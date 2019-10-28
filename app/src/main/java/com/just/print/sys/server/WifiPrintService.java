@@ -325,7 +325,6 @@ public class WifiPrintService implements Runnable{
             if(AppData.showName) {
                 mName = mName + name;             //dish name
             }
-
             saleRecord.setMname(name.trim());
             saleRecord.setNumber(Double.valueOf(number));
             saleRecord.setPrice(price);
@@ -528,7 +527,7 @@ public class WifiPrintService implements Runnable{
 
     private void sendToServer(String serverip) {
         DataSyncService instance = new DataSyncService();
-        instance.serverip = serverip;
+        instance.serverIpAndPort = serverip;
         instance.tableName = CustomerSelection.getInstance().getTableName();
         if(StringUtils.isBlank(instance.tableName)){
             instance.tableName = AppData.curBillIdx; //shouldn't use AppData.getCust... which is already increased.

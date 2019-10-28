@@ -25,16 +25,16 @@ public class DataSyncService extends Thread{
 
     public ArrayList<SelectionDetail> lastSelection;
     public String tableName;
-    protected String serverip;
+    protected String serverIpAndPort;
 
     @Override
     public void run() {     //must use bk, because if use CustomerSelection.getInstance().getSelectedDishes(), it might be cleaned before thread started.
         if(lastSelection != null && lastSelection.size() > 0) {
             HttpURLConnection urlConnection = null;
             try {
-                urlConnection = AppData.prepareConnection("http://" + serverip + "/security/newOrders");
+                urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/security/newOrders");
                 JSONObject json = new JSONObject();//创建json对象
-                json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : AppData.getUserName() + tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                 json.put("billIndex", URLEncoder.encode(AppData.curBillIdx, "UTF-8"));//把数据put进json对象中
                 StringBuilder orderContent = new StringBuilder();
                 for (SelectionDetail selectionDetail : lastSelection) {
@@ -69,7 +69,7 @@ public class DataSyncService extends Thread{
                     Log.e("L", "response code is:" + urlConnection.getResponseCode());
                 }
             } catch (Exception e) {
-                Log.e("L", "Exception happened when sending dishes to server: " + serverip);//rjson={"json":true}
+                Log.e("L", "Exception happened when sending dishes to server: " + serverIpAndPort);//rjson={"json":true}
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();//使用完关闭TCP连接，释放资源
