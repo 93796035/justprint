@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -218,6 +221,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             ary.add("canc");
 
             items = ary.toArray(items);
+            View btnSend = findViewById(R.id.odIdSndBtn);
+            btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
         }
 
         categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderIdentifierItemViewHolder.class);

@@ -88,13 +88,14 @@ public class AppData extends Thread{
     public static final String HideKitchenBillName = "hikina";
     public static final String ColorOnSelect = "cos";
     public static final String TableSelectable = "tableselectable";
+    public static final String SendButtonHeight = "sendbuttonheight";
 
     public static String[] keysToSync = new String[]{server_url, appmode, ShowMarkPirce, userPassword, adminPassword , custChars,
             column, serverip, reportPrinter, waitTime, conbineMarkPrice,
             reportFont, reportWidth, sep_str1, sep_str2, menuNameLength,
             width, kitchentitle, format_style, title_position, priceonkitchenbill,
             KEY_CUST_LAST_CHAR, hideCancelItem,sendReport,sendOnlyWhenReset, HideKitchenBillId,
-            HideKitchenBillId, ColorOnSelect,TableSelectable};
+            HideKitchenBillId, ColorOnSelect,TableSelectable, SendButtonHeight};
     public static String curBillIdx;
 
     public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));
@@ -335,11 +336,24 @@ public class AppData extends Thread{
     }
 
     public static int getThemColor() {
-        String color = AppData.getCustomData(AppData.ColorOnSelect);
+        String color = getCustomData(AppData.ColorOnSelect);
         if(color == null || color.length() != 6){
             color = "0091D5";
         }
         return Color.parseColor("#" + color);
+    }
+
+    public static int getSendButtonHeight() {
+        String height = getCustomData(AppData.SendButtonHeight);
+        if(height == null || height.length() <= 2){
+            return 123;
+        }else{
+            try{
+                return Integer.valueOf(height.trim());
+            }catch(Exception e){
+                return 123;
+            }
+        }
     }
 
     @Override
@@ -558,6 +572,10 @@ public class AppData extends Thread{
             case "s2":
                 AppData.putCustomData(AppData.sep_str2, inputedSN);
                 showToast("App has set sep_str2 to: " + inputedSN);
+                return;
+            case "sh":
+                AppData.putCustomData(AppData.SendButtonHeight, inputedSN);
+                showToast("App has set SendButtonHeight to: " + inputedSN);
                 return;
             case "sset":
                 AppData.putCustomData(AppData.sendOnlyWhenReset, inputedSN);
