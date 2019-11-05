@@ -35,7 +35,7 @@ public class DataSyncService extends Thread{
                 urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/security/newOrders");
                 JSONObject json = new JSONObject();//创建json对象
                 json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : AppData.getUserName() + tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
-                json.put("billIndex", URLEncoder.encode(AppData.curBillIdx, "UTF-8"));//把数据put进json对象中
+                json.put("billIndex", URLEncoder.encode("1", "UTF-8"));//把数据put进json对象中
                 StringBuilder orderContent = new StringBuilder();
                 for (SelectionDetail selectionDetail : lastSelection) {
                     orderContent.append("DishStart:");
