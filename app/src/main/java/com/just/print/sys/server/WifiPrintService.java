@@ -1146,7 +1146,7 @@ public class WifiPrintService implements Runnable{
             content.append("\n");
             if(dd.getMarkList() != null) {                  //dish marks.
                 for (Mark mark : dd.getMarkList()) {
-                    content.append(generateString(5, SEPRATOR)).append("* ").append(mark).append(" *\n");
+                    content.append(generateString(2, SEPRATOR)).append("* ").append(mark).append(" *\n");
                 }
             }
             content.append(generateString(width, sep_str2)).append("\n");
