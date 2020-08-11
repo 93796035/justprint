@@ -1,6 +1,7 @@
 package com.just.print.ui.fragment;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
@@ -42,6 +43,14 @@ public class OrderCategoryFragment extends BaseFragment {
     //add second level menu
     @XViewByID(R.id.odExCategory)
     ExpandableListView odExCategory;
+
+    private static OrderCategoryFragment instance = null;
+    public static OrderCategoryFragment getInstance() {
+        if(instance == null){
+            instance = new OrderCategoryFragment();
+        }
+        return instance;
+    }
 
     @Override
     protected int getLayoutId() {

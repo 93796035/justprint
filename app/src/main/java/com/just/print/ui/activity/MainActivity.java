@@ -20,13 +20,11 @@ public class MainActivity extends BaseActivity {
 
     //    ServiceConnection serviceConnection;
 //    UDPService udp;
-    private static String isDebug = AppData.getCustomData(AppData.debug);
-    public static boolean debug = isDebug == null ? false : Boolean.valueOf(isDebug);
+    public static boolean debug = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.main_activity);
         new StupidReflect(this).init();
 
@@ -34,7 +32,7 @@ public class MainActivity extends BaseActivity {
         // or maybe onCreate method could be called more than one time? so every time swith back to this page,
         // the oncreate will be called again? so we can update the debug setting without restart app?
         try {
-            debug = Boolean.valueOf(AppData.getCustomData("debug"));
+            debug = Boolean.valueOf(AppData.getCustomData(AppData.debug));
         }catch(Exception e){
             L.i("the value of debug in customerr Data ", "can  not be parsered into a boolean!");
         }
