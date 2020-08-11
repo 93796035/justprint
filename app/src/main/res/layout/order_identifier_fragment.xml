@@ -7,52 +7,33 @@
     tools:context="com.just.print.ui.fragment.OrderIdentifierFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <!--
     <LinearLayout
-        android:id="@+id/linettl"
+        android:id="@+id/odInfoCollect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        >
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/odIdInput"
+            android:id="@+id/odInputNotice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:width="100dp"
-            android:hint="Input Id"
-            android:textSize="24dp" />
+            android:padding="8dp"
+            android:text="Please let us know how to call you:" />
 
-        <TextView
-            android:id="@+id/odIdfrName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
-            android:textSize="24dp" />
+        <EditText
+            android:id="@+id/odInfoInputed"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/odIdFrReduce"
+            android:id="@+id/odInfoOK"
+            android:padding="8dp"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-" />
-
-        <TextView
-            android:id="@+id/odIdFrNum"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:maxEms="2"
-            android:text="0" />
-
-        <Button
-            android:id="@+id/odIdFrAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/oddelDish"
-            android:text="+" />
+            android:text="Continue" />
     </LinearLayout>
-
+    <!--
     <LinearLayout
         android:id="@+id/odIdFrLoutMark"
         android:layout_width="match_parent"

@@ -183,14 +183,10 @@ public class WifiPrintService implements Runnable{
             sendToServer(serverip);
         }
 
-        if (manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill)) { //send to printer
-            return SUCCESS;
-        }else {
-            return ERROR;
-        }
+        return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill); //send to printer and return the content.
     }
 
-    private boolean manageDishesIntoMapAndWaitingForPrint(boolean isCancel, Double priceOfBill) {
+    private String manageDishesIntoMapAndWaitingForPrint(boolean isCancel, Double priceOfBill) {
         //1、遍历每个选中的菜，并分别遍历加在其上的打印机。并在ipSelectionsMap上对应IP后面增加菜品
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
             List<M2M_MenuPrint> printerList = selectionDetail.getDish().getM2M_MenuPrintList();
@@ -236,6 +232,7 @@ public class WifiPrintService implements Runnable{
             kitchenBillIdx = mobileIdx + kitchenBillIdx;
         }
 
+        StringBuilder totalContent = new StringBuilder();
         for(Map.Entry entry: ipSelectionsMap.entrySet()){
             String printerIP = (String)entry.getKey();
             List<SelectionDetail> dishList = (List<SelectionDetail>) entry.getValue();
@@ -264,16 +261,22 @@ public class WifiPrintService implements Runnable{
                                 tlist.add(selectionDetail);
                             }
                         }
+                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n";
                         //put the last list into ipContent map.
-                        ipContentMap.get(printerIP).add(formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n");
+                        ipContentMap.get(printerIP).add(content);
+                        totalContent.append(content);
                     }else{
-                        ipContentMap.get(printerIP).add(formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill) + "\n\n\n\n\n");
+                        String content =formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill) + "\n\n\n\n\n";
+                        ipContentMap.get(printerIP).add(content);
+                        totalContent.append(content);
                     }
                 }else{                                          //分单封装---following each key(printer ip), there will be a list of formatted string.
                     for(SelectionDetail selectionDetail : dishList){
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();     //use list to fullfill the parameter format of the format method,
                         tlist.add(selectionDetail);                                         //only one dish will be added into this list.
-                        ipContentMap.get(printerIP).add(formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n");
+                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n";
+                        ipContentMap.get(printerIP).add(content);
+                        totalContent.append(content);
                     }
                 }
             }
@@ -282,7 +285,7 @@ public class WifiPrintService implements Runnable{
         }
 
         L.d(TAG, "Order is translated into ipContentMap map and ready for print.");
-        return true;
+        return totalContent.toString();
     }
 
     private void popKitchenBillIdx() {

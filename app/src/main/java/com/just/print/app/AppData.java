@@ -59,36 +59,41 @@ public class AppData extends Thread{
     public static final String ContentToSend = "ContentToSend";
 
     //to sync
-    public static final String server_url = "server_url";
-    public static final String appmode = "appmode";
-    public static final String ShowMarkPirce = "ShowMarkPirce";
-    public static final String userPassword = "userPassword";
     public static final String adminPassword = "adminPassword";
+    public static final String appmode = "appmode";
+    public static final String clientMode = "clmode";
+    public static final String ColorOnSelect = "cos";
     public static final String custChars = "custChars";
     public static final String column = "column";
-    public static final String serverip = "serverip";
-    public static final String reportPrinter = "reportPrinter";
-    public static final String waitTime = "waitTime";
     public static final String conbineMarkPrice = "conbineMarkPrice";
+    public static final String format_style = "format_style";
+    public static final String hideCancelItem = "hidecancelitem";
+    public static final String HideKitchenBillId = "hikiid";
+    public static final String HideKitchenBillName = "hikina";
+    public static final String HideMark = "hima";
+    public static final String HideTable = "hita";
+    public static final String HideRubber = "hiru";
+    public static final String HideSetting = "hise";
+    public static final String kitchentitle = "kitchentitle";
+    public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
+    public static final String menuNameLength = "menuNameLength";
+    public static final String priceonkitchenbill = "priceonkitchenbill";
+    public static final String reportPrinter = "reportPrinter";
     public static final String reportFont = "reportFont";
     public static final String reportWidth = "reportWidth";
     public static final String sep_str1 = "sep_str1";
     public static final String sep_str2 = "sep_str2";
-    public static final String menuNameLength = "menuNameLength";
-    public static final String width = "width";
-    public static final String kitchentitle = "kitchentitle";
-    public static final String format_style = "format_style";
-    public static final String title_position = "title_position";
-    public static final String priceonkitchenbill = "priceonkitchenbill";
-    public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
-    public static final String hideCancelItem = "hidecancelitem";
+    public static final String ShowMarkPirce = "ShowMarkPirce";
+    public static final String serverip = "serverip";
+    public static final String server_url = "server_url";
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
-    public static final String HideKitchenBillId = "hikiid";
-    public static final String HideKitchenBillName = "hikina";
-    public static final String ColorOnSelect = "cos";
-    public static final String TableSelectable = "tableselectable";
     public static final String SendButtonHeight = "sendbuttonheight";
+    public static final String TableSelectable = "tableselectable";
+    public static final String title_position = "title_position";
+    public static final String userPassword = "userPassword";
+    public static final String waitTime = "waitTime";
+    public static final String width = "width";
 
     public static String[] keysToSync = new String[]{server_url, appmode, ShowMarkPirce, userPassword, adminPassword , custChars,
             column, serverip, reportPrinter, waitTime, conbineMarkPrice,
@@ -335,6 +340,32 @@ public class AppData extends Thread{
         return true;
     }
 
+    public static boolean notifyCheck(String orderContent) {
+        String email = AppData.getCustomData(AppData.sendReport);
+        if(email != null && email.indexOf("@") > 0) {
+            AppData.schema = AppData.getSERVER_URL() + "/sendReport";
+            //if there's already a content, means it's email of last time. then send it out first.
+            String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
+            if(unSendcontent != null && unSendcontent.length() > 0){
+                showToast("Found uncompleted task!");
+                new AppData().start();
+            }
+            boolean  sendOnlyWhenResetFlag = "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
+            JSONObject json = new JSONObject();//创建json对象
+            try {
+                String mobileMark = LoginFragment.getUserName();
+                json.put("idx", "Just Print Order");
+                json.put("email", email);//使用URLEncoder.encode对特殊和不可见字符进行编码
+                json.put("content", URLEncoder.encode(orderContent, "UTF-8"));//把数据put进json对象中
+            } catch (Exception e) {
+                L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + orderContent, e);
+            }
+            AppData.putCustomData(AppData.ContentToSend,json.toString());
+            new AppData().start();
+            return true;
+        }
+        return true;
+    }
     public static int getThemColor() {
         String color = getCustomData(AppData.ColorOnSelect);
         if(color == null || color.length() != 6){
