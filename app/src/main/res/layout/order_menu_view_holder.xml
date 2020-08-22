@@ -73,7 +73,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="3dp"
-            android:textColor="#9c9a9a"
+            android:textColor="#000000"
+            android:textSize="24sp"
             android:maxLines="4"/>
         <ImageButton
             android:id="@+id/odMnLoutMarkBtn"
