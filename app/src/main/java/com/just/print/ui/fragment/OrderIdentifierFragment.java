@@ -32,6 +32,7 @@ import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigActivity;
+import com.just.print.ui.holder.OrderIdentifierCategoryViewHolder;
 import com.just.print.ui.holder.OrderMarksSelectionViewHolder;
 import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
 import com.just.print.ui.holder.OrderIdentifierMarkViewHolder;
@@ -256,7 +257,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
         }
 
-        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderIdentifierItemViewHolder.class);
+        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderIdentifierCategoryViewHolder.class);
         categoryXAdapter.setClickItemListener(this.categoryXAdapterClick);
         odIdCategoryGrid.setAdapter(categoryXAdapter);
 
@@ -306,7 +307,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XClick({R.id.odInfoOK})
     private void onConfirmUserName(View view) {
         String inputContent = odInfoInputed.getText().toString().trim();
-        if (StringUtils.isEmpty(inputContent) || inputContent.length() < 2) {
+        if (StringUtils.isEmpty(inputContent) || inputContent.length() < 1) {
             showToast("Please input a name:");
         } else {
             String userPassword = AppData.getCustomData(AppData.userPassword);
