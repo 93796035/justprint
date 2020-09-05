@@ -963,7 +963,13 @@ public class WifiPrintService implements Runnable{
         content.append(" ITEMS CANCEL:  ").append(qtCancel).append("\n");
         content.append(" TOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
         content.append(generateString(width, SEP_STR1)).append("\n");
-        content.append(" NET:           $").append(String.format("%.2f", total + cancTotal));
+        float tax = 1.15f;
+        try{
+            tax = Float.valueOf(AppData.getCustomData("taxrate"));
+        }catch (Exception e){
+            //do nothing.
+        }
+        content.append(" NET(tax included):    $").append(String.format("%.2f", (total + cancTotal) * tax));
             //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getName()).append(" *\n");
         content.append("\n\n\n\n\n");
         return content.toString();
