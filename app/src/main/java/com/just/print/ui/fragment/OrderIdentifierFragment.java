@@ -362,12 +362,14 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.odIdSndBtn:
             case R.id.odIdSndBtn2:
                 String orderContent = printCurrentSelection(false);
-                AppData.notifyCheck(orderContent);
+                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
+                    AppData.notifyCheck(orderContent);
+                }
                 showToast("ORDER SENT, THANK YOU.");
-
-                findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
-                findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
-
+                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
+                    findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
+                    findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
+                }
                 break;
             case R.id.odIdDelBtn:
                 if( menuMarkSwitcher.getDisplayedChild() == 0) {

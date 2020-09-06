@@ -66,6 +66,7 @@ public class AppData extends Thread{
     public static final String custChars = "custChars";
     public static final String column = "column";
     public static final String conbineMarkPrice = "conbineMarkPrice";
+    public static final String emailorder = "emailorder";
     public static final String format_style = "format_style";
     public static final String hideCancelItem = "hidecancelitem";
     public static final String HideKitchenBillId = "hikiid";

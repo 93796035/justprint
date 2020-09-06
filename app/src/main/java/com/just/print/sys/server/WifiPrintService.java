@@ -407,10 +407,20 @@ public class WifiPrintService implements Runnable{
         if (startTime == null || startTime.length() < 1) {
             startTime = AppData.getCustomData(AppData.lastsuccess);
         }
-        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime);
+        float tax = 1.15f;
+        try{
+            tax = Float.valueOf(AppData.getCustomData("taxrate"));
+        }catch (Exception e){
+            //do nothing.
+        }
+        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime, tax);
         if("true".equals(AppData.getCustomData(AppData.hideCancelItem))) {
             int p = contentFR.indexOf(" ITEMS CANCEL:  ");
-            ipContentMap.get(printerIP).add(contentFR.substring(0, p) + "\n\n\n");
+            contentFR = contentFR.substring(0, p);
+            p = contentFR.lastIndexOf('$');
+            float f = Float.valueOf(contentFR.substring(p + 1));
+            contentFR = contentFR + " TOTAL:  $" + f * tax;
+            ipContentMap.get(printerIP).add(contentFR + "\n\n\n");
         }else {
             ipContentMap.get(printerIP).add(contentFR);
         }
@@ -809,7 +819,7 @@ public class WifiPrintService implements Runnable{
 //        }
 //    }
 
-    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime) {
+    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime, float tax) {
         L.d(TAG,"formatContentForPrintReport");
 
         //translate the time format
@@ -959,17 +969,12 @@ public class WifiPrintService implements Runnable{
 
         content.append(generateString(width, SEP_STR1)).append("\n");
         content.append(" ITEMS SENT:    ").append(qtTotal).append("\n");
-        content.append(" TOTAL SENT:    $").append(String.format("%.2f", total)).append("\n\n");
+        content.append(" SUBTOTAL SENT:    $").append(String.format("%.2f", total)).append("\n\n");
         content.append(" ITEMS CANCEL:  ").append(qtCancel).append("\n");
-        content.append(" TOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
+        content.append(" SUBTOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
         content.append(generateString(width, SEP_STR1)).append("\n");
-        float tax = 1.15f;
-        try{
-            tax = Float.valueOf(AppData.getCustomData("taxrate"));
-        }catch (Exception e){
-            //do nothing.
-        }
-        content.append(" NET(tax included):    $").append(String.format("%.2f", (total + cancTotal) * tax));
+        content.append(" SUBTOTAL:    $").append(String.format("%.2f", total + cancTotal));
+        content.append(" TOTAL:    $").append(String.format("%.2f", (total + cancTotal) * tax));
             //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getName()).append(" *\n");
         content.append("\n\n\n\n\n");
         return content.toString();
