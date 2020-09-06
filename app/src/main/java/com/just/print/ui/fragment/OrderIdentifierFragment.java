@@ -38,7 +38,6 @@ import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
 import com.just.print.ui.holder.OrderIdentifierMarkViewHolder;
 import com.just.print.ui.holder.OrderMenuViewHolder;
 import com.just.print.ui.holder.TableIdentifierViewHolder;
-import com.just.print.util.AppUtils;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.IXOnItemClickListener;
@@ -55,8 +54,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class OrderIdentifierFragment extends BaseFragment implements View.OnClickListener, OnClickItemListener, EventBus.EventHandler{
