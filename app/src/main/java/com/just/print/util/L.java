@@ -69,7 +69,7 @@ public class L extends Thread{
                 String msg = msgs.get(0);
                 msgs.remove(0);
                 try {
-                    urlConnection = AppData.prepareConnection(ErrorLogURL +"/useraccounts/loglog");
+                    urlConnection = AppData.prepareConnection(ErrorLogURL +"/useraccounts/loglog", "POST");
 
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("tag", URLEncoder.encode(AppData.getUserName(), "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码

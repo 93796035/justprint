@@ -30,7 +30,8 @@ import java.util.Date;
 import static com.just.print.util.ToastUtil.showToast;
 
 public class AppData extends Thread{
-    private static String SERVER_URL = "http://www.sharethegoodones.com";
+    public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
+    private static String SERVER_URL = "http://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
@@ -77,6 +78,8 @@ public class AppData extends Thread{
     public static final String HideSetting = "hise";
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
+    public static final String labelsize = "labelsize";
+    public static final String lastDownload = "lastDownload";
     public static final String menuNameLength = "menuNameLength";
     public static final String priceonkitchenbill = "priceonkitchenbill";
     public static final String reportPrinter = "reportPrinter";
@@ -85,8 +88,8 @@ public class AppData extends Thread{
     public static final String sep_str1 = "sep_str1";
     public static final String sep_str2 = "sep_str2";
     public static final String ShowMarkPirce = "ShowMarkPirce";
-    public static final String serverip = "serverip";
     public static final String server_url = "server_url";
+    public static final String serverip = "serverip";
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
@@ -95,17 +98,19 @@ public class AppData extends Thread{
     public static final String userPassword = "userPassword";
     public static final String waitTime = "waitTime";
     public static final String width = "width";
+    public static final String hasCategory = "hasCategory";
 
     public static String[] keysToSync = new String[]{server_url, appmode, ShowMarkPirce, userPassword, adminPassword , custChars,
             column, serverip, reportPrinter, waitTime, conbineMarkPrice,
             reportFont, reportWidth, sep_str1, sep_str2, menuNameLength,
             width, kitchentitle, format_style, title_position, priceonkitchenbill,
             KEY_CUST_LAST_CHAR, hideCancelItem,sendReport,sendOnlyWhenReset, HideKitchenBillId,
-            HideKitchenBillId, ColorOnSelect,TableSelectable, SendButtonHeight};
+            HideKitchenBillId, ColorOnSelect,TableSelectable, SendButtonHeight, hasCategory};
     public static String curBillIdx;
 
     public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));
     public static boolean showName = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillName));
+    private static String labelSN = "labelsn";
 
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
@@ -168,6 +173,9 @@ public class AppData extends Thread{
         }
         if(!serverURL.startsWith("http://")){
             serverURL = "http://" + serverURL;
+        }
+        if(!serverURL.endsWith("/")){
+            serverURL = serverURL + "/";
         }
         return serverURL;
     }
@@ -240,7 +248,7 @@ public class AppData extends Thread{
                 lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
     }
 
-    public static HttpURLConnection prepareConnection(String uri) throws Exception {
+    public static HttpURLConnection prepareConnection(String uri, String method) throws Exception {
         HttpURLConnection urlConnection;
         URL url = new URL(uri);
         urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
@@ -251,7 +259,7 @@ public class AppData extends Thread{
         urlConnection.setReadTimeout(30000);//响应的超时时间
         urlConnection.setDoInput(true);//设置这个连接是否可以写入数据
         urlConnection.setDoOutput(true);//设置这个连接是否可以输出数据
-        urlConnection.setRequestMethod("POST");//设置请求的方式
+        urlConnection.setRequestMethod(method);//设置请求的方式
         urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");//设置消息的类型
         urlConnection.connect();// 连接，从上述至此的配置必须要在connect之前完成，实际上它只是建立了一个与服务器的TCP连接
         return urlConnection;
@@ -284,7 +292,7 @@ public class AppData extends Thread{
     public static String schema;
 
     public static void startActivate() {
-        AppData.schema = AppData.getSERVER_URL() + "/activeJustPrintAccount";
+        AppData.schema = AppData.getSERVER_URL() + "activeJustPrintAccount";
         String accountInfo = AppData.getJsonObjectForActivate();
         if(accountInfo != null){
             AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
@@ -313,7 +321,7 @@ public class AppData extends Thread{
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getSERVER_URL() + "/sendReport";
+            AppData.schema = AppData.getSERVER_URL() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
@@ -344,7 +352,7 @@ public class AppData extends Thread{
     public static boolean notifyCheck(String orderContent) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getSERVER_URL() + "/sendReport";
+            AppData.schema = AppData.getSERVER_URL() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
@@ -388,6 +396,17 @@ public class AppData extends Thread{
         }
     }
 
+    public static boolean hasCategory() {
+        if(isMode2()) {
+            return "true".equals(getCustomData(AppData.hasCategory));
+        }
+        return true;
+    }
+
+    public static String getLabelSN() {
+        return getCustomData(AppData.labelSN);
+    }
+
     @Override
     public void run() {
         super.run();
@@ -395,7 +414,7 @@ public class AppData extends Thread{
         if(contentToSend != null && contentToSend.length() > 0 && AppUtils.hasInternet(Applic.app.getApplicationContext())){
             HttpURLConnection urlConnection = null;
             try {
-                urlConnection = prepareConnection(schema);
+                urlConnection = prepareConnection(schema, "POST");
                 writeOut(urlConnection, contentToSend);
 
                 if(urlConnection.getResponseCode()==HttpURLConnection.HTTP_OK){//得到服务端的返回码是否连接成功
@@ -476,6 +495,22 @@ public class AppData extends Thread{
             answer = SharedPreferencesHelper.getCache(Applic.app.getApplicationContext(), inputedSN).getString(inputedSN);
         }
         showToast(inputedSN + " = " + answer);
+    }
+
+    // 打印机编号，必须要在管理后台里添加打印机或调用API接口添加之后，才能调用API
+    public static void sendToCloudPrinter(String content, String sn) {
+        if (sn != null && sn.length() > 0) {
+            JSONObject json = new JSONObject();//创建json对象
+            try {
+                json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
+            }catch(Exception e){
+                L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
+            }
+            AppData.schema = AppData.getSERVER_URL() + "cloudPrint";
+            AppData.putCustomData(AppData.ContentToSend, json.toString());
+            new AppData().start();
+        }
     }
 
     private static void setCustomValue(String inputedSN, TextView textView) {
@@ -568,6 +603,16 @@ public class AppData extends Thread{
             case "layo":
                 AppData.putCustomData(AppData.custChars, inputedSN);
                 showToast("App has switched custChars to: " + inputedSN);
+                return;
+            case "lbsize":
+                AppData.putCustomData(AppData.labelsize, inputedSN);
+                String[] strs = inputedSN.split(".");
+                if(strs.length == 2 && strs[0].length() >= 3 && strs[1].length() > 8){
+                    sendToCloudPrinter(strs[0], strs[1]);
+                    showToast("App has set label size to: " + strs[0]);
+                }else{
+                    showToast("Please use right format like '40x30,123456789'");
+                }
                 return;
             case "m":
                 AppData.putCustomData(AppData.mode, inputedSN);

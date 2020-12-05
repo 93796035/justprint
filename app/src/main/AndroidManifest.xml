@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.just.print">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.just.print">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--uses-permission android:name="android.permission.READ_PHONE_STATE_PERMISSION" />
+    <uses-permission android:name="android.permission.READ_SMS" /-->
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
         android:name="com.just.print.app.Applic"
@@ -12,10 +14,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name="com.just.print.ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -28,12 +30,8 @@
         <activity android:name="com.just.print.ui.activity.ConfigActivity"/>
         <activity android:name="com.just.print.ui.activity.LoginActivity"/>
         <activity android:name="com.just.print.ui.activity.OrderActivity"/>
-        <activity
-            android:name=".ui.activity.SildingMenuListViewDemo"
-            android:label="@string/title_activity_silding_menu_list_view_demo"  android:screenOrientation="portrait"/>
-        <activity
-            android:name="com.just.print.Activate" android:screenOrientation="portrait"
-            android:label="@string/title_activity_activate"></activity>
+        <activity android:name=".ui.activity.SildingMenuListViewDemo" android:label="@string/title_activity_silding_menu_list_view_demo"  android:screenOrientation="portrait"/>
+        <activity android:name="com.just.print.Activate" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
     </application>
 
 </manifest>

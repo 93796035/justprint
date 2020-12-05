@@ -35,11 +35,7 @@ public class Activate extends BaseActivity {
 
         while(true) {
             //when inputted activate code, should not go to login activity(that activaty will check name and store name then go to Main Interface)
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            AppUtils.sleep(1000);
             String number = AppData.getCustomData(AppData.number);
             if(Long.valueOf(number) > 0){
                 startActivity(new Intent(this, LoginActivity.class));

@@ -58,7 +58,7 @@ public class DatabaseUtil extends Thread{
     }
 
     public static void syncConfigOntoServer(String license, String shopName, boolean isUpload) {
-        AppData.schema = AppData.getSERVER_URL() + (isUpload ? "/uploadConfig" : "/downloadCofig");
+        AppData.schema = AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig");
         JSONObject json = new JSONObject();//创建json对象
         try {
             json.put("filepath", URLEncoder.encode(license + shopName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
@@ -93,9 +93,9 @@ public class DatabaseUtil extends Thread{
                 StringBuilder sb = new StringBuilder(AppData.getSERVER_URL());
 
                 if(isUpload) {
-                    sb.append("/uploadDb?filepath=");
+                    sb.append("uploadDb?filepath=");
                 }else{
-                    sb.append("/downloadDb?filepath=");
+                    sb.append("downloadDb?filepath=");
                 }
                 sb.append(license + storName);
                 sb.append("&submitDate=");

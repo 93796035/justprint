@@ -92,10 +92,11 @@ public class ConfigPrinterFragment extends BaseFragment implements
             @XGetValueByView(fromId = R.id.classPrint) CheckBox classPrint,
             @XGetValueByView(fromId = R.id.note) TextView note) {
 
-        if (!isIP(ip)) {
-            showToast("Please input correct IP address.");
-            return;
-        }
+//        don't check ip format, because we
+//        if (!isIP(ip)) {
+//            showToast("Please input correct IP address.");
+//            return;
+//        }
         int type = 0;
         if(orderPrint.isChecked() && !classPrint.isChecked()){
             type = 1;
@@ -130,13 +131,14 @@ public class ConfigPrinterFragment extends BaseFragment implements
             @XGetValueByView(fromId = R.id.modifyOrderPrint) CheckBox modifyOrderPrint,
             @XGetValueByView(fromId = R.id.modifyClassPrint) CheckBox modifyClassPrint) {
         if (mModifyCache != null) {
-            if (!isIP(modifIP.getText().toString())) {
-                showToast("Please input correct ip");
-                return;
-            }
-
+//            no need to check ip format, we support cloud printer.
+//            if (!isIP(modifIP.getText().toString())) {
+//                showToast("Please input correct ip");
+//                return;
+//            }
+            String ip = modifIP.getText().toString().trim();
             mModifyCache.setPname(modifName.getText().toString());
-            mModifyCache.setIp(modifIP.getText().toString().trim());
+            mModifyCache.setIp(ip);
             mModifyCache.setVersion(mModifyCache.getVersion() + 1);
             if(modifyOrderPrint.isChecked() && !modifyClassPrint.isChecked()){
                 mModifyCache.setType(1);// 1: 顺序打印,
@@ -152,6 +154,9 @@ public class ConfigPrinterFragment extends BaseFragment implements
             mModifyCache.setNote(modifyNote.getText().toString());
             mModifyCache.update();
             mModifyCache = null;
+            if(ip.indexOf(".") == -1){
+                AppData.sendToCloudPrinter(AppData.DEFAULT_LABELPRINTER_SIZE,ip);
+            }
             printerXAdapter.notifyDataSetChanged();
         }
         modifyViewSwitch.setDisplayedChild(0);

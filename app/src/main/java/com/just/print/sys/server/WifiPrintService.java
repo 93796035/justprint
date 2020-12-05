@@ -47,7 +47,6 @@ import static com.just.print.util.ToastUtil.showToast;
 public class WifiPrintService implements Runnable{
     private static final String REFUND_PREFIX = "<<<<";
     private final String TAG = "WifiPrintService";
-    String serverip = null;
     public static String SUCCESS = "0";
     public static String ERROR = "2";
 
@@ -144,7 +143,6 @@ public class WifiPrintService implements Runnable{
     private WifiPrintService(){
         wifiCommunication = new WifiCommunication(handler);
         reInitPrintRelatedMaps();
-        serverip = AppData.getCustomData(AppData.serverip);
         executorService.execute(this);
         L.d(TAG,"Create Service Successful");
     }
@@ -179,9 +177,7 @@ public class WifiPrintService implements Runnable{
 
         Double priceOfBill = saveSaleRecToDB(isCancel);                              //save to db
 
-        if(!StringUtils.isBlank(serverip)){                     //send to server
-            sendToServer(serverip);
-        }
+        sendToAikaServer();
 
         return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill); //send to printer and return the content.
     }
@@ -371,7 +367,7 @@ public class WifiPrintService implements Runnable{
         L.d("ConfigPrintReportFragment","exePrintCommand");
         List<Printer> printers = Applic.app.getDaoMaster().newSession().getPrinterDao().loadAll();
         String printerIP = AppData.getCustomData(AppData.reportPrinter);
-        if(printerIP == null || printerIP.length() < 8 || printerIP.indexOf(".") < 1 || printerIP.indexOf(".") > 3) {
+        if(printerIP == null || printerIP.length() < 8) {
             printerIP = printers.get(0).getIp();
         }
 //        if(categorizedRecs.containsKey(category)){
@@ -496,7 +492,9 @@ public class WifiPrintService implements Runnable{
                         //when all categorizedContent of a printer has printed, it's the right time to close conenction.
                         if (isBeiYangPrinter(curPrintIp)) {
                             closeConenctionToBeiYangPrinter();
-                        } else {
+                        } else if(isCloudPrinter(curPrintIp)) {
+                            resetFlags();
+                        }  else {
                             wifiCommunication.close();
                         }
                     }
@@ -538,19 +536,19 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    private void sendToServer(String serverip) {
-        DataSyncService instance = new DataSyncService();
-        instance.serverIpAndPort = serverip;
-        instance.tableName = CustomerSelection.getInstance().getTableName();
-        if(StringUtils.isBlank(instance.tableName)){
-            instance.tableName = AppData.curBillIdx; //shouldn't use AppData.getCust... which is already increased.
+    private void sendToAikaServer() {
+        DataSyncService dataSyncService = DataSyncService.getInstance();
+        if (dataSyncService.serverIpAndPort != null) {
+            dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
+            if (StringUtils.isBlank(dataSyncService.tableName)) {
+                dataSyncService.tableName = AppData.curBillIdx; //shouldn't use AppData.getCust... which is already increased.
+            }
+            ArrayList<SelectionDetail> newList = new ArrayList<SelectionDetail>();
+            for (SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()) {
+                newList.add(selectionDetail);
+            }
+            dataSyncService.lastSelection = newList;    //!!have to make sure the flag is set up in one single step to avoid thread mess.
         }
-        instance.lastSelection = new ArrayList<SelectionDetail>();
-        for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
-            instance.lastSelection.add(selectionDetail);
-        }
-
-        instance.start();
     }
 
     private boolean isReadyToInitNewPrintJob(){
@@ -561,6 +559,10 @@ public class WifiPrintService implements Runnable{
         return beiYangPrinters.contains(printerIP);
     }
 
+    private boolean isCloudPrinter(String printerIP){
+        return !printerIP.contains(".");
+    }
+
     private boolean isReadyToPrint(){
         return contentReadyForPrintFlag == true && printerConnectedFlag == true;
     }
@@ -569,6 +571,8 @@ public class WifiPrintService implements Runnable{
 
         if(isBeiYangPrinter(printerIP)){
             connectToBeiYangPrinter(printerIP);
+        } else if(isCloudPrinter(curPrintIp)) {
+            printerConnectedFlag = true;
         }else {
             wifiCommunication.initSocket(printerIP, POSPORT);   //this should result in the "printerConnectedFlag" become true .
         }
@@ -595,8 +599,18 @@ public class WifiPrintService implements Runnable{
 
             if (isBeiYangPrinter(curPrintIp)) {
                 doBeiYangPrint(font, content);  //check if it's nbna printer, check printer status
+            } else if(isCloudPrinter(curPrintIp)) {
+                AppData.sendToCloudPrinter(content, curPrintIp);
             } else {
                 doZiJiangPrint(font, content);
+                //if it's a 'togo"
+                if(content.contains("(TOGO)")){
+                    String labelPrinterSN = AppData.getLabelSN();//get the cloud label printer.
+                    if(labelPrinterSN != null && labelPrinterSN.length() > 6) {//for now the sn is like 987623454,longger than 6
+                        AppData.sendToCloudPrinter(content, labelPrinterSN);
+                    }
+                }
+
             }
         }
     }
@@ -1138,7 +1152,7 @@ public class WifiPrintService implements Runnable{
             sep_str2 = SEP_STR2;
         }
 
-        content.append(generateString(width, sep_str1)).append("\n\n");
+        content.append(generateString(width, sep_str1)).append("\n");
 
         //Main contents starts here.........................................................
         for(SelectionDetail dd:list){

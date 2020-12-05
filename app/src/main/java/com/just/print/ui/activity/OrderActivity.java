@@ -6,7 +6,9 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
 import com.just.print.R;
+import com.just.print.app.AppData;
 import com.just.print.app.BaseActivity;
+import com.just.print.sys.server.DataSyncService;
 import com.just.print.ui.adapter.MyPagerAdapter;
 import com.just.print.ui.fragment.OrderCategoryFragment;
 import com.just.print.ui.fragment.OrderIdentifierFragment;
@@ -29,7 +31,9 @@ public class OrderActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.order_activity);
         new StupidReflect(this).init();
-        fragmentList.add(OrderCategoryFragment.getInstance());
+        if(AppData.hasCategory()) {
+            fragmentList.add(OrderCategoryFragment.getInstance());
+        }
         //fragmentList.add(new OrderMenuFragment());
         fragmentList.add(OrderIdentifierFragment.getInstance());
         adapter = new MyPagerAdapter(getSupportFragmentManager(), fragmentList);
@@ -50,6 +54,10 @@ public class OrderActivity extends BaseActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        //the application has logged in, then if has has lastDownload, then response for sending sms for
+        if(AppData.getCustomData(AppData.lastDownload) != null){
+            DataSyncService.getInstance();//initialize and start the data sync thread.....
         }
     }
 /*

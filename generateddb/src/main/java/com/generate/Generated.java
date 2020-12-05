@@ -73,10 +73,10 @@ public class Generated {
         // |    id   |   pid   |  cid    |   manem |
         // +---------+---------+---------+---------+
         //
-        Entity menu = schema.addEntity("Menu");//类别->菜单
+        Entity menu = schema.addEntity("Menu");//category->menu
         menu.addStringProperty("mname").columnName("M_NAME");
         menu.addStringProperty("ID").primaryKey().unique();
-        menu.addDoubleProperty("price");//单价
+        menu.addDoubleProperty("price");//price
         Property.PropertyBuilder cid = menu.addLongProperty("cid").columnName("C_ID");
         category.addToMany(menu, cid.getProperty());
 
@@ -123,7 +123,7 @@ public class Generated {
 //        user.addStringProperty("userID");
 //        user.addStringProperty("phoneIMEI");
 //        user.addStringProperty("phoneID");
-//        user.addStringProperty("alias");//别名
+//        user.addStringProperty("alias");//alias
 //        user.addStringProperty("pwd");
 //        user.addIntProperty("permissions");// 1 is the biggest
         //Property.PropertyBuilder shopId = user.addStringProperty("shopId").columnName("SHOP_ID");
