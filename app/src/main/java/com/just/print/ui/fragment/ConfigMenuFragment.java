@@ -13,14 +13,18 @@ import com.just.print.app.AppData;
 import com.just.print.app.Applic;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
+import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.M2M_MenuPrint;
+import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.dao.CategoryDao;
+import com.just.print.db.dao.M2M_MenuMarkDao;
 import com.just.print.db.dao.M2M_MenuPrintDao;
 import com.just.print.db.dao.MenuDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.db.expand.State;
+import com.just.print.ui.holder.AddMarkViewHolder;
 import com.just.print.ui.holder.AddPrintViewHolder;
 import com.just.print.ui.holder.ConfigCategoryViewHolder;
 import com.just.print.ui.holder.ConfigMenuViewHolder;
@@ -47,6 +51,12 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     XAdapter2<Category> categoryXAdapter;
 
+    List<Printer> addPrints;
+    XAdapter2<Printer> addPrintsAdapter;
+
+    List<Mark> addMarks;
+    XAdapter2<Mark> addMarksAdapter;
+
     @XViewByID(R.id.lvCategory)
     ListView lvCategory;
 
@@ -57,6 +67,12 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     @XViewByID(R.id.lvMenu)
     private ListView lvMenu;
+
+    @XViewByID(R.id.addPrintListView)
+    ListView addPrintListView;
+
+    @XViewByID(R.id.addMarkListView)
+    ListView addMarkListView;
 
     MenuDao menuDao;
 
@@ -107,6 +123,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                     Double price = menuXAdapter.get(i).getPrice();
                     ((EditText)findViewById(R.id.price)).setText(price == null ? "" : price.toString());
 
+                    //preparing printers
                     addPrints = new ArrayList<Printer>();
                     for(M2M_MenuPrint m2m_p : menuXAdapter.get(i).getM2M_MenuPrintList()){
                         addPrints.add(m2m_p.getPrint());
@@ -119,6 +136,22 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                         public void onClickItem(View view, int i) {
                             addPrints.remove(i);
                             addPrintsAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    //preparing marks
+                    addMarks = new ArrayList<Mark>();
+                    for(M2M_MenuMark m2m_p : menuXAdapter.get(i).getM2M_MenuMarkList()){
+                        addMarks.add(m2m_p.getMark());
+                    }
+
+                    addMarksAdapter = new XAdapter2<Mark>(getContext(), addMarks, AddMarkViewHolder.class);
+                    addMarkListView.setAdapter(addMarksAdapter);
+                    addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
+                        @Override
+                        public void onClickItem(View view, int i) {
+                            addMarks.remove(i);
+                            addMarksAdapter.notifyDataSetChanged();
                         }
                     });
                     break;
@@ -139,6 +172,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                     }
                     */
                     M2M_MenuPrintDao m2mDao = Applic.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
+                    M2M_MenuMarkDao m2mDao2 = Applic.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
 
                     new AlertDialog.Builder(getActivity())
                             .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getMname() + "\"?")
@@ -171,6 +205,11 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                 for(M2M_MenuPrint m2m:m2mList) {
                     m2m.delete();
                 }
+                //delete menu-mark maps
+                List<M2M_MenuMark> m2mList2 = menu.getM2M_MenuMarkList();
+                for(M2M_MenuMark m2m:m2mList2) {
+                    m2m.delete();
+                }
                 // delete menu.
                 menu.delete();
             }
@@ -187,10 +226,16 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         @Override
         public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
+
             List<M2M_MenuPrint> m2mList = menu.getM2M_MenuPrintList();
-            for(M2M_MenuPrint m2m:m2mList) {
+            for(M2M_MenuPrint m2m : m2mList) {
                 m2m.delete();
             }
+            List<M2M_MenuMark> m2mList2 = menu.getM2M_MenuMarkList();
+            for(M2M_MenuMark m2m : m2mList2) {
+                m2m.delete();
+            }
+
             menuDao.delete(menu);
             loadMenu();
         }
@@ -236,9 +281,6 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         ((EditText)findViewById(R.id.displayIdx)).setText("");
     }
 
-    @XViewByID(R.id.addPrintListView)
-    ListView addPrintListView;
-
     @XClick({R.id.showMenu})
     private void showMenu() {
         findViewById(R.id.categoryLayout).setVisibility(View.GONE);
@@ -246,7 +288,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
         ((EditText)findViewById(R.id.etMenuID)).setText("");
         ((EditText)findViewById(R.id.etMenu)).setText("");
-
+        //printers
         addPrints = new ArrayList<Printer>(1);
         addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, AddPrintViewHolder.class);
         addPrintListView.setAdapter(addPrintsAdapter);
@@ -257,16 +299,26 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                 addPrintsAdapter.notifyDataSetChanged();
             }
         });
-    }
+        //marks
+        addMarks = new ArrayList<Mark>(1);
+        addMarksAdapter = new XAdapter2<Mark>(getContext(), addMarks, AddMarkViewHolder.class);
+        addMarkListView.setAdapter(addMarksAdapter);
+        addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
+            @Override
+            public void onClickItem(View view, int i) {
+                addMarks.remove(i);
+                addMarksAdapter.notifyDataSetChanged();
+            }
+        });
 
-    List<Printer> addPrints;
-    XAdapter2<Printer> addPrintsAdapter;
+    }
 
     @XClick({R.id.addMenu})
     private void addMenu(@XGetValueByView(fromId = R.id.etMenuID) TextView mid,
                          @XGetValueByView(fromId = R.id.etMenu) TextView mname,
                          @XGetValueByView(fromId = R.id.price) TextView mprice,
-                         @XGetValueByView(fromId = R.id.selectPrint) TextView print) {
+                         @XGetValueByView(fromId = R.id.selectPrint) TextView print,
+                         @XGetValueByView(fromId = R.id.selectMark) TextView mark) {
 
         if (mCategory == null) {
             showToast("Please choose a category");
@@ -336,6 +388,8 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         }
 
         menu.updateAndUpgrade();
+
+        //add printer link
         M2M_MenuPrintDao m2mDao = Applic.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
         if(modifyingMenu != null) {
             for (M2M_MenuPrint p : modifyingMenu.getM2M_MenuPrintList()) {
@@ -348,6 +402,21 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             m2m.setPrint(p);
             m2mDao.insertOrReplace(m2m);
         }
+
+        //add mark link
+        M2M_MenuMarkDao m2mDao2 = Applic.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
+        if(modifyingMenu != null) {
+            for (M2M_MenuMark p : modifyingMenu.getM2M_MenuMarkList()) {
+                m2mDao2.delete(p);
+            }
+        }
+        for (Mark p : addMarks) {
+            M2M_MenuMark m2m = new M2M_MenuMark();
+            m2m.setMenu(menu);
+            m2m.setMark(p);
+            m2mDao2.insertOrReplace(m2m);
+        }
+
         AppData.updataeLastModifyTime(null);
         modifyingMenu = null;
         findViewById(R.id.menuLayout).setVisibility(View.GONE);
@@ -416,6 +485,36 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             public void onClick(DialogInterface dialog, int which) {
                 addPrints.add(data.get(which));
                 addPrintsAdapter.notifyDataSetChanged();
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    @XClick({R.id.selectMark})
+    private void selectMark(final TextView view) {
+        final List<Mark> data = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getMarkDao());
+        data.removeAll(addMarks);
+        if (data.size() == 0) {
+            showToast("Please add Mark first");
+            return;
+        }
+        if (data.size() == 0) {
+            showToast("No marks to select");
+            return;
+        }
+        final CharSequence[] items = new CharSequence[data.size()];
+        for (int i = 0, s = data.size(); i < s; i++) {
+            Mark p = data.get(i);
+            items[i] = p.getName() + "_" + p.getId();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Please choose a mark");
+        builder.setSingleChoiceItems(items, -1, new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                addMarks.add(data.get(which));
+                addMarksAdapter.notifyDataSetChanged();
                 dialog.dismiss();
             }
         });

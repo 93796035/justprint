@@ -24,6 +24,8 @@ import com.just.print.app.Applic;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
 import com.just.print.db.bean.Category;
+import com.just.print.db.bean.M2M_MenuMark;
+import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.SaleRecord;
@@ -278,7 +280,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
         //add Marks
         allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
-        allMarks = sortMarks(DaoExpand.queryAllMarks(Applic.getMarkDao()));
         //add shortcut Marks.
         initShortCutMarks();
 
@@ -766,13 +767,13 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.odMnLoutMarkBtn:
                 curmarkitem = i;
                 marksOfCurDish = dishesXAdapter.get(i).getMarkList();
-                showMarksPanel();
+                showMarksPanel(dishesXAdapter.get(i).getDish());
 
                 break;
         }
     }
 
-    private void showMarksPanel(){   //final onChoiceMarks choiceMarks) {
+    private void showMarksPanel(Menu menu){   //final onChoiceMarks choiceMarks) {
         if(AppData.isMode2()){
             findViewById(R.id.topButtons).setVisibility(View.VISIBLE);
         }
@@ -780,6 +781,18 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             marksOfCurDish = new ArrayList<Mark>();
         }
 
+        List<M2M_MenuMark> printerList = menu.getM2M_MenuMarkList();
+        if(printerList != null && printerList.size() > 0) {
+            List<Mark> unsortedMarks = new ArrayList<>();
+            for (M2M_MenuMark m2m_MenuMark : printerList) {
+                unsortedMarks.add(m2m_MenuMark.getMark());
+            }
+            allMarks = sortMarks(unsortedMarks);
+        }else{
+            allMarks = sortMarks(unsortedMarks);
+        }
+
+        //if mark is already selected, then remove it from the display list.
         for(int j = 0; j < allMarks.size(); j++) {
             Mark mark = allMarks.get(j);
             boolean matched = false;

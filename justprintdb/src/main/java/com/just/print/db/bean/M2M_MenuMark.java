@@ -13,7 +13,7 @@ import de.greenrobot.dao.DaoException;
 // KEEP INCLUDES END
 
 /**
- * Entity mapped to table M2_M__MENU_PRINT.
+ * Entity mapped to table M2_M__MENU_MARK.
  */
 public class M2M_MenuMark {
 
@@ -117,7 +117,7 @@ public class M2M_MenuMark {
         return mark;
     }
 
-    public void setPrint(Printer print) {
+    public void setMark(Mark mark) {
         synchronized (this) {
             this.mark = mark;
             pid = mark == null ? null : mark.getId();
