@@ -14,7 +14,7 @@ import com.just.print.db.bean.Mark;
 /** 
  * DAO for table MARK.
 */
-public class MarkDao extends AbstractDao<Mark, String> {
+public class MarkDao extends AbstractDao<Mark, Long> {
 
     public static final String TABLENAME = "MARK";
 
@@ -23,13 +23,13 @@ public class MarkDao extends AbstractDao<Mark, String> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Name = new Property(0, String.class, "name", true, "NAME");
-        public final static Property State = new Property(1, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(2, Long.class, "version", false, "VERSION");
+        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
+        public final static Property Name = new Property(1, String.class, "name", false, "NAME");
+        public final static Property State = new Property(2, Integer.class, "state", false, "STATE");
+        public final static Property Version = new Property(3, Long.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
-
 
     public MarkDao(DaoConfig config) {
         super(config);
@@ -44,9 +44,10 @@ public class MarkDao extends AbstractDao<Mark, String> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'MARK' (" + //
-                "'NAME' TEXT PRIMARY KEY NOT NULL UNIQUE ," + // 0: name
-                "'STATE' INTEGER," + // 1: state
-                "'VERSION' INTEGER);"); // 2: version
+                "'_id' INTEGER PRIMARY KEY ," + // 0: id
+                "'NAME' TEXT NOT NULL UNIQUE ," + // 1: name
+                "'STATE' INTEGER," + // 2: state
+                "'VERSION' INTEGER);"); // 3: version
     }
 
     /** Drops the underlying database table. */
@@ -59,20 +60,25 @@ public class MarkDao extends AbstractDao<Mark, String> {
     @Override
     protected void bindValues(SQLiteStatement stmt, Mark entity) {
         stmt.clearBindings();
- 
+
+        Long id = entity.getId();
+        if (id != null) {
+            stmt.bindLong(1, id);
+        }
+
         String name = entity.getName();
         if (name != null) {
-            stmt.bindString(1, name);
+            stmt.bindString(2, name);
         }
  
         Integer state = entity.getState();
         if (state != null) {
-            stmt.bindLong(2, state);
+            stmt.bindLong(3, state);
         }
  
         Long version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(3, version);
+            stmt.bindLong(4, version);
         }
     }
 
@@ -84,17 +90,18 @@ public class MarkDao extends AbstractDao<Mark, String> {
 
     /** @inheritdoc */
     @Override
-    public String readKey(Cursor cursor, int offset) {
-        return cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0);
+    public Long readKey(Cursor cursor, int offset) {
+        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
     }    
 
     /** @inheritdoc */
     @Override
     public Mark readEntity(Cursor cursor, int offset) {
         Mark entity = new Mark( //
-            cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // name
-            cursor.isNull(offset + 1) ? null : cursor.getInt(offset + 1), // state
-            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2) // version
+            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
+            cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2), // state
+            cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3) // version
         );
         return entity;
     }
@@ -102,22 +109,24 @@ public class MarkDao extends AbstractDao<Mark, String> {
     /** @inheritdoc */
     @Override
     public void readEntity(Cursor cursor, Mark entity, int offset) {
-        entity.setName(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
-        entity.setState(cursor.isNull(offset + 1) ? null : cursor.getInt(offset + 1));
-        entity.setVersion(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
+        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
+        entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setState(cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2));
+        entity.setVersion(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
      }
     
     /** @inheritdoc */
     @Override
-    protected String updateKeyAfterInsert(Mark entity, long rowId) {
-        return entity.getName();
+    protected Long updateKeyAfterInsert(Mark entity, long rowId) {
+        entity.setId(rowId);
+        return rowId;
     }
     
     /** @inheritdoc */
     @Override
-    public String getKey(Mark entity) {
+    public Long getKey(Mark entity) {
         if(entity != null) {
-            return entity.getName();
+            return entity.getId();
         } else {
             return null;
         }

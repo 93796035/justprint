@@ -16,6 +16,7 @@ import com.just.print.db.dao.MarkDao;
  */
 public class Mark {
 
+    private Long id;
     private String name;
     private Integer state;
     private Long version;
@@ -38,11 +39,12 @@ public class Mark {
     public Mark() {
     }
 
-    public Mark(String name) {
-        this.name = name;
+    public Mark(Long id) {
+        this.id = id;
     }
 
-    public Mark(String name, Integer state, Long version) {
+    public Mark(Long id, String name, Integer state, Long version) {
+        this.id = id;
         this.name = name;
         this.state = state;
         this.version = version;
@@ -63,6 +65,10 @@ public class Mark {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Long getId() { return id;}
+
+    public void setId(Long id) { this.id = id;}
 
     public Integer getState() {
         return state;

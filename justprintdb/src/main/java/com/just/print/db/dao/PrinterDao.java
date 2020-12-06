@@ -35,7 +35,6 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
 
     private DaoSession daoSession;
 
-
     public PrinterDao(DaoConfig config) {
         super(config);
     }

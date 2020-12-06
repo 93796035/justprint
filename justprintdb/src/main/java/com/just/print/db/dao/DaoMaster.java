@@ -21,6 +21,7 @@ public class DaoMaster extends AbstractDaoMaster {
         CategoryDao.createTable(db, ifNotExists);
         MenuDao.createTable(db, ifNotExists);
         M2M_MenuPrintDao.createTable(db, ifNotExists);
+        M2M_MenuMarkDao.createTable(db, ifNotExists);
         MarkDao.createTable(db, ifNotExists);
         LogDao.createTable(db, ifNotExists);
         SaleRecordDao.createTable(db, ifNotExists);
@@ -33,6 +34,7 @@ public class DaoMaster extends AbstractDaoMaster {
         CategoryDao.dropTable(db, ifExists);
         MenuDao.dropTable(db, ifExists);
         M2M_MenuPrintDao.dropTable(db, ifExists);
+        M2M_MenuMarkDao.dropTable(db, ifExists);
         MarkDao.dropTable(db, ifExists);
         LogDao.dropTable(db, ifExists);
         SaleRecordDao.dropTable(db, ifExists);
@@ -72,6 +74,7 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(CategoryDao.class);
         registerDaoClass(MenuDao.class);
         registerDaoClass(M2M_MenuPrintDao.class);
+        registerDaoClass(M2M_MenuMarkDao.class);
         registerDaoClass(MarkDao.class);
         registerDaoClass(LogDao.class);
         registerDaoClass(SaleRecordDao.class);
