@@ -789,7 +789,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             allMarks = sortMarks(unsortedMarks);
         }else{
-            allMarks = sortMarks(unsortedMarks);
+            allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
         }
 
         //if mark is already selected, then remove it from the display list.
