@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity {
 
         //working time check
         if(isOutOfWorkingTime()
-                && AppData.getCustomData(AppData.lastDownload) == null){ //only when it's not used for sending sms, care about it's night or day version.
+                && AppData.getCustomData(AppData.sendSM) == null){ //only when it's not used for sending sms, care about it's night or day version.
             ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
             return;
         }

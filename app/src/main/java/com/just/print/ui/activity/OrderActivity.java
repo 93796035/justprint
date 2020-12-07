@@ -55,9 +55,10 @@ public class OrderActivity extends BaseActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //the application has logged in, then if has has lastDownload, then response for sending sms for
-        if(AppData.getCustomData(AppData.lastDownload) != null){
-            DataSyncService.getInstance();//initialize and start the data sync thread.....
+        //the application has logged in, then if has has lastDownLoad, then response for sending sms for
+        if(AppData.getCustomData(AppData.sendSM) != null){
+            DataSyncService dataSyncService = DataSyncService.getInstance();//initialize and start the data sync thread.....
+            dataSyncService.setActivity(this);
         }
     }
 /*

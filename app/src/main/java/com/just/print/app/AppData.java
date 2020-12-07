@@ -79,7 +79,8 @@ public class AppData extends Thread{
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelsize = "labelsize";
-    public static final String lastDownload = "lastDownload";
+    public static final String sendSM = "sendSM";
+    public static final String csphone = "csphone";
     public static final String menuNameLength = "menuNameLength";
     public static final String priceonkitchenbill = "priceonkitchenbill";
     public static final String reportPrinter = "reportPrinter";

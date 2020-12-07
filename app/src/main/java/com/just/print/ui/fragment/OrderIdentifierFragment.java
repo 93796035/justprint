@@ -99,7 +99,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private static ImageButton odIdConfigBtn2;
 
     @XViewByID(R.id.odIdDelBtn)
-    private ListView odIdDelBtn;
+    private ImageButton odIdDelBtn;
 
     @XViewByID(R.id.odIdOkBtn)
     private ImageButton odIdOkBtn;
