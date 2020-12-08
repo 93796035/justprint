@@ -54,7 +54,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
     List<Printer> addPrints;
     XAdapter2<Printer> addPrintsAdapter;
 
-    List<Mark> addMarks;
+    List<Mark> addedMarks;
     XAdapter2<Mark> addMarksAdapter;
 
     @XViewByID(R.id.lvCategory)
@@ -140,17 +140,17 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                     });
 
                     //preparing marks
-                    addMarks = new ArrayList<Mark>();
+                    addedMarks = new ArrayList<Mark>();
                     for(M2M_MenuMark m2m_p : menuXAdapter.get(i).getM2M_MenuMarkList()){
-                        addMarks.add(m2m_p.getMark());
+                        addedMarks.add(m2m_p.getMark());
                     }
 
-                    addMarksAdapter = new XAdapter2<Mark>(getContext(), addMarks, AddMarkViewHolder.class);
+                    addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, AddMarkViewHolder.class);
                     addMarkListView.setAdapter(addMarksAdapter);
                     addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
                         @Override
                         public void onClickItem(View view, int i) {
-                            addMarks.remove(i);
+                            addedMarks.remove(i);
                             addMarksAdapter.notifyDataSetChanged();
                         }
                     });
@@ -300,13 +300,13 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             }
         });
         //marks
-        addMarks = new ArrayList<Mark>(1);
-        addMarksAdapter = new XAdapter2<Mark>(getContext(), addMarks, AddMarkViewHolder.class);
+        addedMarks = new ArrayList<Mark>(1);
+        addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, AddMarkViewHolder.class);
         addMarkListView.setAdapter(addMarksAdapter);
         addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
             @Override
             public void onClickItem(View view, int i) {
-                addMarks.remove(i);
+                addedMarks.remove(i);
                 addMarksAdapter.notifyDataSetChanged();
             }
         });
@@ -410,7 +410,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                 m2mDao2.delete(p);
             }
         }
-        for (Mark p : addMarks) {
+        for (Mark p : addedMarks) {
             M2M_MenuMark m2m = new M2M_MenuMark();
             m2m.setMenu(menu);
             m2m.setMark(p);
@@ -494,7 +494,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
         final List<Mark> data = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getMarkDao());
-        data.removeAll(addMarks);
+        data.removeAll(addedMarks);
         if (data.size() == 0) {
             showToast("Please add Mark first");
             return;
@@ -509,15 +509,30 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             items[i] = p.getName() + "_" + p.getId();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Please choose a mark");
-        builder.setSingleChoiceItems(items, -1, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                addMarks.add(data.get(which));
-                addMarksAdapter.notifyDataSetChanged();
-                dialog.dismiss();
-            }
-        });
+        if("true".equals(AppData.getCustomData(AppData.isSingleMark))){
+            builder.setTitle("Please choose a mark");
+            builder.setSingleChoiceItems(items, -1, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    addedMarks.add(data.get(which));
+                    addMarksAdapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                }
+            });
+        }else{
+            builder.setTitle("Please choose marks");
+            builder.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isSelected) {
+                    if(isSelected) {
+                        addedMarks.add(data.get(which));
+                    }else{
+                        addedMarks.remove(data.get(which));
+                    }
+                    addMarksAdapter.notifyDataSetChanged();
+                }
+            });
+        }
         builder.show();
     }
 

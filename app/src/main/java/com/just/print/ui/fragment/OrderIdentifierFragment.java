@@ -279,7 +279,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdFrLoutMenuList.setAdapter(dishesXAdapter);
 
         //add Marks
-        allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
+//this way will include in the tables        allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
+        allMarks = sortMarks(DaoExpand.queryAllMarks(Applic.getMarkDao()));
         //add shortcut Marks.
         initShortCutMarks();
 
@@ -789,7 +790,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             allMarks = sortMarks(unsortedMarks);
         }else{
-            allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
+//this way will include in the tables names           allMarks = sortMarks(DaoExpand.queryNotDeletedAll(Applic.getMarkDao()));
+            allMarks = DaoExpand.queryNotDeletedAll(Applic.getMarkDao());
         }
 
         //if mark is already selected, then remove it from the display list.

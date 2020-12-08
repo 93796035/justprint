@@ -69,6 +69,7 @@ public class AppData extends Thread{
     public static final String conbineMarkPrice = "conbineMarkPrice";
     public static final String emailorder = "emailorder";
     public static final String format_style = "format_style";
+    public static final String hasCategory = "hasCategory";
     public static final String hideCancelItem = "hidecancelitem";
     public static final String HideKitchenBillId = "hikiid";
     public static final String HideKitchenBillName = "hikina";
@@ -76,6 +77,7 @@ public class AppData extends Thread{
     public static final String HideTable = "hita";
     public static final String HideRubber = "hiru";
     public static final String HideSetting = "hise";
+    public static final String isSingleMark = "isSingleMark";
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelsize = "labelsize";
@@ -99,7 +101,6 @@ public class AppData extends Thread{
     public static final String userPassword = "userPassword";
     public static final String waitTime = "waitTime";
     public static final String width = "width";
-    public static final String hasCategory = "hasCategory";
 
     public static String[] keysToSync = new String[]{server_url, appmode, ShowMarkPirce, userPassword, adminPassword , custChars,
             column, serverip, reportPrinter, waitTime, conbineMarkPrice,
