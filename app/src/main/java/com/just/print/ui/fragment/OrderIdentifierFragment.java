@@ -782,10 +782,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             marksOfCurDish = new ArrayList<Mark>();
         }
 
-        List<M2M_MenuMark> printerList = menu.getM2M_MenuMarkList();
-        if(printerList != null && printerList.size() > 0) {
+        List<M2M_MenuMark> markList = menu.getM2M_MenuMarkList();
+        if(markList != null && markList.size() > 0) {
             List<Mark> unsortedMarks = new ArrayList<>();
-            for (M2M_MenuMark m2m_MenuMark : printerList) {
+            for (M2M_MenuMark m2m_MenuMark : markList) {
                 unsortedMarks.add(m2m_MenuMark.getMark());
             }
             allMarks = sortMarks(unsortedMarks);

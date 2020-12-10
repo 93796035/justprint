@@ -125,7 +125,7 @@ public class Mark {
     @Override
     public boolean equals(Object o) {
 
-        return toString().equals(o.toString());
+        return o instanceof Mark && getName().equals(((Mark)o).getName());
     }
 
     public void updateAndUpgrade() {
@@ -146,7 +146,13 @@ public class Mark {
 
     @Override
     public String toString() {
-        return name;
+        if(qt == 0) {
+           return "";
+        }else if(qt == 1) {
+           return name;
+        }else{
+           return name + " x" + qt;
+        }
     }
 
     public Mark clone(){
