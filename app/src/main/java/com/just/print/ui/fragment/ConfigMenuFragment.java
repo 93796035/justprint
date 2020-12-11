@@ -493,7 +493,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
-        final List<Mark> data = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getMarkDao());
+        final List<Mark> data = DaoExpand.queryAllMarks(Applic.app.getDaoMaster().newSession().getMarkDao());
         data.removeAll(addedMarks);
         if (data.size() == 0) {
             showToast("Please add Mark first");
