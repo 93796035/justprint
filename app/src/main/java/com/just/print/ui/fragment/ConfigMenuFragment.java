@@ -24,8 +24,8 @@ import com.just.print.db.dao.M2M_MenuPrintDao;
 import com.just.print.db.dao.MenuDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.db.expand.State;
-import com.just.print.ui.holder.AddMarkViewHolder;
-import com.just.print.ui.holder.AddPrintViewHolder;
+import com.just.print.ui.holder.ConfigAddMarkViewHolder;
+import com.just.print.ui.holder.ConfigAddPrintViewHolder;
 import com.just.print.ui.holder.ConfigCategoryViewHolder;
 import com.just.print.ui.holder.ConfigMenuViewHolder;
 import com.stupid.method.adapter.IXOnItemClickListener;
@@ -129,7 +129,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                         addPrints.add(m2m_p.getPrint());
                     }
 
-                    addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, AddPrintViewHolder.class);
+                    addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
                     addPrintListView.setAdapter(addPrintsAdapter);
                     addPrintsAdapter.setClickItemListener(new IXOnItemClickListener() {
                         @Override
@@ -145,7 +145,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                         addedMarks.add(m2m_p.getMark());
                     }
 
-                    addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, AddMarkViewHolder.class);
+                    addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, ConfigAddMarkViewHolder.class);
                     addMarkListView.setAdapter(addMarksAdapter);
                     addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
                         @Override
@@ -290,7 +290,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         ((EditText)findViewById(R.id.etMenu)).setText("");
         //printers
         addPrints = new ArrayList<Printer>(1);
-        addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, AddPrintViewHolder.class);
+        addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
         addPrintListView.setAdapter(addPrintsAdapter);
         addPrintsAdapter.setClickItemListener(new IXOnItemClickListener() {
             @Override
@@ -301,7 +301,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         });
         //marks
         addedMarks = new ArrayList<Mark>(1);
-        addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, AddMarkViewHolder.class);
+        addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, ConfigAddMarkViewHolder.class);
         addMarkListView.setAdapter(addMarksAdapter);
         addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
             @Override

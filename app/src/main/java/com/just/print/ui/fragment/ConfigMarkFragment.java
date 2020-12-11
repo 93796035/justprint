@@ -40,8 +40,8 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
      */
     private Mark onEditMark = null;
 
-    @XViewByID(R.id.name)
-    private TextView name = null;
+    @XViewByID(R.id.fld_name)
+    private TextView fldName = null;
 
     @XViewByID(R.id.dspIdx)
     private TextView dspIdx = null;
@@ -114,7 +114,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         final Mark mark = markXAdapter.getItem(i);
         onEditMark = mark;
 
-        name.setText(mark.getName());
+        fldName.setText(mark.getName());
         dspIdx.setText(String.valueOf(((float) mark.getState()) / 100.00));
         price.setText(String.valueOf(((float) mark.getVersion()) / 100.00));
 
@@ -131,7 +131,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
 //                return;
 //            }
 
-            onEditMark.setName(name.getText().toString());
+            onEditMark.setName(fldName.getText().toString());
 
             try{
                 onEditMark.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));

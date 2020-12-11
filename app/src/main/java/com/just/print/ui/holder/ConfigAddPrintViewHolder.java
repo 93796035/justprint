@@ -12,7 +12,7 @@ import com.stupid.method.reflect.annotation.XViewByID;
 /**
  * Created by wangx on 2016/11/23.
  */
-public class AddPrintViewHolder extends XViewHolder<Printer> {
+public class ConfigAddPrintViewHolder extends XViewHolder<Printer> {
     @XViewByID(R.id.ip)
     TextView ip;
     @XViewByID(R.id.name)
