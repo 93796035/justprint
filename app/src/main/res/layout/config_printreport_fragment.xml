@@ -33,12 +33,11 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/alertDlg"
+        android:id="@+id/alertResetDlg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone">
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,6 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Do you want to reset report?" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -67,8 +67,12 @@
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="left"
                     android:text="    NO    " />
+
+                <TextView
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
 
                 <Button
                     android:id="@+id/btnConfirmResetReportOK"
@@ -76,15 +80,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
+                    android:layout_gravity="right"
                     android:text="    YES    " />
 
             </LinearLayout>
 
         </LinearLayout>
-    </LinearLayout>
 
-    <com.stupid.method.widget.flowlayout.FlowListView
-        android:id="@+id/gridView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@android:color/darker_gray"/>
+
+        <com.stupid.method.widget.flowlayout.FlowListView
+            android:id="@+id/billList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@android:color/darker_gray"/>
+        <ListView
+            android:id="@+id/orderList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"  />
+
+    </LinearLayout>
 </LinearLayout>

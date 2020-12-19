@@ -5,29 +5,52 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
 import com.just.print.app.BaseFragment;
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.SaleRecord;
+import com.just.print.db.dao.BillDao;
+import com.just.print.db.dao.SaleRecordDao;
+import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigActivity;
+import com.just.print.ui.holder.ConfigBillViewHolder;
+import com.just.print.ui.holder.ConfigOrderViewHolder;
 import com.just.print.util.StringUtils;
+import com.stupid.method.adapter.OnClickItemListener;
+import com.stupid.method.adapter.XAdapter2;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XViewByID;
+import com.stupid.method.widget.flowlayout.FlowListView;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class ConfigMainFragment extends BaseFragment {
+public class ConfigMainFragment extends BaseFragment implements OnClickItemListener{
 
     private String reportContent;
 
     @XViewByID(R.id.password)
     EditText password;
+
+    @XViewByID(R.id.billList)
+    FlowListView billListView;
+
+    @XViewByID(R.id.orderList)
+    ListView ordersView;
+
+    private SaleRecordDao saleRecordDao;
+    private BillDao billDao;
+
+    XAdapter2<SaleRecord> orderListXAdapter;
+    XAdapter2<Bill> billsXAdapter;
 
     @Override
     protected int getLayoutId() {
@@ -40,6 +63,20 @@ public class ConfigMainFragment extends BaseFragment {
         if(!"true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
             findViewById(R.id.configTableManager).setVisibility(View.GONE);
         }
+
+        //init the existing bills area.
+        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+        List<Bill> orders = new ArrayList<>();
+        try{
+            String recentNum = AppData.getCustomData(AppData.recentNum);
+            orders = DaoExpand.queryRecentBill(billDao, recentNum == null || recentNum.length() < 1 ? 9 : Integer.valueOf(recentNum));
+        }catch(Exception e){
+            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
+        }
+        billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
+        billsXAdapter.setClickItemListener(this);
+        billListView.setAdapter(billsXAdapter);
+        billsXAdapter.setData(orders);
     }
 
     @XClick({R.id.verifyPassword})
@@ -58,8 +95,18 @@ public class ConfigMainFragment extends BaseFragment {
                     List<SaleRecord> orders = Applic.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.alertDlg).setVisibility(View.VISIBLE);
-                }else {
+                    findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
+                }else if(inputContent.length() > 0 && inputContent.equals(AppData.getCustomData(AppData.orderpassword))){
+                    findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
+
+                    saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
+                    List<SaleRecord> saleRecord = saleRecordDao.loadAll();
+                    if(saleRecord == null || saleRecord.size() == 0){
+                        showToast("No report to print! The sales record has been cleaned!");
+                        return;
+                    }
+                }else{
                     showToast("Please input the right password");
                 }
                 return;
@@ -112,8 +159,8 @@ public class ConfigMainFragment extends BaseFragment {
 
     @XClick({R.id.buttonCancel})
     private void notResetReport(){
-        findViewById(R.id.alertDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertDlg).setMinimumHeight(0);
+        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
         //check if need to send email
         try{
             int reportIdx = 1;
@@ -145,9 +192,23 @@ public class ConfigMainFragment extends BaseFragment {
 
         AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
 
-        findViewById(R.id.alertDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertDlg).setMinimumHeight(0);
+        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
 
         startActivity(new Intent(getContext(), ConfigActivity.class));
+    }
+
+    @Override
+    public void onClickItem(View view, int idx) {
+        Bill order = billsXAdapter.getData().get(idx);
+        //show the content of this order in a pop up view
+
+//        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
+
+        XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
+        adapter.setData(data);
+        ordersView.setAdapter(adapter);
+
     }
 }

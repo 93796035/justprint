@@ -119,7 +119,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/alertDlg"
+        android:id="@+id/alertResetDlg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -169,4 +169,33 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- when user input -op:, show this area up for waiter to check recent bills.-->
+    <LinearLayout
+        android:id="@+id/recentOrders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@android:color/darker_gray"/>
+
+        <com.stupid.method.widget.flowlayout.FlowListView
+            android:id="@+id/billList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/alertDeleteReport" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@android:color/darker_gray"/>
+        <ListView
+            android:id="@+id/orderList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"  />
+    </LinearLayout>
 </FrameLayout>

@@ -9,6 +9,7 @@ import de.greenrobot.dao.AbstractDaoSession;
 import de.greenrobot.dao.identityscope.IdentityScopeType;
 import de.greenrobot.dao.internal.DaoConfig;
 
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.bean.Category;
@@ -34,6 +35,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig m2M_MenuPrintDaoConfig;
     private final DaoConfig m2M_MenuMarkDaoConfig;
     private final DaoConfig markDaoConfig;
+    private final DaoConfig billDaoConfig;
     private final DaoConfig logDaoConfig;
     private final DaoConfig saleRecordDaoConfig;
     private final DaoConfig deviceDaoConfig;
@@ -44,6 +46,7 @@ public class DaoSession extends AbstractDaoSession {
     private final M2M_MenuPrintDao m2M_MenuPrintDao;
     private final M2M_MenuMarkDao m2M_MenuMarkDao;
     private final MarkDao markDao;
+    private final BillDao billDao;
     private final LogDao logDao;
     private final SaleRecordDao saleRecordDao;
     private final DeviceDao deviceDao;
@@ -70,6 +73,9 @@ public class DaoSession extends AbstractDaoSession {
         markDaoConfig = daoConfigMap.get(MarkDao.class).clone();
         markDaoConfig.initIdentityScope(type);
 
+        billDaoConfig = daoConfigMap.get(BillDao.class).clone();
+        billDaoConfig.initIdentityScope(type);
+
         logDaoConfig = daoConfigMap.get(LogDao.class).clone();
         logDaoConfig.initIdentityScope(type);
 
@@ -85,6 +91,7 @@ public class DaoSession extends AbstractDaoSession {
         m2M_MenuPrintDao = new M2M_MenuPrintDao(m2M_MenuPrintDaoConfig, this);
         m2M_MenuMarkDao = new M2M_MenuMarkDao(m2M_MenuMarkDaoConfig, this);
         markDao = new MarkDao(markDaoConfig, this);
+        billDao = new BillDao(billDaoConfig, this);
         logDao = new LogDao(logDaoConfig, this);
         saleRecordDao = new SaleRecordDao(saleRecordDaoConfig, this);
         deviceDao = new DeviceDao(deviceDaoConfig, this);
@@ -97,6 +104,7 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(Mark.class, markDao);
         registerDao(Log.class, logDao);
         registerDao(SaleRecord.class, saleRecordDao);
+        registerDao(Bill.class, billDao);
         registerDao(Device.class, deviceDao);
     }
     
@@ -107,6 +115,7 @@ public class DaoSession extends AbstractDaoSession {
         m2M_MenuPrintDaoConfig.getIdentityScope().clear();
         m2M_MenuMarkDaoConfig.getIdentityScope().clear();
         markDaoConfig.getIdentityScope().clear();
+        billDaoConfig.getIdentityScope().clear();
         logDaoConfig.getIdentityScope().clear();
         saleRecordDaoConfig.getIdentityScope().clear();
         deviceDaoConfig.getIdentityScope().clear();
@@ -132,9 +141,9 @@ public class DaoSession extends AbstractDaoSession {
         return m2M_MenuMarkDao;
     }
 
-    public MarkDao getMarkDao() {
-        return markDao;
-    }
+    public MarkDao getMarkDao() {return markDao;}
+
+    public BillDao getBillDao() {return billDao;}
 
     public LogDao getLogDao() {
         return logDao;

@@ -56,12 +56,12 @@ public class Applic extends Application {
         return getDatabasePath("JustPrinter_" + dbname);
     }
 
-    public DaoMaster newDaoMaster(String dbname) {
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this,
-                getDBPath(dbname).getAbsolutePath(), null);
-        DaoMaster daomaster = new DaoMaster(helper.getWritableDatabase());
-        return daomaster;
-    }
+//    public DaoMaster newDaoMaster(String dbname) {
+//        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this,
+//                getDBPath(dbname).getAbsolutePath(), null);
+//        DaoMaster daomaster = new DaoMaster(helper.getWritableDatabase());
+//        return daomaster;
+//    }
 
     public DaoMaster getDaoMaster() {
         if (daoMaster == null) {

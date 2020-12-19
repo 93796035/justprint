@@ -2,14 +2,19 @@ package com.just.print.db.expand;
 
 import android.database.Cursor;
 
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
+import com.just.print.db.bean.SaleRecord;
+import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.MenuDao;
 import com.just.print.db.dao.PrinterDao;
+import com.just.print.db.dao.SaleRecordDao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.dao.AbstractDao;
@@ -39,6 +44,18 @@ public final class DaoExpand {
 
     static public List<Menu> queryMenuByCategory(Category category, MenuDao dao) {
         return dao.queryBuilder().where(MenuDao.Properties.Cid.eq(category.getId()), MenuDao.Properties.State.notEq(State.delete)).list();
+    }
+
+    static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {
+        List<SaleRecord> records = dao.loadAll();
+        for (int i = records.size() - 1; i >= 0; i--) {
+            if (!billId.equals(records.get(i).getbId())) {
+                records.remove(i);
+            }
+        }
+        return records;
+
+// this line always return 0 row, don't know how to write correctly       return dao.queryBuilder().where(SaleRecordDao.Properties.Bid.eq(billId), SaleRecordDao.Properties.State.notEq(State.delete)).list();
     }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao, String shop) {
@@ -83,6 +100,19 @@ public final class DaoExpand {
         return list.size() > 0 ? list.get(0) : null;
     }
 
+    static public List<Bill> queryRecentBill(BillDao billDao, int num) {
+        List<Bill> bills = billDao.loadAll();
+        List<Bill> recentBills = new ArrayList<>();
+        int lastIdx = bills.size() - 1;
+        if(lastIdx >= 0) {
+            for (int i = 0; i < num; i++) {
+                if (i < lastIdx) {
+                    recentBills.add(bills.get(lastIdx - i));
+                }
+            }
+        }
+        return recentBills;
+    }
 
 //    public static void updateAllPrintTo0(PrinterDao printerDao) {
 //        List<Printer> list = printerDao.queryBuilder().where(PrinterDao.Properties.FirstPrint.eq(1)).list();

@@ -24,11 +24,12 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Mname = new Property(1, String.class, "mname", false, "M_NAME");
-        public final static Property Number = new Property(2, Double.class, "number", false, "NUMBER");
-        public final static Property Price = new Property(3, Double.class, "price", false, "PRICE");
-        public final static Property State = new Property(4, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(5, Long.class, "version", false, "VERSION");
+        public final static Property Bid = new Property(1, String.class, "mname", false, "B_ID");
+        public final static Property Mname = new Property(2, String.class, "mname", false, "M_NAME");
+        public final static Property Number = new Property(3, Double.class, "number", false, "NUMBER");
+        public final static Property Price = new Property(4, Double.class, "price", false, "PRICE");
+        public final static Property State = new Property(5, Integer.class, "state", false, "STATE");
+        public final static Property Version = new Property(6, Long.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -48,11 +49,12 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'SALE_RECORD' (" + //
                 "'_id' INTEGER PRIMARY KEY ASC UNIQUE ," + // 0: id
-                "'M_NAME' TEXT," + // 1: mname
-                "'NUMBER' REAL," + // 2: number
-                "'PRICE' REAL," + // 3: price
-                "'STATE' INTEGER," + // 4: state
-                "'VERSION' INTEGER);"); // 5: version
+                "'B_ID' TEXT," + // 1: bill id
+                "'M_NAME' TEXT," + // 2: mname
+                "'NUMBER' REAL," + // 3: number
+                "'PRICE' REAL," + // 4: price
+                "'STATE' INTEGER," + // 5: state
+                "'VERSION' INTEGER);"); // 6: version
     }
 
     /** Drops the underlying database table. */
@@ -70,30 +72,35 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         if (id != null) {
             stmt.bindLong(1, id);
         }
- 
+
+        String bid = entity.getbId();
+        if (bid != null) {
+            stmt.bindString(2, bid);
+        }
+
         String mname = entity.getMname();
         if (mname != null) {
-            stmt.bindString(2, mname);
+            stmt.bindString(3, mname);
         }
- 
+
         Double number = entity.getNumber();
         if (number != null) {
-            stmt.bindDouble(3, number);
+            stmt.bindDouble(4, number);
         }
  
         Double price = entity.getPrice();
         if (price != null) {
-            stmt.bindDouble(4, price);
+            stmt.bindDouble(5, price);
         }
  
         Integer state = entity.getState();
         if (state != null) {
-            stmt.bindLong(5, state);
+            stmt.bindLong(6, state);
         }
  
         Long version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(6, version);
+            stmt.bindLong(7, version);
         }
     }
 
@@ -115,10 +122,11 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         SaleRecord entity = new SaleRecord( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // mname
-            cursor.isNull(offset + 2) ? null : cursor.getDouble(offset + 2), // number
-            cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3), // price
-            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // state
-            cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5) // version
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // mname
+            cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3), // number
+            cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4), // price
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // state
+            cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6) // version
         );
         return entity;
     }
@@ -127,11 +135,12 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     @Override
     public void readEntity(Cursor cursor, SaleRecord entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setMname(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setNumber(cursor.isNull(offset + 2) ? null : cursor.getDouble(offset + 2));
-        entity.setPrice(cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3));
-        entity.setState(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setVersion(cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5));
+        entity.setbId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setMname(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setNumber(cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3));
+        entity.setPrice(cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4));
+        entity.setState(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6));
      }
     
     /** @inheritdoc */

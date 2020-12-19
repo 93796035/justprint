@@ -12,12 +12,14 @@ import android_wifi_api.SearchPortInfo;
 
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.bean.SaleRecord;
+import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
@@ -163,7 +165,7 @@ public class WifiPrintService implements Runnable{
 
     //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error.
     //other wise will send to serer and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
-    public String exePrintCommand(boolean isCancel){
+    public String printAndSaveCommand(boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
         String ip = getIPofNonEmptyIpContentMapEntry();
         if(ip != null){
@@ -174,8 +176,10 @@ public class WifiPrintService implements Runnable{
             showToast("PRINTING...");
         }
         popKitchenBillIdx();
-
-        Double priceOfBill = saveSaleRecToDB(isCancel);                              //save to db
+        //save sales records and get the total price....
+        Double priceOfBill = saveSaleRecToDB(isCancel);
+        //save bill record.
+        saveBillToDB(priceOfBill);
 
         sendToAikaServer();
 
@@ -292,6 +296,15 @@ public class WifiPrintService implements Runnable{
         AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(AppData.curBillIdx) + 1));   //update thee kbi into higer value.
     }
 
+    private void saveBillToDB(Double priceOfBill) {
+        Bill bill = new Bill();
+        bill.setBillIdx(AppData.curBillIdx );
+        bill.setPrice(String.valueOf(priceOfBill));
+        bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        BillDao billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+        billDao.insertOrReplace(bill);
+    }
+
     private static Double saveSaleRecToDB(boolean isCancel) {
         Double priceFR = 0.0;
         //save the menu into database.
@@ -317,6 +330,7 @@ public class WifiPrintService implements Runnable{
             }
 
             SaleRecord saleRecord = new SaleRecord();
+            saleRecord.setbId(AppData.curBillIdx);
             String mName = "";
             if(AppData.showID) {
                 mName = menu.getID() + " ";
@@ -324,7 +338,7 @@ public class WifiPrintService implements Runnable{
             if(AppData.showName) {
                 mName = mName + name;             //dish name
             }
-            saleRecord.setMname(name.trim());
+            saleRecord.setMname(mName.trim());
             saleRecord.setNumber(Double.valueOf(number));
             saleRecord.setPrice(price);
             saleRecordDao.insertOrReplace(saleRecord);
@@ -364,7 +378,7 @@ public class WifiPrintService implements Runnable{
             showToast("No report to print! The sales record has been cleaned!");
             return null;
         }
-        L.d("ConfigPrintReportFragment","exePrintCommand");
+        L.d("ConfigPrintReportFragment","printAndSaveCommand");
         List<Printer> printers = Applic.app.getDaoMaster().newSession().getPrinterDao().loadAll();
         String printerIP = AppData.getCustomData(AppData.reportPrinter);
         if(printerIP == null || printerIP.length() < 8) {
@@ -989,7 +1003,7 @@ public class WifiPrintService implements Runnable{
         content.append(generateString(width, SEP_STR1)).append("\n");
         content.append(" SUBTOTAL:    $").append(String.format("%.2f", total + cancTotal));
         content.append(" TOTAL:    $").append(String.format("%.2f", (total + cancTotal) * tax));
-            //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getName()).append(" *\n");
+            //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getPrice()).append(" *\n");
         content.append("\n\n\n\n\n");
         return content.toString();
     }

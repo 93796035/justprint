@@ -15,6 +15,7 @@ import com.just.print.db.dao.SaleRecordDao;
 public class SaleRecord {
 
     private Long id;
+    private String bId;
     private String mname;
     private Double number;
     private Double price;
@@ -38,8 +39,9 @@ public class SaleRecord {
         this.id = id;
     }
 
-    public SaleRecord(Long id, String mname, Double number, Double price, Integer state, Long version) {
+    public SaleRecord(Long id, String bId, String mname, Double number, Double price, Integer state, Long version) {
         this.id = id;
+        this.bId = bId;
         this.mname = mname;
         this.number = number;
         this.price = price;
@@ -56,15 +58,16 @@ public class SaleRecord {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
 
+    public String getbId() { return bId;}
+    public void setbId(String bId) { this.bId = bId; }
+
     public String getMname() {
         return mname;
     }
-
     public void setMname(String mname) {
         this.mname = mname;
     }
@@ -72,7 +75,6 @@ public class SaleRecord {
     public Double getNumber() {
         return number;
     }
-
     public void setNumber(Double number) {
         this.number = number;
     }
@@ -80,7 +82,6 @@ public class SaleRecord {
     public Double getPrice() {
         return price;
     }
-
     public void setPrice(Double price) {
         this.price = price;
     }
@@ -88,7 +89,6 @@ public class SaleRecord {
     public Integer getState() {
         return state;
     }
-
     public void setState(Integer state) {
         this.state = state;
     }
@@ -96,7 +96,6 @@ public class SaleRecord {
     public Long getVersion() {
         return version;
     }
-
     public void setVersion(Long version) {
         this.version = version;
     }

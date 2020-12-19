@@ -61,7 +61,7 @@
 -->
     <!--warning dialog when user do print report.....-->
     <LinearLayout
-        android:id="@+id/alertDlg"
+        android:id="@+id/alertResetDlg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

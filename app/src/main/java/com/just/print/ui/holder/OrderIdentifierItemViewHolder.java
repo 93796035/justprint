@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.Button;
 
 import com.just.print.R;
+import com.just.print.util.L;
 import com.stupid.method.adapter.XViewHolder;
 
 /**
@@ -26,7 +27,10 @@ public class OrderIdentifierItemViewHolder extends XViewHolder<String>{
 
     @Override
     public void onResetView(String s, int i) {
-        textView.setText(s);
+        if(s.startsWith(" ")){
+            L.e("WOW", "found space was added before the menubutton!!!!!" + s, null);
+        }
+        textView.setText(s.trim());
 //        try {
 //            Integer.valueOf(s);
 //        }catch(Exception e){

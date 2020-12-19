@@ -25,7 +25,6 @@ import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuMark;
-import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.SaleRecord;
@@ -195,7 +194,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             //get the menu for current category.
             items = new String[menus.size()];
             for (int i = 0; i < menus.size(); i++) {
-                items[i] = menus.get(i).getID();
+                items[i] = menus.get(i).getID().trim();
             }
 
             if("true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
@@ -263,6 +262,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         itemXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(items), OrderIdentifierItemViewHolder.class);
         itemXAdapter.setClickItemListener(this.itemXAdapterClick);
         odMenuGv.setAdapter(itemXAdapter);
+//        odMenuGv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
         odIdTableTbtn.setTextOn(null);
         odIdTableTbtn.setTextOff(null);
@@ -395,7 +395,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                         findViewById(R.id.menuMarkSwitcher).setVisibility(View.INVISIBLE);
                         findViewById(R.id.topButtons).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.alertDlg).setVisibility(View.VISIBLE);
+                        findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
                     }
                     odIdTableTbtn.setText("");
                     odIdInput.setText("");
@@ -439,8 +439,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
     @XClick({R.id.buttonCancel})
     private void notResetReport(){
-        findViewById(R.id.alertDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertDlg).setMinimumHeight(0);
+        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
         findViewById(R.id.topButtons).setY(0);
         findViewById(R.id.topButtons).setVisibility(View.VISIBLE);
         findViewById(R.id.menuMarkSwitcher).setVisibility(View.VISIBLE);
@@ -475,8 +475,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
         AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
 
-        findViewById(R.id.alertDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertDlg).setMinimumHeight(0);
+        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
         findViewById(R.id.topButtons).setY(0);
         findViewById(R.id.topButtons).setVisibility(View.VISIBLE);
         findViewById(R.id.menuMarkSwitcher).setVisibility(View.VISIBLE);
@@ -516,7 +516,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             showToast("Nothing selected!");
             return "";
         }else {
-            final String result = WifiPrintService.getInstance().exePrintCommand(isCancel);
+            final String result = WifiPrintService.getInstance().printAndSaveCommand(isCancel);
             if (result.startsWith("192.") || result.startsWith("10.")) {
                 // pup up a dialog to ask if user want to continue.....
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -914,6 +914,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             odIdTable2.setText(AppData.getCustomData("kitchenBillIdx"));
         }else{
             odIdTable2.setText("");
+            CustomerSelection.getInstance().setTableName("");
         }
     }
 
