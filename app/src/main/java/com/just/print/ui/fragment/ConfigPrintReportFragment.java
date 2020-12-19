@@ -35,7 +35,7 @@ import java.util.List;
 
 import static com.just.print.util.ToastUtil.showToast;
 
-public class ConfigPrintReportFragment extends BaseFragment implements OnClickItemListener {
+public class ConfigPrintReportFragment extends BaseFragment {// implements OnClickItemListener {
 
     private HashMap<String,List<String>> contentForPrintMap;
 
@@ -75,23 +75,24 @@ public class ConfigPrintReportFragment extends BaseFragment implements OnClickIt
         saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
         List<SaleRecord> saleRecord = saleRecordDao.loadAll();
         if(saleRecord == null || saleRecord.size() == 0){
+            getActivity().finish();
             showToast("No report to print! The sales record has been cleaned!");
             return;
         }
 
-        //init the existing bills area.
-        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
-        List<Bill> orders = new ArrayList<>();
-        try{
-            String recentNum = AppData.getCustomData(AppData.recentNum);
-            orders = DaoExpand.queryRecentBill(billDao, recentNum == null || recentNum.length() < 1 ? 9 : Integer.valueOf(recentNum));
-        }catch(Exception e){
-            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
-        }
-        billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
-        billsXAdapter.setData(orders);
-        billsXAdapter.setClickItemListener(this);
-        billListView.setAdapter(billsXAdapter);
+// comment out in case some boss don't like to see it.       //init the existing bills area.
+//        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+//        List<Bill> orders = new ArrayList<>();
+//        try{
+//            String recentNum = AppData.getCustomData(AppData.recentNum);
+//            orders = DaoExpand.queryRecentBill(billDao, recentNum == null || recentNum.length() < 1 ? 9 : Integer.valueOf(recentNum));
+//        }catch(Exception e){
+//            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
+//        }
+//        billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
+//        billsXAdapter.setData(orders);
+//        billsXAdapter.setClickItemListener(this);
+//        billListView.setAdapter(billsXAdapter);
 
 //        List<SaleRecord> dishes = saleRecordDao.loadAll();
 //        orderListXAdapter.setData(dishes);
@@ -144,17 +145,17 @@ public class ConfigPrintReportFragment extends BaseFragment implements OnClickIt
         reportContent = WifiPrintService.getInstance().exePrintReportCommand(saleRecordDao.loadAll(), String.valueOf(now));
     }
 
-    @Override
-    public void onClickItem(View view, int idx) {
-        Bill order = billsXAdapter.getData().get(idx);
-        //show the content of this order in a pop up view
-
-//        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
-
-        XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
-        adapter.setData(data);
-        ordersView.setAdapter(adapter);
-
-    }
+//    @Override
+//    public void onClickItem(View view, int idx) {
+//        Bill order = billsXAdapter.getData().get(idx);
+//        //show the content of this order in a pop up view
+//
+////        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
+//        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
+//
+//        XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
+//        adapter.setData(data);
+//        ordersView.setAdapter(adapter);
+//
+//    }
 }
