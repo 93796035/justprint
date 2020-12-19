@@ -98,13 +98,15 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
                     findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
                 }else if(inputContent.length() > 0 && inputContent.equals(AppData.getCustomData(AppData.orderpassword))){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
 
                     saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
                     List<SaleRecord> saleRecord = saleRecordDao.loadAll();
                     if(saleRecord == null || saleRecord.size() == 0){
+                        getActivity().finish();
                         showToast("No report to print! The sales record has been cleaned!");
                         return;
+                    }else{
+                        findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
                     }
                 }else{
                     showToast("Please input the right password");

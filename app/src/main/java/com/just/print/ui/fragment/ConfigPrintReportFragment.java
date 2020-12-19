@@ -80,8 +80,8 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
             return;
         }
 
+        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
 // comment out in case some boss don't like to see it.       //init the existing bills area.
-//        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
 //        List<Bill> orders = new ArrayList<>();
 //        try{
 //            String recentNum = AppData.getCustomData(AppData.recentNum);
