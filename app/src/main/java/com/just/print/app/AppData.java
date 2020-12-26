@@ -75,6 +75,8 @@ public class AppData extends Thread{
     public static final String hideCancelItem = "hidecancelitem";
     public static final String HideKitchenBillId = "hikiid";
     public static final String HideKitchenBillName = "hikina";
+    public static final String HideKitchenBillId_Cloud = "hiclid";
+    public static final String HideKitchenBillName_Cloud = "hiclna";
     public static final String HideMark = "hima";
     public static final String HideTable = "hita";
     public static final String HideRubber = "hiru";
@@ -114,6 +116,8 @@ public class AppData extends Thread{
 
     public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));
     public static boolean showName = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillName));
+    public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
+    public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
     private static String labelSN = "labelsn";
 
     private static SharedPreferencesHelper getShopData(Context context) {

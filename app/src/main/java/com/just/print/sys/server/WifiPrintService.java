@@ -255,18 +255,18 @@ public class WifiPrintService implements Runnable{
                             } else if(currentCategory.equals(c1.getCname())){    //if same with previous, then add into the list.
                                 tlist.add(selectionDetail);
                             } else {                    //if not same, then add current list into ipContent map, and start a new list.
-                                ipContentMap.get(printerIP).add(formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n");
+                                ipContentMap.get(printerIP).add(formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n");
                                 currentCategory = c1.getCname();
                                 tlist = new ArrayList<SelectionDetail>();
                                 tlist.add(selectionDetail);
                             }
                         }
-                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n";
+                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n";
                         //put the last list into ipContent map.
                         ipContentMap.get(printerIP).add(content);
                         totalContent.append(content);
                     }else{
-                        String content =formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill) + "\n\n\n\n\n";
+                        String content =formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n\n\n\n";
                         ipContentMap.get(printerIP).add(content);
                         totalContent.append(content);
                     }
@@ -274,7 +274,7 @@ public class WifiPrintService implements Runnable{
                     for(SelectionDetail selectionDetail : dishList){
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();     //use list to fullfill the parameter format of the format method,
                         tlist.add(selectionDetail);                                         //only one dish will be added into this list.
-                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill) + "\n\n";
+                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n";
                         ipContentMap.get(printerIP).add(content);
                         totalContent.append(content);
                     }
@@ -1083,7 +1083,7 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    private String formatContentForPrint(List<SelectionDetail> list, String kitchenBillIdx, boolean isCancel, Double priceOfBill) {
+    private String formatContentForPrint(List<SelectionDetail> list, String kitchenBillIdx, boolean isCancel, Double priceOfBill, boolean isCloudPrinter) {
         L.d(TAG, "formatContentForPrint");
 
         determinTheWidth();
@@ -1171,12 +1171,36 @@ public class WifiPrintService implements Runnable{
         //Main contents starts here.........................................................
         for(SelectionDetail dd:list){
             StringBuilder sb = new StringBuilder();
-            if(AppData.showID) {
-                sb.append(dd.getDish().getID());                //dish id
-                sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
-            }
-            if(AppData.showName) {
-                sb.append(dd.getDish().getMname());             //dish name
+            if(isCloudPrinter){
+                if (AppData.cloudShowID != null) {
+                    if (AppData.cloudShowID) {
+                        sb.append(dd.getDish().getID());                //dish id
+                        sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                    }
+                }else{
+                    if (AppData.showID) {
+                        sb.append(dd.getDish().getID());                //dish id
+                        sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                    }
+                }
+
+                if(AppData.cloudShowName != null){
+                    if (AppData.cloudShowName) {
+                        sb.append(dd.getDish().getMname());             //dish name
+                    }
+                }else{
+                    if (AppData.showName) {
+                        sb.append(dd.getDish().getMname());             //dish name
+                    }
+                }
+            }else {
+                if (AppData.showID) {
+                    sb.append(dd.getDish().getID());                //dish id
+                    sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                }
+                if (AppData.showName) {
+                    sb.append(dd.getDish().getMname());             //dish name
+                }
             }
             if(dd.getDishNum() > 1){                        //dish number
                 String space = SEPRATOR;
