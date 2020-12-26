@@ -254,29 +254,43 @@ public class WifiPrintService implements Runnable{
                                 tlist.add(selectionDetail);
                             } else if(currentCategory.equals(c1.getCname())){    //if same with previous, then add into the list.
                                 tlist.add(selectionDetail);
-                            } else {                    //if not same, then add current list into ipContent map, and start a new list.
-                                ipContentMap.get(printerIP).add(formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n");
-                                currentCategory = c1.getCname();
+                            } else {  //if not same, means current category is completed, then add current list into ipContent map, and start a new list.
+                                String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                                if(formattedContent != null)
+                                    ipContentMap.get(printerIP).add(formattedContent + "\n\n");
+
                                 tlist = new ArrayList<SelectionDetail>();
+
+                                currentCategory = c1.getCname();
                                 tlist.add(selectionDetail);
                             }
                         }
-                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n";
-                        //put the last list into ipContent map.
-                        ipContentMap.get(printerIP).add(content);
-                        totalContent.append(content);
+
+                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        if(formattedContent != null) {
+                            String content = formattedContent + "\n\n";
+                            //put the last list into ipContent map.
+                            ipContentMap.get(printerIP).add(content);
+                            totalContent.append(content);
+                        }
                     }else{
-                        String content =formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n\n\n\n";
-                        ipContentMap.get(printerIP).add(content);
-                        totalContent.append(content);
+                        String formattedContent = formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        if(formattedContent != null) {
+                            String content = formattedContent +"\n\n\n\n\n";
+                            ipContentMap.get(printerIP).add(content);
+                            totalContent.append(content);
+                        }
                     }
                 }else{                                          //分单封装---following each key(printer ip), there will be a list of formatted string.
                     for(SelectionDetail selectionDetail : dishList){
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();     //use list to fullfill the parameter format of the format method,
                         tlist.add(selectionDetail);                                         //only one dish will be added into this list.
-                        String content = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP)) + "\n\n";
-                        ipContentMap.get(printerIP).add(content);
-                        totalContent.append(content);
+                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        if(formattedContent != null) {
+                            String content = formattedContent + "\n\n";
+                            ipContentMap.get(printerIP).add(content);
+                            totalContent.append(content);
+                        }
                     }
                 }
             }
@@ -1140,6 +1154,9 @@ public class WifiPrintService implements Runnable{
         }else {
             //table name
             if(tableName != null && tableName.length() > 0) {
+                if(isCloudPrinter && StringUtils.isNumber(tableName)){
+                    return null;
+                }
                 String tablename_position = AppData.getCustomData(AppData.title_position);
                 if ("left".equals(tablename_position)) {
                     //add nothing

@@ -15,6 +15,15 @@ public class StringUtils {
         throw new AssertionError();
     }
 
+    public static boolean isNumber(String content){
+        try{
+            Integer.parseInt(content);
+        }catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
     public static Integer str2Int(String string) {
         return str2Int(string, 0);
     }
