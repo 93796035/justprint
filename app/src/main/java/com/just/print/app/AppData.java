@@ -619,7 +619,7 @@ public class AppData extends Thread{
                     sendToCloudPrinter(strs[0], strs[1]);
                     showToast("App has set label size to: " + strs[0]);
                 }else{
-                    showToast("Please use right format like '40x30,123456789'");
+                    showToast("Please use right format like '40,30.123456789'");
                 }
                 return;
             case "m":
