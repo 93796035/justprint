@@ -512,6 +512,7 @@ public class AppData extends Thread{
             try {
                 json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                 json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
+                json.put("width", AppData.getCustomData(AppData.labelsize));
             }catch(Exception e){
                 L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
             }
@@ -613,12 +614,12 @@ public class AppData extends Thread{
                 showToast("App has switched custChars to: " + inputedSN);
                 return;
             case "lbsize":
-                AppData.putCustomData(AppData.labelsize, inputedSN);
-                String[] strs = inputedSN.split(".");
-                if(strs.length == 2 && strs[0].length() >= 3 && strs[1].length() > 8){
-                    sendToCloudPrinter(strs[0], strs[1]);
-                    showToast("App has set label size to: " + strs[0]);
-                }else{
+                int pos = inputedSN.indexOf('.');
+                if (pos > 3 && inputedSN.length() - pos > 8){
+                    sendToCloudPrinter(inputedSN.substring(0, pos), inputedSN.substring(pos + 1));
+                    AppData.putCustomData(AppData.labelsize, inputedSN.substring(0, pos));
+                    showToast("App has set label size to: " + inputedSN.substring(0, pos));
+                } else{
                     showToast("Please use right format like '40,30.123456789'");
                 }
                 return;
