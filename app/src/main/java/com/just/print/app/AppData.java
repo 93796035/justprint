@@ -518,7 +518,8 @@ public class AppData extends Thread{
             }
             AppData.schema = AppData.getSERVER_URL() + "cloudPrint";
             AppData.putCustomData(AppData.ContentToSend, json.toString());
-            new AppData().start();
+            new AppData().run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
+            //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
         }
     }
 
