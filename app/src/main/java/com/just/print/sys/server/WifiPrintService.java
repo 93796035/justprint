@@ -1190,6 +1190,11 @@ public class WifiPrintService implements Runnable{
         //Main contents starts here.........................................................
         for(SelectionDetail dd:list){
             StringBuilder sb = new StringBuilder();
+            if(dd.getDishNum() > 1){                        //dish number
+//                int occupiedLength = getLengthOfString(sb.toString());
+//                sb.append(generateString(width - occupiedLength - (dd.getDishNum() < 10 ? 2 : 3), SEPRATOR));
+                sb.append(dd.getDishNum()).append("x ");
+            }
             if(isCloudPrinter){
                 if (AppData.cloudShowID != null) {
                     if (AppData.cloudShowID) {
@@ -1221,12 +1226,7 @@ public class WifiPrintService implements Runnable{
                     sb.append(dd.getDish().getMname());             //dish name
                 }
             }
-            if(dd.getDishNum() > 1){                        //dish number
-                String space = SEPRATOR;
-                int occupiedLength = getLengthOfString(sb.toString());
-                sb.append(generateString(width - occupiedLength - (dd.getDishNum() < 10 ? 2 : 3), SEPRATOR));
-                sb.append("X").append(Integer.toString(dd.getDishNum()));
-            }
+
             content.append(sb);
             content.append("\n");
             if(dd.getMarkList() != null) {                  //dish marks.
