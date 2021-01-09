@@ -33,7 +33,7 @@ public class AppData extends Thread{
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
     public static String recentNum = "recentNum";
     public static String orderpassword = "op";
-    private static String SERVER_URL = "http://www.sharethegoodones.com/";
+    private static String SERVER_URL = "https://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
@@ -179,7 +179,7 @@ public class AppData extends Thread{
         if(serverURL == null || serverURL.length() < 10) {
             serverURL = AppData.SERVER_URL;
         }
-        if(!serverURL.startsWith("http://")){
+        if(!serverURL.startsWith("http://") && !serverURL.startsWith("https://")){
             serverURL = "http://" + serverURL;
         }
         if(!serverURL.endsWith("/")){
