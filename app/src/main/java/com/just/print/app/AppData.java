@@ -57,7 +57,9 @@ public class AppData extends Thread{
     public static final String font = "font";
     public static final String mode = "mode";
     public static final String code = "code";
+    public static final String WifiLabelPrinter = "WifiLabelPrinter";
     public static final String BeiYangPrinter = "BeiYangPrinter";
+    public static final String autoSearchWifiLabel = "autoSearchWifiLabel";
     public static final String autoSearchBeiYang = "autoSearchBeiYang";
     public static final String ContentToSend = "ContentToSend";
 
@@ -696,7 +698,7 @@ public class AppData extends Thread{
                 return;
             case "up":
                 AppData.putCustomData(AppData.userPassword, inputedSN);
-                showToast("startTime is set to: " + inputedSN);
+                showToast("backend password is set to: " + inputedSN);
                 return;
             case "wt":
                 AppData.putCustomData(AppData.waitTime, inputedSN);

@@ -1,14 +1,8 @@
 package com.just.print.sys.server;
 
-import POSAPI.POSInterfaceAPI;
-import POSAPI.POSWIFIAPI;
-import POSSDK.POSSDK;
-
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
-
-import android_wifi_api.SearchPortInfo;
 
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
@@ -30,6 +24,8 @@ import com.just.print.util.AppUtils;
 import com.just.print.util.Command;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
+import com.just.print.util.printer.DeviceConnFactoryManager;
+import com.just.print.util.printer.WifiLabelPrinter;
 import com.zj.wfsdk.WifiCommunication;
 
 import java.text.DateFormat;
@@ -43,6 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import POSAPI.POSInterfaceAPI;
+import POSAPI.POSWIFIAPI;
+import POSSDK.POSSDK;
+import android_wifi_api.SearchPortInfo;
 
 import static com.just.print.util.ToastUtil.showToast;
 
@@ -87,6 +88,7 @@ public class WifiPrintService implements Runnable{
     private SearchPortInfo port_info[] = new SearchPortInfo[SearchPortMAX];
     private int return_code = 0;
     private String beiYangPrinters = "";
+    private String wifiLabelPrinters = "";
 
     public static final int POS_SUCCESS=1000;		//success
     public static final int ERR_PROCESSING = 1001;	//processing error
@@ -476,7 +478,7 @@ public class WifiPrintService implements Runnable{
     public void run(){
 
         beiYangPrinters = prepareBeiYangPrinterStr();
-
+        wifiLabelPrinters = prepareWifiLabelPrinterStr();
         int timeCounter = 0;
         while (true) {
             //check if this round is a good time to reset a curPrintIp and load new contnet to print.(two flags are both false)
@@ -587,6 +589,10 @@ public class WifiPrintService implements Runnable{
         return beiYangPrinters.contains(printerIP);
     }
 
+    private boolean isWifiLabelPrinter(String printerIP){
+        return wifiLabelPrinters.contains(printerIP);
+    }
+
     private boolean isCloudPrinter(String printerIP){
         return !printerIP.contains(".");
     }
@@ -629,6 +635,12 @@ public class WifiPrintService implements Runnable{
                 doBeiYangPrint(font, content);  //check if it's nbna printer, check printer status
             } else if(isCloudPrinter(curPrintIp)) {
                 AppData.sendToCloudPrinter(content, curPrintIp);
+            } else if(isWifiLabelPrinter(curPrintIp)) {
+                //if not inited, create the 0 element for it.
+                if(DeviceConnFactoryManager.arry.length == 0) {
+                    new DeviceConnFactoryManager.Build().setConnMethod(DeviceConnFactoryManager.CONN_METHOD.WIFI).setIp(curPrintIp).setPort(POSPORT).setId(0).build();
+                }
+                WifiLabelPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content);
             } else {
                 doZiJiangPrint(font, content);
                 //if it's a 'togo"
@@ -846,6 +858,20 @@ public class WifiPrintService implements Runnable{
             L.d(TAG, "beiyang printers : " + beiYangPrinter);
         }
         return beiYangPrinter;
+    }
+
+    private String prepareWifiLabelPrinterStr(){
+        String wifiLabelPrinter = AppData.getCustomData(AppData.WifiLabelPrinter);
+        if(wifiLabelPrinter != null && wifiLabelPrinter.length() > 7){
+            return wifiLabelPrinter;
+        }
+
+        wifiLabelPrinter = "";    //@note: we don't want to return a null back to cause any null pointer.
+        if( "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchWifiLabel))) {
+           //TODO： auto check if any of the printers are wifiLabel
+
+        }
+        return wifiLabelPrinter;
     }
 
     private void isAllPrintedCheck(){
