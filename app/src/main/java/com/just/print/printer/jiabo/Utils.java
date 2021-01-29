@@ -1,4 +1,4 @@
-package com.just.print.util.printer;
+package com.just.print.printer.jiabo;
 
 import android.content.Context;
 import android.hardware.usb.UsbDevice;

@@ -46,6 +46,7 @@ import static android.content.DialogInterface.OnClickListener;
 public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLongClickListener {
 
     private static Menu modifyingMenu = null;
+    public static int curCategory = 0;
 
     private Category modifyingCategory = null;
 
@@ -82,6 +83,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         public void onClickItem(View view, int i) {
             switch (view.getId()) {
                 case android.R.id.content:
+                    curCategory = i;
                     onChangeCategory(categoryXAdapter.get(i));
                     break;
 

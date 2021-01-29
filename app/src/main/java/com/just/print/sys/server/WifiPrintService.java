@@ -24,8 +24,9 @@ import com.just.print.util.AppUtils;
 import com.just.print.util.Command;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
-import com.just.print.util.printer.DeviceConnFactoryManager;
-import com.just.print.util.printer.WifiLabelPrinter;
+import com.just.print.printer.jiabo.DeviceConnFactoryManager;
+import com.just.print.printer.jiabo.ThreadPool;
+import com.just.print.printer.jiabo.JiaBoPrinter;
 import com.zj.wfsdk.WifiCommunication;
 
 import java.text.DateFormat;
@@ -100,18 +101,18 @@ public class WifiPrintService implements Runnable{
         public void handleMessage(Message msg){//this method will handle the message queue of this thread base on the message type(.waht)
             switch (msg.what){
                 case WifiCommunication.WFPRINTER_CONNECTED:
-                    L.d(TAG,"connection generated with ip:" + WifiPrintService.curPrintIp);
+                    L.d(TAG,"connection generated with ip:" + curPrintIp);
 //                    Command.GS_ExclamationMark[2] = 0x11;
 //                    wifiCommunication.sndByte(Command.GS_ExclamationMark);//put it here will cause app exit in emulator(5x api 24)
                     printerConnectedFlag = true;
                     break;
                 case WifiCommunication.WFPRINTER_DISCONNECTED:
-                    L.d(TAG,"connection stopped with ip:" + WifiPrintService.curPrintIp);
+                    L.d(TAG,"connection stopped with ip:" + curPrintIp);
                     contentReadyForPrintFlag = false;//in case this happen when trying to generate connection with printer.
                     printerConnectedFlag = false;
                     break;
                 case WifiCommunication.WFPRINTER_CONNECTEDERR:
-                    L.e(TAG,"Connection Error! With ip:" + WifiPrintService.curPrintIp, null);
+                    L.e(TAG,"Connection Error! With ip:" + curPrintIp, null);
                     showToast("Printer:" + curPrintIp + " connection error!");
 
                     AppUtils.sleep(1000);
@@ -121,7 +122,7 @@ public class WifiPrintService implements Runnable{
 
                     break;
                 case WifiCommunication.SEND_FAILED:
-                    L.e(TAG, "ERROR! When sending msg to: " + WifiPrintService.curPrintIp, null);
+                    L.e(TAG, "ERROR! When sending msg to: " + curPrintIp, null);
                     contentReadyForPrintFlag = false;
                     printerConnectedFlag = false;
                     //发送失败对策暂无
@@ -137,7 +138,6 @@ public class WifiPrintService implements Runnable{
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private static WifiPrintService instance = null;
-
     public static WifiPrintService getInstance(){
         if(instance == null){
             instance = new WifiPrintService();
@@ -165,10 +165,11 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error.
+    //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. bicause it means last time didn't print successfully
     //other wise will send to serer and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
     public String printAndSaveCommand(boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
+        //Check
         String ip = getIPofNonEmptyIpContentMapEntry();
         if(ip != null){
             L.d(TAG,"ipContent not empty, means last print job not finished yet! returning not success flag.");
@@ -177,14 +178,13 @@ public class WifiPrintService implements Runnable{
         if(checkErrorPrinterList()){
             showToast("PRINTING...");
         }
+        //Save
         popKitchenBillIdx();
-        //save sales records and get the total price....
-        Double priceOfBill = saveSaleRecToDB(isCancel);
-        //save bill record.
-        saveBillToDB(priceOfBill);
-
+        Double priceOfBill = saveSaleRecToDB(isCancel);//save sales records and get the total price....
+        saveBillToDB(priceOfBill);                      //save bill record.
+        //Sync
         sendToAikaServer();
-
+        //Print
         return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill); //send to printer and return the content.
     }
 
@@ -516,7 +516,7 @@ public class WifiPrintService implements Runnable{
                             printContents(contentList);
                         }
                     } catch (Exception e) {
-                        //note is not a number then do not loop.
+                        //note is not a number then do not loop, print only once.
                         printContents(contentList);
                     } finally {
                         //when all categorizedContent of a printer has printed, it's the right time to close conenction.
@@ -524,7 +524,9 @@ public class WifiPrintService implements Runnable{
                             closeConenctionToBeiYangPrinter();
                         } else if(isCloudPrinter(curPrintIp)) {
                             resetFlags();
-                        }  else {
+                        } else if(isWifiLabelPrinter(curPrintIp)){
+                            resetFlags();
+                        } else{
                             wifiCommunication.close();
                         }
                     }
@@ -568,7 +570,7 @@ public class WifiPrintService implements Runnable{
 
     private void sendToAikaServer() {
         DataSyncService dataSyncService = DataSyncService.getInstance();
-        if (dataSyncService.serverIpAndPort != null) {
+        if (dataSyncService.serverIpAndPort != null && dataSyncService.serverIpAndPort.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             if (StringUtils.isBlank(dataSyncService.tableName)) {
                 dataSyncService.tableName = AppData.curBillIdx; //shouldn't use AppData.getCust... which is already increased.
@@ -605,7 +607,21 @@ public class WifiPrintService implements Runnable{
 
         if(isBeiYangPrinter(printerIP)){
             connectToBeiYangPrinter(printerIP);
-        } else if(isCloudPrinter(curPrintIp)) {
+        } else if(isWifiLabelPrinter(printerIP)){
+            DeviceConnFactoryManager.curPrinter = new DeviceConnFactoryManager.Build()
+                 .setConnMethod(DeviceConnFactoryManager.CONN_METHOD.WIFI)
+                 .setIp(printerIP)
+                 .setId(0)
+                 .setPort(9100)
+                 .build();
+            ThreadPool.getInstance().addSerialTask(new Runnable() {
+                @Override
+                public void run() {
+                    DeviceConnFactoryManager.curPrinter.openPort(handler);
+                }
+            });
+
+        } else if(isCloudPrinter(printerIP)) {
             printerConnectedFlag = true;
         }else {
             wifiCommunication.initSocket(printerIP, POSPORT);   //this should result in the "printerConnectedFlag" become true .
@@ -618,7 +634,7 @@ public class WifiPrintService implements Runnable{
         if (StringUtils.isBlank(font)) {
             font = AppData.getCustomData(AppData.font);
         }
-        if(isPrintingReport(contents)){
+        if(isPrintingReport(contents)){//TODO: here's a bug, non report was considered as  report!!!!
             font = AppData.getCustomData(AppData.reportFont);
             if(font == null || font.length() < 6) {
                 font = "27,33,0";
@@ -633,14 +649,10 @@ public class WifiPrintService implements Runnable{
 
             if (isBeiYangPrinter(curPrintIp)) {
                 doBeiYangPrint(font, content);  //check if it's nbna printer, check printer status
+            } else if(isWifiLabelPrinter(curPrintIp)) {
+                JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content);
             } else if(isCloudPrinter(curPrintIp)) {
                 AppData.sendToCloudPrinter(content, curPrintIp);
-            } else if(isWifiLabelPrinter(curPrintIp)) {
-                //if not inited, create the 0 element for it.
-                if(DeviceConnFactoryManager.arry.length == 0) {
-                    new DeviceConnFactoryManager.Build().setConnMethod(DeviceConnFactoryManager.CONN_METHOD.WIFI).setIp(curPrintIp).setPort(POSPORT).setId(0).build();
-                }
-                WifiLabelPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content);
             } else {
                 doZiJiangPrint(font, content);
                 //if it's a 'togo"

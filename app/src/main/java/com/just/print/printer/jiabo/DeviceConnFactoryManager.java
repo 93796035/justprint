@@ -1,4 +1,4 @@
-package com.just.print.util.printer;
+package com.just.print.printer.jiabo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +32,11 @@ public class DeviceConnFactoryManager {
 
     private static final String TAG = DeviceConnFactoryManager.class.getSimpleName();
 
-    public CONN_METHOD connMethod;
+    public CONN_METHOD connMethod = DeviceConnFactoryManager.CONN_METHOD.WIFI;
 
     private String ip;
 
-    private int port;
+    private int port = 9100;
 
     private String macAddress;
 
@@ -51,6 +51,7 @@ public class DeviceConnFactoryManager {
     private int id;
 
     public static DeviceConnFactoryManager[] arry = new DeviceConnFactoryManager[4];
+    public static DeviceConnFactoryManager curPrinter;
 
     private boolean isOpenPort;
     /**
@@ -108,7 +109,7 @@ public class DeviceConnFactoryManager {
     /**
      * 判断打印机所使用指令是否是ESC指令
      */
-    private PrinterCommand currentPrinterCommand;
+    public PrinterCommand currentPrinterCommand = PrinterCommand.TSC;
     public static final byte FLAG = 0x10;
     private static final int READ_DATA = 10000;
     private static final int DEFAUIT_COMMAND=20000;
@@ -158,7 +159,7 @@ public class DeviceConnFactoryManager {
      *
      * @return
      */
-    public void openPort() {
+    public void openPort(Handler handler) {
         arry[id].isOpenPort = false;
         sendStateBroadcast(CONN_STATE_CONNECTING);
         switch (arry[id].connMethod) {
@@ -173,6 +174,7 @@ public class DeviceConnFactoryManager {
             case WIFI:
                 mPort = new EthernetPort(ip, port);
                 isOpenPort = mPort.openPort();
+                handler.sendMessage(handler.obtainMessage(0));
                 break;
             case SERIAL_PORT:
                 mPort = new SerialPort(serialPortPath, baudrate, 0);
@@ -207,47 +209,27 @@ public class DeviceConnFactoryManager {
 //        sendStateBroadcast(CONN_STATE_CONNECTED);
     }
 
-    /**
-     * 获取端口连接方式
-     *
-     * @return
-     */
+    // 获取端口连接方式//
     public CONN_METHOD getConnMethod() {
         return connMethod;
     }
 
-    /**
-     * 获取端口打开状态（true 打开，false 未打开）
-     *
-     * @return
-     */
+    // 获取端口打开状态（true 打开，false 未打开）//
     public boolean getConnState() {
         return isOpenPort;
     }
 
-    /**
-     * 获取连接蓝牙的物理地址
-     *
-     * @return
-     */
+    // 获取连接蓝牙的物理地址//
     public String getMacAddress() {
         return macAddress;
     }
 
-    /**
-     * 获取连接网口端口号
-     *
-     * @return
-     */
+    // 获取连接网口端口号//
     public int getPort() {
         return port;
     }
 
-    /**
-     * 获取连接网口的IP
-     *
-     * @return
-     */
+    // 获取连接网口的IP//
     public String getIp() {
         return ip;
     }
@@ -258,7 +240,7 @@ public class DeviceConnFactoryManager {
     }
 
     // 关闭端口//
-    public void closePort(int id) {
+    public void closePort() {
         if (this.mPort != null) {
             if(reader!=null) {
                 reader.cancel();
@@ -288,10 +270,15 @@ public class DeviceConnFactoryManager {
         for (DeviceConnFactoryManager deviceConnFactoryManager : arry) {
             if (deviceConnFactoryManager != null) {
                 Log.e(TAG, "cloaseAllPort() id -> " + deviceConnFactoryManager.id);
-                deviceConnFactoryManager.closePort(deviceConnFactoryManager.id);
+                deviceConnFactoryManager.closePort();
                 arry[deviceConnFactoryManager.id] = null;
             }
         }
+    }
+
+    public DeviceConnFactoryManager(String ip) {
+        this.ip = ip;
+        mPort = new EthernetPort(ip, port);
     }
 
     private DeviceConnFactoryManager(Build build) {
@@ -495,7 +482,7 @@ public class DeviceConnFactoryManager {
                 }
             } catch (Exception e) {//异常断开
                 if (arry[id] != null) {
-                    closePort(id);
+                    closePort();
                     mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
                 }
             }

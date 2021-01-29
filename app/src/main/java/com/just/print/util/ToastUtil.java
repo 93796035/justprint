@@ -91,16 +91,23 @@ public class ToastUtil {
     private static void showToastOnUiThread(final Context context, final CharSequence text, final View view, final int duration, final int gravity) {
 
         Handler handler = null;
-        if (refHandler == null || (handler = refHandler.get()) == null)
-            refHandler = new WeakReference<Handler>(handler = new Handler(
-                    context.getMainLooper()));
+        if (refHandler == null || (refHandler.get()) == null) {
+            handler = new Handler(context.getMainLooper());
+            refHandler = new WeakReference<Handler>(handler);
+        }else {
+            handler = refHandler.get();
+        }
+
         handler.post(new Runnable() {
 
             @Override
             public void run() {
                 Toast toast = getToast();
-                if (toast != null) toast.cancel();
-                toast = null;
+                if (toast != null) {
+                    toast.cancel();
+                    toast = null;
+                }
+
                 if (view != null) {
                     toast = new Toast(context);
                     toast.setGravity(gravity, toast.getXOffset(), toast.getYOffset());
