@@ -69,7 +69,7 @@ public class DataSyncService extends BaseActivity implements Runnable{
             if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
                 HttpURLConnection urlConnection = null;
                 try {
-                    urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/security/newOrders","POST");
+                    urlConnection = AppData.prepareConnection("https://" + serverIpAndPort + "/security/newOrders","POST");
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : AppData.getUserName() + tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                     json.put("billIndex", URLEncoder.encode("1", "UTF-8"));//把数据put进json对象中
@@ -115,7 +115,7 @@ public class DataSyncService extends BaseActivity implements Runnable{
             }
 
             lastDownLoad = AppData.getCustomData(AppData.sendSM);
-            if(lastDownLoad != null && lastDownLoad.length() > 0 && !"null".equalsIgnoreCase(lastDownLoad)){ //if the lastDownLoad
+            if(lastDownLoad != null && lastDownLoad.length() > 0 && !"null".equalsIgnoreCase(lastDownLoad) && !"false".equalsIgnoreCase(lastDownLoad)){ //if the lastDownLoad
                 // is set, then download new orders.
                 String account = AppData.getShopName();
                 //download new records after last download time:

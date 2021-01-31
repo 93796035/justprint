@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class JiaBoPrinter extends BaseActivity {
+public class JiaBoPrinter {
 
     private static final String TAG = JiaBoPrinter.class.getSimpleName();
 
@@ -68,40 +68,19 @@ public class JiaBoPrinter extends BaseActivity {
         //just make a private constructor
     }
 
-    public void connect(String strIp, String strPort) {
-        if (!TextUtils.isEmpty(strIp) && !TextUtils.isEmpty(strPort)) {
-            Message message = Message.obtain();
-            message.what = MESSAGE_UPDATE_PARAMETER;
-            Bundle bundle = new Bundle();
-            bundle.putString("Ip", strIp);
-            bundle.putString("Port", strPort);
-            message.setData(bundle);
-        }
-    }
-
-    public void disConn() {
-        if (DeviceConnFactoryManager.curPrinter == null || !DeviceConnFactoryManager.curPrinter.getConnState()) {
-            Utils.toast(Applic.app, "Please connect the printer first");
-            return;
-        }else{
-            DeviceConnFactoryManager.curPrinter.closePort();
-        }
-    }
-
     public void printLabel(String ip, String port, final String content) {
-        threadPool = ThreadPool.getInstance();
-        threadPool.addSerialTask(new Runnable() {
-            @Override
-            public void run() {
+//        threadPool = ThreadPool.getInstance();
+//        threadPool.addSerialTask(new Runnable() {
+//            @Override
+//            public void run() {
                 if (DeviceConnFactoryManager.curPrinter.currentPrinterCommand == PrinterCommand.TSC) {
                     DeviceConnFactoryManager.curPrinter.sendDataImmediately(prepareWifiLabelContent(content));
-                    disConn();
                 }
-            }
-        });
+//            }
+//        });
     }
 
-    public static Vector<Byte> prepareWifiLabelContent(String content) {
+    private static Vector<Byte> prepareWifiLabelContent(String content) {
         LabelCommand tsc = new LabelCommand();
         String size = AppData.getCustomData(AppData.labelsize);
         int w = 40;
@@ -183,180 +162,50 @@ public class JiaBoPrinter extends BaseActivity {
         return  tsc.getCommand();// 返回数据
     }
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            switch (action) {
-                //连接状态
-                case DeviceConnFactoryManager.ACTION_CONN_STATE:
-                    int state = intent.getIntExtra(DeviceConnFactoryManager.STATE, -1);
-                    int deviceId = intent.getIntExtra(DeviceConnFactoryManager.DEVICE_ID, -1);
-                    switch (state) {
-                        case DeviceConnFactoryManager.CONN_STATE_DISCONNECT:
-                            if (id == deviceId) {
-                                Log.e(TAG,"connection is lost");
-                                ToastUtil.showToast("Connection state: unconnected");
-                            }
-                            break;
-                        case DeviceConnFactoryManager.CONN_STATE_CONNECTING:
-                            ToastUtil.showToast("Connection state: connecting");
-                            break;
-                        case DeviceConnFactoryManager.CONN_STATE_CONNECTED:
-                            ToastUtil.showToast("Connection state: connected" + "\n" + getConnDeviceInfo());
-                            break;
-                        case CONN_STATE_FAILED:
-                            ToastUtil.showToast("The connection failed!");
-                            //wificonn=false;
-                            ToastUtil.showToast("Connection state: unconnected");
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                //连续打印，一票一控，防止打印机乱码
-                case ACTION_QUERY_PRINTER_STATE:
-                    if (counts >=0) {
-                        if(continuityprint) {
-                            printcount++;
-                            ToastUtil.showToast("Continuity Printer" + " " + printcount);
-                        }
-                        if(counts!=0) {
-                            sendContinuityPrint();
-                        }else {
-                            continuityprint=false;
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 
     private void sendContinuityPrint() {
         ThreadPool.getInstance().addSerialTask(new Runnable() {
             @Override
             public void run() {
-                if (DeviceConnFactoryManager.arry[id] != null
-                        && DeviceConnFactoryManager.arry[id].getConnState()) {
                     ThreadFactoryBuilder threadFactoryBuilder = new ThreadFactoryBuilder("MainActivity_sendContinuity_Timer");
                     ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1, threadFactoryBuilder);
                     scheduledExecutorService.schedule(threadFactoryBuilder.newThread(new Runnable() {
                         @Override
                         public void run() {
                             counts--;
-                            if (DeviceConnFactoryManager.arry[id].getCurrentPrinterCommand() == PrinterCommand.ESC) {
-                                DeviceConnFactoryManager.arry[id].sendDataImmediately(PrintContent.getReceipt());
-                            } else if(DeviceConnFactoryManager.arry[id].getCurrentPrinterCommand() == PrinterCommand.TSC) {
-                                DeviceConnFactoryManager.arry[id].sendDataImmediately(PrintContent.getLabel());
-                            }else {
-                                DeviceConnFactoryManager.arry[id].sendDataImmediately(PrintContent.getCPCL());
-                            }
+                            DeviceConnFactoryManager.curPrinter.sendDataImmediately(PrintContent.getLabel());
                         }
                     }), 1000, TimeUnit.MILLISECONDS);
                 }
-            }
         });
     }
-    /**
-     * 获取当前连接设备信息
-     * @return
-     */
-    private String getConnDeviceInfo() {
-        String str = "";
-        DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.arry[id];
-        if (deviceConnFactoryManager != null
-                && deviceConnFactoryManager.getConnState()) {
-            if ("USB".equals(deviceConnFactoryManager.getConnMethod().toString())) {
-                str += "USB\n";
-                str += "USB Name: " + deviceConnFactoryManager.usbDevice().getDeviceName();
-            } else if ("WIFI".equals(deviceConnFactoryManager.getConnMethod().toString())) {
-                str += "WIFI\n";
-                str += "IP: " + deviceConnFactoryManager.getIp() + "\t";
-                str += "Port: " + deviceConnFactoryManager.getPort();
-                checkWifiConnThread=new CheckWifiConnThread(deviceConnFactoryManager.getIp(),mHandler);//开启监听WiFi线程
-                checkWifiConnThread.start();
-            } else if ("BLUETOOTH".equals(deviceConnFactoryManager.getConnMethod().toString())) {
-                str += "BLUETOOTH\n";
-                str += "MacAddress: " + deviceConnFactoryManager.getMacAddress();
-            } else if ("SERIAL_PORT".equals(deviceConnFactoryManager.getConnMethod().toString())) {
-                str += "SERIAL_PORT\n";
-                str += "Path: " + deviceConnFactoryManager.getSerialPortPath() + "\t";
-                str += "Baudrate: " + deviceConnFactoryManager.getBaudrate();
-            }
-        }
-        return str;
-    }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case CONN_STATE_DISCONN://断开连接
-                    DeviceConnFactoryManager deviceConnFactoryManager=DeviceConnFactoryManager.arry[id];
-                    if (deviceConnFactoryManager!= null&&deviceConnFactoryManager.getConnState()) {
-                        DeviceConnFactoryManager.arry[id].closePort();
-                        Utils.toast(JiaBoPrinter.this,"Disconnect Success");
-                    }
-                    break;
-                case PRINTER_COMMAND_ERROR://打印机指令错误
-                    Utils.toast(JiaBoPrinter.this, "Please select the correct printer instructions");
-                    break;
-                case CONN_PRINTER://未连接打印机
-                    Utils.toast(JiaBoPrinter.this, "Please connect the printer first");
-                    break;
-//                case MESSAGE_UPDATE_PARAMETER:
-//                    String strIp = msg.getData().getString("Ip");
-//                    String strPort = msg.getData().getString("Port");
-//                    //初始化端口信息
-//                    new DeviceConnFactoryManager.Build()
-//                            .setConnMethod(DeviceConnFactoryManager.CONN_METHOD.WIFI) //设置端口连接方式
-//                            .setIp(strIp)                                       //设置端口IP地址
-//                            .setId(id)                                  //设置端口ID（主要用于连接多设备）
-//                            .setPort(Integer.parseInt(strPort)) //设置连接的热点端口号
-//                            .build();
-//                    threadPool = ThreadPool.getInstance();
-//                    threadPool.addSerialTask(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            DeviceConnFactoryManager.arry[id].openPort();
-//                        }
-//                    });
-//                    break;
-                case CheckWifiConnThread.PING_SUCCESS://WIfi连接成功\
-                    Log.e(TAG,"wifi connect success!");
-                    break;
-                case CheckWifiConnThread.PING_FAIL://WIfI断开连接
-                    Log.e(TAG,"wifi connect fail!");
-                    Utils.toast(JiaBoPrinter.this,"Disconnect");
-                    checkWifiConnThread.cancel();
-                    checkWifiConnThread=null;
-                    mHandler.obtainMessage(CONN_STATE_DISCONN).sendToTarget();
-                    break;
-                case Constant.tip:
-                    String str=(String) msg.obj;
-                    Utils.toast(JiaBoPrinter.this,str);
-                    break;
-                default:
-//                    new DeviceConnFactoryManager.Build()
-//                            //设置端口连接方式
-//                            .setConnMethod(DeviceConnFactoryManager.CONN_METHOD.WIFI)
-//                            //设置端口IP地址
-//                            .setIp("192.168.2.227")
-//                            //设置端口ID（主要用于连接多设备）
-//                            .setId(id)
-//                            //设置连接的热点端口号
-//                            .setPort(9100)
-//                            .build();
-//                    threadPool.addSerialTask(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            DeviceConnFactoryManager.arry[id].openPort();
-//                        }
-//                    });
-                    break;
-            }
-        }
-    };
+//    /**
+//     * 获取当前连接设备信息
+//     * @return
+//     */
+//    private String getConnDeviceInfo() {
+//        String str = "";
+//        DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.arry[id];
+//        if (deviceConnFactoryManager != null
+//                && deviceConnFactoryManager.getConnState()) {
+//            if ("USB".equals(deviceConnFactoryManager.getConnMethod().toString())) {
+//                str += "USB\n";
+//                str += "USB Name: " + deviceConnFactoryManager.usbDevice().getDeviceName();
+//            } else if ("WIFI".equals(deviceConnFactoryManager.getConnMethod().toString())) {
+//                str += "WIFI\n";
+//                str += "IP: " + deviceConnFactoryManager.getIp() + "\t";
+//                str += "Port: " + deviceConnFactoryManager.getPort();
+//                checkWifiConnThread=new CheckWifiConnThread(deviceConnFactoryManager.getIp(),handler);//开启监听WiFi线程
+//                checkWifiConnThread.start();
+//            } else if ("BLUETOOTH".equals(deviceConnFactoryManager.getConnMethod().toString())) {
+//                str += "BLUETOOTH\n";
+//                str += "MacAddress: " + deviceConnFactoryManager.getMacAddress();
+//            } else if ("SERIAL_PORT".equals(deviceConnFactoryManager.getConnMethod().toString())) {
+//                str += "SERIAL_PORT\n";
+//                str += "Path: " + deviceConnFactoryManager.getSerialPortPath() + "\t";
+//                str += "Baudrate: " + deviceConnFactoryManager.getBaudrate();
+//            }
+//        }
+//        return str;
+//    }
 }

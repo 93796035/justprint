@@ -153,13 +153,14 @@ public class DeviceConnFactoryManager {
     public static DeviceConnFactoryManager[] getArry() {
         return arry;
     }
-
+    Handler handler;
     /**
      * 打开端口
      *
      * @return
      */
     public void openPort(Handler handler) {
+        this.handler = handler;
         arry[id].isOpenPort = false;
         sendStateBroadcast(CONN_STATE_CONNECTING);
         switch (arry[id].connMethod) {
@@ -365,7 +366,7 @@ public class DeviceConnFactoryManager {
             try {
                 this.mPort.writeDataImmediately(data, 0, data.size());
             } catch (Exception e) {//异常中断发送
-                mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
+                handler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
     //            e.printStackTrace();
             }
         }
@@ -382,7 +383,7 @@ public class DeviceConnFactoryManager {
                 this.mPort.writeDataImmediately(datas, 0, datas.size());
             } catch (IOException e) {//异常中断发送
 //                e.printStackTrace();
-                mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
+                handler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
             }
         }
     }
@@ -407,7 +408,7 @@ public class DeviceConnFactoryManager {
                                 currentPrinterCommand = PrinterCommand.ESC;
                                 sendStateBroadcast(CONN_STATE_CONNECTED);
                                 sendCommand = esc;
-                                mHandler.sendMessage(mHandler.obtainMessage(DEFAUIT_COMMAND, ""));
+//                                handler.sendMessage(handler.obtainMessage(DEFAUIT_COMMAND, ""));
                                 scheduledExecutorService.shutdown();
                             }else{
                                 if (reader != null) {//三种状态，查询无返回值，发送连接失败广播
@@ -477,13 +478,13 @@ public class DeviceConnFactoryManager {
                         bundle.putInt(READ_DATA_CNT, len); //数据长度
                         bundle.putByteArray(READ_BUFFER_ARRAY, buffer); //数据
                         message.setData(bundle);
-                        mHandler.sendMessage(message);
+                        handler.sendMessage(message);
                     }
                 }
             } catch (Exception e) {//异常断开
                 if (arry[id] != null) {
                     closePort();
-                    mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
+                    handler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
                 }
             }
         }
@@ -492,108 +493,6 @@ public class DeviceConnFactoryManager {
             isRun = false;
         }
     }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Context context = Applic.app.getApplicationContext();
-            switch (msg.what) {
-                case Constant.abnormal_Disconnection://异常断开连接
-                    Utils.toast(context,"Disconnect");
-                    break;
-                case DEFAUIT_COMMAND://默认模式
-                    Utils.toast(context, "Default mode, small ticket mode");
-                    break;
-                case READ_DATA:
-                    int cnt = msg.getData().getInt(READ_DATA_CNT); //数据长度 >0;
-                    byte[] buffer = msg.getData().getByteArray(READ_BUFFER_ARRAY);  //数据
-                    //这里只对查询状态返回值做处理，其它返回值可参考编程手册来解析
-                    if (buffer == null) {
-                        return;
-                    }
-                    int result = judgeResponseType(buffer[0]); //数据右移
-                    String status = "Printer connected normal";
-                    if (sendCommand == esc) {
-                        //设置当前打印机模式为ESC模式
-                        if (currentPrinterCommand == null) {
-                            currentPrinterCommand = PrinterCommand.ESC;
-                            sendStateBroadcast(CONN_STATE_CONNECTED);
-                            Utils.toast(context, "Receipt Mode");
-                        } else {//查询打印机状态
-                            if (result == 0) {//打印机状态查询
-                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
-                                context.sendBroadcast(intent);
-                            } else if (result == 1) {//查询打印机实时状态
-                                if ((buffer[0] & ESC_STATE_PAPER_ERR) > 0) {
-                                    status += " " + "Printer out of paper";
-                                }
-                                if ((buffer[0] & ESC_STATE_COVER_OPEN) > 0) {
-                                    status += " " + "Printer open cover";
-                                }
-                                if ((buffer[0] & ESC_STATE_ERR_OCCURS) > 0) {
-                                    status += " "+ "Printer error";
-                                }
-                                System.out.println("State:" + status);
-                                String mode="Print Mode:ESC";
-                                Utils.toast(context, mode+" "+status);
-                            }
-                        }
-                    } else if (sendCommand == tsc) {
-                        //设置当前打印机模式为TSC模式
-                        if (currentPrinterCommand == null) {
-                            currentPrinterCommand = PrinterCommand.TSC;
-                            sendStateBroadcast(CONN_STATE_CONNECTED);
-                            Utils.toast(context,"Label Mode");
-                        } else {
-                            if (cnt == 1) {//查询打印机实时状态
-                                if ((buffer[0] & TSC_STATE_PAPER_ERR) > 0) {//缺纸
-                                    status += " " + "Printer out of paper";
-                                }
-                                if ((buffer[0] & TSC_STATE_COVER_OPEN) > 0) {//开盖
-                                    status += " "+ "Printer open cover";
-                                }
-                                if ((buffer[0] & TSC_STATE_ERR_OCCURS) > 0) {//打印机报错
-                                    status += " "+"Printer error";
-                                }
-                                System.out.println("State:" + status);
-                                String mode= "Print Mode :TSC";
-                                Utils.toast(context, mode+" "+status);
-                            } else {//打印机状态查询
-                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
-                                context.sendBroadcast(intent);
-                            }
-                        }
-                    }else if(sendCommand==cpcl){
-                        if (currentPrinterCommand == null) {
-                            currentPrinterCommand = PrinterCommand.CPCL;
-                            sendStateBroadcast(CONN_STATE_CONNECTED);
-                            Utils.toast(context,"Cpcl Mode");
-                        }else {
-                            if (cnt == 1) {
-                                System.out.println("State:" + status);
-                                if ((buffer[0] ==CPCL_STATE_PAPER_ERR)) {//缺纸
-                                    status += " "+ "Printer out of Paper";
-                                }
-                                if ((buffer[0] ==CPCL_STATE_COVER_OPEN)) {//开盖
-                                    status += " "+"Printer open cover";
-                                }
-                                String mode="Print Mode:CPCL";
-                                Utils.toast(context, mode+" "+status);
-                            } else {//打印机状态查询
-                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
-                                context.sendBroadcast(intent);
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 
     // 发送广播//
     private void sendStateBroadcast(int state) {

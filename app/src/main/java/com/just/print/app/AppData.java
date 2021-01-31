@@ -55,9 +55,10 @@ public class AppData extends Thread{
     public static final String AllowDownloadFromeOthers = "AllowDownloadFromeOthers";
     public static final String kitchenBillIdx = "kitchenBillIdx";
     public static final String font = "font";
+    public static final String labelFont = "fontlb";
     public static final String mode = "mode";
     public static final String code = "code";
-    public static final String WifiLabelPrinter = "WifiLabelPrinter";
+    public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
     public static final String BeiYangPrinter = "BeiYangPrinter";
     public static final String autoSearchWifiLabel = "autoSearchWifiLabel";
     public static final String autoSearchBeiYang = "autoSearchBeiYang";
@@ -75,8 +76,8 @@ public class AppData extends Thread{
     public static final String format_style = "format_style";
     public static final String hasCategory = "hasCategory";
     public static final String hideCancelItem = "hidecancelitem";
-    public static final String HideKitchenBillId = "hikiid";
-    public static final String HideKitchenBillName = "hikina";
+    public static final String HideKitchenBillId = "hiid";
+    public static final String HideKitchenBillName = "hina";
     public static final String HideKitchenBillId_Cloud = "hiclid";
     public static final String HideKitchenBillName_Cloud = "hiclna";
     public static final String HideMark = "hima";
@@ -87,6 +88,9 @@ public class AppData extends Thread{
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelsize = "labelsize";
+    public static final String gap = "gap";
+    public static final String StartX = "startx";
+    public static final String StartY = "starty";
     public static final String sendSM = "sendSM";
     public static final String csphone = "csphone";
     public static final String menuNameLength = "menuNameLength";
@@ -594,7 +598,7 @@ public class AppData extends Thread{
                 AppData.putCustomData(AppData.hideCancelItem, inputedSN);
                 showToast("App has set hideCancelItem to: " + inputedSN);
                 return;
-            case "hiid":
+            case "":
                 AppData.putCustomData(AppData.HideKitchenBillId, inputedSN);
                 showToast("App has set HideKitchenBillId to: " + inputedSN);
                 return;
@@ -624,8 +628,11 @@ public class AppData extends Thread{
                     sendToCloudPrinter(inputedSN.substring(0, pos), inputedSN.substring(pos + 1));
                     AppData.putCustomData(AppData.labelsize, inputedSN.substring(0, pos));
                     showToast("App has set label size to: " + inputedSN.substring(0, pos));
+                } else if(inputedSN.indexOf(',') > 0){
+                    AppData.putCustomData(AppData.labelsize, inputedSN);
+                    showToast("App has set label size to: " + inputedSN);
                 } else{
-                    showToast("Please use right format like '40,30.123456789'");
+                    showToast("Please use right format like '40,30.123456789' or '40,30'");
                 }
                 return;
             case "m":

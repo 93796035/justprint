@@ -257,7 +257,7 @@ public class WifiPrintService implements Runnable{
                             } else if(currentCategory.equals(c1.getCname())){    //if same with previous, then add into the list.
                                 tlist.add(selectionDetail);
                             } else {  //if not same, means current category is completed, then add current list into ipContent map, and start a new list.
-                                String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                                String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, printerIP);
                                 if(formattedContent != null)
                                     ipContentMap.get(printerIP).add(formattedContent + "\n\n");
 
@@ -268,7 +268,7 @@ public class WifiPrintService implements Runnable{
                             }
                         }
 
-                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, printerIP);
                         if(formattedContent != null) {
                             String content = formattedContent + "\n\n";
                             //put the last list into ipContent map.
@@ -276,7 +276,7 @@ public class WifiPrintService implements Runnable{
                             totalContent.append(content);
                         }
                     }else{
-                        String formattedContent = formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        String formattedContent = formatContentForPrint(dishList, kitchenBillIdx, isCancel, priceOfBill, printerIP);
                         if(formattedContent != null) {
                             String content = formattedContent +"\n\n\n\n\n";
                             ipContentMap.get(printerIP).add(content);
@@ -287,7 +287,7 @@ public class WifiPrintService implements Runnable{
                     for(SelectionDetail selectionDetail : dishList){
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();     //use list to fullfill the parameter format of the format method,
                         tlist.add(selectionDetail);                                         //only one dish will be added into this list.
-                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, isCloudPrinter(printerIP));
+                        String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, printerIP);
                         if(formattedContent != null) {
                             String content = formattedContent + "\n\n";
                             ipContentMap.get(printerIP).add(content);
@@ -507,17 +507,17 @@ public class WifiPrintService implements Runnable{
 
                 if (ipContentMap != null && ipContentMap.get(curPrintIp) != null) {
 
-                    List<String> contentList = ipContentMap.get(curPrintIp);
-                    L.d(TAG, "out printing... categorizedContent list size is:" + contentList.size());
+                    List<String> contents = ipContentMap.get(curPrintIp);
+                    L.d(TAG, "out printing... categorizedContent list size is:" + contents.size());
                     String note = ipPrinterMap.get(curPrintIp).getNote();
                     try {
                         int loopTime = Integer.valueOf(note);
                         for (int i = 0; i < loopTime; i++) {
-                            printContents(contentList);
+                            printContents(contents);
                         }
                     } catch (Exception e) {
                         //note is not a number then do not loop, print only once.
-                        printContents(contentList);
+                        printContents(contents);
                     } finally {
                         //when all categorizedContent of a printer has printed, it's the right time to close conenction.
                         if (isBeiYangPrinter(curPrintIp)) {
@@ -525,6 +525,7 @@ public class WifiPrintService implements Runnable{
                         } else if(isCloudPrinter(curPrintIp)) {
                             resetFlags();
                         } else if(isWifiLabelPrinter(curPrintIp)){
+                            DeviceConnFactoryManager.curPrinter.closePort();
                             resetFlags();
                         } else{
                             wifiCommunication.close();
@@ -1115,13 +1116,13 @@ public class WifiPrintService implements Runnable{
         return "";
     }
 
-    private void determinTheWidth() {
-        String font = AppData.getCustomData(curPrintIp + AppData.font);
+    private void determinTheWidth(String printerIp) {
+        String font = AppData.getCustomData(printerIp + AppData.font);
         if(StringUtils.isBlank(font)) {
             font = AppData.getCustomData(AppData.font);
         }
         if(!StringUtils.isBlank(font)){
-            String w = AppData.getCustomData(curPrintIp + AppData.width);
+            String w = AppData.getCustomData(printerIp + AppData.width);
             if(StringUtils.isBlank(w)) {
                 w = AppData.getCustomData(AppData.width);
             }
@@ -1135,10 +1136,11 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    private String formatContentForPrint(List<SelectionDetail> list, String kitchenBillIdx, boolean isCancel, Double priceOfBill, boolean isCloudPrinter) {
+    private String formatContentForPrint(List<SelectionDetail> list, String kitchenBillIdx, boolean isCancel, Double priceOfBill, String printerIp) {
+        boolean isCloudPrinter = isCloudPrinter(printerIp);
         L.d(TAG, "formatContentForPrint");
 
-        determinTheWidth();
+        determinTheWidth(printerIp);
 
         //leave 2 space, incase the printer prints extra characters at the left corner.
         String SEPRATOR = isCancel ? "<" : " ";
@@ -1256,11 +1258,13 @@ public class WifiPrintService implements Runnable{
                     }
                 }
             }else {
-                if (AppData.showID) {
+                String showID = AppData.getCustomData(printerIp + AppData.HideKitchenBillId);
+                String showName = AppData.getCustomData(printerIp + AppData.HideKitchenBillName);
+                if (showID.length() == 0 ? AppData.showID : !"true".equals(showID)) {
                     sb.append(dd.getDish().getID());                //dish id
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
-                if (AppData.showName) {
+                if (showName.length() == 0 ? AppData.showName : !"true".equals(showName)) {
                     sb.append(dd.getDish().getMname());             //dish name
                 }
             }
