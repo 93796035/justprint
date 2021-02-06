@@ -109,7 +109,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
     @XClick({R.id.confirmUserName})
     private void onConfirmUserName(View view) {
         String userName = this.userName.getText().toString().trim();
-        if (StringUtils.isEmpty(userName) || userName.length() < 2) {
+        if (StringUtils.isEmpty(userName)) {
             showToast("Please input your name");
         } else {
             findViewById(R.id.storeName).setVisibility(View.VISIBLE);

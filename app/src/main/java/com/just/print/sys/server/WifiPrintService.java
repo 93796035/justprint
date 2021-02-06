@@ -1184,15 +1184,34 @@ public class WifiPrintService implements Runnable{
             } else if ("right".equals(billIdx_Position)) {
                 content.append(generateString(width - kitchenBillIdx.length(), " "));
             }else{  //center is the default
-                content.append(generateString((width - kitchenBillIdx.length()) / 2, " "));
+                content.append(generateString((width / 2 - kitchenBillIdx.length()) / 2, " "));
             }
-            content.append(kitchenBillIdx).append("\n\n");
+            content.append(kitchenBillIdx).append("\n");
             //kitchenBillIdx and time
             if(tableName != null && tableName.length() > 0) {
                 content.append("(").append(tableName).append(")");
             }
             content.append(generateString(width - tableName.length() - 2 - dateStr.length(), SEPRATOR))
                     .append(dateStr).append("\n");
+        }else if("2".equals(AppData.getCustomData(AppData.format_style))){
+
+            String billIdx_Position = AppData.getCustomData(AppData.title_position);
+            if ("left".equals(billIdx_Position)) {
+                //add no space.
+            } else if ("right".equals(billIdx_Position)) {
+                content.append(generateString(width - kitchenBillIdx.length(), " "));
+            }else{  //center is the default
+                content.append(generateString((width / 2 - kitchenBillIdx.length()) / 2, " "));
+            }
+            content.append(kitchenBillIdx).append("\n");
+            //kitchenBillIdx and time
+            if(tableName != null && tableName.length() > 0) {
+                content.append("(").append(tableName).append(")");
+            }
+            content.append("  ").append(kitchenBillIdx);
+            content.append(generateString(width - tableName.length() - kitchenBillIdx.length() - 4 - dateStr.length(), SEPRATOR))
+                    .append(dateStr).append("\n");
+
         }else {
             //table name
             if(tableName != null && tableName.length() > 0) {
