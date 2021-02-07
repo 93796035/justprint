@@ -1200,10 +1200,7 @@ public class WifiPrintService implements Runnable{
                 //add no space.
             } else if ("right".equals(billIdx_Position)) {
                 content.append(generateString(width - kitchenBillIdx.length(), " "));
-            }else{  //center is the default
-                content.append(generateString((width / 2 - kitchenBillIdx.length()) / 2, " "));
             }
-            content.append(kitchenBillIdx).append("\n");
             //kitchenBillIdx and time
             if(tableName != null && tableName.length() > 0) {
                 content.append("(").append(tableName).append(")");
