@@ -33,6 +33,7 @@ public class AppData extends Thread{
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
     public static String recentNum = "recentNum";
     public static String orderpassword = "op";
+    public static String labelLines = "lls";
     private static String SERVER_URL = "https://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";

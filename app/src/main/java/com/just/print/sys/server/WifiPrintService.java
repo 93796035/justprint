@@ -651,7 +651,7 @@ public class WifiPrintService implements Runnable{
             if (isBeiYangPrinter(curPrintIp)) {
                 doBeiYangPrint(font, content);  //check if it's nbna printer, check printer status
             } else if(isWifiLabelPrinter(curPrintIp)) {
-                JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content);
+                JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content, width);
             } else if(isCloudPrinter(curPrintIp)) {
                 AppData.sendToCloudPrinter(content, curPrintIp);
             } else {
@@ -1069,7 +1069,7 @@ public class WifiPrintService implements Runnable{
             char c = content.charAt(i);
             if(c >=19968 && c <= 171941) {
                 realWidth++;
-                if(realWidth == maxLength){
+                if(realWidth >= maxLength){
                     return content.substring(0, i - 3 ) + "...";
                 }
             }
@@ -1121,7 +1121,8 @@ public class WifiPrintService implements Runnable{
         if(StringUtils.isBlank(font)) {
             font = AppData.getCustomData(AppData.font);
         }
-        if(!StringUtils.isBlank(font)){
+
+        if(!StringUtils.isBlank(font)){ //???should we do something when the font is set? like if the font is set to double witch, we should make hte width less...no?
             String w = AppData.getCustomData(printerIp + AppData.width);
             if(StringUtils.isBlank(w)) {
                 w = AppData.getCustomData(AppData.width);
@@ -1129,10 +1130,18 @@ public class WifiPrintService implements Runnable{
             try {
                 width = Integer.valueOf(w);
             }catch(Exception e){
-
+                width = 24;
             }
         }else{
-            width = 24;
+            String w = AppData.getCustomData(printerIp + AppData.width);
+            if(StringUtils.isBlank(w)) {
+                w = AppData.getCustomData(AppData.width);
+            }
+            try {
+                width = Integer.valueOf(w);
+            }catch(Exception e){
+                width = 24;
+            }
         }
     }
 
@@ -1169,9 +1178,10 @@ public class WifiPrintService implements Runnable{
         if (isCancel) {
             content.append("       *** (取消CANCEL) ***\n");
         }
-        if (width < 20) {
-            content.append("\n\n");
-        }
+// don't remember why I added this, so have to coment it out.
+//        if (width < 20) {
+//            content.append("\n\n");
+//        }
         //table name and bill index and  print time.......................
         DateFormat df = new SimpleDateFormat("HH:mm");
         String tableName = CustomerSelection.getInstance().getTableName();
