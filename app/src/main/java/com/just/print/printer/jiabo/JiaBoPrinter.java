@@ -1,22 +1,9 @@
 package com.just.print.printer.jiabo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.text.TextUtils;
-import android.util.Log;
-
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.LabelCommand;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
-import com.just.print.app.BaseActivity;
-import com.just.print.util.ToastUtil;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -88,9 +75,17 @@ public class JiaBoPrinter {
 
     private static List<Vector<Byte>> prepareWifiLabelContent(String content, int width) {
         List<Vector<Byte>> list = new ArrayList<Vector<Byte>>();
-
+        String tableMarkStr = AppData.getCustomData(AppData.TableMark);
+        if(tableMarkStr == null || tableMarkStr.length() == 0){
+            tableMarkStr = "*";
+        }
+        int startP = content.indexOf("(") + 1;
+        if(content.substring(startP).startsWith(tableMarkStr)){
+            return list;
+        }
         //make content into lines first(not considering the chinese words)------------------------------------------
         String[] contents = content.split("\n");
+
         //then check how many lines the content should be actually devided into(this time will considering the Chinese words).
         List<String> allLines = new ArrayList();
         for(int i = 0; i < contents.length; i++) {
@@ -98,14 +93,20 @@ public class JiaBoPrinter {
             int length = line.length();
             int strRealLength = 0;//because some character might be Chinese, so the real occupication might be longger.
             for (int j = 0; j < length; j++) {
-                strRealLength++;
+                strRealLength++;            //for every character, the real length of currentline increase 1;
                 char c = line.charAt(j);
-                if (c >= 19968 && c <= 171941) {
+                boolean isChinese = c >= 19968 && c <= 171941;
+                if (isChinese) {    //while for Chinese, the real length of current line increase extra 1;(increase 2)
                     strRealLength++;
                 }
+
                 if (strRealLength >= width && (j + 1) < length) {//actually reach the edge, and there are still characters in the line.
-                    allLines.add(line.substring(0, j));
-                    line = line.substring(j);
+                    int breakPlace = j;
+                    if(!isChinese) {//if it's not Chinese, break from last empty space.
+                        breakPlace = line.lastIndexOf(" ", j);
+                    }
+                    allLines.add(line.substring(0, breakPlace));
+                    line = line.substring(breakPlace);
                     j = -1; //after j++, it will become 0
                     length = line.length();
                     strRealLength = 0;

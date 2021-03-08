@@ -1215,9 +1215,8 @@ public class WifiPrintService implements Runnable{
             if(tableName != null && tableName.length() > 0) {
                 content.append("(").append(tableName).append(")");
             }
-            content.append("  ").append(kitchenBillIdx);
-            content.append(generateString(width - tableName.length() - kitchenBillIdx.length() - 4 - dateStr.length(), SEPRATOR))
-                    .append(dateStr).append("\n");
+            String spacesStr = generateString((width - tableName.length() - 2 - kitchenBillIdx.length() - dateStr.length()) / 2, SEPRATOR);
+            content.append(spacesStr).append(kitchenBillIdx).append(spacesStr).append(dateStr).append("\n");
 
         }else {
             //table name
