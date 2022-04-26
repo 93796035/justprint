@@ -26,8 +26,8 @@ public class ReActivateFragment extends BaseFragment implements OnClickItemListe
         new StupidReflect(this, getView()).init();
     }
 
-    @XClick({R.id.licenseButton})
-    void submit(@XGetValueByView(fromId = R.id.license) TextView textView) {
+    @XClick({R.id.inputCodeButton})
+    void submit(@XGetValueByView(fromId = R.id.inputCodeText) TextView textView) {
         //check if has internet.
         if(!AppUtils.hasInternet(Applic.app.getApplicationContext())){
             showToast("Please connect the device to internet, then try again.");
@@ -35,7 +35,7 @@ public class ReActivateFragment extends BaseFragment implements OnClickItemListe
         }
 
         String inputedSN = String.valueOf(textView.getText()).trim();
-        AppData.setLicense(inputedSN, textView);
+        AppData.setActivateCode(inputedSN, textView);
 
         getActivity().finish();
     }

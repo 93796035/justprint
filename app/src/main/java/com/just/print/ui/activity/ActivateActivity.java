@@ -1,19 +1,19 @@
-package com.just.print;
+package com.just.print.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
 import com.just.print.app.BaseActivity;
-import com.just.print.ui.activity.LoginActivity;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 
-public class Activate extends BaseActivity {
+public class ActivateActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +22,8 @@ public class Activate extends BaseActivity {
         new StupidReflect(this).init();
     }
 
-    @XClick({R.id.licenseButton})
-    void submit(@XGetValueByView(fromId = R.id.license) TextView textView) {
+    @XClick({R.id.inputCodeButton})
+    void submit(@XGetValueByView(fromId = R.id.inputCodeText) TextView textView) {
         //check if has internet.
         if(!AppUtils.hasInternet(Applic.app.getApplicationContext())){
             showToast("Please connect the device to internet, then try again.");
@@ -31,7 +31,7 @@ public class Activate extends BaseActivity {
         }
 
         String inputedSN = String.valueOf(textView.getText());
-        AppData.setLicense(inputedSN, textView);
+        AppData.setActivateCode(inputedSN, textView);
 
         while(true) {
             //when inputted activate code, should not go to login activity(that activaty will check name and store name then go to Main Interface)

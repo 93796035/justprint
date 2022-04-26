@@ -119,16 +119,17 @@ public class XCrashHandler implements UncaughtExceptionHandler {
 	 */
 	private void saveLog(final Thread thread, final Throwable ex, String msg) {
 		L.e("xLog", msg, ex);
-		JSONObject json = devInfo();
-		json.put("throw_class", ex.getClass());
-		json.put("throw_msg", msg);
-		json.put("tag", "crash");
-		json.put("localtime", System.currentTimeMillis());
-		try {
-			save2File(json.toJSONString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//comment out, because can not write into external storage. actually can not wrote into DCIM...don't know why yet.
+//		JSONObject json = devInfo();
+//		json.put("throw_class", ex.getClass());
+//		json.put("throw_msg", msg);
+//		json.put("tag", "crash");
+//		json.put("localtime", System.currentTimeMillis());
+//		try {
+//			save2File(json.toJSONString());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
 	}
 	private void showMessage() {
