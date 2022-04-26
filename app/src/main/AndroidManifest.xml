@@ -6,6 +6,9 @@
     <!--uses-permission android:name="android.permission.READ_PHONE_STATE_PERMISSION" />
     <uses-permission android:name="android.permission.READ_SMS" /-->
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- doesn't work, still can not write file to /storage/...folder
+     uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /-->
 
     <application
         android:name="com.just.print.app.Applic"
@@ -30,8 +33,7 @@
         <activity android:name="com.just.print.ui.activity.ConfigActivity"/>
         <activity android:name="com.just.print.ui.activity.LoginActivity"/>
         <activity android:name="com.just.print.ui.activity.OrderActivity"/>
-        <activity android:name=".ui.activity.SildingMenuListViewDemo" android:label="@string/title_activity_silding_menu_list_view_demo"  android:screenOrientation="portrait"/>
-        <activity android:name="com.just.print.Activate" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
+        <activity android:name="com.just.print.ui.activity.ActivateActivity" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
     </application>
 
 </manifest>

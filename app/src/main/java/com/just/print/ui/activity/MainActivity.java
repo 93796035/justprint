@@ -3,7 +3,6 @@ package com.just.print.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.just.print.Activate;
 import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.BaseActivity;
@@ -39,8 +38,9 @@ public class MainActivity extends BaseActivity {
 
         //working time check
         if(isOutOfWorkingTime()
-                && AppData.getCustomData(AppData.sendSM) == null){ //only when it's not used for sending sms, care about it's night or day version.
+                && StringUtils.isBlank(AppData.getCustomData(AppData.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
             ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
+            finish();   //No need to add thread to make it stay. even the app quit, the showToast will still on screen for a few seconds.
             return;
         }
 //        if (alreadyExist()) {
@@ -57,7 +57,7 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(this, LoginActivity.class));
         } else {
             ToastUtil.showToast("Application expired! Please re-activate it!");
-            startActivity(new Intent(this, Activate.class));
+            startActivity(new Intent(this, ActivateActivity.class));
         }
         finish();
         return;

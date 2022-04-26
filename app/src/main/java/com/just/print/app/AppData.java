@@ -35,8 +35,8 @@ public class AppData extends Thread{
     public static String orderpassword = "op";
     public static String labelLines = "lls";
     public static String TableMark = "tablemark";
-    private static String SERVER_URL = "https://www.sharethegoodones.com/";
-
+    private static String SERVER_URL = "https://www.sharethegoodones.com/";//为什么用这个，可以用A2hosting的吗？
+                                                            //A2Hosting 更稳定，而且我家里的不好说。加入哪天停电啥的
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
     public static final String KEY_SHOP_ID = "KEY_SHOP_ID";
@@ -232,7 +232,7 @@ public class AppData extends Thread{
         return getShopData(context).getString("license", "");
     }
 
-    public static void setLicense(String inputedSN, TextView textView) {
+    public static void setActivateCode(String inputedSN, TextView textView) {
         if(inputedSN.startsWith("-") && (inputedSN.indexOf(":") > 1 || inputedSN.indexOf("：") > 1)){
             setCustomValue(inputedSN, textView);
             return;
