@@ -165,8 +165,8 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. bicause it means last time didn't print successfully
-    //other wise will send to serer and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
+    //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. because it means that last time didn't print successfully
+    //otherwise will send to sever and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
     public String printAndSaveCommand(boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
         //Check
@@ -387,8 +387,8 @@ public class WifiPrintService implements Runnable{
 
     //The start time and end time are long format, need to be translate for print.
     public String exePrintReportCommand(List<SaleRecord> saleRecords, String endTime){
-        if(checkErrorPrinterList()){
-            showToast("PRINTING...");
+        if(checkErrorPrinterList()){    //if errorPrinterList is emptly will return true.
+            showToast("PRINTING...");   //otherwise will show notice to check printer and restart app and return false.
         }
         if(saleRecords == null || saleRecords.size() == 0) {
             showToast("No report to print! The sales record has been cleaned!");
