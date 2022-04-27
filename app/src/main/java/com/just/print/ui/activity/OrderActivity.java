@@ -46,7 +46,7 @@ public class OrderActivity extends BaseActivity {
                     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
                     public void onPageSelected(int position) {
-                        if(position == 0){
+                        if(position == 0 && AppData.hasCategory()){
                             ((OrderCategoryFragment)fragmentList.get(0)).categoryExXAdapter.notifyDataSetChanged();
                        }
                     }
