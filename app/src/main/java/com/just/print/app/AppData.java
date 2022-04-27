@@ -35,8 +35,9 @@ public class AppData extends Thread{
     public static String orderpassword = "op";
     public static String labelLines = "lls";
     public static String TableMark = "tablemark";
-    private static String SERVER_URL = "https://www.sharethegoodones.com/";//为什么用这个，可以用A2hosting的吗？
-                                                            //A2Hosting 更稳定，而且我家里的不好说。加入哪天停电啥的
+    private static String SERVER_URL = "http://216.137.179.176/"; //A2hosting is good but can not send email
+    private static String EMAIL_SERVER = "https://www.sharethegoodones.com/";
+
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
     public static final String KEY_SHOP_ID = "KEY_SHOP_ID";
@@ -104,6 +105,7 @@ public class AppData extends Thread{
     public static final String sep_str2 = "sep_str2";
     public static final String ShowMarkPirce = "ShowMarkPirce";
     public static final String server_url = "server_url";
+    public static final String email_server = "email_server";
     public static final String serverip = "serverip";
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
@@ -194,6 +196,20 @@ public class AppData extends Thread{
             serverURL = serverURL + "/";
         }
         return serverURL;
+    }
+
+    public static String getEmailServer(){
+        String emailServer = AppData.getCustomData(AppData.email_server);
+        if(emailServer == null || emailServer.length() < 10) {
+            emailServer = AppData.EMAIL_SERVER;
+        }
+        if(!emailServer.startsWith("http://") && !emailServer.startsWith("https://")){
+            emailServer = "http://" + emailServer;
+        }
+        if(!emailServer.endsWith("/")){
+            emailServer = emailServer + "/";
+        }
+        return emailServer;
     }
 
     public static String getCustomizedLastCharOnPanel(Context context){
@@ -337,7 +353,7 @@ public class AppData extends Thread{
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getSERVER_URL() + "sendReport";
+            AppData.schema = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
@@ -368,7 +384,7 @@ public class AppData extends Thread{
     public static boolean notifyCheck(String orderContent) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getSERVER_URL() + "sendReport";
+            AppData.schema = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
