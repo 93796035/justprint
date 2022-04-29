@@ -943,7 +943,7 @@ public class WifiPrintService implements Runnable{
         try {
             lastBillNo = Integer.valueOf(AppData.getCustomData(AppData.kitchenBillIdx)) - 1;
         }catch (Exception e){
-            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + lastBillNo, e);
+            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + AppData.getCustomData(AppData.kitchenBillIdx), e);
         }
         content.append("last bill : #").append(lastBillNo);
         content.append("\n");
