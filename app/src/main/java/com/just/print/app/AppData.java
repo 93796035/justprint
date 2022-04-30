@@ -29,7 +29,7 @@ import java.util.Date;
 
 import static com.just.print.util.ToastUtil.showToast;
 
-public class AppData extends Thread{
+public class  AppData extends Thread{
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
     public static String recentNum = "recentNum";
     public static String orderpassword = "op";
@@ -74,6 +74,7 @@ public class AppData extends Thread{
     public static final String ColorOnSelect = "cos";
     public static final String custChars = "custChars";
     public static final String column = "column";
+    public static final String tblcol = "tblcol";
     public static final String conbineMarkPrice = "conbineMarkPrice";
     public static final String emailorder = "emailorder";
     public static final String format_style = "format_style";

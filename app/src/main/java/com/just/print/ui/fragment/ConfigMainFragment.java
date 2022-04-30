@@ -208,6 +208,9 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
         final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
 
+        for(SaleRecord sr : data){
+            sr.time = order.getTime();
+        }
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);
         ordersView.setAdapter(adapter);

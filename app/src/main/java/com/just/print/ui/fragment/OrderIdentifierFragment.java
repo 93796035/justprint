@@ -186,7 +186,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             String col = AppData.getCustomData(AppData.column);
             try {
                 ((GridView) findViewById(R.id.odMenuGv)).setNumColumns(Integer.valueOf(col));
-                ((GridView) findViewById(R.id.odTableGrid)).setNumColumns(Integer.valueOf(col));
+                int tableViewColumn = Integer.valueOf(col);
+                try{
+                    tableViewColumn = Integer.valueOf(AppData.getCustomData(AppData.tblcol));
+                }catch(Exception e){}
+                ((GridView) findViewById(R.id.odTableGrid)).setNumColumns(tableViewColumn);
             }catch(Exception e){
                 //ignore, it's normal user didn't change the setting. then leave it to be 2.
             }
@@ -198,7 +202,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
 
             if("true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
-                odIdTable2.setText("");
+                odIdTable2.setText("T");
             }else{
                 odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
             }

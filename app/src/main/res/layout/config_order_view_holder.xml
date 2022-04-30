@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="horizontal">
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
@@ -28,16 +28,27 @@
             android:textStyle="bold"
             android:textSize="24sp" />
 
+        <TextView
+            android:id="@+id/odmnnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxEms="1"
+            android:minEms="1"
+            android:textSize="24sp"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/odmtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:text="abcdef"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+            android:textColor="#0091c1"
+            android:textSize="24sp" />
+
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/odmnnum"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:maxEms="1"
-        android:minEms="1"
-        android:textSize="24sp"
-        android:text="0" />
 
 </LinearLayout>

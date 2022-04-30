@@ -315,7 +315,7 @@
                                     android:paddingLeft="10dp"
                                     android:paddingRight="10dp"
                                     android:textOff=""
-                                    android:textOn=""
+                                    android:textOn="T"
                                     android:layout_weight="1" />
                                 <ImageButton
                                     android:id="@+id/odIdCancel"

@@ -15,6 +15,7 @@ import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.SaleRecordDao;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import de.greenrobot.dao.AbstractDao;
@@ -102,16 +103,13 @@ public final class DaoExpand {
 
     static public List<Bill> queryRecentBill(BillDao billDao, int num) {
         List<Bill> bills = billDao.loadAll();
-        List<Bill> recentBills = new ArrayList<>();
-        int lastIdx = bills.size() - 1;
-        if(lastIdx >= 0) {
-            for (int i = 0; i < num; i++) {
-                if (i < lastIdx) {
-                    recentBills.add(bills.get(lastIdx - i));
-                }
+        bills.sort(new Comparator<Bill>() {
+            @Override
+            public int compare(Bill o1, Bill o2) {
+                return Integer.valueOf(o2.getBillIdx()) - Integer.valueOf(o1.getBillIdx());
             }
-        }
-        return recentBills;
+        });
+        return bills.subList(0,num < bills.size() ? num : bills.size());
     }
 
 //    public static void updateAllPrintTo0(PrinterDao printerDao) {
