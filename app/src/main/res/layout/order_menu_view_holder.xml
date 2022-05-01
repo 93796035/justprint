@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="3dp"
-            android:text="abcdef"
+            android:text=""
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:textColor="#0091c1"
             android:textStyle="bold"

@@ -474,6 +474,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
         Applic.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
+        Applic.app.getDaoMaster().newSession().getBillDao().deleteAll();
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
         AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
 

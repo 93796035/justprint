@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
@@ -43,6 +44,16 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @XViewByID(R.id.billList)
     FlowListView billListView;
 
+    @XViewByID(R.id.table)
+    TextView table;
+    @XViewByID(R.id.time)
+    TextView time;
+
+    @XViewByID(R.id.subtotal)
+    TextView subtoal;
+    @XViewByID(R.id.total)
+    TextView total;
+
     @XViewByID(R.id.orderList)
     ListView ordersView;
 
@@ -69,7 +80,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         List<Bill> orders = new ArrayList<>();
         try{
             String recentNum = AppData.getCustomData(AppData.recentNum);
-            orders = DaoExpand.queryRecentBill(billDao, recentNum == null || recentNum.length() < 1 ? 9 : Integer.valueOf(recentNum));
+            orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
         }catch(Exception e){
             //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
         }
@@ -81,22 +92,24 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
 
     @XClick({R.id.verifyPassword})
     private void onConfirmUserName(View view) {
+        String up = AppData.getCustomData(AppData.userPassword);
+        String ap = AppData.getCustomData(AppData.adminPassword);
+        String op = AppData.getCustomData(AppData.orderpassword);
+        if(StringUtils.isBlank(ap)){ap = "2266";}
+        if(StringUtils.isBlank(up)){up = "8888";}
+        if(StringUtils.isBlank(op)){op = "1111";}
+
         String inputContent = this.password.getText().toString().trim();
         if (StringUtils.isEmpty(inputContent) || inputContent.length() < 2) {
             showToast("Please input the right password");
         } else {
-            String userPassword = AppData.getCustomData(AppData.userPassword);
-            if(userPassword == null || userPassword.length() == 0){
-                userPassword = "88882288";
-            }
-
-            if(!userPassword.equals(inputContent)){
-                if(AppData.getCustomData(AppData.adminPassword).equals(inputContent)){
+            if(!up.equals(inputContent)){
+                if(ap.equals(inputContent)){
                     List<SaleRecord> orders = Applic.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
                     findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
-                }else if(inputContent.length() > 0 && inputContent.equals(AppData.getCustomData(AppData.orderpassword))){
+                }else if(op.equals(inputContent)){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
                     saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
@@ -189,6 +202,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
         Applic.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
+        Applic.app.getDaoMaster().newSession().getBillDao().deleteAll();
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
         AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
 
@@ -203,14 +217,14 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @Override
     public void onClickItem(View view, int idx) {
         Bill order = billsXAdapter.getData().get(idx);
-        //show the content of this order in a pop up view
-
+        String timeString = order.getTime();
+        table.setText("    Table:#" + order.getState());
+        time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
+        subtoal.setText("    Sub: $" + order.getPrice());
+        total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
         final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
 
-        for(SaleRecord sr : data){
-            sr.time = order.getTime();
-        }
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);
         ordersView.setAdapter(adapter);

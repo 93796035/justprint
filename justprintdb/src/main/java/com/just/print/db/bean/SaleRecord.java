@@ -28,10 +28,6 @@ public class SaleRecord {
     /** Used for active entity operations. */
     private transient SaleRecordDao myDao;
 
-    /** Used for active entity operations. */
-    public transient String time;
-
-
     // KEEP FIELDS - put your custom fields here
     // KEEP FIELDS END
 
