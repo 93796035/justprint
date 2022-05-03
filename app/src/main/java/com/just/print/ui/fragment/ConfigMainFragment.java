@@ -220,7 +220,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         String timeString = order.getTime();
         table.setText("    Table:#" + order.getState());
         time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
-        subtoal.setText("    Sub: $" + order.getPrice());
+        subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
         total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
         final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
