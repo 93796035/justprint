@@ -29,48 +29,50 @@
             android:textSize="24sp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:orientation="horizontal">
-        <ImageButton
-            android:id="@+id/odMnLoutMarkBtn"
-            android:layout_width="39dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:src="@drawable/change"/>
-        <ImageButton
-            android:id="@+id/oddelDish"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/delete"/>
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/odMnLoutMarkBtn"
+                android:layout_width="39dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/change"/>
+            <ImageButton
+                android:id="@+id/oddelDish"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/delete"/>
 
-        <Button
-            android:id="@+id/odmnreduce"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" - " />
+            <Button
+                android:id="@+id/odmnreduce"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" - " />
 
-        <TextView
-            android:id="@+id/odmnnum"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxEms="1"
-            android:minEms="1"
-            android:textSize="24sp"
-            android:text="0" />
+            <TextView
+                android:id="@+id/odmnnum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxEms="1"
+                android:minEms="1"
+                android:textSize="24sp"
+                android:text="0" />
 
-        <Button
-            android:id="@+id/odmnadd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/oddelDish"
-            android:text=" + "/>
+            <Button
+                android:id="@+id/odmnadd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/oddelDish"
+                android:text=" + "/>
 
-    </LinearLayout>
-
+        </LinearLayout>
+    </RelativeLayout>
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">

@@ -227,7 +227,7 @@
                         <!--selected dishes-->
                         <ListView
                             android:id="@+id/odIdFrLoutMenuList"
-                            android:layout_width="wrap_content"
+                            android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:divider="#000000"
                             android:dividerHeight="1px"
