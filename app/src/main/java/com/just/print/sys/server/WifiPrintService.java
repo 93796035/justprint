@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -167,7 +168,7 @@ public class WifiPrintService implements Runnable{
 
     //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. because it means that last time didn't print successfully
     //otherwise will send to sever and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
-    public String printAndSaveCommand(boolean isCancel){
+    public String saveAndSyncCommand(boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
         //Check
         String ip = getIPofNonEmptyIpContentMapEntry();
@@ -175,7 +176,7 @@ public class WifiPrintService implements Runnable{
             L.d(TAG,"ipContent not empty, means last print job not finished yet! returning not success flag.");
             return ip;                     //未打印完毕
         }
-        if(checkErrorPrinterList()){
+        if(checkEmptyInErrorPrinterList()){
             showToast("PRINTING...");
         }
         //Save
@@ -402,7 +403,7 @@ public class WifiPrintService implements Runnable{
 
     //The start time and end time are long format, need to be translate for print.
     public String exePrintReportCommand(List<SaleRecord> saleRecords, String endTime){
-        if(checkErrorPrinterList()){    //if errorPrinterList is emptly will return true.
+        if(checkEmptyInErrorPrinterList()){    //if errorPrinterList is emptly will return true.
             showToast("PRINTING...");   //otherwise will show notice to check printer and restart app and return false.
         }
         if(saleRecords == null || saleRecords.size() == 0) {
@@ -470,7 +471,7 @@ public class WifiPrintService implements Runnable{
         return contentFR;
     }
 
-    private boolean checkErrorPrinterList() {
+    private boolean checkEmptyInErrorPrinterList() {
         StringBuilder ipStr = new StringBuilder();
         for(String ip : errorPrinterList){
             ipStr.append(",");
@@ -1173,8 +1174,18 @@ public class WifiPrintService implements Runnable{
         //tiltle---could be used for kithch name, empty lines.......
         String title = AppData.getCustomData(AppData.kitchentitle);
         if (title.length() > 0) {
-            if (title.endsWith("lines")) {
+            if (title.toLowerCase(Locale.ROOT).endsWith("lines")) {
                 if(!isCloudPrinter) {
+                    title = title.substring(0, title.length() - 5).trim();
+                    try {
+                        int qt = Integer.valueOf(title);
+                        for (int i = 0; i < qt; i++) {
+                            content.append("\n");
+                        }
+                    } catch (Exception e) {
+                        L.e("WifiPrint", "when seeting title", e);
+                    }
+                }else{ //totally same code with when it's not cloudprinter, will make it different when I know why I've added cloud printer check.
                     title = title.substring(0, title.length() - 5).trim();
                     try {
                         int qt = Integer.valueOf(title);

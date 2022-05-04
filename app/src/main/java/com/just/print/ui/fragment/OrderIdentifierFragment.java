@@ -521,7 +521,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             showToast("Nothing selected!");
             return "";
         }else {
-            final String result = WifiPrintService.getInstance().printAndSaveCommand(isCancel);
+            final String result = WifiPrintService.getInstance().saveAndSyncCommand(isCancel);
             if (result.startsWith("192.") || result.startsWith("10.")) {
                 // pup up a dialog to ask if user want to continue.....
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
