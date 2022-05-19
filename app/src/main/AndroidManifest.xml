@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="com.just.print.ui.activity.MainActivity">
+        <activity android:name="com.just.print.ui.activity.MainFragmentActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,13 +27,13 @@
 
         <service android:name="com.just.print.net.UDPService" />
 
-        <!--activity android:name="com.just.print.ui.activity.ConfigActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.just.print.ui.activity.LoginActivity" android:screenOrientation="portrait" />
-        <activity android:name="com.just.print.ui.activity.OrderActivity" android:screenOrientation="portrait" /-->
-        <activity android:name="com.just.print.ui.activity.ConfigActivity"/>
-        <activity android:name="com.just.print.ui.activity.LoginActivity"/>
-        <activity android:name="com.just.print.ui.activity.OrderActivity"/>
-        <activity android:name="com.just.print.ui.activity.ActivateActivity" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
+        <!--activity android:name="com.just.print.ui.activity.ConfigFragmentActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.just.print.ui.activity.LoginFragmentActivity" android:screenOrientation="portrait" />
+        <activity android:name="com.just.print.ui.activity.OrderFragmentActivity" android:screenOrientation="portrait" /-->
+        <activity android:name="com.just.print.ui.activity.ConfigFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.LoginFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.OrderFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.ActivateFragmentActivity" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
     </application>
 
 </manifest>

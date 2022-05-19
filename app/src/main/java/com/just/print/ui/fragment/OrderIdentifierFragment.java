@@ -32,7 +32,7 @@ import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
-import com.just.print.ui.activity.ConfigActivity;
+import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.OrderIdentifierCategoryViewHolder;
 import com.just.print.ui.holder.OrderMarksSelectionViewHolder;
 import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
@@ -318,7 +318,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
 
             if(userPassword.equals(inputContent)){
-                startActivity(new Intent(getContext(), ConfigActivity.class));
+                startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
             }else {
                 hideInputMethod(getActivity());
                 findViewById(R.id.odInfoCollect).setVisibility(View.INVISIBLE);
@@ -356,7 +356,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         switch (v.getId()) {
             case R.id.odIdConfigBtn:
             case R.id.odIdConfigBtn2:
-                startActivity(new Intent(getContext(), ConfigActivity.class));
+                startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
                 break;
             case R.id.odIdCancel:
                 printCurrentSelection(true);

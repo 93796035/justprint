@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.widget.TextView;
 
 import com.just.print.db.bean.Printer;
-import com.just.print.ui.activity.MainActivity;
+import com.just.print.ui.activity.MainFragmentActivity;
 import com.just.print.ui.fragment.LoginFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.L;
@@ -583,9 +583,9 @@ public class  AppData extends Thread{
                 showToast("App has set conbineMarkPrice to: " + inputedSN);
                 return;
             case AppData.debug:
-                MainActivity.debug = Boolean.valueOf(inputedSN);
-                AppData.putCustomData(AppData.debug, String.valueOf(MainActivity.debug));
-                if(MainActivity.debug) {
+                MainFragmentActivity.debug = Boolean.valueOf(inputedSN);
+                AppData.putCustomData(AppData.debug, String.valueOf(MainFragmentActivity.debug));
+                if(MainFragmentActivity.debug) {
                     showToast("App is in debug mode, when bug appears again, please write down the system time and report.");
 
                     StringBuilder sb = new StringBuilder();

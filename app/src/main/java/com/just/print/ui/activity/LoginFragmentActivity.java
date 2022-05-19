@@ -4,10 +4,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.just.print.R;
-import com.just.print.app.BaseActivity;
+import com.just.print.app.BaseFragmentActivity;
 import com.just.print.ui.fragment.LoginFragment;
 
-public class LoginActivity extends BaseActivity {
+public class LoginFragmentActivity extends BaseFragmentActivity {
 
     static final private String tag = "LOGIN";
 

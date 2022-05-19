@@ -9,9 +9,6 @@ import android.widget.TextView;
 import com.just.print.R;
 import com.stupid.method.adapter.XViewHolder;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ActivityViewHolder extends XViewHolder<ActivityInfo> {
 
     TextView textView;

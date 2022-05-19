@@ -8,9 +8,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by wangx on 2016/10/31.
- */
 abstract public class AbsModel implements IModel {
     public static Map<String, Class<? extends AbsModel>> CHILD_CLASS = new HashMap<>();
     private int requestID;

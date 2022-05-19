@@ -7,13 +7,13 @@ import android.widget.TextView;
 import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
-import com.just.print.app.BaseActivity;
+import com.just.print.app.BaseFragmentActivity;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 
-public class ActivateActivity extends BaseActivity {
+public class ActivateFragmentActivity extends BaseFragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +38,7 @@ public class ActivateActivity extends BaseActivity {
             AppUtils.sleep(1000);
             String number = AppData.getCustomData(AppData.number);
             if(Long.valueOf(number) > 0){
-                startActivity(new Intent(this, LoginActivity.class));
+                startActivity(new Intent(this, LoginFragmentActivity.class));
                 break;
             }
         }

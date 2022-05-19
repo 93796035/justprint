@@ -21,9 +21,6 @@ import com.stupid.method.reflect.annotation.XGetValueByView;
 import com.stupid.method.reflect.annotation.XViewByID;
 import com.stupid.method.widget.flowlayout.FlowListView;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ConfigTableFragment extends BaseFragment implements OnClickItemListener {
 
     @XViewByID(R.id.gridView)

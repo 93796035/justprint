@@ -9,9 +9,6 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by wangx on 2016/11/4.
- */
 public class ServiceExecutor {
 
 

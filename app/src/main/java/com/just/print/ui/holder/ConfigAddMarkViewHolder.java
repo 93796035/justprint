@@ -10,9 +10,6 @@ import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-/**
- * Created by wangx on 2016/11/23.
- */
 public class ConfigAddMarkViewHolder extends XViewHolder<Mark> {
     @XViewByID(R.id.ip)
     TextView ip;

@@ -9,9 +9,6 @@ import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ConfigMarkViewHolder extends XViewHolder<Mark> {
     @Override
     public int getLayoutId() {

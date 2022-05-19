@@ -26,9 +26,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ConfigMarkFragment extends BaseFragment implements OnClickItemListener {
 
     @XViewByID(R.id.gridView)

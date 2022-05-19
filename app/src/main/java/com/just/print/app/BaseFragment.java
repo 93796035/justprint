@@ -13,9 +13,6 @@ import com.just.print.util.ToastUtil;
 
 import java.util.List;
 
-/**
- * Created by wangx on 2016/11/1.
- */
 abstract public class BaseFragment extends Fragment {
     protected abstract int getLayoutId();
 

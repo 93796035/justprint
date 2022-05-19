@@ -18,7 +18,7 @@ import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
-import com.just.print.ui.activity.ConfigActivity;
+import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
 import com.just.print.util.StringUtils;
@@ -137,37 +137,37 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.configMenuManager:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ConfigMenuFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigMenuFragment.class);
                 break;
             case R.id.configUserManager:
                 // getEventBus().post(ConfigActivity.CHANGE_PAGE, Config.class);
                 break;
             case R.id.configTagManager:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ConfigMarkFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigMarkFragment.class);
                 break;
             case R.id.configTableManager:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ConfigTableFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigTableFragment.class);
                 break;
             case R.id.configPrintManager:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ConfigPrinterFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigPrinterFragment.class);
                 break;
             case R.id.configPrintReport:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ConfigPrintReportFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigPrintReportFragment.class);
                 break;
             case R.id.uploadDB:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, UploadingConfirmFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, UploadingConfirmFragment.class);
                 break;
             case R.id.downloadDB:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, DownloadingConfirmFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, DownloadingConfirmFragment.class);
                 break;
             case R.id.uploadConfig:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, UploadingConfigConfirmFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, UploadingConfigConfirmFragment.class);
                 break;
             case R.id.downloadConfig:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, DownloadingConfigConfirmFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, DownloadingConfigConfirmFragment.class);
                 break;
             case R.id.reactivate:
-                getEventBus().post(ConfigActivity.CHANGE_PAGE, ReActivateFragment.class);
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ReActivateFragment.class);
                 break;
         }
     }
@@ -184,7 +184,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
-        startActivity(new Intent(getContext(), ConfigActivity.class));
+        startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
     }
 
     @XClick({R.id.btnConfirmResetReportOK})
@@ -211,7 +211,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
         findViewById(R.id.alertResetDlg).setMinimumHeight(0);
 
-        startActivity(new Intent(getContext(), ConfigActivity.class));
+        startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
     }
 
     @Override

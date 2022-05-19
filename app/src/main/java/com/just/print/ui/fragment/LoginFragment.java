@@ -11,7 +11,7 @@ import com.just.print.app.BaseFragment;
 import com.just.print.net.UDPService;
 import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
-import com.just.print.ui.activity.OrderActivity;
+import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
 import com.just.print.util.DatabaseUtil;
 import com.just.print.util.StringUtils;
@@ -52,7 +52,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
         if (!StringUtils.isEmpty(shopName)) {
             //showToast(shopName);
             AppData.createShopDB(getContext(), shopName);
-            startActivity(new Intent(getContext(), OrderActivity.class));
+            startActivity(new Intent(getContext(), OrderFragmentActivity.class));
             getActivity().finish();
         }
 
@@ -90,7 +90,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
                             AppData.saveShopName(getContext(), result2.getShopName());
                             AppData.createShopDB(getContext(), result2.getShopName());
                             //showToast("店铺存在");
-                            startActivity(new Intent(getContext(), OrderActivity.class));
+                            startActivity(new Intent(getContext(), OrderFragmentActivity.class));
                             getActivity().finish();
                         } else {
 //                            String string = ((TextView) findViewById(R.id.shopName)).getText().toString();
@@ -151,7 +151,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
 
         //initialize the days left and the stated days on cloud.
         AppData.startActivate();
-        startActivity(new Intent(getContext(), OrderActivity.class));
+        startActivity(new Intent(getContext(), OrderFragmentActivity.class));
         getActivity().finish();
     }
 

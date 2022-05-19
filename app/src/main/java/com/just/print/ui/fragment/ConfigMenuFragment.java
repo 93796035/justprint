@@ -40,9 +40,6 @@ import java.util.List;
 
 import static android.content.DialogInterface.OnClickListener;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLongClickListener {
 
     private static Menu modifyingMenu = null;

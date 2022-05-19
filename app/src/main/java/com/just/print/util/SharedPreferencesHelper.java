@@ -20,9 +20,7 @@ import java.util.WeakHashMap;
 
 /**
  * SharedPreferences 工具类
- *
- * @author wangx 2016-04-27 重构
- **/
+ */
 public class SharedPreferencesHelper {
 
     private static final String empty = "";
@@ -150,8 +148,7 @@ public class SharedPreferencesHelper {
      *
      * @param key
      * @throws ClassNotFoundException
-     * @author wangx
-     **/
+     */
     @SuppressLint("NewApi")
     public Object getObject(String key) throws ClassNotFoundException {
 
@@ -238,7 +235,6 @@ public class SharedPreferencesHelper {
      * 测试中的方法,保存序列化的对象到xml里
      *
      * @param key
-     * @author wangx
      **/
     @SuppressLint("NewApi")
     public void putObject(String key, Serializable serializable)

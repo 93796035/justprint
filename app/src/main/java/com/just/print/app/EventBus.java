@@ -6,9 +6,6 @@ import com.just.print.util.L;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public interface EventBus {
     public class EventBusImpl implements EventBus {
         static final String tag = "EventBusImpl";

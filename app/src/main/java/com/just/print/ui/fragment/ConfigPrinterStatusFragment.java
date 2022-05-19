@@ -23,9 +23,6 @@ import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.List;
 
-/**
- * Created by wangx on 2016/11/2.
- */
 public class ConfigPrinterStatusFragment extends BaseFragment implements OnClickItemListener {
 
     @XViewByID(R.id.gridView)

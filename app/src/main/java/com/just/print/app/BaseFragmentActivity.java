@@ -7,10 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.just.print.util.ToastUtil;
 
-/**
- * Created by wangx on 2016/10/28.
- */
-public class BaseActivity extends FragmentActivity implements EventBus {
+public class BaseFragmentActivity extends FragmentActivity implements EventBus {
 
 
     final EventBusImpl eventBus = new EventBusImpl();

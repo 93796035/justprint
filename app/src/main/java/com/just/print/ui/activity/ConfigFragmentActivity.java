@@ -4,19 +4,18 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.just.print.R;
-import com.just.print.app.BaseActivity;
+import com.just.print.app.BaseFragmentActivity;
 import com.just.print.app.EventBus;
 import com.just.print.ui.fragment.ConfigMainFragment;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigActivity extends BaseActivity implements EventBus.EventHandler {
+public class ConfigFragmentActivity extends BaseFragmentActivity implements EventBus.EventHandler {
 
     public static final String CHANGE_PAGE = "CHANGE_PAGE";
 
     Map<Class<? extends Fragment>, Fragment> mFragment = new HashMap<Class<? extends Fragment>, Fragment>();
-
 
     {
         mFragment.put(ConfigMainFragment.class, new ConfigMainFragment());

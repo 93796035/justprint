@@ -13,12 +13,12 @@ import android.widget.Toast;
 
 import com.just.print.app.AppData;
 import com.just.print.app.Applic;
-import com.just.print.app.BaseActivity;
+import com.just.print.app.BaseFragmentActivity;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.sys.model.SelectionDetail;
-import com.just.print.ui.activity.OrderActivity;
+import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.AppUtils;
 import com.just.print.util.StringUtils;
 
@@ -35,9 +35,8 @@ import java.util.concurrent.Executors;
 
 /**
  * 数据同步服务
- * Created by wangx on 2016/10/31.
  */
-public class DataSyncService extends BaseActivity implements Runnable{
+public class DataSyncService extends BaseFragmentActivity implements Runnable{
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
@@ -48,7 +47,7 @@ public class DataSyncService extends BaseActivity implements Runnable{
 
     public ArrayList<SelectionDetail> lastSelection;
     public String tableName;
-    private OrderActivity orderActivity;
+    private OrderFragmentActivity orderActivity;
 
     public static DataSyncService getInstance() {
         if(dataSyncService == null) {
@@ -236,7 +235,7 @@ public class DataSyncService extends BaseActivity implements Runnable{
     }
 
 
-    public void setActivity(OrderActivity orderActivity) {
+    public void setActivity(OrderFragmentActivity orderActivity) {
         this.orderActivity = orderActivity;
     }
 }

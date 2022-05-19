@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.BaseActivity;
+import com.just.print.app.BaseFragmentActivity;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
@@ -15,7 +15,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class MainActivity extends BaseActivity {
+public class MainFragmentActivity extends BaseFragmentActivity {
 
     //    ServiceConnection serviceConnection;
 //    UDPService udp;
@@ -54,10 +54,10 @@ public class MainActivity extends BaseActivity {
             if (timeLeft < 3024000000l) {   //3024000000L == 35days
                 ToastUtil.showToast("Application is about to expire! Please re-activate it!");
             }
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LoginFragmentActivity.class));
         } else {
             ToastUtil.showToast("Application expired! Please re-activate it!");
-            startActivity(new Intent(this, ActivateActivity.class));
+            startActivity(new Intent(this, ActivateFragmentActivity.class));
         }
         finish();
         return;

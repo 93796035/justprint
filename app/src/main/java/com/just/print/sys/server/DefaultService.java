@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 
-/**
- * Created by wangx on 2016/10/31.
- */
 public class DefaultService extends AbsService {
     static final String tag = "DefaultService";
 

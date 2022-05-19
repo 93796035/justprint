@@ -10,7 +10,6 @@ import java.util.List;
 
 /**
  * 数据同步
- * Created by wangx on 2016/10/31.
  */
 public class DataSyncModel extends AbsModel {
 

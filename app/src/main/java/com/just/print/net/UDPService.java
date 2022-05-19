@@ -37,8 +37,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.CharsetUtil;
 
 /**
- * Created by wangx on 2016/10/28.
- *
  * @protocol UDP-JSON
  */
 public class UDPService extends Service implements TCPSever.TcpServerReadOver {
