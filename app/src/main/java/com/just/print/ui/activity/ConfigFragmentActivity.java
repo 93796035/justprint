@@ -15,26 +15,27 @@ public class ConfigFragmentActivity extends BaseFragmentActivity implements Even
 
     public static final String CHANGE_PAGE = "CHANGE_PAGE";
 
-    Map<Class<? extends Fragment>, Fragment> mFragment = new HashMap<Class<? extends Fragment>, Fragment>();
+    //to be able to support multiple fragments
+    private Map<Class<? extends Fragment>, Fragment> fragments = new HashMap<Class<? extends Fragment>, Fragment>();
 
-    {
-        mFragment.put(ConfigMainFragment.class, new ConfigMainFragment());
+    {//while for now, seems we put only one fragment into it.
+        fragments.put(ConfigMainFragment.class, new ConfigMainFragment());
     }
 
-    Fragment getFragment(Class<? extends Fragment> clz) {
-        Fragment f = mFragment.get(clz);
-        if (f == null) {
+    private Fragment getFragment(Class<? extends Fragment> aClass) {
+        Fragment fragment = fragments.get(aClass);
+        if (fragment == null) {
             try {
-                f = clz.newInstance();
+                fragment = aClass.newInstance();
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-            if (f != null)
-                mFragment.put(clz, f);
+            if (fragment != null)
+                fragments.put(aClass, fragment);
         }
-        return f;
+        return fragment;
 
     }
 
@@ -43,6 +44,7 @@ public class ConfigFragmentActivity extends BaseFragmentActivity implements Even
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sys_config_activity);
         register(CHANGE_PAGE, this);
+        //why not use beginTransaction().add()?
         getSupportFragmentManager().beginTransaction().add(R.id.content, getFragment(ConfigMainFragment.class), ConfigMainFragment.class.getName())
                 .commit();
     }

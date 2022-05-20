@@ -14,7 +14,7 @@ import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 
-public class ReActivateFragment extends BaseFragment implements OnClickItemListener {
+public class ReActivateFragment extends BaseFragment{
 
     @Override
     protected int getLayoutId() {
@@ -40,8 +40,4 @@ public class ReActivateFragment extends BaseFragment implements OnClickItemListe
         getActivity().finish();
     }
 
-    @Override
-    public void onClickItem(View view, int i) {
-
-    }
 }

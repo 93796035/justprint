@@ -9,9 +9,7 @@ import com.just.print.ui.fragment.LoginFragment;
 
 public class LoginFragmentActivity extends BaseFragmentActivity {
 
-    static final private String tag = "LOGIN";
-
-    Fragment fragment = new LoginFragment();
+    private Fragment fragment = new LoginFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +17,5 @@ public class LoginFragmentActivity extends BaseFragmentActivity {
         setContentView(R.layout.login_activity);
         beginTransaction().add(R.id.content, fragment, fragment.getClass().getName()).commit();
     }
-
 
 }
