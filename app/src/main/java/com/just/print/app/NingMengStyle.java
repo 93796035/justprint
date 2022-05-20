@@ -15,9 +15,9 @@ import java.io.File;
 
 import static android.content.ContentValues.TAG;
 
-public class Applic extends Application {
+public class NingMengStyle extends Application {
 
-    public volatile static Applic app;
+    public volatile static NingMengStyle app;
 
     public UDPService mUDPService;
 
@@ -65,7 +65,7 @@ public class Applic extends Application {
 
     public DaoMaster getDaoMaster() {
         if (daoMaster == null) {
-            L.e("Applic","non-none daoMaster expected! db not inited!", null);
+            L.e("NingMengStyle","non-none daoMaster expected! db not inited!", null);
             new NullPointerException("Please initialize database!");
         }
         return daoMaster;

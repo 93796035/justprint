@@ -7,7 +7,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 
 import java.lang.ref.WeakReference;
 
@@ -20,7 +20,7 @@ public class ToastUtil {
     }
 
     public static void showToast(CharSequence text) {
-        showToast(Applic.app.getApplicationContext(), text, Toast.LENGTH_SHORT);
+        showToast(NingMengStyle.app.getApplicationContext(), text, Toast.LENGTH_SHORT);
     }
 
     public static void showToast(Context context, CharSequence text) {

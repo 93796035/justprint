@@ -20,7 +20,7 @@ import android.widget.ViewSwitcher;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
 import com.just.print.db.bean.Category;
@@ -283,7 +283,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdFrLoutMenuList.setAdapter(dishesXAdapter);
 
         //add Marks
-        allMarks = sortMarks(DaoExpand.queryAllMarks(Applic.getMarkDao()));//deleted is used for table name....
+        allMarks = sortMarks(DaoExpand.queryAllMarks(NingMengStyle.getMarkDao()));//deleted is used for table name....
         //add shortcut Marks.
         initShortCutMarks();
 
@@ -342,7 +342,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     public static void loadTables() {
-        tables = DaoExpand.queryAllTables(Applic.app.getDaoMaster().newSession().getMarkDao());
+        tables = DaoExpand.queryAllTables(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
         Collections.sort(tables, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
@@ -390,7 +390,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 }
                 if(adminPassword.equals(odIdTableTbtn.getText().toString()) || adminPassword.equals(odIdInput.getText().toString())){
                     //print report
-                    List<SaleRecord> orders = Applic.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
 
                     if(orders == null || orders.size() == 0){
                         showToast("No report to print! The sales record has been cleaned!");
@@ -473,8 +473,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         }
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
-        Applic.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
-        Applic.app.getDaoMaster().newSession().getBillDao().deleteAll();
+        NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
+        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
         AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
 
@@ -741,7 +741,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private Menu SearchMenuFromDB(String context) {
-        List<Menu> mnlist = DaoExpand.queryFuzzyMenu(Applic.app.getDaoMaster().newSession().getMenuDao(), context);
+        List<Menu> mnlist = DaoExpand.queryFuzzyMenu(NingMengStyle.app.getDaoMaster().newSession().getMenuDao(), context);
         if (mnlist.size() >= 1) {
             Collections.sort(mnlist, new Comparator<Menu>() {
                 @Override
@@ -794,7 +794,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             allMarks = sortMarks(unsortedMarks);
         }else{
-            allMarks = sortMarks(DaoExpand.queryAllMarks(Applic.getMarkDao()));
+            allMarks = sortMarks(DaoExpand.queryAllMarks(NingMengStyle.getMarkDao()));
         }
 
         //if mark is already selected, then remove it from the display list.

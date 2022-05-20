@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.SaleRecord;
@@ -76,7 +76,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         }
 
         //init the existing bills area.
-        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+        billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
         List<Bill> orders = new ArrayList<>();
         try{
             String recentNum = AppData.getCustomData(AppData.recentNum);
@@ -105,14 +105,14 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         } else {
             if(!up.equals(inputContent)){
                 if(ap.equals(inputContent)){
-                    List<SaleRecord> orders = Applic.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
                     findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
                 }else if(op.equals(inputContent)){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
-                    saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
+                    saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
                     List<SaleRecord> saleRecord = saleRecordDao.loadAll();
                     if(saleRecord == null || saleRecord.size() == 0){
                         getActivity().finish();
@@ -201,8 +201,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         }
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
-        Applic.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
-        Applic.app.getDaoMaster().newSession().getBillDao().deleteAll();
+        NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
+        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
         AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
 
@@ -223,7 +223,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
         total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
 
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);

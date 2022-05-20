@@ -9,7 +9,7 @@ import android.widget.ViewSwitcher;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.expand.DaoExpand;
@@ -66,7 +66,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryAllNotDeletedMark(Applic.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryAllNotDeletedMark(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
         Collections.sort(list, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
@@ -98,7 +98,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             mark1.setVersion(0l);
         }
 
-        Applic.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
+        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
         mark1.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);
         loadMark();

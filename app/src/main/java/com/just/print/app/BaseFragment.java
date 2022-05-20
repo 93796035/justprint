@@ -23,22 +23,17 @@ abstract public class BaseFragment extends Fragment {
 
     View mRoot;
 
-    EventBus mEventBus;
-
-    public interface onChoiceMarks {
-        void onChoiceMarks(List<Mark> list);
-    }
+    EventBus eventBus;
 
     public EventBus getEventBus() {
-        if (mEventBus == null)
+        if (eventBus == null)
             if (getActivity() instanceof EventBus) {
-                mEventBus = (EventBus) getActivity();
+                eventBus = (EventBus) getActivity();
             } else {
-                mEventBus = new EventBus.EventBusImpl();
+                eventBus = new EventBus.EventBusImpl();
             }
-        return mEventBus;
+        return eventBus;
     }
-
 
     protected View findViewById(int id) {
         return mRoot.findViewById(id);
@@ -53,10 +48,10 @@ abstract public class BaseFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if (mRoot == null)
+        if (mRoot == null) {
             mRoot = inflater.inflate(getLayoutId(), container, false);
-        else {
-            if (mRoot != null && mRoot.getParent() != null) {
+        } else {
+            if (mRoot.getParent() != null) {
                 ViewGroup v = (ViewGroup) mRoot.getParent();
                 v.removeView(mRoot);
             }
@@ -76,4 +71,8 @@ abstract public class BaseFragment extends Fragment {
     }
 
     public abstract void onCreated(Bundle savedInstanceState);
+
+    public interface onChoiceMarks {
+        void onChoiceMarks(List<Mark> list);
+    }
 }

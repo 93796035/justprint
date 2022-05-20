@@ -3,7 +3,7 @@ package com.just.print.util;
 import android.util.Log;
 
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.ui.activity.MainFragmentActivity;
 
 import org.json.JSONObject;
@@ -24,7 +24,7 @@ public class L extends Thread{
     private static Vector<String> msgs = new Vector<String>();
 
     public static void d(String tag, Object msg){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(Applic.app.getApplicationContext())) {
+        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + String.valueOf(msg));
         }
         Log.d(tag, String.valueOf(msg));
@@ -32,21 +32,21 @@ public class L extends Thread{
 
     public static void e(String tag, String msg, Throwable e){
         MainFragmentActivity.debug = true;
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(Applic.app.getApplicationContext())) {
+        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.i(tag, msg, e);
     }
 
     public static void i(String tag, String msg){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(Applic.app.getApplicationContext())) {
+        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.i(tag, msg);
     }
 
     public static void w(String tag, String msg, Throwable e){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(Applic.app.getApplicationContext())) {
+        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.d(tag, msg, e);

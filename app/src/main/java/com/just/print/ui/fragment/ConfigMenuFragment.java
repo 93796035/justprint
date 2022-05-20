@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuMark;
@@ -170,8 +170,8 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
                         m2m.delete();
                     }
                     */
-                    M2M_MenuPrintDao m2mDao = Applic.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
-                    M2M_MenuMarkDao m2mDao2 = Applic.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
+                    M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
+                    M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
 
                     new AlertDialog.Builder(getActivity())
                             .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getMname() + "\"?")
@@ -266,7 +266,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         menuXAdapter.setClickItemListener(categoryAdapterClick);
         lvMenu.setAdapter(menuXAdapter);
 
-        menuDao = Applic.app.getDaoMaster().newSession().getMenuDao();
+        menuDao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
 
         loadCategory();
         loadMenu();
@@ -389,7 +389,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         menu.updateAndUpgrade();
 
         //add printer link
-        M2M_MenuPrintDao m2mDao = Applic.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
+        M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
         if(modifyingMenu != null) {
             for (M2M_MenuPrint p : modifyingMenu.getM2M_MenuPrintList()) {
                 m2mDao.delete(p);
@@ -403,7 +403,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         }
 
         //add mark link
-        M2M_MenuMarkDao m2mDao2 = Applic.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
+        M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
         if(modifyingMenu != null) {
             for (M2M_MenuMark p : modifyingMenu.getM2M_MenuMarkList()) {
                 m2mDao2.delete(p);
@@ -451,7 +451,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         cat.setDisplayIdx(idx);
 
         cat.setState(State.def);
-        Applic.app.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
+        NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
         cat.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);
         loadCategory();
@@ -462,7 +462,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     @XClick({R.id.selectPrint})
     private void selectPrint(final TextView view) {
-        final List<Printer> data = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getPrinterDao());
+        final List<Printer> data = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());
         data.removeAll(addPrints);
         if (data.size() == 0) {
             showToast("Please add printer first");
@@ -492,7 +492,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
-        final List<Mark> data = DaoExpand.queryAllMarks(Applic.app.getDaoMaster().newSession().getMarkDao());
+        final List<Mark> data = DaoExpand.queryAllMarks(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
         data.removeAll(addedMarks);
         if (data.size() == 0) {
             showToast("Please add Mark first");
@@ -543,7 +543,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     private void loadCategory() {
 
-        List<Category> list = DaoExpand.queryAllNotDeleted(Applic.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+        List<Category> list = DaoExpand.queryAllNotDeleted(NingMengStyle.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         categoryXAdapter.setData(list);
         categoryXAdapter.notifyDataSetChanged();
 
@@ -556,7 +556,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
     private void loadMenu() {
         if (mCategory != null) {
-            List<Menu> menuList = DaoExpand.queryMenuByCategory(Applic.app.getDaoMaster().newSession().getMenuDao(), mCategory);
+            List<Menu> menuList = DaoExpand.queryMenuByCategory(NingMengStyle.app.getDaoMaster().newSession().getMenuDao(), mCategory);
             menuXAdapter.setData(menuList);
             menuXAdapter.notifyDataSetChanged();
         }

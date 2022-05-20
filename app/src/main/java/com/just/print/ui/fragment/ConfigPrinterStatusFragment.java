@@ -7,7 +7,7 @@ import android.view.View;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.expand.DaoExpand;
@@ -44,7 +44,7 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
         markXAdapter.setData(list);
         markXAdapter.notifyDataSetChanged();
     }
@@ -55,7 +55,7 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
         Mark mark1 = new Mark();
         mark1.setState(State.def);
         mark1.setName(mark);
-        Applic.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
+        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
         mark1.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);
         loadMark();

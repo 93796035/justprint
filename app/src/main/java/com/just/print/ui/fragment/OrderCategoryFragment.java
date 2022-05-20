@@ -7,7 +7,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Mark;
@@ -101,7 +101,7 @@ public class OrderCategoryFragment extends BaseFragment {
 
     public static List<Category> getCategoryList(){
         if(categoryList == null) {
-            categoryList = DaoExpand.queryAllNotDeleted(Applic.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+            categoryList = DaoExpand.queryAllNotDeleted(NingMengStyle.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         }
         return categoryList;
     }
@@ -109,7 +109,7 @@ public class OrderCategoryFragment extends BaseFragment {
     public static Map<Category, List<Menu>> getCategorizedContent(){
         if(categorizedContent == null){
             categorizedContent = new LinkedHashMap<>();
-            MenuDao dao = Applic.app.getDaoMaster().newSession().getMenuDao();
+            MenuDao dao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
             for (Category ca : getCategoryList()) {
                 List<Menu> menus = DaoExpand.queryMenuByCategory(ca, dao);
                 Collections.sort(menus, new Comparator<Menu>() {
@@ -204,7 +204,7 @@ public class OrderCategoryFragment extends BaseFragment {
 
         addMenuCtrl(Menu men) {
             mMenu = men;
-            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getMarkDao()), MarkViewHolder.class);
+            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getMarkDao()), MarkViewHolder.class);
             markAdapter.setClickItemListener(new OnClickItemListener() {
                 @Override
                 public void onClickItem(View view, int i) {

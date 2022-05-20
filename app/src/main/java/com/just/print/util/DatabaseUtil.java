@@ -3,7 +3,7 @@ package com.just.print.util;
 import android.util.Base64;
 
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 
 import org.json.JSONObject;
 
@@ -40,7 +40,7 @@ public class DatabaseUtil extends Thread{
      */
     public static void syncDbOntoServer(String license, String storeName, boolean isUpload) {
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
-        file = Applic.app.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + AppData.getShopName(Applic.app.getApplicationContext()));
+        file = NingMengStyle.app.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + AppData.getShopName(NingMengStyle.app.getApplicationContext()));
         if (file.exists()){
             DatabaseUtil util = new DatabaseUtil();
             if(license != null && license.length() > 0){
@@ -53,7 +53,7 @@ public class DatabaseUtil extends Thread{
             util.start();
         }else{
             L.e("DatabaseUtil", "can not find database!", null);
-            ToastUtil.showToast(Applic.app.getApplicationContext(), "Can not find the menu file.");
+            ToastUtil.showToast(NingMengStyle.app.getApplicationContext(), "Can not find the menu file.");
         }
     }
 
@@ -85,7 +85,7 @@ public class DatabaseUtil extends Thread{
     @Override
     public void run() {
         super.run();
-        if(AppUtils.hasInternet(Applic.app.getApplicationContext())){
+        if(AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
 
             HttpURLConnection urlConnection = null;
             URL url = null;
@@ -165,7 +165,7 @@ public class DatabaseUtil extends Thread{
                 urlConnection.disconnect();//使用完关闭TCP连接，释放资源
             }
         }else{
-            ToastUtil.showToast(Applic.app.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
+            ToastUtil.showToast(NingMengStyle.app.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
         }
     }
 
@@ -195,8 +195,8 @@ public class DatabaseUtil extends Thread{
 
     public static void writeDBByte(byte[] datas) {
 
-        File file = Applic.app.getApplicationContext().getDatabasePath(
-                DATABASE_NAME_PREFFIX + AppData.getShopName(Applic.app.getApplicationContext()));
+        File file = NingMengStyle.app.getApplicationContext().getDatabasePath(
+                DATABASE_NAME_PREFFIX + AppData.getShopName(NingMengStyle.app.getApplicationContext()));
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }

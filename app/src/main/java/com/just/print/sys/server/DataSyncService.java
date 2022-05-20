@@ -12,7 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Mark;
@@ -76,7 +76,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     for (SelectionDetail selectionDetail : lastSelection) {
                         orderContent.append("DishStart:");
                         Menu menu = selectionDetail.getDish();
-                        Category categoryStr = Applic.app.getDaoMaster().newSession().getCategoryDao().load(menu.getCid());
+                        Category categoryStr = NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().load(menu.getCid());
                         orderContent.append(URLEncoder.encode(categoryStr.getCname(), "UTF-8")).append("\n");
                         orderContent.append(URLEncoder.encode(menu.getMname(), "UTF-8")).append("\n");
 
@@ -198,7 +198,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     protected void sendSMSMessage(String phoneNumber, String content) {
 
         if(PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber)){
-            if (ContextCompat.checkSelfPermission(Applic.app.getApplicationContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(NingMengStyle.app.getApplicationContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
                 //this is display an interface for user to click send button, not OK for us, we need to send automatically and silently
 //                    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"+phoneNumber));
 //                    intent.putExtra("sms_body", content);
@@ -211,10 +211,10 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     Intent itDeliver = new Intent(SMS_DELIVERED_ACTION);
 
                     /* sentIntent参数为传送后接受的广播信息PendingIntent */
-                    PendingIntent mSendPI = PendingIntent.getBroadcast(Applic.app.getApplicationContext(), 0, itSend, 0);
+                    PendingIntent mSendPI = PendingIntent.getBroadcast(NingMengStyle.app.getApplicationContext(), 0, itSend, 0);
 
                     /* deliveryIntent参数为送达后接受的广播信息PendingIntent */
-                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(Applic.app.getApplicationContext(), 0, itDeliver, 0);
+                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(NingMengStyle.app.getApplicationContext(), 0, itDeliver, 0);
                     List<String> divideContents = smsManager.divideMessage(content);
                     for (String text:divideContents) {
                         /* 发送SMS短信，注意倒数的两个PendingIntent参数 */

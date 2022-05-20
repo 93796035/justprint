@@ -6,7 +6,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
@@ -25,7 +25,7 @@ public class ActivateFragmentActivity extends BaseFragmentActivity {
     @XClick({R.id.inputCodeButton})
     void submit(@XGetValueByView(fromId = R.id.inputCodeText) TextView textView) {
         //check if has internet.
-        if(!AppUtils.hasInternet(Applic.app.getApplicationContext())){
+        if(!AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
             showToast("Please connect the device to internet, then try again.");
             return;
         }

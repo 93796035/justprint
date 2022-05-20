@@ -7,6 +7,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface EventBus {
+
+    void post(String eventName, Object... argument);
+
+    void register(String eventName, EventBus.EventHandler handler);
+
+    void unregister(String eventName);
+
+    public interface EventHandler {
+        void handleEvent(String eventName, Object... argument);
+    }
+
     public class EventBusImpl implements EventBus {
         static final String tag = "EventBusImpl";
         final Map<String, EventHandler> event = new HashMap<String, EventHandler>();
@@ -27,15 +38,5 @@ public interface EventBus {
         public void unregister(String eventName) {
             event.remove(eventName);
         }
-    }
-
-    void post(String eventName, Object... argument);
-
-    void register(String eventName, EventBus.EventHandler handler);
-
-    void unregister(String eventName);
-
-    public interface EventHandler {
-        void handleEvent(String eventName, Object... argument);
     }
 }

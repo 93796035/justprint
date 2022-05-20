@@ -11,7 +11,7 @@ import android.widget.ViewSwitcher;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.expand.DaoExpand;
@@ -120,7 +120,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
     }
 
     private void loadPrinter() {
-        List<Printer> list = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getPrinterDao());
+        List<Printer> list = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());
         WifiPrintService.getInstance().reInitPrintRelatedMaps();
         printerXAdapter.setData(list);
     }

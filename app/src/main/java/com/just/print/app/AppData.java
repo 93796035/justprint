@@ -157,7 +157,7 @@ public class  AppData extends Thread{
             String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
             getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopName);
         }
-        Applic.app.initDaoMaster(shopName);
+        NingMengStyle.app.initDaoMaster(shopName);
     }
 
     public static void createPrinter(
@@ -177,7 +177,7 @@ public class  AppData extends Thread{
         //            printer.setFirstPrint(1);
         //        }
         printer.setState(com.just.print.db.expand.State.def);
-        Applic.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
+        NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
         printer.updateAndUpgrade();
     }
 
@@ -222,7 +222,7 @@ public class  AppData extends Thread{
     }
 
     public static String getShopName(){
-        return getShopName(Applic.app.getApplicationContext());
+        return getShopName(NingMengStyle.app.getApplicationContext());
     }
 
     public static String getShopName(Context context) {
@@ -234,7 +234,7 @@ public class  AppData extends Thread{
     }
 
     public static String getUserName() {
-        return getShopData(Applic.app.getApplicationContext()).getString("userName", "");
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("userName", "");
     }
 
     public static String getUserName(Context context) {
@@ -242,7 +242,7 @@ public class  AppData extends Thread{
     }
 
     public static String getLicense() {
-        return getLicense(Applic.app.getApplicationContext());
+        return getLicense(NingMengStyle.app.getApplicationContext());
     }
 
     public static String getLicense(Context context) {
@@ -261,23 +261,23 @@ public class  AppData extends Thread{
             return;
         }
 
-        getShopData(Applic.app.getApplicationContext()).putString("license", inputedSN);
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
         startActivate();
     }
 
     public static void putCustomData(String key, String value) {
-        getShopData(Applic.app.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
     }
     public static String getCustomData(String key) {
-        return getShopData(Applic.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
     }
 
     public static String getLastModifyTime(){
-        return getShopData(Applic.app.getApplicationContext()).getString("LastSyncDate","");
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("LastSyncDate","");
     }
 
     public static void updataeLastModifyTime(String lastUpdateTime) {
-        getShopData(Applic.app.getApplicationContext()).putString("LastSyncDate",
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("LastSyncDate",
                 lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
     }
 
@@ -444,7 +444,7 @@ public class  AppData extends Thread{
     public void run() {
         super.run();
         String contentToSend = AppData.getCustomData(AppData.ContentToSend);
-        if(contentToSend != null && contentToSend.length() > 0 && AppUtils.hasInternet(Applic.app.getApplicationContext())){
+        if(contentToSend != null && contentToSend.length() > 0 && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
             HttpURLConnection urlConnection = null;
             try {
                 urlConnection = prepareConnection(schema, "POST");
@@ -525,7 +525,7 @@ public class  AppData extends Thread{
         inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
         String answer = AppData.getCustomData(inputedSN);
         if(answer == null || answer.length() == 0) {
-            answer = SharedPreferencesHelper.getCache(Applic.app.getApplicationContext(), inputedSN).getString(inputedSN);
+            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
         }
         showToast(inputedSN + " = " + answer);
     }

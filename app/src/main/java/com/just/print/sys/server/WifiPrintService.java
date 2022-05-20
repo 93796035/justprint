@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuPrint;
@@ -157,7 +157,7 @@ public class WifiPrintService implements Runnable{
         ipContentMap = new HashMap<String,List<String>>();
         ipSelectionsMap = new HashMap<String,List<SelectionDetail>>();
 
-        List<Printer> printerList = DaoExpand.queryNotDeletedAll(Applic.app.getDaoMaster().newSession().getPrinterDao());//读取打印机位置
+        List<Printer> printerList = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());//读取打印机位置
         for(Printer printer:printerList){
             String ip = printer.getIp();
             ipPrinterMap.put(ip,printer);
@@ -218,8 +218,8 @@ public class WifiPrintService implements Runnable{
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<SelectionDetail>() {
                     @Override
                     public int compare(SelectionDetail dishesDetailModel, SelectionDetail t1) {
-                        Category c1 = Applic.app.getDaoMaster().newSession().getCategoryDao().load(dishesDetailModel.getDish().getCid());
-                        Category c2 = Applic.app.getDaoMaster().newSession().getCategoryDao().load(t1.getDish().getCid());
+                        Category c1 = NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().load(dishesDetailModel.getDish().getCid());
+                        Category c2 = NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().load(t1.getDish().getCid());
                         return c1.getDisplayIdx().compareTo(c2.getDisplayIdx());
                     }
                 });
@@ -251,7 +251,7 @@ public class WifiPrintService implements Runnable{
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();
                         String currentCategory = null;
                         for(SelectionDetail selectionDetail : dishList){
-                            Category c1 = Applic.app.getDaoMaster().newSession().getCategoryDao().load(selectionDetail.getDish().getCid());
+                            Category c1 = NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().load(selectionDetail.getDish().getCid());
                             if(currentCategory == null){    //if not set yet, then set the first value.
                                 currentCategory = c1.getCname();
                                 tlist.add(selectionDetail);
@@ -333,14 +333,14 @@ public class WifiPrintService implements Runnable{
         bill.setState(tableNum);
 
         bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-        BillDao billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+        BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
         billDao.insertOrReplace(bill);
     }
 
     private static Double saveSaleRecToDB(boolean isCancel) {
         Double priceFR = 0.0;
         //save the menu into database.
-        SaleRecordDao saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
+        SaleRecordDao saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
             int number = selectionDetail.getDishNum();
             Menu menu = selectionDetail.getDish();
@@ -411,7 +411,7 @@ public class WifiPrintService implements Runnable{
             return null;
         }
         L.d("ConfigPrintReportFragment","printAndSaveCommand");
-        List<Printer> printers = Applic.app.getDaoMaster().newSession().getPrinterDao().loadAll();
+        List<Printer> printers = NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().loadAll();
         String printerIP = AppData.getCustomData(AppData.reportPrinter);
         if(printerIP == null || printerIP.length() < 8) {
             printerIP = printers.get(0).getIp();

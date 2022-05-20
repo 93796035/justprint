@@ -1,26 +1,18 @@
 package com.just.print.ui.fragment;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
-import com.just.print.db.expand.DaoExpand;
-import com.just.print.sys.model.SelectionDetail;
-import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
-import com.just.print.ui.holder.ConfigBillViewHolder;
-import com.just.print.ui.holder.ConfigOrderViewHolder;
-import com.just.print.ui.holder.OrderMenuViewHolder;
-import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
@@ -28,7 +20,6 @@ import com.stupid.method.reflect.annotation.XGetValueByView;
 import com.stupid.method.reflect.annotation.XViewByID;
 import com.stupid.method.widget.flowlayout.FlowListView;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +63,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
         }
         findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
-        saleRecordDao = Applic.app.getDaoMaster().newSession().getSaleRecordDao();
+        saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
         List<SaleRecord> saleRecord = saleRecordDao.loadAll();
         if(saleRecord == null || saleRecord.size() == 0){
             getActivity().finish();
@@ -80,7 +71,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
             return;
         }
 
-        billDao = Applic.app.getDaoMaster().newSession().getBillDao();
+        billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
 // comment out in case some boss don't like to see it.       //init the existing bills area.
 //        List<Bill> orders = new ArrayList<>();
 //        try{
@@ -151,7 +142,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
 //        //show the content of this order in a pop up view
 //
 ////        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-//        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), Applic.app.getDaoMaster().newSession().getSaleRecordDao());
+//        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
 //
 //        XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
 //        adapter.setData(data);

@@ -9,7 +9,7 @@ import android.widget.ViewSwitcher;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.Applic;
+import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.ui.holder.ConfigTableViewHolder;
@@ -76,7 +76,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
             mark1.setState(0);
         }
         mark1.setVersion(-1l);
-        Applic.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
+        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
         mark1.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);
         loadTables();
