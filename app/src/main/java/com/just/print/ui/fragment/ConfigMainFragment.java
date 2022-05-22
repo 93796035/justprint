@@ -133,7 +133,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     }
 
     @XClick({R.id.configMenuManager, R.id.configPrintManager, R.id.configTagManager, R.id.configTableManager,
-            R.id.configUserManager, R.id.configPrintReport, R.id.uploadDB, R.id.downloadDB, R.id.uploadConfig, R.id.downloadConfig, R.id.reactivate})
+            R.id.configUserManager, R.id.configCusManager, R.id.configPrintReport,R.id.uploadDB, R.id.downloadDB, R.id.uploadConfig, R.id.downloadConfig, R.id.reactivate})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.configMenuManager:
@@ -150,6 +150,9 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
                 break;
             case R.id.configPrintManager:
                 getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigPrinterFragment.class);
+                break;
+            case R.id.configCusManager:
+                getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigCustFragment.class);
                 break;
             case R.id.configPrintReport:
                 getEventBus().post(ConfigFragmentActivity.CHANGE_PAGE, ConfigPrintReportFragment.class);

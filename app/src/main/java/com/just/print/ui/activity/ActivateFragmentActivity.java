@@ -13,7 +13,7 @@ import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 //when system start up, MainFragment will decide to start loginFragmentActivity or this activity
-//base on the time left, at that time, configMainFragmentActivity and relevant fragment not exist...
+//base on the timeleft > 0 or not, at that time, configMainFragmentActivity and relevant fragment not exist...
 //I guess that's the reason of this class exists here.
 public class ActivateFragmentActivity extends BaseFragmentActivity {
 

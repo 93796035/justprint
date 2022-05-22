@@ -916,7 +916,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTableTbtn.setChecked(true);
         loadOrderMenu();
         if(tables.size() == 0) {
-            odIdTable2.setText(AppData.getCustomData("kitchenBillIdx"));
+            odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
         }else{
             odIdTable2.setText("");
             CustomerSelection.getInstance().setTableName("");

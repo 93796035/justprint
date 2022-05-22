@@ -34,49 +34,49 @@ public class  AppData extends Thread{
     public static String recentNum = "keep";
     public static String orderpassword = "op";
     public static String labelLines = "lls";
-    public static String TableMark = "tablemark";
+
     private static String SERVER_URL = "http://216.137.179.176/"; //A2hosting is good but can not send email
     private static String EMAIL_SERVER = "https://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
-    public static final String KEY_SHOP_ID = "KEY_SHOP_ID";
-    private static final String KEY_PREFIX_SHOP_ID_ = "KEY_SHOP_ID_";
     private static final String KEY_SHOP_NAME = "shopName";
 
-    //all keys
-    //no sync
-    public static final String debug = "debug";
-    public static final String limitation = "limitation";
-    public static final String lastsuccessStr = "lastsuccessStr";
-    public static final String number = "number";
-    public static final String startTime = "startTime";
-    public static final String endTime = "endTime";
-    public static final String reportStartDate = "reportStartDate";
-    public static final String lastsuccess = "lastsuccess";
-    public static final String reportIdx = "reportIdx";
-    public static final String AllowDownloadFromeOthers = "AllowDownloadFromeOthers";
-    public static final String kitchenBillIdx = "kitchenBillIdx";
-    public static final String font = "font";
-    public static final String labelFont = "fontlb";
-    public static final String mode = "mode";
-    public static final String code = "code";
-    public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
-    public static final String BeiYangPrinter = "BeiYangPrinter";
-    public static final String autoSearchWifiLabel = "autoSearchWifiLabel";
+    //all keys=================================================
+    //no need to sync, because every pad may has differnet configs----
     public static final String autoSearchBeiYang = "autoSearchBeiYang";
+    public static final String autoSearchWifiLabel = "autoSearchWifiLabel";
+    public static final String BeiYangPrinter = "BeiYangPrinter";
+    public static final String code = "code";//activation
     public static final String ContentToSend = "ContentToSend";
+    public static final String debug = "debug";
+    public static final String endTime = "endTime";
+    public static final String font = "font";
+    public static final String kitchenBillIdx = "kitchenBillIdx";
+    public static final String labelFont = "fontlb";
+    public static final String limitation = "limitation";
+    public static final String lastsuccess = "lastsuccess";
+    public static final String lastsuccessStr = "lastsuccessStr";
+    public static final String mode = "mode";
+    public static final String number = "number";
+    public static final String reportIdx = "reportIdx";
+    public static final String reportStartDate = "reportStartDate";
+    public static final String startTime = "startTime";
 
     //to sync
     public static final String adminPassword = "adminPassword";
+    public static final String AllowDownloadFromOtherServer = "AllowDownloadFromOtherServer";
     public static final String appmode = "appmode";
     public static final String clientMode = "clmode";
     public static final String ColorOnSelect = "cos";
+    public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
     public static final String column = "column";
     public static final String tblcol = "tblcol";
     public static final String conbineMarkPrice = "conbineMarkPrice";
     public static final String emailorder = "emailorder";
+    public static final String font_h = "font_h";
+    public static final String font_w = "font_w";
     public static final String format_style = "format_style";
     public static final String hasCategory = "hasCategory";
     public static final String hideCancelItem = "hidecancelitem";
@@ -92,6 +92,7 @@ public class  AppData extends Thread{
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelsize = "labelsize";
+    public static final String line_height = "line_height";
     public static final String gap = "gap";
     public static final String StartX = "startx";
     public static final String StartY = "starty";
@@ -111,18 +112,31 @@ public class  AppData extends Thread{
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
+    public static final String TableMark = "tablemark";
     public static final String TableSelectable = "tableselectable";
+    public static final String taxrate = "taxrate";
     public static final String title_position = "title_position";
     public static final String userPassword = "userPassword";
     public static final String waitTime = "waitTime";
     public static final String width = "width";
+    public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
-    public static String[] keysToSync = new String[]{server_url, appmode, ShowMarkPirce, userPassword, adminPassword , custChars,
-            column, serverip, reportPrinter, waitTime, conbineMarkPrice,
-            reportFont, reportWidth, sep_str1, sep_str2, menuNameLength,
-            width, kitchentitle, format_style, title_position, priceonkitchenbill,
-            KEY_CUST_LAST_CHAR, hideCancelItem,sendReport,sendOnlyWhenReset, HideKitchenBillId,
-            HideKitchenBillId, ColorOnSelect,TableSelectable, SendButtonHeight, hasCategory};
+    public static String[] keysToSync = new String[]{adminPassword, AllowDownloadFromOtherServer, appmode, clientMode, ColorOnSelect,
+            combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
+            emailorder, email_server, font_h, font_w, format_style,
+            gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud, HideKitchenBillName,
+            HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting, HideTable, isSingleMark,
+            KEY_CUST_LAST_CHAR, kitchentitle, labelsize, line_height, menuNameLength, priceonkitchenbill, reportFont, reportPrinter, reportWidth, sep_str1,
+            sep_str2, ShowMarkPirce, SendButtonHeight, sendOnlyWhenReset, sendReport, sendSM,
+            server_url, serverip, StartX, StartY, TableMark, TableSelectable, taxrate, tblcol, title_position,
+            userPassword, waitTime, width, WifiLabelPrinter};
+
+    public static String[] keysNotToSync = new String[]{
+            autoSearchBeiYang, autoSearchWifiLabel, BeiYangPrinter, code, ContentToSend,
+            debug, endTime, font, kitchenBillIdx, labelFont,
+            limitation, lastsuccess, lastsuccessStr, mode, number,
+            reportIdx, reportStartDate, startTime};
+
     public static String curBillIdx;
 
     public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));
@@ -250,6 +264,7 @@ public class  AppData extends Thread{
     }
 
     public static void setActivateCode(String inputedSN, TextView textView) {
+        inputedSN = inputedSN.trim();
         if(inputedSN.startsWith("-") && (inputedSN.indexOf(":") > 1 || inputedSN.indexOf("：") > 1)){
             setCustomValue(inputedSN, textView);
             return;
@@ -408,6 +423,7 @@ public class  AppData extends Thread{
         }
         return true;
     }
+
     public static int getThemColor() {
         String color = getCustomData(AppData.ColorOnSelect);
         if(color == null || color.length() != 6){

@@ -377,7 +377,7 @@ public class WifiPrintService implements Runnable{
 
             priceFR += price;
 
-            if (!"true".equals(AppData.getCustomData("combineMarkPrice"))) {  //by defalut mark price is not added into salesrecord, so, generate saleRecord for the marks.
+            if (!"true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {  //by defalut mark price is not added into salesrecord, so, generate saleRecord for the marks.
                 List<Mark> marks = selectionDetail.getMarkList();
                 if (marks != null) {
                     for (Mark mark : marks) {
@@ -451,7 +451,7 @@ public class WifiPrintService implements Runnable{
         }
         float tax = 1.15f;
         try{
-            tax = Float.valueOf(AppData.getCustomData("taxrate"));
+            tax = Float.valueOf(AppData.getCustomData(AppData.taxrate));
         }catch (Exception e){
             //do nothing.
         }
@@ -751,22 +751,22 @@ public class WifiPrintService implements Runnable{
 
     private void doBeiYangPrint(String font, String content){
         //get out customized line_height
-        String line_height = AppData.getCustomData(curPrintIp + "line_height");
+        String line_height = AppData.getCustomData(curPrintIp + AppData.line_height);
         if (StringUtils.isBlank(line_height)) {
-            line_height = AppData.getCustomData("line_height");
+            line_height = AppData.getCustomData(AppData.line_height);
         }
 
-        String font_w = AppData.getCustomData(curPrintIp + "font_w");
+        String font_w = AppData.getCustomData(curPrintIp + AppData.font_w);
         if (StringUtils.isBlank(font_w)) {
-            font_w = AppData.getCustomData("font_w");
+            font_w = AppData.getCustomData(AppData.font_w);
         }
         if (StringUtils.isBlank(font_w)) {
             font_w = font;
         }
 
-        String font_h = AppData.getCustomData(curPrintIp + "font_h");
+        String font_h = AppData.getCustomData(curPrintIp + AppData.font_h);
         if (StringUtils.isBlank(font_h)) {
-            font_h = AppData.getCustomData("font_h");
+            font_h = AppData.getCustomData(AppData.font_h);
         }
         if (StringUtils.isBlank(font_h)) {
             font_h = font;

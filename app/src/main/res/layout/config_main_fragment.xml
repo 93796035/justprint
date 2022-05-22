@@ -75,6 +75,13 @@
             android:text="Table Management" />
 
         <TextView
+            android:id="@+id/configCusManager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Customizations" />
+
+        <TextView
             android:id="@+id/configPrintReport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
