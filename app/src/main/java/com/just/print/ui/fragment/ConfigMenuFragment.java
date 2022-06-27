@@ -72,7 +72,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
     @XViewByID(R.id.addMarkListView)
     ListView addMarkListView;
 
-    @XViewByID(R.id.curCategory)
+    @XViewByID(R.id.curCategoryName)
     TextView curCategoryName;
 
     MenuDao menuDao;
@@ -84,7 +84,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             switch (view.getId()) {
                 case android.R.id.content:
                     curCategory = i;
-                    curCategoryName.setText(categoryXAdapter.get(i));
+                    curCategoryName.setText(categoryXAdapter.get(i).getCname());
                     onChangeCategory(categoryXAdapter.get(i));
                     break;
 
@@ -274,6 +274,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
         loadCategory();
         loadMenu();
+        curCategoryName.setText(categoryXAdapter.get(0).getCname());
     }
 
     @XClick({R.id.showCategory})
