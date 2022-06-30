@@ -427,7 +427,7 @@ public class  AppData extends Thread{
     public static int getThemColor() {
         String color = getCustomData(AppData.ColorOnSelect);
         if(color == null || color.length() != 6){
-            color = "0091D5";
+            color = "7D7E2C";
         }
         return Color.parseColor("#" + color);
     }
