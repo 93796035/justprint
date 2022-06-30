@@ -22,7 +22,7 @@
             android:padding="8dp"
             android:text="Please Input Your Number:"
             android:textAlignment="center"
-            android:textColor="#3F51B5"
+            android:textColor="#7D7E2C"
             android:textSize="36sp"
             android:textStyle="bold" />
 
@@ -163,7 +163,7 @@
             android:inAnimation="@android:anim/slide_in_left"
             android:outAnimation="@android:anim/slide_out_right">
 
-            <!--categories and menu-->
+            <!--categories, selected dishes and menu selection area-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -173,70 +173,11 @@
                     android:id="@+id/odIdCategoryGrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#3F51B5"></GridView>
-
+                    android:background="#7D7E2C"></GridView>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal">
-                    <!--area of selected dishes and menu/tables-->
-                    <LinearLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent"
-                        android:orientation="vertical"
-                        android:layout_weight="1">
-                        <!--mark short cuts-->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="#DCDCDC"
-                            android:orientation="vertical">
-                            <!--
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <ToggleButton
-                                    android:id="@+id/odIdDefaultTbtn"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/tag_bg"
-                                    android:layout_marginTop="10px"
-                                    android:layout_marginLeft="10px"
-                                    android:layout_marginRight="20px"
-                                    android:button="@null"
-                                    android:minHeight="10dp"
-                                    android:minWidth="25dp"
-                                    android:paddingBottom="5dp"
-                                    android:paddingLeft="10dp"
-                                    android:paddingRight="10dp"
-                                    android:paddingTop="5dp"
-                                    android:textOff=""
-                                    android:textOn=""
-                                    android:layout_weight="1"/>
-                            </LinearLayout>
-                            -->
-                            <GridView
-                                android:id="@+id/odIdMarksGrid"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:numColumns="2">
-                            </GridView>
-                        </LinearLayout>
-                        <!--selected dishes-->
-                        <ListView
-                            android:id="@+id/odIdFrLoutMenuList"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:divider="#000000"
-                            android:dividerHeight="1px"
-                            android:stackFromBottom="true"
-                            android:transcriptMode="alwaysScroll">
-
-                        </ListView>
-                    </LinearLayout>
-
 
                     <ViewSwitcher
                         android:id="@+id/menuTableSwitcher"
@@ -349,6 +290,63 @@
                             android:textSize="24sp"
                             android:textStyle="bold"></GridView>
                     </ViewSwitcher>
+                    <!--area of selected dishes and menu/tables-->
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:orientation="vertical"
+                        android:layout_weight="1">
+                        <!--mark short cuts-->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="#DCDCDC"
+                            android:orientation="vertical">
+                            <!--
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <ToggleButton
+                                    android:id="@+id/odIdDefaultTbtn"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/tag_bg"
+                                    android:layout_marginTop="10px"
+                                    android:layout_marginLeft="10px"
+                                    android:layout_marginRight="20px"
+                                    android:button="@null"
+                                    android:minHeight="10dp"
+                                    android:minWidth="25dp"
+                                    android:paddingBottom="5dp"
+                                    android:paddingLeft="10dp"
+                                    android:paddingRight="10dp"
+                                    android:paddingTop="5dp"
+                                    android:textOff=""
+                                    android:textOn=""
+                                    android:layout_weight="1"/>
+                            </LinearLayout>
+                            -->
+                            <GridView
+                                android:id="@+id/odIdMarksGrid"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:numColumns="2">
+                            </GridView>
+                        </LinearLayout>
+                        <!--selected dishes-->
+                        <ListView
+                            android:id="@+id/odIdFrLoutMenuList"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:divider="#000000"
+                            android:dividerHeight="1px"
+                            android:stackFromBottom="true"
+                            android:transcriptMode="alwaysScroll">
+
+                        </ListView>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

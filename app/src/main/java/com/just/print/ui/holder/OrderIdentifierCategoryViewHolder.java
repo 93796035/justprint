@@ -16,7 +16,7 @@ public class OrderIdentifierCategoryViewHolder extends XViewHolder<String>{
     @Override
     public void onCreate(Context context) {
         textView = (Button)findViewById(R.id.buttonholder);
-        textView.setTextColor(Color.parseColor("#3F51B5"));
+        textView.setTextColor(Color.parseColor("#7D7E2C"));
         textView.setOnClickListener(this);
         textView.setTextSize(24);
     }
