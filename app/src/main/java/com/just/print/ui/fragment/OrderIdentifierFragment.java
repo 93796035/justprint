@@ -201,7 +201,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 items[i] = menus.get(i).getID().trim();
             }
 
-            if("true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+            if(AppData.getCustomData(AppData.TableSelectable) == null || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
                 odIdTable2.setText("T");
             }else{
                 odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
@@ -273,7 +273,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTableTbtn.setText("");
         odIdTableTbtn.setChecked(true);
         odIdTableTbtn.setOnClickListener(this);
-        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+        if(AppData.getCustomData(AppData.TableSelectable) == null || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
             odIdTable2.setOnClickListener(this);
         }
         //initSelected dishes part.

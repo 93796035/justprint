@@ -139,7 +139,7 @@ public class  AppData extends Thread{
 
     public static String curBillIdx;
 
-    public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));
+    public static boolean showID = "false".equals(AppData.getCustomData(AppData.HideKitchenBillId));
     public static boolean showName = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillName));
     public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
     public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));

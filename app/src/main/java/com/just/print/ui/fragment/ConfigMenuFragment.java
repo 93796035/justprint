@@ -3,6 +3,7 @@ package com.just.print.ui.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -48,7 +49,8 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
     private Category modifyingCategory = null;
 
     XAdapter2<Category> categoryXAdapter;
-
+    
+    private String previouseCode = "  "; //give 3 empty space to avoid excption, because latter will use subString(1).
     List<Printer> addPrints;
     XAdapter2<Printer> addPrintsAdapter;
 
@@ -285,15 +287,15 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         ((EditText)findViewById(R.id.displayIdx)).setText("");
     }
 
-    @XClick({R.id.showMenu})
-    private void showMenu() {
+    @XClick({R.id.addMenuItem})
+    private void addMenuItem() {
         findViewById(R.id.categoryLayout).setVisibility(View.GONE);
         findViewById(R.id.menuLayout).setVisibility(View.VISIBLE);
 
-        ((EditText)findViewById(R.id.etMenuID)).setText("");
+        ((EditText)findViewById(R.id.etMenuID)).setText(getDefaultCode());
         ((EditText)findViewById(R.id.etMenu)).setText("");
         //printers
-        addPrints = new ArrayList<Printer>(1);
+        addPrints = addPrints == null ? new ArrayList<Printer>(1) : addPrints;
         addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
         addPrintListView.setAdapter(addPrintsAdapter);
         addPrintsAdapter.setClickItemListener(new IXOnItemClickListener() {
@@ -304,7 +306,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             }
         });
         //marks
-        addedMarks = new ArrayList<Mark>(1);
+        addedMarks = addedMarks == null ? new ArrayList<Mark>(1) : addedMarks;
         addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, ConfigAddMarkViewHolder.class);
         addMarkListView.setAdapter(addMarksAdapter);
         addMarksAdapter.setClickItemListener(new IXOnItemClickListener() {
@@ -315,6 +317,38 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             }
         });
 
+    }
+
+    private String getDefaultCode() {
+        String defautlCode = "";
+        int endCode = parseInt(previouseCode);
+
+        if(endCode >= 0){
+            defautlCode = String.valueOf(endCode + 1);
+        }else {
+            int idx = previouseCode.indexOf(".");
+            if (idx < 0) {
+                idx = 0;
+                if(previouseCode.length() > 0 && parseInt(previouseCode.substring(1)) <= 0) {
+                    idx = 1;
+                }
+            }
+            String preFix = previouseCode.substring(0, idx + 1);
+            defautlCode = previouseCode.substring(idx + 1);
+            endCode = parseInt(defautlCode);
+            if (endCode > 0) {
+               defautlCode = preFix + String.valueOf(endCode + 1);
+            }
+        }
+        return defautlCode;
+    }
+
+    private int parseInt(String code ){
+        try{
+            return Integer.parseInt(code);
+        }catch (Exception e){
+            return -1;
+        }
     }
 
     @XClick({R.id.addMenu})
@@ -379,6 +413,7 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
             menu.setCid(mCategory.getId());
             menu.setPrice(price);
             menuDao.insert(menu);
+            previouseCode = menu.getID();
         }else{              //the code is same with some record in db. means it's updating....
             menu.setID(mid.getText().toString().trim());
             menu.setState(State.def);

@@ -1311,7 +1311,7 @@ public class WifiPrintService implements Runnable{
             }else {
                 String showID = AppData.getCustomData(printerIp + AppData.HideKitchenBillId);
                 String showName = AppData.getCustomData(printerIp + AppData.HideKitchenBillName);
-                if (showID.length() == 0 ? AppData.showID : !"true".equals(showID)) {
+                if (showID.length() == 0 ? AppData.showID : "false".equals(showID)) {
                     sb.append(dd.getDish().getID());                //dish id
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
