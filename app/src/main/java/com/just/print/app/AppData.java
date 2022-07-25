@@ -1,6 +1,7 @@
 package com.just.print.app;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.widget.TextView;
@@ -69,6 +70,7 @@ public class  AppData extends Thread{
     public static final String appmode = "appmode";
     public static final String clientMode = "clmode";
     public static final String ColorOnSelect = "cos";
+    public static final String ColorOfTheme = "cot";
     public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
     public static final String column = "column";
@@ -89,6 +91,7 @@ public class  AppData extends Thread{
     public static final String HideRubber = "hiru";
     public static final String HideSetting = "hise";
     public static final String isSingleMark = "isSingleMark";
+    public static final String isScreenHorizontal = "isScreenHorizontal";
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelsize = "labelsize";
@@ -121,15 +124,19 @@ public class  AppData extends Thread{
     public static final String width = "width";
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
-    public static String[] keysToSync = new String[]{adminPassword, AllowDownloadFromOtherServer, appmode, clientMode, ColorOnSelect,
+    public static String[] keysToSync = new String[]{adminPassword,
+            AllowDownloadFromOtherServer, appmode, clientMode, ColorOnSelect, ColorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, format_style,
-            gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud, HideKitchenBillName,
-            HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting, HideTable, isSingleMark,
-            KEY_CUST_LAST_CHAR, kitchentitle, labelsize, line_height, menuNameLength, priceonkitchenbill, reportFont, reportPrinter, reportWidth, sep_str1,
-            sep_str2, ShowMarkPirce, SendButtonHeight, sendOnlyWhenReset, sendReport, sendSM,
-            server_url, serverip, StartX, StartY, TableMark, TableSelectable, taxrate, tblcol, title_position,
-            userPassword, waitTime, width, WifiLabelPrinter};
+            gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
+            HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
+            HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelsize,
+            line_height, menuNameLength, priceonkitchenbill, reportFont, reportPrinter,
+            reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
+            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
+            StartX, StartY, TableMark, TableSelectable, taxrate,
+            tblcol, title_position, userPassword, waitTime, width,
+            WifiLabelPrinter};
 
     public static String[] keysNotToSync = new String[]{
             autoSearchBeiYang, autoSearchWifiLabel, BeiYangPrinter, code, ContentToSend,
@@ -425,7 +432,7 @@ public class  AppData extends Thread{
     }
 
     public static int getThemColor() {
-        String color = getCustomData(AppData.ColorOnSelect);
+        String color = getCustomData(AppData.ColorOfTheme);
         if(color == null || color.length() != 6){
             color = "0091D5";
         }
@@ -454,6 +461,11 @@ public class  AppData extends Thread{
 
     public static String getLabelSN() {
         return getCustomData(AppData.labelSN);
+    }
+
+    public static int getScreenOrientation() {
+        return "true".equals(getCustomData(AppData.isScreenHorizontal)) ?
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     @Override
@@ -573,7 +585,7 @@ public class  AppData extends Thread{
         }
         String SettingType = inputedSN.substring(1,p);
         inputedSN = inputedSN.substring(p + 1);
-        switch (SettingType.toLowerCase()) {
+        switch (SettingType.toLowerCase()) { //we support some short cuts.
             case "ap":   // means theres parameters
                 AppData.putCustomData(AppData.adminPassword, inputedSN);
                 showToast("App has set adminPassword to: " + inputedSN);
@@ -589,6 +601,10 @@ public class  AppData extends Thread{
             case "cos":
                 AppData.putCustomData(AppData.ColorOnSelect, inputedSN);
                 showToast("App has set ColorOnSelect to: " + inputedSN);
+                return;
+            case "cot":
+                AppData.putCustomData(AppData.ColorOfTheme, inputedSN);
+                showToast("App has set ColorOfTheme to: " + inputedSN);
                 return;
             case "cn":
                 AppData.putCustomData(AppData.column, inputedSN);

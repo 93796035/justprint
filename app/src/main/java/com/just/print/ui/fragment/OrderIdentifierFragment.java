@@ -168,6 +168,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.odIdInfo).setVisibility(View.GONE);
             findViewById(R.id.odIdSndBtn).setVisibility(View.GONE);
             findViewById(R.id.topButtons).setVisibility(View.GONE);
+            findViewById(R.id.odIdCategoryGrid).setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.odIdTools).setBackgroundColor(AppData.getThemColor());
 
             if(categories.size() > 1) {
