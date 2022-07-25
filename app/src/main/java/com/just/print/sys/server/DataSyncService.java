@@ -42,6 +42,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
 
     private static DataSyncService dataSyncService;
     protected String serverIpAndPort;
+    private String URL_SERVER_NEWORDER;
     protected String lastDownLoad;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -58,7 +59,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
 
     private DataSyncService(){
         serverIpAndPort = AppData.getCustomData(AppData.serverip);
-
+        URL_SERVER_NEWORDER = "https://" + serverIpAndPort + "/security/newOrders";
         executorService.execute(this);
     }
 
@@ -68,7 +69,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
             if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
                 HttpURLConnection urlConnection = null;
                 try {
-                    urlConnection = AppData.prepareConnection("https://" + serverIpAndPort + "/security/newOrders","POST");
+                    urlConnection = AppData.prepareConnection(URL_SERVER_NEWORDER,"POST");
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : AppData.getUserName() + tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                     json.put("billIndex", URLEncoder.encode("1", "UTF-8"));//把数据put进json对象中
