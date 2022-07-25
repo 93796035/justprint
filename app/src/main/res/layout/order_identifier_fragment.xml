@@ -172,8 +172,7 @@
                 <GridView
                     android:id="@+id/odIdCategoryGrid"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#7D7E2C"></GridView>
+                    android:layout_height="wrap_content"></GridView>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
