@@ -12,6 +12,7 @@ import com.just.print.ui.fragment.LoginFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.L;
 import com.just.print.util.SharedPreferencesHelper;
+import com.just.print.util.ToastUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -512,13 +513,18 @@ public class  AppData extends Thread{
 
     private void absortTheConfiguration(String responseString) {
         String[] strs = responseString.split(",");
+        int count = 0;
         for (String entry : strs) {
             int i = entry.indexOf(":");
             if(i > 0){
-                AppData.putCustomData(entry.substring(0, i), entry.substring(i + 1));
+                String value = entry.substring(i + 1);
+                AppData.putCustomData(entry.substring(0, i), value);
+                if(!"".equals(value)){
+                    count++;
+                }
             }
         }
-
+        ToastUtil.showToast(count + " configurations in this device has been refreshed successfully.");
     }
 
     @NonNull

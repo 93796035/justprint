@@ -185,6 +185,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
             //might need more col for menu.
             String col = AppData.getCustomData(AppData.column);
+            if("".equals(col)){
+                col = "2";
+            }
             try {
                 ((GridView) findViewById(R.id.odMenuGv)).setNumColumns(Integer.valueOf(col));
                 int tableViewColumn = Integer.valueOf(col);
