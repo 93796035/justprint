@@ -35,7 +35,12 @@ public class UploadingConfigConfirmFragment extends BaseFragment{
 
     @XClick({R.id.btnConfirmUploadOK})
     private void onButtonOK(){
-        DatabaseUtil.syncConfigOntoServer(AppData.getLicense(), AppData.getShopName(),true);
+        String license = AppData.getLicense();
+        if(license.length() < 6){
+            showToast("Please activate the application first.");
+            return;
+        }
+        DatabaseUtil.syncConfigOntoServer(license, AppData.getShopName(),true);
         getActivity().finish();
     }
 

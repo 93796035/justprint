@@ -24,8 +24,8 @@ public class SynchronizeDBFragment extends BaseFragment{
 
     @XViewByID(R.id.store_name)
     EditText store_name;
-    @XViewByID(R.id.password)
-    EditText password;
+    @XViewByID(R.id.license)
+    EditText license;
     @XViewByID(R.id.lastModified)
     TextView lastModified;
 
@@ -42,7 +42,7 @@ public class SynchronizeDBFragment extends BaseFragment{
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
         store_name.setText(AppData.getShopName());
-        //password.setText(AppData.getLicense());
+        license.setText(AppData.getLicense());
         String lastSyncDate = AppData.getLastModifyTime();
         if(lastSyncDate == null || lastSyncDate.length() == 0){
             lastSyncDate = "1";
@@ -52,7 +52,12 @@ public class SynchronizeDBFragment extends BaseFragment{
 
     @XClick({R.id.btnConfirmResetReportOK})
     private void onButtonOK(){
-        DatabaseUtil.syncDbOntoServer(store_name.getText().toString(), password.getText().toString(), false);
+        String code = license.getText().toString();
+        if(code.length() < 6){
+            showToast("Please activate the application first.");
+            return;
+        }
+        DatabaseUtil.syncDbOntoServer(code, store_name.getText().toString(),  false);
         getActivity().finish();
     }
 
