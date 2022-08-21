@@ -276,7 +276,9 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
 
         loadCategory();
         loadMenu();
-        curCategoryName.setText(categoryXAdapter.get(0).getCname());
+        if(categoryXAdapter.size() > 0) {
+            curCategoryName.setText(categoryXAdapter.get(0).getCname());
+        }
     }
 
     @XClick({R.id.showCategory})
