@@ -2,6 +2,8 @@ package com.just.print.ui.fragment;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
@@ -13,8 +15,12 @@ import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
+import com.stupid.method.reflect.annotation.XViewByID;
 
 public class ReActivateFragment extends BaseFragment{
+
+    @XViewByID(R.id.inputCodeText)
+    EditText inputCodeText;
 
     @Override
     protected int getLayoutId() {
@@ -24,6 +30,7 @@ public class ReActivateFragment extends BaseFragment{
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
+        inputCodeText.setHint("SN code for " + AppData.getShopName());
     }
 
     @XClick({R.id.inputCodeButton})
