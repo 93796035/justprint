@@ -58,6 +58,10 @@ public class DownloadingConfigConfirmFragment extends BaseFragment{
         String license = password.getText().toString();
         if(license.length() < 6){
             license = AppData.getLicense();
+            if(license.length() < 6){
+                showToast("Please activate the application first.");
+                return;
+            }
         }
         DatabaseUtil.syncConfigOntoServer(license, store_name.getText().toString(),false);
         getActivity().finish();
