@@ -67,7 +67,7 @@ public class  AppData extends Thread{
 
     //to sync
     public static final String adminPassword = "adminPassword";
-    public static final String AllowDownloadFromOtherServer = "AllowDownloadFromOtherServer";
+    public static final String AllowDownloadFromOtherStore = "AllowDownloadFromOtherServer";
     public static final String appmode = "appmode";
     public static final String clientMode = "clmode";
     public static final String ColorOnSelect = "cos";
@@ -126,7 +126,7 @@ public class  AppData extends Thread{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            AllowDownloadFromOtherServer, appmode, clientMode, ColorOnSelect, ColorOfTheme,
+            AllowDownloadFromOtherStore, appmode, clientMode, ColorOnSelect, ColorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
