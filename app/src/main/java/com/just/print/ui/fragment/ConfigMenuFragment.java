@@ -41,7 +41,7 @@ import java.util.List;
 
 import static android.content.DialogInterface.OnClickListener;
 
-public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLongClickListener {
+public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChangeListener {//} implements IXOnItemLongClickListener {
 
     private static Menu modifyingMenu = null;
     public static int curCategory = 0;
@@ -77,8 +77,14 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
     @XViewByID(R.id.curCategoryName)
     TextView curCategoryName;
 
-    MenuDao menuDao;
+    @XViewByID(R.id.etMenuID)
+    private EditText etMenuId;
 
+    @XViewByID(R.id.etMenu)
+    private EditText etMenuName;
+
+    MenuDao menuDao;
+    private boolean needAutoFill;
     private XAdapter2<Menu> menuXAdapter;
     IXOnItemClickListener categoryAdapterClick = new IXOnItemClickListener() {
         @Override
@@ -272,12 +278,48 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         menuXAdapter.setClickItemListener(categoryAdapterClick);
         lvMenu.setAdapter(menuXAdapter);
 
+        etMenuId.setOnFocusChangeListener(this);
+        etMenuName.setOnFocusChangeListener(this);
+
         menuDao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
 
         loadCategory();
         loadMenu();
         if(categoryXAdapter.size() > 0) {
             curCategoryName.setText(categoryXAdapter.get(0).getCname());
+        }
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if(hasFocus) {
+            String menuId = etMenuId.getText().toString();
+            String menuName = etMenuName.getText().toString();
+            needAutoFill = menuName.length() == 0 //menuName must be empty
+                    && (menuId.length() == 0    //menuId must be empty or num+"."
+                        || (menuId.endsWith(".")
+                            && Integer.valueOf(menuId.substring(0, menuId.length() - 1)) > 0));
+        }else if(needAutoFill){  //when lost focus, and the flag already set.
+            needAutoFill = false;   //first reset flag.
+            if (view == etMenuId){
+                String menuId = etMenuId.getText().toString();
+                int p = menuId.indexOf(".");
+                if(p > 0){
+                    String intPart = menuId.substring(0, p);
+                    if(Integer.valueOf(intPart) > 0){
+                        etMenuName.setText(menuId.substring(p + 1));
+                    }else {
+                        etMenuName.setText(menuId);
+                    }
+                }else{
+                    etMenuName.setText(menuId);
+                }
+
+            }else if(view == etMenuName){
+                String menuName = etMenuName.getText().toString();
+                String menuId = etMenuId.getText().toString();
+                etMenuId.setText(menuId + menuName);
+            }
         }
     }
 
@@ -294,8 +336,9 @@ public class ConfigMenuFragment extends BaseFragment{//} implements IXOnItemLong
         findViewById(R.id.categoryLayout).setVisibility(View.GONE);
         findViewById(R.id.menuLayout).setVisibility(View.VISIBLE);
 
-        ((EditText)findViewById(R.id.etMenuID)).setText(getDefaultCode());
-        ((EditText)findViewById(R.id.etMenu)).setText("");
+        etMenuId.setText(getDefaultCode());
+        etMenuName.setText("");
+
         //printers
         addPrints = addPrints == null ? new ArrayList<Printer>(1) : addPrints;
         addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
