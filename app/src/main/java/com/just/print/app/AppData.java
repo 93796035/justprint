@@ -152,6 +152,8 @@ public class  AppData extends Thread{
     public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
     public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
     private static String labelSN = "labelsn";
+    private static String codeNumberConsidered = "codeNumberConsidered";
+    private static String addingDefaultCode = "addingDefaultCode";
 
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
@@ -467,6 +469,14 @@ public class  AppData extends Thread{
     public static int getScreenOrientation() {
         return "true".equals(getCustomData(AppData.isScreenHorizontal)) ?
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    }
+
+    public static boolean isCodeNumberConsidered() {
+        return "true".equals(getCustomData(AppData.codeNumberConsidered));
+    }
+
+    public static boolean isAddingDefaultCode() {
+        return "true".equals(getCustomData(AppData.addingDefaultCode));
     }
 
     @Override

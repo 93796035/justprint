@@ -51,7 +51,8 @@
 
         <EditText
             android:id="@+id/etMenuID"
-            android:layout_width="149dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:ems="4"
             android:hint="Code"
