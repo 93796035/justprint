@@ -8,7 +8,7 @@
             android:id="@+id/markText"
             android:layout_width="230dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:textSize="24sp"
             android:layout_weight="3"
             android:text="0" />
@@ -17,7 +17,7 @@
             android:id="@+id/markPrice"
             android:layout_width="110dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="right"
             android:textSize="24sp"
             android:padding="8dp"
             android:layout_weight="1"
