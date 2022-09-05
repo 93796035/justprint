@@ -33,6 +33,7 @@ import static com.just.print.util.ToastUtil.showToast;
 
 public class  AppData extends Thread{
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
+    public static final String DENSITY = "density";
     public static String recentNum = "keep";
     public static String orderpassword = "op";
     public static String labelLines = "lls";

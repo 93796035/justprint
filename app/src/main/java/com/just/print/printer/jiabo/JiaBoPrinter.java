@@ -115,7 +115,7 @@ public class JiaBoPrinter {
             allLines.add(line);
         }
         //get the lines for each label
-        int linesOfEachLabel = 5;
+        int linesOfEachLabel = 9;
         String size = AppData.getCustomData(AppData.labelsize);
         int w = 40;
         int h = 30;
@@ -147,7 +147,7 @@ public class JiaBoPrinter {
 
             tsc.addSize(w, h); // 设置标签尺寸宽高，按照实际尺寸设置 单位mm
 
-            int gap = 4;
+            int gap = 2;
             String gapStr = AppData.getCustomData(AppData.gap);
             if (gapStr != null && gapStr.length() > 0) {
                 try {
@@ -179,7 +179,12 @@ public class JiaBoPrinter {
             }
             tsc.addReference(startX, startY);// 设置原点坐标
 
-            tsc.addDensity(LabelCommand.DENSITY.DNESITY4);//设置浓度
+            String denStr = AppData.getCustomData(AppData.DENSITY);
+            LabelCommand.DENSITY density = LabelCommand.DENSITY.DNESITY4;
+            if(denStr != null && LabelCommand.DENSITY.valueOf(denStr) != null){
+                density = LabelCommand.DENSITY.valueOf(denStr);
+            }
+            tsc.addDensity(density );//设置浓度
             tsc.addTear(EscCommand.ENABLE.ON); // 撕纸模式开启
             tsc.addCls();// 清除打印缓冲区
 
