@@ -304,7 +304,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             if (view == etMenuId){
                 String menuId = etMenuId.getText().toString();
                 int p = menuId.indexOf(".");
-                if(p > 0){
+                if(p > 0 && AppData.isCodeNumberConsidered()){
                     String intPart = menuId.substring(0, p);
                     if(Integer.valueOf(intPart) > 0){
                         etMenuName.setText(menuId.substring(p + 1));
@@ -366,6 +366,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private String getDefaultCode() {
         String defautlCode = "";
+        if(!"true".equals(AppData.isAddingDefaultCode())){
+            return defautlCode;
+        }
         int endCode = parseInt(previouseCode);
 
         if(endCode >= 0){
