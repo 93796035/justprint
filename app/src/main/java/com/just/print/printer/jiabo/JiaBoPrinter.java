@@ -115,7 +115,7 @@ public class JiaBoPrinter {
             allLines.add(line);
         }
         //get the lines for each label
-        int linesOfEachLabel = 5;
+        int linesOfEachLabel = 9;
         String size = AppData.getCustomData(AppData.labelsize);
         int w = 40;
         int h = 30;
@@ -147,7 +147,7 @@ public class JiaBoPrinter {
 
             tsc.addSize(w, h); // 设置标签尺寸宽高，按照实际尺寸设置 单位mm
 
-            int gap = 4;
+            int gap = 2;
             String gapStr = AppData.getCustomData(AppData.gap);
             if (gapStr != null && gapStr.length() > 0) {
                 try {
