@@ -179,7 +179,12 @@ public class JiaBoPrinter {
             }
             tsc.addReference(startX, startY);// 设置原点坐标
 
-            tsc.addDensity(LabelCommand.DENSITY.DNESITY4);//设置浓度
+            String denStr = AppData.getCustomData(AppData.DENSITY);
+            LabelCommand.DENSITY density = LabelCommand.DENSITY.DNESITY4;
+            if(denStr != null && LabelCommand.DENSITY.valueOf(denStr) != null){
+                density = LabelCommand.DENSITY.valueOf(denStr);
+            }
+            tsc.addDensity(density );//设置浓度
             tsc.addTear(EscCommand.ENABLE.ON); // 撕纸模式开启
             tsc.addCls();// 清除打印缓冲区
 
