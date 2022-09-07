@@ -174,6 +174,22 @@ public class M2M_MenuMarkDao extends AbstractDao<M2M_MenuMark, Long> {
         return query.list();
     }
 
+    /** Internal query to resolve the "M2M_MenuMarkList" to-many relationship of Menu. */
+    public void _deleteMenu_M2M_MenuMarkList(Long id) {
+        synchronized (this) {
+            if (menu_M2M_MenuMarkListQuery == null) {
+                QueryBuilder<M2M_MenuMark> queryBuilder = queryBuilder();
+                queryBuilder.where(Properties.Id.eq(null));
+                menu_M2M_MenuMarkListQuery = queryBuilder.build();
+            }
+        }
+        Query<M2M_MenuMark> query = menu_M2M_MenuMarkListQuery.forCurrentThread();
+        query.setParameter(0, id);
+        for(M2M_MenuMark m2m_menuMark : query.list()){
+            m2m_menuMark.delete();
+        }
+    }
+
     private String selectDeep;
 
     protected String getSelectDeep() {

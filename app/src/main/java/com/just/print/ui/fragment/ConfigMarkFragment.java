@@ -11,7 +11,10 @@ import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
+import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Mark;
+import com.just.print.db.dao.M2M_MenuMarkDao;
+import com.just.print.db.dao.MarkDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.holder.ConfigMarkViewHolder;
 import com.stupid.method.adapter.OnClickItemListener;
@@ -82,6 +85,12 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
                          @XGetValueByView(fromId = R.id.dspIdxMark) String dspIdx,
                          @XGetValueByView(fromId = R.id.priceMark) String price) {
 
+        for(Mark mark : markXAdapter.getData()){
+            if(markName.equals(mark.getName())){
+                showToast("Already existing, please choose a different text");
+                return;
+            }
+        }
         Mark mark = new Mark();
 
         mark.setName(markName);
@@ -161,6 +170,9 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 mark.delete();
+
+                M2M_MenuMarkDao targetDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
+                targetDao._deleteMenu_M2M_MenuMarkList(mark.getId());
                 loadMark();
 
                 modifyViewSwitch.setDisplayedChild(0);

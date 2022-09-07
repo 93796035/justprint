@@ -186,7 +186,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             //might need more col for menu.
             String col = AppData.getCustomData(AppData.column);
             if("".equals(col)){
-                col = "2";
+                col = "1";
             }
             try {
                 ((GridView) findViewById(R.id.odMenuGv)).setNumColumns(Integer.valueOf(col));
@@ -872,6 +872,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         List<Mark> sortedMarks = new ArrayList<Mark>();
         for (int i = 0; i < unsortedMarks.size(); i++) {
             Mark mark = unsortedMarks.get(i);
+            if(mark == null){
+                continue;   //in case the mark is removed but here not refreshed.
+            }
             boolean inserted = false;
             for (int j = 0; j < sortedMarks.size(); j++) {
                 if (sortedMarks.get(j).getState() > mark.getState()) {

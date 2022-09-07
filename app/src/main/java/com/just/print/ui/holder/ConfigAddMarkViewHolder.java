@@ -29,6 +29,9 @@ public class ConfigAddMarkViewHolder extends XViewHolder<Mark> {
 
     @Override
     public void onResetView(Mark mark, int i) {
+        if(mark == null){ //if the mark is deleted while the M2M menu is not cleaned well.
+            return;
+        }
         ip.setText(String.valueOf(mark.getId()));
         name.setText(mark.getName());
     }
