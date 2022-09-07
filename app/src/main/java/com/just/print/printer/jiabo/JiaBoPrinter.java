@@ -127,9 +127,9 @@ public class JiaBoPrinter {
             }
         }
         if(h == 30){
-            linesOfEachLabel = 5;
-        }else if(h == 40){
             linesOfEachLabel = 6;
+        }else if(h == 40){
+            linesOfEachLabel = 9;
         }
         String labelLine = AppData.getCustomData(AppData.labelLines);
         if (labelLine != null && labelLine.length() > 0) {
@@ -188,8 +188,8 @@ public class JiaBoPrinter {
             tsc.addTear(EscCommand.ENABLE.ON); // 撕纸模式开启
             tsc.addCls();// 清除打印缓冲区
 
-            LabelCommand.FONTMUL fontMul = LabelCommand.FONTMUL.MUL_2;
-            int fontSize = 2;
+            LabelCommand.FONTMUL fontMul = LabelCommand.FONTMUL.MUL_1;
+            int fontSize = 1;
             String fontSizeStr = AppData.getCustomData(AppData.labelFont);
             if (fontSizeStr != null && fontSizeStr.length() > 0) {
                 try {
@@ -197,8 +197,8 @@ public class JiaBoPrinter {
                 } catch (Exception e) {
                 }
             }
-            if (fontSize == 1) {
-                fontMul = LabelCommand.FONTMUL.MUL_1;
+            if (fontSize == 2) {
+                fontMul = LabelCommand.FONTMUL.MUL_2;
             } else if (fontSize == 3) {
                 fontMul = LabelCommand.FONTMUL.MUL_3;
             } else if (fontSize == 4) {

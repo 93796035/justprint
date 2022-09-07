@@ -3,7 +3,6 @@ package com.just.print.ui.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -51,7 +50,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     XAdapter2<Category> categoryXAdapter;
     
     private String previouseCode = "  "; //give 3 empty space to avoid excption, because latter will use subString(1).
-    List<Printer> addPrints;
+    List<Printer> addedPrints;
     XAdapter2<Printer> addPrintsAdapter;
 
     List<Mark> addedMarks;
@@ -135,17 +134,17 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     ((EditText)findViewById(R.id.price)).setText(price == null ? "" : price.toString());
 
                     //preparing printers
-                    addPrints = new ArrayList<Printer>();
+                    addedPrints = new ArrayList<Printer>();
                     for(M2M_MenuPrint m2m_p : menuXAdapter.get(i).getM2M_MenuPrintList()){
-                        addPrints.add(m2m_p.getPrint());
+                        addedPrints.add(m2m_p.getPrint());
                     }
 
-                    addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
+                    addPrintsAdapter = new XAdapter2<Printer>(getContext(), addedPrints, ConfigAddPrintViewHolder.class);
                     addPrintListView.setAdapter(addPrintsAdapter);
                     addPrintsAdapter.setClickItemListener(new IXOnItemClickListener() {
                         @Override
                         public void onClickItem(View view, int i) {
-                            addPrints.remove(i);
+                            addedPrints.remove(i);
                             addPrintsAdapter.notifyDataSetChanged();
                         }
                     });
@@ -335,18 +334,18 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     private void addMenuItem() {
         findViewById(R.id.categoryLayout).setVisibility(View.GONE);
         findViewById(R.id.menuLayout).setVisibility(View.VISIBLE);
-
+        modifyingMenu = null; //make sure the flag reset, so then ok is cliced, we know it's not update.
         etMenuId.setText(getDefaultCode());
         etMenuName.setText("");
 
         //printers
-        addPrints = addPrints == null ? new ArrayList<Printer>(1) : addPrints;
-        addPrintsAdapter = new XAdapter2<Printer>(getContext(), addPrints, ConfigAddPrintViewHolder.class);
+        addedPrints = addedPrints == null ? new ArrayList<Printer>(1) : addedPrints;
+        addPrintsAdapter = new XAdapter2<Printer>(getContext(), addedPrints, ConfigAddPrintViewHolder.class);
         addPrintListView.setAdapter(addPrintsAdapter);
         addPrintsAdapter.setClickItemListener(new IXOnItemClickListener() {
             @Override
             public void onClickItem(View view, int i) {
-                addPrints.remove(i);
+                addedPrints.remove(i);
                 addPrintsAdapter.notifyDataSetChanged();
             }
         });
@@ -429,19 +428,24 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             return;
         }
         //should allow dish without printer in mode 2
-        if (addPrints == null || addPrints.size() == 0) {
+        if (addedPrints == null || addedPrints.size() == 0) {
             if(!AppData.isMode2()) {
                 showToast("Please select printer");
                 return;
             }
         }
 
-
-        //filter out "is adding" and "code is ocupied" case.
         Menu menu = menuDao.load(mid.getText().toString());
-        if (menu != null && menu.getState() == State.def && modifyingMenu == null) {
-            showToast("the code is used already");
-            return;
+
+        if(menu != null && menu.getState() == State.def) { //if not allow, then if it's adding should give a check.
+            //to filter out "is adding" and "code is ocupied" case. while modify case no need to check
+            //because it will update existing one anyway.....wait a second, still need to check the case
+            //that id is changed and new id duplicated with ohter one.
+            if(modifyingMenu == null                             //if it's adding
+                || !menu.getID().equals(modifyingMenu.getID())){ //or it's modifying, but id changed
+                 showToast("the code is used already");      //but changed to be duplicated with existing menu.
+                 return;
+            }
         }
         /*
         if (menu != null && menu.getState() == State.delete){
@@ -453,7 +457,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }
         */
 
-        if(menu == null){   //the code mapping to no record in db.
+        if(modifyingMenu == null){   //adding case
             menu = new Menu();
             menu.setID(mid.getText().toString().trim());
             menu.setState(State.def);
@@ -462,17 +466,16 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menu.setPrice(price);
             menuDao.insert(menu);
             previouseCode = menu.getID();
-        }else{              //the code is same with some record in db. means it's updating....
-            menu.setID(mid.getText().toString().trim());
-            menu.setState(State.def);
-            menu.setMname(mname.getText().toString().trim());
-            menu.setCid(mCategory.getId());
-            menu.setPrice(price);
-            menuDao.update(menu);
+        }else{              //updating....now it's allow duplicate name case..
+            modifyingMenu.setID(mid.getText().toString().trim());
+            modifyingMenu.setState(State.def);
+            modifyingMenu.setMname(mname.getText().toString().trim());
+            modifyingMenu.setCid(mCategory.getId());
+            modifyingMenu.setPrice(price);
+            menuDao.update(modifyingMenu);
+            menu = modifyingMenu;
         }
-        if(modifyingMenu != null && !modifyingMenu.getID().equals(menu.getID())){ //if it's modifying, and the code is changed to be same with some other existing one.
-            menuDao.delete(modifyingMenu);
-        }
+
 
         menu.updateAndUpgrade();
 
@@ -480,10 +483,10 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
         if(modifyingMenu != null) {
             for (M2M_MenuPrint p : modifyingMenu.getM2M_MenuPrintList()) {
-                m2mDao.delete(p);
+                m2mDao.delete(p);   //remove a record from db.
             }
         }
-        for (Printer p : addPrints) {
+        for (Printer p : addedPrints) { //re-add record into db
             M2M_MenuPrint m2m = new M2M_MenuPrint();
             m2m.setMenu(menu);
             m2m.setPrint(p);
@@ -493,8 +496,8 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         //add mark link
         M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
         if(modifyingMenu != null) {
-            for (M2M_MenuMark p : modifyingMenu.getM2M_MenuMarkList()) {
-                m2mDao2.delete(p);
+            for (M2M_MenuMark remark : modifyingMenu.getM2M_MenuMarkList()) {
+                m2mDao2.delete(remark);
             }
         }
         for (Mark p : addedMarks) {
@@ -551,7 +554,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     @XClick({R.id.selectPrint})
     private void selectPrint(final TextView view) {
         final List<Printer> data = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());
-        data.removeAll(addPrints);
+        data.removeAll(addedPrints);
         if (data.size() == 0) {
             showToast("Please add printer first");
             return;
@@ -570,7 +573,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         builder.setSingleChoiceItems(items, -1, new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                addPrints.add(data.get(which));
+                addedPrints.add(data.get(which));
                 addPrintsAdapter.notifyDataSetChanged();
                 dialog.dismiss();
             }

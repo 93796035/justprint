@@ -895,7 +895,7 @@ public class WifiPrintService implements Runnable{
             return wifiLabelPrinter;
         }
 
-        wifiLabelPrinter = "";    //@note: we don't want to return a null back to cause any null pointer.
+        wifiLabelPrinter = "192.168.6.122";    //@note: we don't want to return a null back to cause any null pointer.
         if( "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchWifiLabel))) {
            //TODO： auto check if any of the printers are wifiLabel
 
@@ -1212,8 +1212,8 @@ public class WifiPrintService implements Runnable{
         DateFormat df = new SimpleDateFormat("HH:mm");
         String tableName = CustomerSelection.getInstance().getTableName();
         String dateStr = df.format(new Date());
-
-        if("1".equals(AppData.getCustomData(AppData.format_style))){
+        String format_style = AppData.getCustomData(AppData.format_style);
+        if("1".equals(format_style)){
             String billIdx_Position = AppData.getCustomData(AppData.title_position);
             if ("left".equals(billIdx_Position)) {
                 //add no space.
@@ -1229,22 +1229,7 @@ public class WifiPrintService implements Runnable{
             }
             content.append(generateString(width - tableName.length() - 2 - dateStr.length(), SEPRATOR))
                     .append(dateStr).append("\n");
-        }else if("2".equals(AppData.getCustomData(AppData.format_style))){
-
-            String billIdx_Position = AppData.getCustomData(AppData.title_position);
-            if ("left".equals(billIdx_Position)) {
-                //add no space.
-            } else if ("right".equals(billIdx_Position)) {
-                content.append(generateString(width - kitchenBillIdx.length(), " "));
-            }
-            //kitchenBillIdx and time
-            if(tableName != null && tableName.length() > 0) {
-                content.append("(").append(tableName).append(")");
-            }
-            String spacesStr = generateString((width - tableName.length() - 2 - kitchenBillIdx.length() - dateStr.length()) / 2, SEPRATOR);
-            content.append(spacesStr).append(kitchenBillIdx).append(spacesStr).append(dateStr).append("\n");
-
-        }else {
+        }else if("3".equals(format_style)){
             //table name
             if(tableName != null && tableName.length() > 0) {
                 if(isCloudPrinter && StringUtils.isNumber(tableName)){
@@ -1264,6 +1249,19 @@ public class WifiPrintService implements Runnable{
             content.append(kitchenBillIdx)
                     .append(generateString(width - kitchenBillIdx.length() - dateStr.length(), SEPRATOR))
                     .append(dateStr).append("\n");
+        }else{ //format_style is null or 2, goes here.
+            String billIdx_Position = AppData.getCustomData(AppData.title_position);
+            if ("left".equals(billIdx_Position)) {
+                //add no space.
+            } else if ("right".equals(billIdx_Position)) {
+                content.append(generateString(width - kitchenBillIdx.length(), " "));
+            }
+            //kitchenBillIdx and time
+            if(tableName != null && tableName.length() > 0) {
+                content.append("(").append(tableName).append(")");
+            }
+            String spacesStr = generateString((width - tableName.length() - 2 - kitchenBillIdx.length() - dateStr.length()) / 2, SEPRATOR);
+            content.append(spacesStr).append(kitchenBillIdx).append(spacesStr).append(dateStr).append("\n");
         }
         //Seperator
 
