@@ -36,6 +36,7 @@ import com.stupid.method.reflect.annotation.XGetValueByView;
 import com.stupid.method.reflect.annotation.XViewByID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static android.content.DialogInterface.OnClickListener;
@@ -85,6 +86,32 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     MenuDao menuDao;
     private boolean needAutoFill;
     private XAdapter2<Menu> menuXAdapter;
+
+    @Override
+    public void onCreated(Bundle savedInstanceState) {
+        new StupidReflect(this, getView()).init();
+
+        categoryXAdapter = new XAdapter2<Category>(getContext(), ConfigCategoryViewHolder.class);
+        categoryXAdapter.setClickItemListener(categoryAdapterClick);
+        //categoryXAdapter.setLongClickItemListener(this);
+        lvCategory.setAdapter(categoryXAdapter);
+
+        menuXAdapter = new XAdapter2<Menu>(getContext(), ConfigMenuViewHolder.class);
+        menuXAdapter.setClickItemListener(categoryAdapterClick);
+        lvMenu.setAdapter(menuXAdapter);
+
+        etMenuId.setOnFocusChangeListener(this);
+        etMenuName.setOnFocusChangeListener(this);
+
+        menuDao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
+
+        loadCategory();
+        loadMenu();
+        if(categoryXAdapter.size() > 0) {
+            curCategoryName.setText(categoryXAdapter.get(0).getCname());
+        }
+    }
+
     IXOnItemClickListener categoryAdapterClick = new IXOnItemClickListener() {
         @Override
         public void onClickItem(View view, int i) {
@@ -265,31 +292,6 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     }
 
     @Override
-    public void onCreated(Bundle savedInstanceState) {
-        new StupidReflect(this, getView()).init();
-
-        categoryXAdapter = new XAdapter2<Category>(getContext(), ConfigCategoryViewHolder.class);
-        categoryXAdapter.setClickItemListener(categoryAdapterClick);
-        //categoryXAdapter.setLongClickItemListener(this);
-        lvCategory.setAdapter(categoryXAdapter);
-
-        menuXAdapter = new XAdapter2<Menu>(getContext(), ConfigMenuViewHolder.class);
-        menuXAdapter.setClickItemListener(categoryAdapterClick);
-        lvMenu.setAdapter(menuXAdapter);
-
-        etMenuId.setOnFocusChangeListener(this);
-        etMenuName.setOnFocusChangeListener(this);
-
-        menuDao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
-
-        loadCategory();
-        loadMenu();
-        if(categoryXAdapter.size() > 0) {
-            curCategoryName.setText(categoryXAdapter.get(0).getCname());
-        }
-    }
-
-    @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if(hasFocus) {
             String menuId = etMenuId.getText().toString();
@@ -467,17 +469,18 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menuDao.insert(menu);
             previouseCode = menu.getID();
         }else{              //updating....now it's allow duplicate name case..
+            menuDao.delete(modifyingMenu);
             modifyingMenu.setID(mid.getText().toString().trim());
             modifyingMenu.setState(State.def);
             modifyingMenu.setMname(mname.getText().toString().trim());
             modifyingMenu.setCid(mCategory.getId());
             modifyingMenu.setPrice(price);
-            menuDao.update(modifyingMenu);
+            menuDao.insert(modifyingMenu);
             menu = modifyingMenu;
         }
 
 
-        menu.updateAndUpgrade();
+//        menu.updateAndUpgrade();    //is this useful or not?
 
         //add printer link
         M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
@@ -648,6 +651,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     private void loadMenu() {
         if (mCategory != null) {
             List<Menu> menuList = DaoExpand.queryMenuByCategory(NingMengStyle.app.getDaoMaster().newSession().getMenuDao(), mCategory);
+            Collections.sort(menuList, OrderCategoryFragment.comparator);
             menuXAdapter.setData(menuList);
             menuXAdapter.notifyDataSetChanged();
         }
