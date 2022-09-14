@@ -110,7 +110,9 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
     private void onConfirmUserName(View view) {
         String userName = this.userName.getText().toString().trim();
         if (StringUtils.isEmpty(userName)) {
-            showToast("Please input your name");
+            showToast("Please input tablet name");
+        } else if("asdfas".equals(userName)) {
+            showToast("Please input tablet name");
         } else {
             findViewById(R.id.storeName).setVisibility(View.VISIBLE);
             view.setVisibility(View.GONE);
