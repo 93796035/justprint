@@ -495,7 +495,7 @@ public class  AppData extends Thread{
                     AppData.putCustomData(AppData.ContentToSend, null);
                     long time = 0;
                     try{
-                        time = Long.valueOf(responseString);
+                        time = Long.valueOf(responseString);    // if returned a number, then it must be  left time---(the activation case)
                         if(time > 0){//if success
                             AppData.putCustomData(AppData.number,responseString);
                             AppData.putCustomData(AppData.lastsuccess, String.valueOf(new Date().getTime()));
@@ -505,8 +505,9 @@ public class  AppData extends Thread{
                             showToast("No time left on server: "+ time);
                         }
                     }catch (Exception e){
-                        //so the return back is configurations instead of a number(left time)
-                        absortTheConfiguration(responseString);
+                        if(responseString.length() > 0) {           //for the sending content to cloud printer case, the return value is "".
+                            absortTheConfiguration(responseString); //if come here, so the return back is configurations
+                        }
                     }
                 }else{
                     showToast("Please provide valid shop name, user name and license number!");
