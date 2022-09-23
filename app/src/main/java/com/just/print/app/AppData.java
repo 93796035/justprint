@@ -27,9 +27,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 
 import static com.just.print.util.ToastUtil.showToast;
 
@@ -40,8 +38,8 @@ public class  AppData extends Thread{
     public static String orderpassword = "op";
     public static String labelLines = "lls";
 
-    private static String SERVER_URL = "http://216.137.179.176/"; //A2hosting is good but can not send email
-    private static String EMAIL_SERVER = "https://www.sharethegoodones.com/";
+    private static final String SERVER_URL = "http://216.137.179.176/"; //A2hosting is good but can not send email
+    private static final String EMAIL_SERVER = "https://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
@@ -155,12 +153,9 @@ public class  AppData extends Thread{
     public static boolean showName = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillName));
     public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
     public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
-    private static String labelSN = "labelsn";
-    private static String codeNumberConsidered = "codeNumberConsidered";
-    private static String addingDefaultCode = "addingDefaultCode";
-
-
-    private static HashSet popUpMenuList;
+    private static final String labelSN = "labelsn";
+    private static final String codeNumberConsidered = "codeNumberConsidered";
+    private static final String addingDefaultCode = "addingDefaultCode";
 
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
@@ -168,9 +163,6 @@ public class  AppData extends Thread{
 
     /**
      * 判断店铺是否存在
-     *
-     * @param context
-     * @param shopName
      * @return true 存在,false 不存在
      **/
     private static boolean existShop(Context context, String shopName) {
@@ -178,11 +170,6 @@ public class  AppData extends Thread{
         return shoplist.contains(shopName);
     }
 
-    /**
-     * @param context
-     * @param shopName
-     * @return id
-     **/
     public static void createShopDB(Context context, String shopName) {
         if (!existShop(context, shopName)) {
             String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
@@ -485,14 +472,8 @@ public class  AppData extends Thread{
         return "true".equals(getCustomData(AppData.addingDefaultCode));
     }
 
-    public static HashSet getForcePopUpList() {
-        if(popUpMenuList == null){
-            popUpMenuList = new HashSet();
-            for(String menuID : getCustomData(AppData.forcePopUpMenuList).split(",")){
-                popUpMenuList.add(menuID);
-            }
-        }
-        return popUpMenuList;
+    public static String getForcePopUpList() {
+        return getCustomData(AppData.forcePopUpMenuList);
     }
 
     @Override
@@ -804,10 +785,6 @@ public class  AppData extends Thread{
                 return;
             case "fpmm":
                 AppData.putCustomData(AppData.forcePopUpMenuList, inputedSN);
-                popUpMenuList = new HashSet<String>();
-                for(String menuId : inputedSN.split(",")){
-                    popUpMenuList.add(menuId);
-                }
                 showToast("App has set popUpMenuMarkList to: " + inputedSN);
                 return;
 
