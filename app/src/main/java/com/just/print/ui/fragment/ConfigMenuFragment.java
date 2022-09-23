@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -74,6 +75,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     @XViewByID(R.id.addMarkListView)
     ListView addMarkListView;
 
+    @XViewByID(R.id.showMarkSelection)
+    CheckBox showMarkSelection;
+
     @XViewByID(R.id.curCategoryName)
     TextView curCategoryName;
 
@@ -86,7 +90,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     MenuDao menuDao;
     private boolean needAutoFill;
     private XAdapter2<Menu> menuXAdapter;
-
+    private boolean originalSelectStatus;
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
@@ -191,6 +195,10 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                             addMarksAdapter.notifyDataSetChanged();
                         }
                     });
+
+                    //initial autoPopup check box status
+                    originalSelectStatus = AppData.getForcePopUpList().contains(menuXAdapter.get(i).getID());
+                    showMarkSelection.setChecked(originalSelectStatus);
                     break;
                 case R.id.delMenu:
                     //menuXAdapter.get(i).logicDelete();
@@ -362,7 +370,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                 addMarksAdapter.notifyDataSetChanged();
             }
         });
-
+        //set the ariginal status of the check box, while, be noticed that the ui might show selected
+        //status, because we want to keep the check box same with previous item.
+        originalSelectStatus = false;
     }
 
     private String getDefaultCode() {
@@ -508,6 +518,17 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             m2m.setMenu(menu);
             m2m.setMark(p);
             m2mDao2.insertOrReplace(m2m);
+        }
+
+        //process the popup selection
+        if(originalSelectStatus != showMarkSelection.isChecked()){
+            if(showMarkSelection.isChecked()){
+                AppData.getForcePopUpList().add(modifyingMenu.getID());
+            }else{
+                AppData.getForcePopUpList().remove(modifyingMenu.getID());
+            }
+            String newValue = AppData.getForcePopUpList().toString();
+            AppData.putCustomData(AppData.forcePopUpMenuList, newValue.substring(1, newValue.length() - 1));
         }
 
         AppData.updataeLastModifyTime(null);

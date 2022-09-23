@@ -27,7 +27,9 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 
 import static com.just.print.util.ToastUtil.showToast;
 
@@ -81,6 +83,7 @@ public class  AppData extends Thread{
     public static final String emailorder = "emailorder";
     public static final String font_h = "font_h";
     public static final String font_w = "font_w";
+    public static final String forcePopUpMenuList = "fpmm";
     public static final String format_style = "format_style";
     public static final String hasCategory = "hasCategory";
     public static final String hideCancelItem = "hidecancelitem";
@@ -129,7 +132,7 @@ public class  AppData extends Thread{
     public static String[] keysToSync = new String[]{adminPassword,
             AllowDownloadFromOtherStore, appmode, clientMode, ColorOnSelect, ColorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
-            emailorder, email_server, font_h, font_w, format_style,
+            emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelsize,
@@ -155,6 +158,9 @@ public class  AppData extends Thread{
     private static String labelSN = "labelsn";
     private static String codeNumberConsidered = "codeNumberConsidered";
     private static String addingDefaultCode = "addingDefaultCode";
+
+
+    private static HashSet popUpMenuList;
 
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
@@ -480,6 +486,16 @@ public class  AppData extends Thread{
         return "true".equals(getCustomData(AppData.addingDefaultCode));
     }
 
+    public static HashSet getForcePopUpList() {
+        if(popUpMenuList == null){
+            popUpMenuList = new HashSet();
+            for(String menuID : getCustomData(AppData.forcePopUpMenuList).split(",")){
+                popUpMenuList.add(menuID);
+            }
+        }
+        return popUpMenuList;
+    }
+
     @Override
     public void run() {
         super.run();
@@ -786,6 +802,14 @@ public class  AppData extends Thread{
                     AppData.putCustomData("font", "29, 33, 34");
                 }
                 showToast("App has set width to: " + inputedSN);
+                return;
+            case "fpmm":
+                AppData.putCustomData(AppData.forcePopUpMenuList, inputedSN);
+                popUpMenuList = new HashSet<String>();
+                for(String menuId : inputedSN.split(",")){
+                    popUpMenuList.add(menuId);
+                }
+                showToast("App has set popUpMenuMarkList to: " + inputedSN);
                 return;
 
             default:

@@ -573,6 +573,13 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         if (dishesXAdapter != null) {
                             loadOrderMenu();
                         }
+                        //if it's defined to be show up lable(mark) panel
+                        if(AppData.getForcePopUpList().contains(items[i])) {
+                            curmarkitem = i;
+                            marksOfCurDish = dishesXAdapter.get(i).getMarkList();
+                            showMarksPanel(dishesXAdapter.get(i).getDish());
+                        }
+
                     } else {
                         if (i < 10) {
                             InputText(Integer.toString((i + 1) % 10));
@@ -661,10 +668,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     };
 
     @XClick({R.id.tableNameOK})
-    private void verifyPassword(@XGetValueByView(fromId = R.id.password) String mark) {
+    private void confirmTableName(@XGetValueByView(fromId = R.id.tableName) String tableName) {
 
-        odIdTable2.setText(mark);
-        CustomerSelection.getInstance().setTableName(mark);
+        odIdTable2.setText(tableName);
+        CustomerSelection.getInstance().setTableName(tableName);
         //print code:
         findViewById(R.id.inputTableName).setVisibility(View.INVISIBLE);
         findViewById(R.id.mainDialog).setVisibility(View.VISIBLE);
@@ -729,7 +736,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         } else {
             odIdInput.append(str);
         }
-
     }
 
     private void DelOneText() {
