@@ -421,7 +421,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 //                            return;
 //                        } else
                         if (storedMenu != null) {     //last order send to printer well.
-                            addDish();
+                            addNewSelection(storedMenu);
                             odIdInput.setText("");
                             odIdfrName.setText("");
                             if (dishesXAdapter != null) {
@@ -568,16 +568,15 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             switch (view.getId()) {
                 case R.id.buttonholder: //number buttons.
                     if (AppData.isMode2()) {
-                        storedMenu = SearchMenuFromDB(items[i]);
-                        addDish();
+                        tmpMenu = SearchMenuFromDB(items[i]);
+                        SelectionDetail newSelection = addNewSelection(tmpMenu);
                         if (dishesXAdapter != null) {
                             loadOrderMenu();
                         }
                         //if it's defined to be show up lable(mark) panel
                         if(AppData.getForcePopUpList().contains(items[i])) {
-                            curmarkitem = i;
-                            marksOfCurDish = dishesXAdapter.get(i).getMarkList();
-                            showMarksPanel(dishesXAdapter.get(i).getDish());
+                            marksOfCurDish = newSelection.getMarkList();
+                            showMarksPanel(newSelection.getDish());
                         }
 
                     } else {
@@ -857,16 +856,16 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 //        }).setNegativeButton("Cancel", null).show();
     }
 
-    private void addDish() {
+    private SelectionDetail addNewSelection(Menu menu) {
         SelectionDetail selectedDish = new SelectionDetail();
-        selectedDish.setDish(storedMenu);
+        selectedDish.setDish(menu);
         selectedDish.setMarkList(new ArrayList<Mark>());
         if(shortCutMarks != null) {
             L.d(TAG, shortCutMarks.toString());
         }
         selectedDish.setDishNum(1);
         CustomerSelection.getInstance().addSelectedDish(selectedDish);
-        storedMenu = null;
+        return selectedDish;
     }
 
     private void loadOrderMenu() {
