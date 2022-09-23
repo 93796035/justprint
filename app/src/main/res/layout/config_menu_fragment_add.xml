@@ -112,4 +112,10 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
+    <CheckBox
+        android:id="@+id/showMarkSelection"
+        android:text="show label selection panel automatically"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
