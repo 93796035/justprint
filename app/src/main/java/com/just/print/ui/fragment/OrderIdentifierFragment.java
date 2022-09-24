@@ -553,8 +553,19 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 return "";
             } else {
                 backupAndClearOrderMenu();
+                increaseKitchenBillIdx();   //when the save/send action succeed, increase the billIdx!
                 return result;
             }
+        }
+    }
+
+    //set current AppData.curBillIdx and increase the value of AppData.kitchenBillIdxit, when next in
+    private void increaseKitchenBillIdx() {
+        String curBillIdx = AppData.getCustomData(AppData.kitchenBillIdx);  //and it can also be used to know which order come in first.
+        if(StringUtils.isBlank(curBillIdx)){
+            AppData.putCustomData(AppData.kitchenBillIdx, "2");   //update the kbi into higer value.
+        }else {
+            AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
         }
     }
 

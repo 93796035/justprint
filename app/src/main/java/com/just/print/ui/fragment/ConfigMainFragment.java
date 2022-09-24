@@ -91,7 +91,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     }
 
     @XClick({R.id.verifyPassword})
-    private void onConfirmUserName(View view) {
+    private void onConfirmPassword(View view) {
         String up = AppData.getCustomData(AppData.userPassword);
         String ap = AppData.getCustomData(AppData.adminPassword);
         String op = AppData.getCustomData(AppData.orderpassword);

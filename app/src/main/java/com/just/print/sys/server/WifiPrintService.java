@@ -180,16 +180,17 @@ public class WifiPrintService implements Runnable{
             showToast("PRINTING...");
         }
         //Save
-        popKitchenBillIdx();
-        Double priceOfBill = saveSaleRecToDB(isCancel);//save sales records and get the total price....
-        saveBillToDB(priceOfBill);                      //save bill record.
+        String billIndex = AppData.getCustomData(AppData.kitchenBillIdx);
+        Double priceOfBill = saveSaleRecToDB(isCancel, billIndex);//save sales records and get the total price....
+
+        saveBillToDB(priceOfBill, billIndex);                      //save bill record.
         //Sync
-        sendToAikaServer();
+        sendToAikaServer(billIndex);
         //Print
-        return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill); //send to printer and return the content.
+        return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill, billIndex); //send to printer and return the content.
     }
 
-    private String manageDishesIntoMapAndWaitingForPrint(boolean isCancel, Double priceOfBill) {
+    private String manageDishesIntoMapAndWaitingForPrint(boolean isCancel, Double priceOfBill, String kitchenBillIdx) {
         //1、遍历每个选中的菜，并分别遍历加在其上的打印机。并在ipSelectionsMap上对应IP后面增加菜品
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
             List<M2M_MenuPrint> printerList = selectionDetail.getDish().getM2M_MenuPrintList();
@@ -228,8 +229,6 @@ public class WifiPrintService implements Runnable{
 
         //3、再次遍历ipSelectionsMap, 封装打印信息
         //add a kitchenBill on top, so when there's issue in printer, user can found a bill was miss printed.
-        String kitchenBillIdx = AppData.curBillIdx;
-
         String mobileIdx = LoginFragment.getUserName();     //used for knowing printed from which mobile.
         if(!StringUtils.isBlank(mobileIdx)){                            //@TODO: should be improved by using pos to print, then no need this mobile Mark anymore.
             kitchenBillIdx = mobileIdx + kitchenBillIdx;
@@ -305,17 +304,9 @@ public class WifiPrintService implements Runnable{
         return totalContent.toString();
     }
 
-    private void popKitchenBillIdx() {
-        AppData.curBillIdx = AppData.getCustomData(AppData.kitchenBillIdx);  //and it can also be used to know which order come in first.
-        if(StringUtils.isBlank(AppData.curBillIdx)){
-            AppData.curBillIdx = "1";
-        }
-        AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(AppData.curBillIdx) + 1));   //update thee kbi into higer value.
-    }
-
-    private void saveBillToDB(Double priceOfBill) {
+    private void saveBillToDB(Double priceOfBill, String curBillIdx) {
         Bill bill = new Bill();
-        bill.setBillIdx(AppData.curBillIdx );
+        bill.setBillIdx(curBillIdx );
         bill.setPrice(String.valueOf(priceOfBill));
 
         //statue field is used to save table info.
@@ -337,7 +328,7 @@ public class WifiPrintService implements Runnable{
         billDao.insertOrReplace(bill);
     }
 
-    private static Double saveSaleRecToDB(boolean isCancel) {
+    private static Double saveSaleRecToDB(boolean isCancel, String curBillIdx) {
         Double priceFR = 0.0;
         //save the menu into database.
         SaleRecordDao saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
@@ -362,7 +353,7 @@ public class WifiPrintService implements Runnable{
             }
 
             SaleRecord saleRecord = new SaleRecord();
-            saleRecord.setbId(AppData.curBillIdx);
+            saleRecord.setbId(curBillIdx);
             String mName = "";
             if(AppData.showID) {
                 mName = menu.getID() + " ";
@@ -585,12 +576,12 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    private void sendToAikaServer() {
+    private void sendToAikaServer(String billIndex) {
         DataSyncService dataSyncService = DataSyncService.getInstance();
         if (dataSyncService.serverIpAndPort != null && dataSyncService.serverIpAndPort.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             if (StringUtils.isBlank(dataSyncService.tableName)) {
-                dataSyncService.tableName = AppData.curBillIdx; //shouldn't use AppData.getCust... which is already increased.
+                dataSyncService.tableName = billIndex;
             }
             ArrayList<SelectionDetail> newList = new ArrayList<SelectionDetail>();
             for (SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()) {
