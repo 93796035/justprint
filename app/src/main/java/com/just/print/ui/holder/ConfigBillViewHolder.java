@@ -26,7 +26,15 @@ public class ConfigBillViewHolder extends XViewHolder<Bill> {
 
     @Override
     public void onResetView(Bill bill, int i) {
+        String billId = bill.getBillIdx();
+        if(billId.length() > 3){
+            billId = billId.substring(billId.length() - 3);
+        }
+        String table = String.valueOf(bill.getState());
+        if(table.length() > 3){
+            table = table.substring(table.length() - 3);
+        }
         //comment out the price part to save space for more bill to display  billButton.setText( "#" + bill.getBillIdx() + " $" + bill.getPrice());
-        billButton.setText(bill.getBillIdx());
+        billButton.setText(billId + "\n" +"#"+table);
     }
 }

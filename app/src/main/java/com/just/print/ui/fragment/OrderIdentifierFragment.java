@@ -155,6 +155,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         loadTables();
         //CustomerSelection.getInstance().setTableName(odIdTableNumEt.getText().toString());
         storedMenu = null;
+        String tableSelectable = AppData.getCustomData(AppData.TableSelectable);
         //the model of the menus.
         if(AppData.isMode2()) {
             //prepare the categoryNames and items.
@@ -204,8 +205,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             for (int i = 0; i < menus.size(); i++) {
                 items[i] = menus.get(i).getID().trim();
             }
-
-            if(AppData.getCustomData(AppData.TableSelectable) == null || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+            if(tableSelectable == null
+                || tableSelectable.length() < 1
+                || "true".equalsIgnoreCase(tableSelectable)) {
                 odIdTable2.setText("T");
             }else{
                 odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
@@ -277,7 +279,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTableTbtn.setText("");
         odIdTableTbtn.setChecked(true);
         odIdTableTbtn.setOnClickListener(this);
-        if(AppData.getCustomData(AppData.TableSelectable) == null || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+        if(tableSelectable == null
+            || tableSelectable.length() < 1
+            || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
             odIdTable2.setOnClickListener(this);
         }
         //initSelected dishes part.
@@ -553,19 +557,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 return "";
             } else {
                 backupAndClearOrderMenu();
-                increaseKitchenBillIdx();   //when the save/send action succeed, increase the billIdx!
                 return result;
             }
-        }
-    }
-
-    //set current AppData.curBillIdx and increase the value of AppData.kitchenBillIdxit, when next in
-    private void increaseKitchenBillIdx() {
-        String curBillIdx = AppData.getCustomData(AppData.kitchenBillIdx);  //and it can also be used to know which order come in first.
-        if(StringUtils.isBlank(curBillIdx)){
-            AppData.putCustomData(AppData.kitchenBillIdx, "2");   //update the kbi into higer value.
-        }else {
-            AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
         }
     }
 

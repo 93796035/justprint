@@ -326,6 +326,17 @@ public class WifiPrintService implements Runnable{
         bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
         billDao.insertOrReplace(bill);
+        increaseKitchenBillIdx();   //when the save bill to DB action succeed, increase the billIdx!
+    }
+
+    //increase the value of AppData.kitchenBillIdxit
+    private void increaseKitchenBillIdx() {
+        String curBillIdx = AppData.getCustomData(AppData.kitchenBillIdx);  //and it can also be used to know which order come in first.
+        if(StringUtils.isBlank(curBillIdx)){
+            AppData.putCustomData(AppData.kitchenBillIdx, "2");   //update the kbi into higer value.
+        }else {
+            AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
+        }
     }
 
     private static Double saveSaleRecToDB(boolean isCancel, String curBillIdx) {
@@ -381,9 +392,11 @@ public class WifiPrintService implements Runnable{
             if (!"true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {
                 for (Mark mark : marks) {
                     Double markPrice = ((float) mark.getVersion()) / 100.0 * mark.getQt();
-                    if(markPrice >= 0.01) {
+                    // even no price for this mark, still create saleorder, to show it up in salesorder panel
+                    // if(markPrice >= 0.01) {
                         SaleRecord saleRecordForMark = new SaleRecord();
-                        saleRecordForMark.setMname(mark.getName());
+                        saleRecordForMark.setbId(curBillIdx);
+                        saleRecordForMark.setMname("  *" + mark.getName());
                         saleRecordForMark.setNumber(Double.valueOf(mark.getQt()));
                         if(isCancel){
                             markPrice *= -1;
@@ -391,7 +404,7 @@ public class WifiPrintService implements Runnable{
                         saleRecordForMark.setPrice(markPrice);
                         saleRecordDao.insertOrReplace(saleRecordForMark);
                         priceFR += markPrice;
-                    }
+//                    }
                 }
             }
         }
