@@ -106,7 +106,8 @@ public final class DaoExpand {
         bills.sort(new Comparator<Bill>() {
             @Override
             public int compare(Bill o1, Bill o2) {
-                return Integer.valueOf(o2.getBillIdx()) - Integer.valueOf(o1.getBillIdx());
+                return Integer.valueOf(o2.getBillIdx().length() == 0 ? "0" : o2.getBillIdx())
+                        - Integer.valueOf(o1.getBillIdx().length() == 0 ? "0" : o1.getBillIdx());
             }
         });
         return bills.subList(0,num < bills.size() ? num : bills.size());

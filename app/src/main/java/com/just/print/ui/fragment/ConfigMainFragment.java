@@ -21,6 +21,7 @@ import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
+import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;
@@ -82,6 +83,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
             String recentNum = AppData.getCustomData(AppData.recentNum);
             orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
         }catch(Exception e){
+            L.e("orders", "exception when fetching sale orders", e);
             //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
         }
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);

@@ -171,12 +171,12 @@ public class WifiPrintService implements Runnable{
     public String saveAndSyncCommand(boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
         //Check
-        String ip = getIPofNonEmptyIpContentMapEntry();
-        if(ip != null){
+        String printerIp = getIPofNonEmptyIpContentMapEntry();
+        if(printerIp != null){
             L.d(TAG,"ipContent not empty, means last print job not finished yet! returning not success flag.");
-            return ip;                     //未打印完毕
+            return printerIp;                     //未打印完毕
         }
-        if(checkEmptyInErrorPrinterList()){
+        if(isErrorPrinterListEmpty()){
             showToast("PRINTING...");
         }
         //Save
@@ -335,32 +335,41 @@ public class WifiPrintService implements Runnable{
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
             int number = selectionDetail.getDishNum();
             Menu menu = selectionDetail.getDish();
-            String name = menu.getMname();
-            Double price = menu.getPrice() * number;
 
-            //if set as conbine mark price into dish price.
+            String mName = "";
+            if(AppData.showID) {
+                mName = menu.getID() + " ";
+            }
+            if(AppData.showName) {
+                mName += menu.getMname();             //dish name
+            }
+
+            String markNames = "";
+            Double price = menu.getPrice() * number;
+            Double markTotalPrice = 0.0;
+
+            List<Mark> marks = selectionDetail.getMarkList();
+            for (Mark mark : marks) {
+                markTotalPrice += ((float) mark.getVersion()) / 100.0 * mark.getQt();
+                markNames += mark.getName() + ";";
+            }
+
+            //if set as conbine mark price into dish price, mark name into the dish name. do not save sale records for each mark.
             if("true".equals(AppData.getCustomData(AppData.conbineMarkPrice))) {
-                List<Mark> marks = selectionDetail.getMarkList();
-                if (marks != null) {
-                    for (Mark mark : marks) {
-                        price += ((float) mark.getVersion()) / 100.0 * mark.getQt();
-                    }
+                price += markTotalPrice;
+                //becuase there's no enough column, and modifying table schema will cause version compatibility issue.
+                //so hide mark into name for now. if AppData.conbineMarkPrice not set, dont add this into the name, because there
+                if(markNames.length() > 0){
+                    mName += "--->" + markNames;
                 }
             }
 
             if(isCancel){
                 price *= -1;
             }
-
+            //save the sale record of dish first.
             SaleRecord saleRecord = new SaleRecord();
             saleRecord.setbId(curBillIdx);
-            String mName = "";
-            if(AppData.showID) {
-                mName = menu.getID() + " ";
-            }
-            if(AppData.showName) {
-                mName = mName + name;             //dish name
-            }
             saleRecord.setMname(mName.trim());
             saleRecord.setNumber(Double.valueOf(number));
             saleRecord.setPrice(price);
@@ -368,23 +377,20 @@ public class WifiPrintService implements Runnable{
 
             priceFR += price;
 
-            if (!"true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {  //by defalut mark price is not added into salesrecord, so, generate saleRecord for the marks.
-                List<Mark> marks = selectionDetail.getMarkList();
-                if (marks != null) {
-                    for (Mark mark : marks) {
-                        Double markPrice = ((float) mark.getVersion()) / 100.0 * mark.getQt();
-                        if(markPrice >= 0.01) {
-                            SaleRecord saleRecordForMark = new SaleRecord();
-                            saleRecordForMark.setMname(mark.getName());
-                            saleRecordForMark.setNumber(Double.valueOf(mark.getQt()));
-                            if(isCancel){
-                                markPrice *= -1;
-                            }
-                            saleRecordForMark.setPrice(markPrice);
-                            saleRecordDao.insertOrReplace(saleRecordForMark);
-
-                            priceFR += markPrice;
+            //while by defalut, mark price is not added into salesrecord, so, generate saleRecord for the marks.
+            if (!"true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {
+                for (Mark mark : marks) {
+                    Double markPrice = ((float) mark.getVersion()) / 100.0 * mark.getQt();
+                    if(markPrice >= 0.01) {
+                        SaleRecord saleRecordForMark = new SaleRecord();
+                        saleRecordForMark.setMname(mark.getName());
+                        saleRecordForMark.setNumber(Double.valueOf(mark.getQt()));
+                        if(isCancel){
+                            markPrice *= -1;
                         }
+                        saleRecordForMark.setPrice(markPrice);
+                        saleRecordDao.insertOrReplace(saleRecordForMark);
+                        priceFR += markPrice;
                     }
                 }
             }
@@ -394,7 +400,7 @@ public class WifiPrintService implements Runnable{
 
     //The start time and end time are long format, need to be translate for print.
     public String exePrintReportCommand(List<SaleRecord> saleRecords, String endTime){
-        if(checkEmptyInErrorPrinterList()){    //if errorPrinterList is emptly will return true.
+        if(isErrorPrinterListEmpty()){    //if errorPrinterList is emptly will return true.
             showToast("PRINTING...");   //otherwise will show notice to check printer and restart app and return false.
         }
         if(saleRecords == null || saleRecords.size() == 0) {
@@ -462,7 +468,7 @@ public class WifiPrintService implements Runnable{
         return contentFR;
     }
 
-    private boolean checkEmptyInErrorPrinterList() {
+    private boolean isErrorPrinterListEmpty() {
         StringBuilder ipStr = new StringBuilder();
         for(String ip : errorPrinterList){
             ipStr.append(",");
