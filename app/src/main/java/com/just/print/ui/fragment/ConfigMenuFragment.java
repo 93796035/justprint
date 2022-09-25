@@ -524,12 +524,16 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         if(originalSelectStatus != showMarkSelection.isChecked()){
             if(showMarkSelection.isChecked()){
                 AppData.putCustomData(AppData.forcePopUpMenuList,
-                AppData.getForcePopUpList() + "," + modifyingMenu.getID());
+                AppData.getForcePopUpList() + ";" + modifyingMenu.getID());
             }else{
                 String existingStr = AppData.getForcePopUpList();
                 int p = existingStr.indexOf(modifyingMenu.getID());
-                AppData.putCustomData(AppData.forcePopUpMenuList,
-                existingStr.substring(p == 0 ? p : p - 1, p + modifyingMenu.getID().length()));
+                String newValue = existingStr.substring(0, p) + existingStr.substring(p + modifyingMenu.getID().length());
+                newValue = newValue.replace(";;", ";");
+                if(newValue.startsWith(";")){   //if it's the first, then there will be a ";" left in the position 0.
+                    newValue = newValue.substring(1, newValue.length());
+                }
+                AppData.putCustomData(AppData.forcePopUpMenuList, newValue);
             }
         }
 

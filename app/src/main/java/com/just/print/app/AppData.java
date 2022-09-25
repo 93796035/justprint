@@ -500,7 +500,7 @@ public class  AppData extends Thread{
                             showToast("No time left on server: "+ time);
                         }
                     }catch (Exception e){
-                        if(responseString.length() > 0) {           //for the sending content to cloud printer case, the return value is "".
+                        if(responseString.length() > 2) {           //for the sending content to cloud printer case, the return value is "", for uploading, the return is "OK".
                             absortTheConfiguration(responseString); //if come here, so the return back is configurations
                         }
                     }
