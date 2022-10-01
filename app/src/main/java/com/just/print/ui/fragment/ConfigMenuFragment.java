@@ -568,7 +568,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }else {
             cat = modifyingCategory;
         }
-        cat.setCname(cname.getText().toString().trim());
+        cat.setCname(cname.getText().toString());
         cat.setDisplayIdx(idx);
 
         cat.setState(State.def);

@@ -222,8 +222,13 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @Override
     public void onClickItem(View view, int idx) {
         Bill order = billsXAdapter.getData().get(idx);
+        String tableName = order.getBillIdx();
+        int p = tableName.indexOf("\n");
+        if(p > -1){
+            tableName = tableName.substring(p + 1);
+        }
         String timeString = order.getTime();
-        table.setText("    Table:#" + order.getState());
+        table.setText("    Table:#" + tableName);
         time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
         subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
         total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));

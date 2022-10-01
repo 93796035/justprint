@@ -23,6 +23,7 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Mark;
@@ -33,12 +34,14 @@ import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigFragmentActivity;
-import com.just.print.ui.holder.OrderIdentifierCategoryViewHolder;
+import com.just.print.ui.holder.ConfigBillViewHolder;
+import com.just.print.ui.holder.ViewHolderButtonFullWidth;
 import com.just.print.ui.holder.OrderMarksSelectionViewHolder;
 import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
 import com.just.print.ui.holder.OrderIdentifierMarkViewHolder;
 import com.just.print.ui.holder.OrderMenuViewHolder;
 import com.just.print.ui.holder.TableIdentifierViewHolder;
+import com.just.print.ui.holder.ViewHolderButtonNatureWidth;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.IXOnItemClickListener;
@@ -48,6 +51,7 @@ import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 import com.stupid.method.reflect.annotation.XViewByID;
+import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +70,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private static boolean isCancel;
     private List<Mark> allMarks;
     private List<Mark> marksOfCurDish;
-    private int curmarkitem;
     private String reportContent;
 
     public static OrderIdentifierFragment getInstance(){
@@ -112,6 +115,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XViewByID(R.id.odIdCategoryGrid)
     private GridView odIdCategoryGrid;
 
+    @XViewByID(R.id.categoryFlowList)
+    FlowListView categoryFlowList;
+
     @XViewByID(R.id.odMenuGv)
     private GridView odMenuGv;
 
@@ -130,9 +136,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private Menu storedMenu;
 
     XAdapter2<Mark> markShorCutXAdapter;
-    XAdapter2<Menu> menuXAdapter;
     XAdapter2<SelectionDetail> dishesXAdapter;
     XAdapter2<String> categoryXAdapter;
+    XAdapter2<String> categoryXAdapter2;
     XAdapter2<String> itemXAdapter;
     XAdapter2<Mark> tableXAdapter;
     XAdapter2<Mark> markAllXAdapter;
@@ -169,14 +175,16 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.odIdInfo).setVisibility(View.GONE);
             findViewById(R.id.odIdSndBtn).setVisibility(View.GONE);
             findViewById(R.id.topButtons).setVisibility(View.GONE);
-            findViewById(R.id.odIdCategoryGrid).setBackgroundColor(AppData.getThemColor());
+            odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
+            categoryFlowList.setBackgroundColor(AppData.getThemColor());
+            categoryFlowList.setVisibility(View.GONE);
             findViewById(R.id.odIdTools).setBackgroundColor(AppData.getThemColor());
 
             if(categories.size() > 1) {
-                ((GridView)findViewById(R.id.odIdCategoryGrid)).setNumColumns(categories.size());
+                ((GridView)odIdCategoryGrid).setNumColumns(categories.size());
                 menus = OrderCategoryFragment.getCategorizedContent().get(categories.get(0));
             }else{
-                //findViewById(R.id.odIdCategoryGrid).setVisibility(View.GONE);
+                //odIdCategoryGrid.setVisibility(View.GONE);
                 if(categories.size() == 0){
                     menus = new ArrayList<Menu>();
                 }else {
@@ -229,7 +237,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
         }else{
-            findViewById(R.id.odIdCategoryGrid).setVisibility(View.GONE);
+            odIdCategoryGrid.setVisibility(View.GONE);
+            categoryFlowList.setVisibility(View.GONE);
             findViewById(R.id.odIdTools).setVisibility(View.GONE);
             //the "must have" buttons
             items = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C"};
@@ -265,9 +274,13 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
         }
 
-        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderIdentifierCategoryViewHolder.class);
+        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), ViewHolderButtonFullWidth.class);
         categoryXAdapter.setClickItemListener(this.categoryXAdapterClick);
         odIdCategoryGrid.setAdapter(categoryXAdapter);
+
+        categoryXAdapter2 = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), ViewHolderButtonNatureWidth.class);
+        categoryXAdapter2.setClickItemListener(this.categoryXAdapterClick);
+        categoryFlowList.setAdapter(categoryXAdapter2);
 
         itemXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(items), OrderIdentifierItemViewHolder.class);
         itemXAdapter.setClickItemListener(this.itemXAdapterClick);
@@ -517,9 +530,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
         }
         menuMarkSwitcher.setDisplayedChild(0);
-        //menuXAdapter.notifyDataSetChanged();
-        dishesXAdapter.get(curmarkitem).setMarkList(marksOfCurDish);
-
         loadOrderMenu();
     }
 
@@ -694,9 +704,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             itemXAdapter.setData(Arrays.asList(items));
             for(int i = 0; i < categoryXAdapter.getCount(); i++) {
                 odIdCategoryGrid.getChildAt(i).setBackground(null);
+                categoryFlowList.getChildAt(i).setBackground(null);
             }
 
             odIdCategoryGrid.getChildAt(idx).setBackgroundColor(AppData.getThemColor());
+            categoryFlowList.getChildAt(idx).setBackgroundColor(AppData.getThemColor());
         }
     };
 
@@ -783,7 +795,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 break;
 
             case R.id.odMnLoutMarkBtn:
-                curmarkitem = i;
                 marksOfCurDish = dishesXAdapter.get(i).getMarkList();
                 showMarksPanel(dishesXAdapter.get(i).getDish());
 

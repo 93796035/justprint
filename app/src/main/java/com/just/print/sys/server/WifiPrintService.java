@@ -306,22 +306,11 @@ public class WifiPrintService implements Runnable{
 
     private void saveBillToDB(Double priceOfBill, String curBillIdx) {
         Bill bill = new Bill();
-        bill.setBillIdx(curBillIdx );
+        String tableName = CustomerSelection.getInstance().getTableName();
+        bill.setBillIdx(curBillIdx + "\n" + tableName);
         bill.setPrice(String.valueOf(priceOfBill));
 
-        //statue field is used to save table info.
-        int tableNum = 0;
-        String tableName = CustomerSelection.getInstance().getTableName();
-        try{
-            tableNum = Integer.valueOf(tableName);
-        }catch (Exception e){
-            try{
-                tableNum = Integer.valueOf(tableName.substring(1));
-            }catch (Exception exp){
-                //do nothing, keep the table Num = 0
-            }
-        }
-        bill.setState(tableNum);
+        //statue field is not used for now.
 
         bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();

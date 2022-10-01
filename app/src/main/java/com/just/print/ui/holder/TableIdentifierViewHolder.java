@@ -22,7 +22,7 @@ public class TableIdentifierViewHolder extends XViewHolder<Mark>{
 
     @Override
     public int getLayoutId() {
-        return R.layout.button_view_holder;
+        return R.layout.view_holder_button_full_width;
     }
 
     @Override

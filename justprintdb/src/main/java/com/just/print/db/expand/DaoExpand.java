@@ -48,6 +48,10 @@ public final class DaoExpand {
     }
 
     static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {
+        int p = billId.indexOf("\n");
+        if(p > -1){
+            billId = billId.substring(0, p);
+        }
         List<SaleRecord> records = dao.loadAll();
         for (int i = records.size() - 1; i >= 0; i--) {
             if (!billId.equals(records.get(i).getbId())) {
@@ -106,8 +110,18 @@ public final class DaoExpand {
         bills.sort(new Comparator<Bill>() {
             @Override
             public int compare(Bill o1, Bill o2) {
-                return Integer.valueOf(o2.getBillIdx().length() == 0 ? "0" : o2.getBillIdx())
-                        - Integer.valueOf(o1.getBillIdx().length() == 0 ? "0" : o1.getBillIdx());
+                String billIdx1 = o1.getBillIdx();
+                String billIdx2 = o2.getBillIdx();
+                int p = billIdx1.indexOf("\n");
+                if(p > -1){
+                    billIdx1 = billIdx1.substring(0, p);
+                }
+                p = billIdx2.indexOf("\n");
+                if(p > -1){
+                    billIdx2 = billIdx2.substring(0, p);
+                }
+                return Integer.valueOf(billIdx2.length() == 0 ? "0" : billIdx2)
+                        - Integer.valueOf(billIdx1.length() == 0 ? "0" : billIdx1);
             }
         });
         return bills.subList(0,num < bills.size() ? num : bills.size());

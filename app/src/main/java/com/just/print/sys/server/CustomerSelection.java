@@ -8,7 +8,8 @@ import java.util.List;
 public class CustomerSelection {
 
     private static CustomerSelection instance;
-    private String tableName;
+    private String tableName;   //we can not keep an Mark object here, because some table not exists, it's a tempral name.
+                                //and it has no relavant table(mark) in db...so we can not use id to indicate it in selection.
     private List<SelectionDetail> selectedDishes;
     private List<String> mkList;
 

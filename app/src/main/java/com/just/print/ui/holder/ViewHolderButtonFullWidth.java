@@ -11,7 +11,7 @@ import com.stupid.method.adapter.XViewHolder;
  * Created by qiqi on 2016/11/23.
  */
 
-public class OrderIdentifierCategoryViewHolder extends XViewHolder<String>{
+public class ViewHolderButtonFullWidth extends XViewHolder<String>{
     Button textView;
     @Override
     public void onCreate(Context context) {
@@ -23,7 +23,7 @@ public class OrderIdentifierCategoryViewHolder extends XViewHolder<String>{
 
     @Override
     public int getLayoutId() {
-        return R.layout.button_view_holder;
+        return R.layout.view_holder_button_full_width;
     }
 
     @Override

@@ -64,20 +64,20 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     }
 
     @XClick({R.id.addTable})
-    private void addMark(@XGetValueByView(fromId = R.id.etTable) String mark,
+    private void addTable(@XGetValueByView(fromId = R.id.etTable) String mark,
                          @XGetValueByView(fromId = R.id.dspIdxTable) String dspIdx) {
 
-        Mark mark1 = new Mark();        //currently we are using Mark to save table( when deleted flag is set, then it's table.
-        mark1.setName(mark);
+        Mark table = new Mark();        //currently we are using Mark to save table( when deleted flag is set, then it's table.
+        table.setName(mark);
 
         try{
-            mark1.setState((int)(Float.valueOf(dspIdx) * 100));
+            table.setState((int)(Float.valueOf(dspIdx) * 100));
         }catch(NumberFormatException e){
-            mark1.setState(0);
+            table.setState(0);
         }
-        mark1.setVersion(-1l);
-        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
-        mark1.updateAndUpgrade();
+        table.setVersion(-1l);
+        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
+        table.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);
         loadTables();
     }
@@ -86,11 +86,11 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     @Override
     public void onClickItem(View view, int i) {
         onEditIdx = i;
-        final Mark mark = markXAdapter.getItem(i);
-        onEditMark = mark;
+        final Mark table = markXAdapter.getItem(i);
+        onEditMark = table;
 
-        name.setText(mark.getName());
-        dspIdx.setText(String.valueOf(((float) mark.getState()) / 100.00));
+        name.setText(table.getName());
+        dspIdx.setText(String.valueOf(((float) table.getState()) / 100.00));
 
         if (modifyViewSwitch.getDisplayedChild() == 0){
             modifyViewSwitch.setDisplayedChild(1);
