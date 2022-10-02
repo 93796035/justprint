@@ -23,8 +23,8 @@ import com.stupid.method.widget.flowlayout.FlowListView;
 
 public class ConfigTableFragment extends BaseFragment implements OnClickItemListener {
 
-    @XViewByID(R.id.gridView)
-    FlowListView gridView;
+    @XViewByID(R.id.tableFlowListView)
+    FlowListView flowListView;
     XAdapter2<Mark> markXAdapter;
 
     /**
@@ -52,7 +52,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
         markXAdapter = new XAdapter2<Mark>(getContext(), ConfigTableViewHolder.class);
-        gridView.setAdapter(markXAdapter);
+        flowListView.setAdapter(markXAdapter);
         markXAdapter.setClickItemListener(this);
         loadTables();
     }

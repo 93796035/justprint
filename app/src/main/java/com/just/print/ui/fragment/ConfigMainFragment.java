@@ -13,6 +13,7 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
+import com.just.print.db.bean.Category;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
@@ -21,6 +22,7 @@ import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
+import com.just.print.ui.holder.OrderCategoryButtonNatureWidthViewHolder;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.OnClickItemListener;
@@ -31,6 +33,7 @@ import com.stupid.method.reflect.annotation.XViewByID;
 import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +64,6 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     private SaleRecordDao saleRecordDao;
     private BillDao billDao;
 
-    XAdapter2<SaleRecord> orderListXAdapter;
     XAdapter2<Bill> billsXAdapter;
 
     @Override

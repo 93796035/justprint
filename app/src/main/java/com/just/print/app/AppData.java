@@ -70,6 +70,7 @@ public class  AppData extends Thread{
     public static final String adminPassword = "adminPassword";
     public static final String AllowDownloadFromOtherStore = "AllowDownloadFromOtherServer";
     public static final String appmode = "appmode";
+    public static final String categoryLayoutStyle = "category_layout_style";
     public static final String clientMode = "clmode";
     public static final String ColorOnSelect = "cos";
     public static final String ColorOfTheme = "cot";
@@ -97,6 +98,7 @@ public class  AppData extends Thread{
     public static final String isScreenHorizontal = "isScreenHorizontal";
     public static final String kitchentitle = "kitchentitle";
     public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
+    public static final String labelColumn = "label_columns";
     public static final String labelsize = "labelsize";
     public static final String line_height = "line_height";
     public static final String gap = "gap";
@@ -128,12 +130,12 @@ public class  AppData extends Thread{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            AllowDownloadFromOtherStore, appmode, clientMode, ColorOnSelect, ColorOfTheme,
+            AllowDownloadFromOtherStore, appmode, categoryLayoutStyle, clientMode, ColorOnSelect, ColorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
-            HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelsize,
+            HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
             line_height, menuNameLength, priceonkitchenbill, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
@@ -473,6 +475,18 @@ public class  AppData extends Thread{
     public static String getForcePopUpList() {
         return getCustomData(AppData.forcePopUpMenuList);
     }
+    public static String getCategoryLayoutStyle() {
+        return getCustomData(AppData.categoryLayoutStyle);
+    }
+
+    public static int getMarkNumColumn() {
+        String cols = getCustomData(AppData.labelColumn);
+        try{
+            return Integer.parseInt(cols);
+        }catch(Exception e){
+            return 1;
+        }
+    }
 
     @Override
     public void run() {
@@ -609,6 +623,10 @@ public class  AppData extends Thread{
             case "c":
                 AppData.putCustomData(AppData.code, inputedSN);
                 showToast("App has set code to: " + inputedSN);
+                return;
+            case "cls":
+                AppData.putCustomData(AppData.categoryLayoutStyle, inputedSN);
+                showToast("App has set categoryLayoutStyle to: " + inputedSN);
                 return;
             case "cos":
                 AppData.putCustomData(AppData.ColorOnSelect, inputedSN);

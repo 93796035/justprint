@@ -168,15 +168,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-                <!-- categories -->
+                <!-- two style of categories: grid style and flow style -->
                 <GridView
                     android:id="@+id/odIdCategoryGrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-                <com.stupid.method.widget.flowlayout.FlowListView
-                    android:id="@+id/categoryFlowList"
+                <LinearLayout
+                    android:id="@+id/categoryFlowListPane"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <com.stupid.method.widget.flowlayout.FlowListView
+                        android:id="@+id/categoryFlowList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -347,7 +354,7 @@
                             android:layout_weight="4"
                             android:numColumns="2"
                             android:textSize="24sp"
-                            android:textStyle="bold"></GridView>
+                            android:textStyle="bold"/>
                     </ViewSwitcher>
                 </LinearLayout>
             </LinearLayout>
@@ -357,17 +364,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <ListView
+                <GridView
                     android:id="@+id/allMarkList"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:divider="#000000"
                     android:dividerHeight="2px"
                     android:stackFromBottom="true"
-                    android:transcriptMode="alwaysScroll">
+                    android:transcriptMode="alwaysScroll"
 
-                </ListView>
+                    android:layout_weight="4"
+                    android:numColumns="1"
+                    android:textSize="24sp"
+                    android:textStyle="bold">
+
+                </GridView>
 
                 <!--LinearLayout
                     android:layout_width="match_parent"

@@ -74,7 +74,7 @@
     </ViewSwitcher>
 
     <com.stupid.method.widget.flowlayout.FlowListView
-        android:id="@+id/gridView"
+        android:id="@+id/tableFlowListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

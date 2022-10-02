@@ -23,7 +23,6 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
-import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Mark;
@@ -34,14 +33,13 @@ import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigFragmentActivity;
-import com.just.print.ui.holder.ConfigBillViewHolder;
-import com.just.print.ui.holder.ViewHolderButtonFullWidth;
+import com.just.print.ui.holder.OrderCategoryButtonFullWidthViewHolder;
 import com.just.print.ui.holder.OrderMarksSelectionViewHolder;
 import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
 import com.just.print.ui.holder.OrderIdentifierMarkViewHolder;
 import com.just.print.ui.holder.OrderMenuViewHolder;
 import com.just.print.ui.holder.TableIdentifierViewHolder;
-import com.just.print.ui.holder.ViewHolderButtonNatureWidth;
+import com.just.print.ui.holder.OrderCategoryButtonNatureWidthViewHolder;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.IXOnItemClickListener;
@@ -131,7 +129,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     ToggleButton odIdTableTbtn;
 
     @XViewByID(R.id.allMarkList)
-    ListView markAllList;
+    GridView markAllList;
 
     private Menu storedMenu;
 
@@ -176,8 +174,12 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.odIdSndBtn).setVisibility(View.GONE);
             findViewById(R.id.topButtons).setVisibility(View.GONE);
             odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
-            categoryFlowList.setBackgroundColor(AppData.getThemColor());
-            categoryFlowList.setVisibility(View.GONE);
+            findViewById(R.id.categoryFlowListPane).setBackgroundColor(AppData.getThemColor());
+            if("flow".equals(AppData.getCategoryLayoutStyle())){
+                odIdCategoryGrid.setVisibility(View.GONE);
+            }else{
+                categoryFlowList.setVisibility(View.GONE);
+            }
             findViewById(R.id.odIdTools).setBackgroundColor(AppData.getThemColor());
 
             if(categories.size() > 1) {
@@ -274,12 +276,12 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
         }
 
-        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), ViewHolderButtonFullWidth.class);
+        categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderCategoryButtonFullWidthViewHolder.class);
         categoryXAdapter.setClickItemListener(this.categoryXAdapterClick);
         odIdCategoryGrid.setAdapter(categoryXAdapter);
 
-        categoryXAdapter2 = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), ViewHolderButtonNatureWidth.class);
-        categoryXAdapter2.setClickItemListener(this.categoryXAdapterClick);
+        categoryXAdapter2 = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderCategoryButtonNatureWidthViewHolder.class);
+        categoryXAdapter2.setClickItemListener(this.categoryXAdapterClick2);
         categoryFlowList.setAdapter(categoryXAdapter2);
 
         itemXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(items), OrderIdentifierItemViewHolder.class);
@@ -319,6 +321,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         markAllXAdapter.setClickItemListener(this);
         markAllXAdapter.setData(allMarks);
         markAllList.setAdapter(markAllXAdapter);
+        markAllList.setNumColumns(AppData.getMarkNumColumn());
 
         if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
             findViewById(R.id.mainDialog).setVisibility(View.GONE);
@@ -704,14 +707,29 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             itemXAdapter.setData(Arrays.asList(items));
             for(int i = 0; i < categoryXAdapter.getCount(); i++) {
                 odIdCategoryGrid.getChildAt(i).setBackground(null);
-                categoryFlowList.getChildAt(i).setBackground(null);
             }
 
             odIdCategoryGrid.getChildAt(idx).setBackgroundColor(AppData.getThemColor());
+        }
+    };
+    IXOnItemClickListener categoryXAdapterClick2 = new IXOnItemClickListener() {
+        @Override
+        public void onClickItem(View view, int idx) {
+            L.d(TAG, "onClickCategory" + view.getId() + String.valueOf(idx));
+
+            List<Menu> menus = OrderCategoryFragment.getCategorizedContent().get(OrderCategoryFragment.getCategoryList().get(idx));
+            items = new String[menus.size()];
+            for (int i = 0; i < menus.size(); i++) {
+                items[i] = menus.get(i).getID();
+            }
+            itemXAdapter.setData(Arrays.asList(items));
+            for(int i = 0; i < categoryXAdapter.getCount(); i++) {
+                categoryFlowList.getChildAt(i).setBackground(null);
+            }
+
             categoryFlowList.getChildAt(idx).setBackgroundColor(AppData.getThemColor());
         }
     };
-
     @Override
     protected int getLayoutId() {
         return R.layout.order_identifier_fragment;
