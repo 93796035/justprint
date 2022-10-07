@@ -588,9 +588,7 @@ public class WifiPrintService implements Runnable{
         DataSyncService dataSyncService = DataSyncService.getInstance();
         if (dataSyncService.serverIpAndPort != null && dataSyncService.serverIpAndPort.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
-            if (StringUtils.isBlank(dataSyncService.tableName)) {
-                dataSyncService.tableName = billIndex;
-            }
+            dataSyncService.billIndex = billIndex;
             ArrayList<SelectionDetail> newList = new ArrayList<SelectionDetail>();
             for (SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()) {
                 newList.add(selectionDetail);

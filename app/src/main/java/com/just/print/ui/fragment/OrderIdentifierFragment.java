@@ -150,6 +150,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     String[] items;// = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "H", "S", "U", "+", "togo", "canc"};
 
     public static List<Mark> tables = new ArrayList<Mark>();
+    String tableSelectable = AppData.getCustomData(AppData.TableSelectable);
 
     @Override
     public void onCreated(Bundle savedInstanceState) {
@@ -159,7 +160,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         loadTables();
         //CustomerSelection.getInstance().setTableName(odIdTableNumEt.getText().toString());
         storedMenu = null;
-        String tableSelectable = AppData.getCustomData(AppData.TableSelectable);
         //the model of the menus.
         if(AppData.isMode2()) {
             //prepare the categoryNames and items.
@@ -215,9 +215,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             for (int i = 0; i < menus.size(); i++) {
                 items[i] = menus.get(i).getID().trim();
             }
-            if(tableSelectable == null
-                || tableSelectable.length() < 1
-                || "true".equalsIgnoreCase(tableSelectable)) {
+            if(!"false".equalsIgnoreCase(tableSelectable)) {
                 odIdTable2.setText("T");
             }else{
                 odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
@@ -387,6 +385,13 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 break;
             case R.id.odIdSndBtn:
             case R.id.odIdSndBtn2:
+                if(!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0){
+                    String curTable = odIdTable2.getText().toString();
+                    if(curTable.length() == 0 || "T".equals(curTable)){
+                        menuTableSwitcher.setDisplayedChild(1);
+                        return;
+                    }
+                }
                 String orderContent = printCurrentSelection(false);
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent);

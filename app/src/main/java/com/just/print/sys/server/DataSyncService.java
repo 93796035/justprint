@@ -41,25 +41,27 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
     private static DataSyncService dataSyncService;
-    protected String serverIpAndPort;
+    protected static String serverIpAndPort;
     protected String lastDownLoad;
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public ArrayList<SelectionDetail> lastSelection;
     public String tableName;
+    public String billIndex;
     private OrderFragmentActivity orderActivity;
 
     public static DataSyncService getInstance() {
         if(dataSyncService == null) {
             dataSyncService = new DataSyncService();
+            serverIpAndPort = AppData.getCustomData(AppData.serverip);
+            if(serverIpAndPort != null && serverIpAndPort.length() > 8) {
+                executorService.execute(dataSyncService);
+            }
         }
         return dataSyncService;
     }
 
     private DataSyncService(){
-        serverIpAndPort = AppData.getCustomData(AppData.serverip);
-
-        executorService.execute(this);
     }
 
     @Override
@@ -68,10 +70,11 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
             if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
                 HttpURLConnection urlConnection = null;
                 try {
-                    urlConnection = AppData.prepareConnection("https://" + serverIpAndPort + "/security/newOrders","POST");
+                    urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/SanjiPos/newOrders","POST");
                     JSONObject json = new JSONObject();//创建json对象
-                    json.put("table", URLEncoder.encode(StringUtils.isBlank(tableName) ? AppData.getUserName() : AppData.getUserName() + tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
-                    json.put("billIndex", URLEncoder.encode("1", "UTF-8"));//把数据put进json对象中
+                    json.put("waiter", AppData.getUserName());
+                    json.put("table", URLEncoder.encode(tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                    json.put("billIndex", billIndex);//把数据put进json对象中
                     StringBuilder orderContent = new StringBuilder();
                     for (SelectionDetail selectionDetail : lastSelection) {
                         orderContent.append("DishStart:");
@@ -101,6 +104,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         String rjson = AppData.readBackFromConnection(urlConnection);
 
                         Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
+                        lastSelection.clear();
                     } else {
                         Log.e("L", "response code is:" + urlConnection.getResponseCode());
                     }
