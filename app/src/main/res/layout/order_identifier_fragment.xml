@@ -158,8 +158,8 @@
 
         <ViewSwitcher
             android:id="@+id/menuTableSwitcher"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:inAnimation="@android:anim/slide_in_left"
             android:outAnimation="@android:anim/slide_out_right"
             android:layout_weight="1">
@@ -397,14 +397,133 @@
             </LinearLayout>
 
             <!--tables-->
-            <GridView
-                android:id="@+id/odTableGrid"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="4"
-                android:numColumns="2"
-                android:textSize="24sp"
-                android:textStyle="bold"/>
+                android:orientation="vertical"
+                android:visibility="gone">
+                <!-- table list -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="6"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:textSize="24sp"
+                        android:gravity="center"
+                        android:text="Table Selection" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp"
+                        android:background="@android:color/darker_gray"/>
+                    <GridView
+                        android:id="@+id/odTableGrid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+                <!-- when user click a table which already has unclosed bill on it, show this area up-->
+                <LinearLayout
+                    android:id="@+id/billOnTable"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <!-- control buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/cancelShowingBill"
+                            style="?android:attr/buttonStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="left"
+                            android:text="Cancel" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <Button
+                            android:id="@+id/OKCloseTable"
+                            style="?android:attr/buttonStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:text="Close Table" />
+                    </LinearLayout>
+                    <!-- billId tableId and OpenTime-->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp"
+                        android:background="@android:color/darker_gray"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/table2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:textSize="14sp"
+                            android:text="    Table:#" />
+                        <TextView
+                            android:id="@+id/billIdx2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:textSize="14sp"
+                            android:text="    BillId:#" />
+                        <TextView
+                            android:id="@+id/openTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:textSize="14sp"
+                            android:text="    OpenTime:" />
+                    </LinearLayout>
+                    <!-- sub and total -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@android:color/darker_gray"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/subtotal2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:text="  Sub: $" />
+                        <TextView
+                            android:id="@+id/total2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:text="    Total: $" />
+                    </LinearLayout>
+                    <!--- ordered contents -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@android:color/darker_gray"/>
+                    <ListView
+                        android:id="@+id/orderList2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"  />
+                </LinearLayout>
+
+            </LinearLayout>
         </ViewSwitcher>
     </LinearLayout>
 
@@ -471,6 +590,7 @@
                 android:layout_gravity="right"
                 android:text="    OK    " />
         </LinearLayout>
+        <!-- bill list -->
         <View
             android:layout_width="match_parent"
             android:layout_height="5dp"
@@ -479,77 +599,72 @@
             android:id="@+id/billList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="@android:color/darker_gray"/>
+        <!-- detail of a bill -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/billIdx"
-                android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <!-- billId tableId and OpenTime-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@android:color/darker_gray"/>
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:textSize="14sp"
-                android:text="    BillId:#" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="@android:color/darker_gray"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/table"
-                android:layout_width="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/billIdx"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:textSize="14sp"
+                    android:text="    BillId:#" />
+                <TextView
+                    android:id="@+id/table"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:textSize="14sp"
+                    android:text="    Table:#" />
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:textSize="14sp"
+                    android:text="    Time:" />
+            </LinearLayout>
+            <!-- sub and total -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+            <LinearLayout
+                android:id="@+id/sub_and_total"
+                android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:textSize="14sp"
-                android:text="    Table:#" />
-            <TextView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:textSize="14sp"
-                android:text="    Time:" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-        <LinearLayout
-            android:id="@+id/sub_and_total"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/subtotal"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/subtotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="  Sub: $" />
+                <TextView
+                    android:id="@+id/total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="    Total: $" />
+            </LinearLayout>
+            <!--- ordered contents -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+            <ListView
+                android:id="@+id/orderList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="  Sub: $" />
-            <TextView
-                android:id="@+id/total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="    Total: $" />
+                android:layout_weight="1"  />
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-        <ListView
-            android:id="@+id/orderList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"  />
-
     </LinearLayout>
 </FrameLayout>

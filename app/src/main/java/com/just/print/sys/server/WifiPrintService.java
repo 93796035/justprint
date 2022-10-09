@@ -182,24 +182,14 @@ public class WifiPrintService implements Runnable{
         }
         //Save
         if(billIdx == null){
-            billIdx = AppData.getCustomData(AppData.billIdx);
-            if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
-                List<Bill> orders = DaoExpand.queryRecentBill(
-                        NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
-                billIdx = orders.get(0).getBillIdx();
-                int p = billIdx.indexOf("\n");
-                if(p > 0){
-                    billIdx = billIdx.substring(0, p);
-                }
-                billIdx = String.valueOf(Integer.valueOf(billIdx) + 1);
-            }
-
+            billIdx = AppData.getCurrentBillIdx();
             if(isCancel){
                 billIdx = String.valueOf(Integer.valueOf(billIdx)-1); //if shot click on cancel, will use last billIdx by default.
             }
         }
+        //save sales to db
         Double priceOfBill = saveSaleRecToDB(billIdx, isCancel);//save sales records and get the total price....
-
+        //save bill to db
         String openTime = saveBillToDB(priceOfBill, billIdx);                      //save bill record. and will increase billIdx.
         //Sync
         sendToAikaServer(priceOfBill, billIdx, openTime);
@@ -323,13 +313,14 @@ public class WifiPrintService implements Runnable{
 
     private String saveBillToDB(Double priceOfBill, String curBillIdx) {
         BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
-        Bill bill = billDao.load( Long.valueOf(curBillIdx));
+        Bill bill = billDao.load(Long.valueOf(curBillIdx));
         if(bill != null){
             bill.setPrice(String.valueOf(Double.valueOf(bill.getPrice()) + priceOfBill));
             //statue field is not used for now.
         }else{
             bill = new Bill();
-            bill.setBillIdx(curBillIdx + "\n" + CustomerSelection.getInstance().getTableName());
+            bill.setId(Long.valueOf(curBillIdx));
+            bill.setBillIdx(CustomerSelection.getInstance().getTableName());
             bill.setPrice(String.valueOf(priceOfBill));
             bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             //statue field is not used for now.
@@ -337,6 +328,7 @@ public class WifiPrintService implements Runnable{
         }
 
         billDao.insertOrReplace(bill);
+
         return bill.getTime();
     }
 

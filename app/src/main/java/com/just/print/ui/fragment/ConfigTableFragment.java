@@ -25,12 +25,12 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
 
     @XViewByID(R.id.tableFlowListView)
     FlowListView flowListView;
-    XAdapter2<Mark> markXAdapter;
+    XAdapter2<Mark> tableXAdapter;
 
     /**
      * for storing tempral modification
      */
-    private Mark onEditMark = null;
+    private Mark onEditTable = null;
 
     @XViewByID(R.id.name)
     private TextView name = null;
@@ -51,16 +51,16 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        markXAdapter = new XAdapter2<Mark>(getContext(), ConfigTableViewHolder.class);
-        flowListView.setAdapter(markXAdapter);
-        markXAdapter.setClickItemListener(this);
+        tableXAdapter = new XAdapter2<Mark>(getContext(), ConfigTableViewHolder.class);
+        flowListView.setAdapter(tableXAdapter);
+        tableXAdapter.setClickItemListener(this);
         loadTables();
     }
 
     private void loadTables() {
         OrderIdentifierFragment.loadTables();
-        markXAdapter.setData(OrderIdentifierFragment.tables);
-        markXAdapter.notifyDataSetChanged();
+        tableXAdapter.setData(OrderIdentifierFragment.tables);
+        tableXAdapter.notifyDataSetChanged();
     }
 
     @XClick({R.id.addTable})
@@ -86,8 +86,8 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     @Override
     public void onClickItem(View view, int i) {
         onEditIdx = i;
-        final Mark table = markXAdapter.getItem(i);
-        onEditMark = table;
+        final Mark table = tableXAdapter.getItem(i);
+        onEditTable = table;
 
         name.setText(table.getName());
         dspIdx.setText(String.valueOf(((float) table.getState()) / 100.00));
@@ -99,23 +99,23 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
 
     @XClick({R.id.modifyLable})
     private void confirmChange(){
-        if (onEditMark != null) {
+        if (onEditTable != null) {
 //            if (!isIP(modifIP.getText().toString())) {
 //                showToast("Please input correct ip");
 //                return;
 //            }
 
-            onEditMark.setName(name.getText().toString());
+            onEditTable.setName(name.getText().toString());
 
             try{
-                onEditMark.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
+                onEditTable.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
             }catch(NumberFormatException e){
                 //do nothing.
             }
 
-            onEditMark.update();
-            onEditMark = null;
-            markXAdapter.notifyDataSetChanged();
+            onEditTable.update();
+            onEditTable = null;
+            tableXAdapter.notifyDataSetChanged();
             AppData.updataeLastModifyTime(null);
         }
         modifyViewSwitch.setDisplayedChild(0);
@@ -123,15 +123,15 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
 
     @XClick({R.id.delete})
     private void delete(){
-        final Mark mark = markXAdapter.getItem(onEditIdx);
+        final Mark table = tableXAdapter.getItem(onEditIdx);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Are you sure to delete \"" + mark.getName() + "\"?");
+        builder.setMessage("Are you sure to delete \"" + table.getName() + "\"?");
         builder.setTitle("Notice").setNegativeButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                mark.delete();
+                table.delete();
                 loadTables();
 
                 modifyViewSwitch.setDisplayedChild(0);

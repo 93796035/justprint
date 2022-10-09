@@ -30,10 +30,12 @@ import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
+import com.just.print.db.dao.MarkDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
+import com.just.print.ui.UC;
 import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
@@ -67,8 +69,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String EVENT_ADD_MENU = "EVENT_ADD_MENU=";
     private static final String TAG = "OrderIdentifierFragment";
-    public static final String WILL_APPEND_NEW_SELECTION_TO_BILL = "    Will append new selection to bill: ";
-    public static final String TABLE = "    Table:#";
 
     private static OrderIdentifierFragment instance = null;
     private static boolean isCancel;
@@ -76,8 +76,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private List<Mark> marksOfCurDish;
     private String reportContent;
     private XAdapter2<Bill> billsXAdapter;
-    private BillDao billDao;
-
+    private BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();;
 
     public static OrderIdentifierFragment getInstance(){
         if(instance == null){
@@ -151,18 +150,30 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
     @XViewByID(R.id.billIdx)
     TextView billIdx;
+    @XViewByID(R.id.billIdx2)
+    TextView billIdx2;
     @XViewByID(R.id.table)
     TextView table;
+    @XViewByID(R.id.table2)
+    TextView table2;
     @XViewByID(R.id.time)
-    TextView time;
+    TextView tvOpenTime;
+    @XViewByID(R.id.openTime)
+    TextView tvOpenTime2;
 
     @XViewByID(R.id.subtotal)
     TextView subtoal;
+    @XViewByID(R.id.subtotal2)
+    TextView subtoal2;
     @XViewByID(R.id.total)
     TextView total;
+    @XViewByID(R.id.total2)
+    TextView total2;
 
     @XViewByID(R.id.orderList)
     ListView ordersView;
+    @XViewByID(R.id.orderList2)
+    ListView ordersView2;
 
     private Menu storedMenu;
 
@@ -189,6 +200,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     public void onCreated(Bundle savedInstanceState) {
         getEventBus().register(EVENT_ADD_MENU, this);
         new StupidReflect(this, getView()).init();
+
         //设置餐桌号用
         loadTables();
         //CustomerSelection.getInstance().setTableName(odIdTableNumEt.getText().toString());
@@ -345,11 +357,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         //add shortcut Marks.
         initShortCutMarks();
 
-
         tableXAdapter = new XAdapter2<Mark>(getActivity(), tables, TableIdentifierViewHolder.class);
         tableXAdapter.setClickItemListener(this.tableXAdapterClick);
         odTableGrid.setAdapter(tableXAdapter);
-
 
         //init MarkSelection panel
         markAllXAdapter = new XAdapter2<Mark>(getContext(), OrderMarksSelectionViewHolder.class);
@@ -365,19 +375,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         }
 
         //init the existing bills area.
-        billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
-        List<Bill> orders = new ArrayList<>();
-        try{
-            String recentNum = AppData.getCustomData(AppData.recentNum);
-            orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
-        }catch(Exception e){
-            L.e("orders", "exception when fetching sale orders", e);
-            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
-        }
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
-        billsXAdapter.setData(orders);
     }
 
     @XClick({R.id.odInfoOK})
@@ -435,12 +435,25 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             this.billIdToMregeTo = null;
             return false;
         }
+
+        //init the existing bills area.
+        List<Bill> orders = new ArrayList<>();
+        try{
+            String recentNum = AppData.getCustomData(AppData.recentBillAmount);
+            orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
+        }catch(Exception e){
+            L.e("orders", "exception when fetching sale orders", e);
+            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
+        }
+        billsXAdapter.setData(orders);
+
         switch (view.getId()) {
             case R.id.odIdSndBtn2:
                 //check if table selected.
                 if (!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0) {
                     String curTable = odIdTable2.getText().toString();
                     if (curTable.length() == 0 || "T".equals(curTable)) {
+                        loadTables();
                         menuTableSwitcher.setDisplayedChild(1);
                         return false;
                     }
@@ -489,12 +502,22 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     this.billIdToMregeTo = null;
                     return;
                 }
-                //check if table selected.
+                //check if table not selected.
                 if(!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0){
                     String curTable = odIdTable2.getText().toString();
                     if(curTable.length() == 0 || "T".equals(curTable)){
+                        loadTables();
                         menuTableSwitcher.setDisplayedChild(1);
                         return;
+                    }
+                    //update the table status.
+                    MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
+                    List<Mark> tables = markDao.loadAll();
+                    for (Mark table : tables) {
+                        if(curTable.equals(table.getName())){
+                            table.setVersion(Long.valueOf(AppData.getCurrentBillIdx()) * -1);
+                            markDao.insertOrReplace(table);
+                        }
                     }
                 }
                 String orderContent = printCurrentSelection(billIdToMregeTo, false);
@@ -573,7 +596,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.OKSelectBillId:
                 //in case the billIdx is not a number, report error, and do nothing.
                 try {
-                    billIdToMregeTo = billIdx.getText().toString().substring(WILL_APPEND_NEW_SELECTION_TO_BILL.length());
+                    billIdToMregeTo = billIdx.getText().toString().substring(UC.ORDER_NUMBER.length());
                 }catch (Exception e){
                     L.e("OrderIdentifierFragment",
                             "Unexcepted id in label:" + billIdx.getText().toString().substring("    Will append new selection to bill: ".length()), e);
@@ -582,7 +605,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     return;
                 }
 
-                CustomerSelection.getInstance().setTableName(table.getText().toString().substring(TABLE.length()));
+                CustomerSelection.getInstance().setTableName(table.getText().toString().substring(UC.TABLE.length()));
                 String orderContent2 = printCurrentSelection(billIdToMregeTo, isCancel);
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent2);
@@ -812,15 +835,23 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         @Override
         public void onClickItem(View view, int idx) {
             L.d(TAG, "onClickTable" + view.getId() + String.valueOf(idx));
-            String table = OrderIdentifierFragment.tables.get(idx).getName();
-            if("桌".equals(table) || "号".equals(table) ||  "Table".equalsIgnoreCase(table.trim()) || "Number".equalsIgnoreCase(table)){
+            Mark selectedTable = OrderIdentifierFragment.tables.get(idx);
+            String tableName = selectedTable.getName();
+            if("桌".equals(tableName) || "号".equals(tableName) ||  "Table".equalsIgnoreCase(tableName.trim()) || "Number".equalsIgnoreCase(tableName)){
                 findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE);
                 findViewById(R.id.inputTableName).setVisibility(View.VISIBLE);
             }else {
-                odIdTable2.setText(table);
+                odIdTable2.setText(tableName);
             }
-            CustomerSelection.getInstance().setTableName(table);// can not use it for now, because if input dlg poped up, this line will excuted before input message return back.odIdTable2.getText().toString());
-            menuTableSwitcher.setDisplayedChild(0);
+            //check if there's a unclosed bill on this table.
+            if(selectedTable.getVersion() == -1){ //negative means a mark is used as table, -1 means closed table
+                CustomerSelection.getInstance().setTableName(tableName);// can not use it for now, because if input dlg poped up, this line will excuted before input message return back.odIdTable2.getText().toString());
+                findViewById(R.id.billOnTable).setVisibility(View.GONE);
+                menuTableSwitcher.setDisplayedChild(0);
+            }else { //less than -1 means openned table, and the number is bill number.
+                Bill bill = billDao.load(-1 * selectedTable.getVersion());
+                showOrderDetail(bill);
+            }
         }
     };
 
@@ -898,6 +929,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 L.d(TAG, "ClickedTableButton");
                 if(tables.size() > 0) {
                     if (menuMarkSwitcher.getDisplayedChild() == 0){
+                        loadTables();
                         menuTableSwitcher.setDisplayedChild(1);
                     }
                 }
@@ -961,28 +993,40 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
             default:
                 Bill order = billsXAdapter.getData().get(i);
-
-                String tableName = order.getBillIdx();
-                int p = tableName.indexOf("\n");
-                if(p > -1){
-                    billIdx.setText("    Will append new selection to bill: " + Integer.valueOf(tableName.substring(0,p).trim()));
-                    tableName = tableName.substring(p + 1);
-                }else{
-                    billIdx.setText("    Will append new selection to bill: " + Integer.valueOf(tableName));
-                }
-                String timeString = order.getTime();
-                table.setText(TABLE + tableName);
-                time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
-                subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
-                total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
-//        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-                final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
-
-                XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
-                adapter.setData(data);
-                ordersView.setAdapter(adapter);
-
+                showOrderDetail(order);
         }
+    }
+
+    private void showOrderDetail(Bill order) {
+        String billID = order.getId().toString();
+        String tableName = order.getBillIdx();
+        String openTime = order.getTime().substring(0, order.getTime().length() - 3);
+        String subTotalStr = String.format("%.2f", Float.valueOf(order.getPrice()));
+        String totalStr = String.format("%.2f", Float.valueOf(order.getPrice())*1.49);
+        //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
+
+        XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
+        adapter.setData(data);
+        //updating the ui for bill selection panel
+
+        billIdx.setText(UC.ORDER_NUMBER + billID);
+        table.setText(UC.TABLE + tableName);
+        tvOpenTime.setText(UC.OPEN_TIME + openTime);
+        subtoal.setText(UC.SUB_TOTAL + subTotalStr);
+        total.setText(UC.TOTAL + totalStr);
+        ordersView.setAdapter(adapter);
+        //updating panel for table selection panel
+        billIdx2.setText(UC.ORDER_NUMBER + billID);
+        table2.setText(UC.TABLE + tableName);
+        tvOpenTime2.setText(UC.OPEN_TIME + openTime);
+        subtoal2.setText(UC.SUB_TOTAL + subTotalStr);
+        total2.setText(UC.TOTAL + totalStr);
+        XAdapter2<SaleRecord> adapter2 = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
+        adapter2.setData(data);
+
+        ordersView2.setAdapter(adapter2);
+        findViewById(R.id.billOnTable).setVisibility(View.VISIBLE);
     }
 
     private void showMarksPanel(Menu menu){   //final onChoiceMarks choiceMarks) {

@@ -13,16 +13,15 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
-import com.just.print.db.bean.Category;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
+import com.just.print.ui.UC;
 import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
-import com.just.print.ui.holder.OrderCategoryButtonNatureWidthViewHolder;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.OnClickItemListener;
@@ -33,7 +32,6 @@ import com.stupid.method.reflect.annotation.XViewByID;
 import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -84,7 +82,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
         List<Bill> orders = new ArrayList<>();
         try{
-            String recentNum = AppData.getCustomData(AppData.recentNum);
+            String recentNum = AppData.getCustomData(AppData.recentBillAmount);
             orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
         }catch(Exception e){
             L.e("orders", "exception when fetching sale orders", e);
@@ -119,8 +117,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
                     saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
-                    List<SaleRecord> saleRecord = saleRecordDao.loadAll();
-                    if(saleRecord == null || saleRecord.size() == 0){
+                    List<SaleRecord> saleRecords = saleRecordDao.loadAll();
+                    if(saleRecords == null || saleRecords.size() == 0){
                         getActivity().finish();
                         showToast("No report to print! The sales record has been cleaned!");
                         return;
@@ -226,22 +224,13 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @Override
     public void onClickItem(View view, int idx) {
         Bill order = billsXAdapter.getData().get(idx);
-        String tableName = order.getBillIdx();
-        int p = tableName.indexOf("\n");
-        if(p > -1){
-            billIdx.setText("    BillId: " + Integer.valueOf(tableName.substring(0,p).trim()));
-            tableName = tableName.substring(p + 1);
-        }else{
-            billIdx.setText("    BillId: " + Integer.valueOf(tableName));
-        }
-
-        String timeString = order.getTime();
-        table.setText("    Table:#" + tableName);
-        time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
-        subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
-        total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
+        billIdx.setText(UC.ORDER_NUMBER + order.getId());
+        table.setText(UC.TABLE + order.getBillIdx());
+        time.setText(UC.OPEN_TIME + order.getTime().substring(0, order.getTime().length() - 3));
+        subtoal.setText(UC.SUB_TOTAL + String.format("%.2f", Float.valueOf(order.getPrice())));
+        total.setText(UC.TOTAL + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
 
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);

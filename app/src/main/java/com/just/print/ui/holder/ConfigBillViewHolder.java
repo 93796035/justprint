@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.db.bean.Bill;
+import com.just.print.ui.UC;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -26,22 +27,19 @@ public class ConfigBillViewHolder extends XViewHolder<Bill> {
 
     @Override
     public void onResetView(Bill bill, int i) {
-        String billId = bill.getBillIdx();
-        String[] parts = billId.split("\n");
+        String billId = bill.getId().toString();
+        String tableName = bill.getBillIdx();
+//        String[] parts = billId.split("\n");
 
-        if(parts[0].length() > 3){
-            parts[0] = parts[0].substring(billId.length() - 3);
+        if(billId.length() > 3){
+            billId = billId.substring(billId.length() - 3);
         }
-        parts[0] += "\n";
-        String table = null;
-        if(parts.length > 1) {
-            if (parts[1].length() > 3) {
-                table = parts[1].substring(parts[1].length() - 3);
-            }else{
-                table = parts[1];
+        if(tableName.length() > 1) {
+            if (tableName.length() > 3) {
+                tableName = tableName.substring(tableName.length() - 3);
             }
         }
         //comment out the price part to save space for more bill to display  billButton.setText( "#" + bill.getBillIdx() + " $" + bill.getPrice());
-        billButton.setText(table == null ? parts[0] : parts[0] + table);
+        billButton.setText(tableName == null ? billId + UC.ENTER : billId + "\n" + tableName);
     }
 }

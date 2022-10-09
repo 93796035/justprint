@@ -6,12 +6,15 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.widget.TextView;
 
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Printer;
+import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.activity.MainFragmentActivity;
 import com.just.print.ui.fragment.LoginFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.L;
 import com.just.print.util.SharedPreferencesHelper;
+import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
 
 import org.json.JSONException;
@@ -28,13 +31,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.List;
 
 import static com.just.print.util.ToastUtil.showToast;
 
 public class  AppData extends Thread{
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
     public static final String DENSITY = "density";
-    public static String recentNum = "keep";
+    public static String recentBillAmount = "recentBillAmount";
     public static String orderpassword = "op";
     public static String labelLines = "lls";
 
@@ -136,7 +140,7 @@ public class  AppData extends Thread{
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
-            line_height, menuNameLength, priceOnkitchenbill, reportFont, reportPrinter,
+            line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
             StartX, StartY, TableMark, TableSelectable, taxrate,
@@ -298,6 +302,17 @@ public class  AppData extends Thread{
     public static void updataeLastModifyTime(String lastUpdateTime) {
         getShopData(NingMengStyle.app.getApplicationContext()).putString("LastSyncDate",
                 lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
+    }
+
+    //return the current billIdx saved in config. if not set yet, then check the bill ids in db, then give a next one.
+    public static String getCurrentBillIdx() {
+        String billIdx = AppData.getCustomData(AppData.billIdx);
+        if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
+            List<Bill> orders = DaoExpand.queryRecentBill(
+                    NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
+            billIdx = String.valueOf(orders.get(0).getId() + 1);
+        }
+        return billIdx;
     }
 
     public static HttpURLConnection prepareConnection(String uri, String method) throws Exception {
