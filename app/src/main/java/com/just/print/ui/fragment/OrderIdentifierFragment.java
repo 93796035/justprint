@@ -92,6 +92,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XViewByID(R.id.menuMarkSwitcher)
     private ViewSwitcher menuMarkSwitcher;
 
+    @XViewByID(R.id.categoryArea)
+    private LinearLayout categoryArea;
+
     @XViewByID(R.id.menuTableSwitcher)
     private ViewSwitcher menuTableSwitcher;
 
@@ -205,6 +208,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.topButtons).setVisibility(View.GONE);
             odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryFlowListPane).setBackgroundColor(AppData.getThemColor());
+            findViewById(R.id.categoryArea).setBackgroundColor(AppData.getThemColor());
             odIdCancel.setOnLongClickListener(this);
             odIdSndBtn2.setOnLongClickListener(this);
 
@@ -507,6 +511,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if( menuMarkSwitcher.getDisplayedChild() == 0) {
                     DelOneText();
                 }else{
+                    categoryArea.setVisibility(View.VISIBLE);
                     menuMarkSwitcher.setDisplayedChild(0);
                 }
                 break;
@@ -593,6 +598,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 isCancel = false;
                 break;
 //            case R.id.odMarkSelectionCancel:
+//                categoryArea.setVisibility(View.VISIBLE);
 //                menuMarkSwitcher.setDisplayedChild(0);
 //                break;
 //
@@ -670,6 +676,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 marksOfCurDish.add(mark.clone());
             }
         }
+        categoryArea.setVisibility(View.VISIBLE);
         menuMarkSwitcher.setDisplayedChild(0);
         loadOrderMenu();
     }
@@ -1024,6 +1031,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         markAllList.setSelection(0);
 
         if (menuMarkSwitcher.getDisplayedChild() == 0){
+            categoryArea.setVisibility(View.GONE);
             menuMarkSwitcher.setDisplayedChild(1);
         }
 //        new AlertDialog.Builder(this.getActivity()).setMultiChoiceItems(markNames, selectedQT, new DialogInterface.OnMultiChoiceClickListener() {
