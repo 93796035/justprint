@@ -437,7 +437,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if (!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0) {
                     String curTable = odIdTable2.getText().toString();
                     if (curTable.length() == 0 || "T".equals(curTable)) {
-                        menuMarkSwitcher.setDisplayedChild(2);
+                        menuTableSwitcher.setDisplayedChild(1);
                         return false;
                     }
                 }
@@ -489,7 +489,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if(!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0){
                     String curTable = odIdTable2.getText().toString();
                     if(curTable.length() == 0 || "T".equals(curTable)){
-                        menuMarkSwitcher.setDisplayedChild(2);
+                        menuTableSwitcher.setDisplayedChild(1);
                         return;
                     }
                 }
@@ -813,7 +813,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdTable2.setText(table);
             }
             CustomerSelection.getInstance().setTableName(table);// can not use it for now, because if input dlg poped up, this line will excuted before input message return back.odIdTable2.getText().toString());
-            menuMarkSwitcher.setDisplayedChild(0);
+            menuTableSwitcher.setDisplayedChild(0);
         }
     };
 
@@ -891,7 +891,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 L.d(TAG, "ClickedTableButton");
                 if(tables.size() > 0) {
                     if (menuMarkSwitcher.getDisplayedChild() == 0){
-                        menuMarkSwitcher.setDisplayedChild(2);
+                        menuTableSwitcher.setDisplayedChild(1);
                     }
                 }
                 break;
