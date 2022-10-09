@@ -22,6 +22,8 @@ public class ConfigOrderViewHolder extends XViewHolder<SaleRecord> {
     TextView odMName;
     @XViewByID(R.id.odmnnum)
     TextView odMNNum;
+    @XViewByID(R.id.odprice)
+    TextView odPrice;
 
     @Override
     public int getLayoutId() {
@@ -48,5 +50,6 @@ public class ConfigOrderViewHolder extends XViewHolder<SaleRecord> {
 
         odMName.setText(saleRecord.getMname());
         odMNNum.setText("x" + saleRecord.getNumber().intValue());
+        odPrice.setText("$" + saleRecord.getPrice());
     }
 }

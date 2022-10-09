@@ -64,18 +64,18 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
     }
 
     @XClick({R.id.addTable})
-    private void addTable(@XGetValueByView(fromId = R.id.etTable) String mark,
+    private void addTable(@XGetValueByView(fromId = R.id.etTable) String tableName,
                          @XGetValueByView(fromId = R.id.dspIdxTable) String dspIdx) {
 
         Mark table = new Mark();        //currently we are using Mark to save table( when deleted flag is set, then it's table.
-        table.setName(mark);
+        table.setName(tableName);
 
         try{
-            table.setState((int)(Float.valueOf(dspIdx) * 100));
+            table.setState((int)(Float.valueOf(dspIdx) * 100)); //table can be ordered by name, so this field can be used for other stuff if needed.
         }catch(NumberFormatException e){
             table.setState(0);
         }
-        table.setVersion(-1l);
+        table.setVersion(-1l);  //negative means it's a table not mark. while we can still give it some nubmer to indicate the bill.
         NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
         table.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);

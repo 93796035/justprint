@@ -198,6 +198,21 @@
             android:layout_height="5dp"
             android:background="@android:color/darker_gray"/>
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/billIdx"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:textSize="14sp"
+                android:text="    BillId:#" />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@android:color/darker_gray"/>
+        <LinearLayout
             android:id="@+id/table_time"
             android:layout_width="match_parent"
             android:layout_height="20dp"

@@ -168,7 +168,8 @@ public class WifiPrintService implements Runnable{
 
     //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. because it means that last time didn't print successfully
     //otherwise will send to sever and report.(no matter the content will be printed succesfully or not, because if not printed by accident, they will manully write kitchen a bill.
-    public String saveAndSyncCommand(boolean isCancel){
+    //the billIdx was come from the flag in orderIdentifierFragment, which could be set by selecting an existing bill, while if no bill selected, it will be null.
+    public String saveAndSyncCommand(String billIdx, boolean isCancel){
         L.d(TAG,"start to translate selection into ipContent for printing.");
         //Check
         String printerIp = getIPofNonEmptyIpContentMapEntry();
@@ -180,14 +181,30 @@ public class WifiPrintService implements Runnable{
             showToast("PRINTING...");
         }
         //Save
-        String billIndex = AppData.getCustomData(AppData.kitchenBillIdx);
-        Double priceOfBill = saveSaleRecToDB(isCancel, billIndex);//save sales records and get the total price....
+        if(billIdx == null){
+            billIdx = AppData.getCustomData(AppData.billIdx);
+            if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
+                List<Bill> orders = DaoExpand.queryRecentBill(
+                        NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
+                billIdx = orders.get(0).getBillIdx();
+                int p = billIdx.indexOf("\n");
+                if(p > 0){
+                    billIdx = billIdx.substring(0, p);
+                }
+                billIdx = String.valueOf(Integer.valueOf(billIdx) + 1);
+            }
 
-        saveBillToDB(priceOfBill, billIndex);                      //save bill record.
+            if(isCancel){
+                billIdx = String.valueOf(Integer.valueOf(billIdx)-1); //if shot click on cancel, will use last billIdx by default.
+            }
+        }
+        Double priceOfBill = saveSaleRecToDB(billIdx, isCancel);//save sales records and get the total price....
+
+        String openTime = saveBillToDB(priceOfBill, billIdx);                      //save bill record. and will increase billIdx.
         //Sync
-        sendToAikaServer(billIndex);
+        sendToAikaServer(priceOfBill, billIdx, openTime);
         //Print
-        return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill, billIndex); //send to printer and return the content.
+        return manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill, billIdx); //send to printer and return the content.
     }
 
     private String manageDishesIntoMapAndWaitingForPrint(boolean isCancel, Double priceOfBill, String kitchenBillIdx) {
@@ -304,31 +321,36 @@ public class WifiPrintService implements Runnable{
         return totalContent.toString();
     }
 
-    private void saveBillToDB(Double priceOfBill, String curBillIdx) {
-        Bill bill = new Bill();
-        String tableName = CustomerSelection.getInstance().getTableName();
-        bill.setBillIdx(curBillIdx + "\n" + tableName);
-        bill.setPrice(String.valueOf(priceOfBill));
-
-        //statue field is not used for now.
-
-        bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    private String saveBillToDB(Double priceOfBill, String curBillIdx) {
         BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
+        Bill bill = billDao.load( Long.valueOf(curBillIdx));
+        if(bill != null){
+            bill.setPrice(String.valueOf(Double.valueOf(bill.getPrice()) + priceOfBill));
+            //statue field is not used for now.
+        }else{
+            bill = new Bill();
+            bill.setBillIdx(curBillIdx + "\n" + CustomerSelection.getInstance().getTableName());
+            bill.setPrice(String.valueOf(priceOfBill));
+            bill.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            //statue field is not used for now.
+            increaseKitchenBillIdx();   //when the save bill to DB action succeed, increase the billIdx!
+        }
+
         billDao.insertOrReplace(bill);
-        increaseKitchenBillIdx();   //when the save bill to DB action succeed, increase the billIdx!
+        return bill.getTime();
     }
 
     //increase the value of AppData.kitchenBillIdxit
     private void increaseKitchenBillIdx() {
-        String curBillIdx = AppData.getCustomData(AppData.kitchenBillIdx);  //and it can also be used to know which order come in first.
+        String curBillIdx = AppData.getCustomData(AppData.billIdx);  //and it can also be used to know which order come in first.
         if(StringUtils.isBlank(curBillIdx)){
-            AppData.putCustomData(AppData.kitchenBillIdx, "2");   //update the kbi into higer value.
+            AppData.putCustomData(AppData.billIdx, "2");   //update the kbi into higer value.
         }else {
-            AppData.putCustomData(AppData.kitchenBillIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
+            AppData.putCustomData(AppData.billIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
         }
     }
 
-    private static Double saveSaleRecToDB(boolean isCancel, String curBillIdx) {
+    private static Double saveSaleRecToDB(String curBillIdx, boolean isCancel) {
         Double priceFR = 0.0;
         //save the menu into database.
         SaleRecordDao saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
@@ -584,11 +606,13 @@ public class WifiPrintService implements Runnable{
         }
     }
 
-    private void sendToAikaServer(String billIndex) {
+    private void sendToAikaServer(Double totalPrice, String billIndex, String openTime) {
         DataSyncService dataSyncService = DataSyncService.getInstance();
         if (dataSyncService.serverIpAndPort != null && dataSyncService.serverIpAndPort.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             dataSyncService.billIndex = billIndex;
+            dataSyncService.totalPrice = totalPrice;
+            dataSyncService.opentime = openTime;
             ArrayList<SelectionDetail> newList = new ArrayList<SelectionDetail>();
             for (SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()) {
                 newList.add(selectionDetail);
@@ -858,7 +882,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private String prepareBeiYangPrinterStr(){
-        String beiYangPrinter = AppData.getCustomData(AppData.BeiYangPrinter);
+        String beiYangPrinter = AppData.getCustomData(AppData.beiYangPrinter);
         if(beiYangPrinter != null && beiYangPrinter.length() > 7){
             return beiYangPrinter;
         }
@@ -880,7 +904,7 @@ public class WifiPrintService implements Runnable{
                 }
             }
 
-            AppData.putCustomData(AppData.BeiYangPrinter, beiYangPrinter);
+            AppData.putCustomData(AppData.beiYangPrinter, beiYangPrinter);
             L.d(TAG, "beiyang printers : " + beiYangPrinter);
         }
         return beiYangPrinter;
@@ -954,9 +978,9 @@ public class WifiPrintService implements Runnable{
         content.append("\n");
         int lastBillNo = 0;
         try {
-            lastBillNo = Integer.valueOf(AppData.getCustomData(AppData.kitchenBillIdx)) - 1;
+            lastBillNo = Integer.valueOf(AppData.getCustomData(AppData.billIdx)) - 1;
         }catch (Exception e){
-            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + AppData.getCustomData(AppData.kitchenBillIdx), e);
+            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + AppData.getCustomData(AppData.billIdx), e);
         }
         content.append("last bill : #").append(lastBillNo);
         content.append("\n");
@@ -1324,7 +1348,7 @@ public class WifiPrintService implements Runnable{
             }
             content.append(generateString(width, sep_str2)).append("\n");
         }
-        if("true".equals(AppData.getCustomData(AppData.priceonkitchenbill))) {
+        if("true".equals(AppData.getCustomData(AppData.priceOnkitchenbill))) {
             return content.append(priceOfBill).append("\n").toString();
         }else {
             return content.substring(0, content.length() - (width + 1));

@@ -48,6 +48,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @XViewByID(R.id.billList)
     FlowListView billListView;
 
+    @XViewByID(R.id.billIdx)
+    TextView billIdx;
     @XViewByID(R.id.table)
     TextView table;
     @XViewByID(R.id.time)
@@ -227,8 +229,12 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         String tableName = order.getBillIdx();
         int p = tableName.indexOf("\n");
         if(p > -1){
+            billIdx.setText("    BillId: " + Integer.valueOf(tableName.substring(0,p).trim()));
             tableName = tableName.substring(p + 1);
+        }else{
+            billIdx.setText("    BillId: " + Integer.valueOf(tableName));
         }
+
         String timeString = order.getTime();
         table.setText("    Table:#" + tableName);
         time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));

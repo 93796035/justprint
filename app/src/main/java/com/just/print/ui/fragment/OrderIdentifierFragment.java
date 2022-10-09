@@ -23,16 +23,20 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
+import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.SaleRecord;
+import com.just.print.db.dao.BillDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.activity.ConfigFragmentActivity;
+import com.just.print.ui.holder.ConfigBillViewHolder;
+import com.just.print.ui.holder.ConfigOrderViewHolder;
 import com.just.print.ui.holder.OrderCategoryButtonFullWidthViewHolder;
 import com.just.print.ui.holder.OrderMarksSelectionViewHolder;
 import com.just.print.ui.holder.OrderIdentifierItemViewHolder;
@@ -59,16 +63,21 @@ import java.util.Date;
 import java.util.List;
 
 
-public class OrderIdentifierFragment extends BaseFragment implements View.OnClickListener, OnClickItemListener, EventBus.EventHandler{
+public class OrderIdentifierFragment extends BaseFragment implements View.OnClickListener, View.OnLongClickListener, OnClickItemListener, EventBus.EventHandler{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String EVENT_ADD_MENU = "EVENT_ADD_MENU=";
     private static final String TAG = "OrderIdentifierFragment";
+    public static final String WILL_APPEND_NEW_SELECTION_TO_BILL = "    Will append new selection to bill: ";
+    public static final String TABLE = "    Table:#";
 
     private static OrderIdentifierFragment instance = null;
     private static boolean isCancel;
     private List<Mark> allMarks;
     private List<Mark> marksOfCurDish;
     private String reportContent;
+    private XAdapter2<Bill> billsXAdapter;
+    private BillDao billDao;
+
 
     public static OrderIdentifierFragment getInstance(){
         if(instance == null){
@@ -97,6 +106,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
     @XViewByID(R.id.odIdConfigBtn2)
     private static ImageButton odIdConfigBtn2;
+
+    @XViewByID(R.id.odIdSndBtn2)
+    private ImageButton odIdSndBtn2;
 
     @XViewByID(R.id.odIdDelBtn)
     private ImageButton odIdDelBtn;
@@ -131,6 +143,24 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XViewByID(R.id.allMarkList)
     GridView markAllList;
 
+    @XViewByID(R.id.billList)
+    FlowListView billListView;
+
+    @XViewByID(R.id.billIdx)
+    TextView billIdx;
+    @XViewByID(R.id.table)
+    TextView table;
+    @XViewByID(R.id.time)
+    TextView time;
+
+    @XViewByID(R.id.subtotal)
+    TextView subtoal;
+    @XViewByID(R.id.total)
+    TextView total;
+
+    @XViewByID(R.id.orderList)
+    ListView ordersView;
+
     private Menu storedMenu;
 
     XAdapter2<Mark> markShorCutXAdapter;
@@ -151,7 +181,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
     public static List<Mark> tables = new ArrayList<Mark>();
     String tableSelectable = AppData.getCustomData(AppData.TableSelectable);
-
+    private String billIdToMregeTo;
     @Override
     public void onCreated(Bundle savedInstanceState) {
         getEventBus().register(EVENT_ADD_MENU, this);
@@ -175,6 +205,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.topButtons).setVisibility(View.GONE);
             odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryFlowListPane).setBackgroundColor(AppData.getThemColor());
+            odIdCancel.setOnLongClickListener(this);
+            odIdSndBtn2.setOnLongClickListener(this);
+
             if("flow".equals(AppData.getCategoryLayoutStyle())){
                 odIdCategoryGrid.setVisibility(View.GONE);
             }else{
@@ -218,7 +251,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             if(!"false".equalsIgnoreCase(tableSelectable)) {
                 odIdTable2.setText("T");
             }else{
-                odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
+                odIdTable2.setText(AppData.getCustomData(AppData.billIdx));
             }
 
             if("true".equals(AppData.getCustomData(AppData.clientMode))){
@@ -326,6 +359,21 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         }else{
             findViewById(R.id.odInfoCollect).setVisibility(View.GONE);
         }
+
+        //init the existing bills area.
+        billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
+        List<Bill> orders = new ArrayList<>();
+        try{
+            String recentNum = AppData.getCustomData(AppData.recentNum);
+            orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
+        }catch(Exception e){
+            L.e("orders", "exception when fetching sale orders", e);
+            //means the bill table not existing. for old version there are no bill table yet, so when update them into new version, and downloaded the old database, then will have this issue.
+        }
+        billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
+        billsXAdapter.setClickItemListener(this);
+        billListView.setAdapter(billsXAdapter);
+        billsXAdapter.setData(orders);
     }
 
     @XClick({R.id.odInfoOK})
@@ -373,26 +421,79 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         });
     }
 
-    @XClick({R.id.odIdConfigBtn,R.id.odIdConfigBtn2, R.id.odIdSndBtn, R.id.odIdSndBtn2, R.id.odIdDelBtn, R.id.odIdOkBtn, R.id.odIdCancel})
+    boolean longClickFlag = false;
+    @Override
+    public boolean onLongClick(View view) {
+        List<SelectionDetail> selectionDetails = CustomerSelection.getInstance().getSelectedDishes();
+        //check if dish selected.
+        if (selectionDetails == null || selectionDetails.size() == 0) {
+            showToast("Nothing selected!");
+            this.billIdToMregeTo = null;
+            return false;
+        }
+        switch (view.getId()) {
+            case R.id.odIdSndBtn2:
+                //check if table selected.
+                if (!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0) {
+                    String curTable = odIdTable2.getText().toString();
+                    if (curTable.length() == 0 || "T".equals(curTable)) {
+                        menuMarkSwitcher.setDisplayedChild(2);
+                        return false;
+                    }
+                }
+                longClickFlag = true;   //set the flag, because the exeControlCommand emthod will also be triggered when long click happenned.
+                // in the action of ok button of recentOrders view, the printCurrentSelection method will be called.
+                findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE);
+                findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
+                break;
+            case R.id.odIdCancel:
+                longClickFlag = true;
+                isCancel = true;
+                findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE);
+                findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
+                break;
+        }
+        return false;
+    }
+
+    @XClick({R.id.OKSelectBillId, R.id.cancelSelectBillId, R.id.odIdConfigBtn,R.id.odIdConfigBtn2, R.id.odIdSndBtn, R.id.odIdSndBtn2, R.id.odIdDelBtn, R.id.odIdOkBtn, R.id.odIdCancel})
     private void exeControlCommand(View v) {
+        if(longClickFlag){
+            longClickFlag = false;
+            return;
+        }
+        List<SelectionDetail> selectionDetails = CustomerSelection.getInstance().getSelectedDishes();
         switch (v.getId()) {
             case R.id.odIdConfigBtn:
             case R.id.odIdConfigBtn2:
                 startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
                 break;
             case R.id.odIdCancel:
-                printCurrentSelection(true);
+                //check if dish selected.
+                if(selectionDetails == null || selectionDetails.size() == 0){
+                    showToast("Nothing selected!");
+                    this.billIdToMregeTo = null;
+                    return;
+                }
+                printCurrentSelection(billIdToMregeTo,true);
                 break;
             case R.id.odIdSndBtn:
             case R.id.odIdSndBtn2:
+                //check if dish selected.
+                if(selectionDetails == null || selectionDetails.size() == 0){
+                    showToast("Nothing selected!");
+                    this.billIdToMregeTo = null;
+                    return;
+                }
+                //check if table selected.
                 if(!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0){
                     String curTable = odIdTable2.getText().toString();
                     if(curTable.length() == 0 || "T".equals(curTable)){
-                        menuTableSwitcher.setDisplayedChild(1);
+                        menuMarkSwitcher.setDisplayedChild(2);
                         return;
                     }
                 }
-                String orderContent = printCurrentSelection(false);
+                String orderContent = printCurrentSelection(billIdToMregeTo, false);
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent);
                 }
@@ -458,7 +559,39 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     updateSelectionOfCurrentDish();
                 }
                 break;
+            case R.id.cancelSelectBillId:
+                billIdToMregeTo = null;
+                isCancel = false;
+                findViewById(R.id.mainDialog).setVisibility(View.VISIBLE); //it's better to be run after 10 seconds
+                findViewById(R.id.recentOrders).setVisibility(View.INVISIBLE);
+                break;
+            case R.id.OKSelectBillId:
+                //in case the billIdx is not a number, report error, and do nothing.
+                try {
+                    billIdToMregeTo = billIdx.getText().toString().substring(WILL_APPEND_NEW_SELECTION_TO_BILL.length());
+                }catch (Exception e){
+                    L.e("OrderIdentifierFragment",
+                            "Unexcepted id in label:" + billIdx.getText().toString().substring("    Will append new selection to bill: ".length()), e);
+                    billIdToMregeTo = null;
+                    isCancel = false;
+                    return;
+                }
 
+                CustomerSelection.getInstance().setTableName(table.getText().toString().substring(TABLE.length()));
+                String orderContent2 = printCurrentSelection(billIdToMregeTo, isCancel);
+                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
+                    AppData.notifyCheck(orderContent2);
+                }
+                showToast("ORDER SENT, THANK YOU.");
+                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
+                    findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
+                    findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
+                }
+                findViewById(R.id.mainDialog).setVisibility(View.VISIBLE); //it's better to be run after 10 seconds
+                findViewById(R.id.recentOrders).setVisibility(View.INVISIBLE);
+
+                isCancel = false;
+                break;
 //            case R.id.odMarkSelectionCancel:
 //                menuMarkSwitcher.setDisplayedChild(0);
 //                break;
@@ -541,42 +674,38 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         loadOrderMenu();
     }
 
-    private String printCurrentSelection(final boolean isCancel) {
-        List<SelectionDetail> selectionDetails = CustomerSelection.getInstance().getSelectedDishes();
-        if(selectionDetails == null || selectionDetails.size() == 0){
-            showToast("Nothing selected!");
+    private String printCurrentSelection(final String billToMregeTo, final boolean isCancel) {
+        final String result = WifiPrintService.getInstance().saveAndSyncCommand(billToMregeTo, isCancel);
+        if (result.startsWith("192.") || result.startsWith("10.")) {
+            // pup up a dialog to ask if user want to continue.....
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Last print on " + result + " not completed. Continue? ");
+            builder.setTitle("WARNING").setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    //do we need to clean bkSelections?????
+                    confirmPrintOK();
+                    //clean the printer maps, to make sure it can pass the check when call itself again to send content to printer.
+                    WifiPrintService.getInstance().addProblematicPrinter(result);
+                    WifiPrintService.getInstance().reInitPrintRelatedMaps();
+                    WifiPrintService.getInstance().resetFlags();
+                    printCurrentSelection(billToMregeTo, isCancel);
+                }
+            });
+            builder.setPositiveButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+            this.billIdToMregeTo = null;
             return "";
-        }else {
-            final String result = WifiPrintService.getInstance().saveAndSyncCommand(isCancel);
-            if (result.startsWith("192.") || result.startsWith("10.")) {
-                // pup up a dialog to ask if user want to continue.....
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Last print on " + result + " not completed. Continue? ");
-                builder.setTitle("WARNING").setNegativeButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        //do we need to clean bkSelections?????
-                        confirmPrintOK();
-                        //clean the printer maps, to make sure it can pass the check when call itself again to send content to printer.
-                        WifiPrintService.getInstance().addProblematicPrinter(result);
-                        WifiPrintService.getInstance().reInitPrintRelatedMaps();
-                        WifiPrintService.getInstance().resetFlags();
-                        printCurrentSelection(isCancel);
-                    }
-                });
-                builder.setPositiveButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.show();
-                return "";
-            } else {
-                backupAndClearOrderMenu();
-                return result;
-            }
+        } else {
+            this.billIdToMregeTo = null;
+            backupAndClearOrderMenu();
+            return result;
         }
     }
 
@@ -612,7 +741,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         } else if (i == items.length - 1) {
                             odIdTableTbtn.setText("");
                             //added the selected dish with negative price. (return a non-null string means print success.
-                            if (printCurrentSelection(true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
+                            if (printCurrentSelection(billIdToMregeTo, true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
                                 isCancel = true;
                             }
                         } else {
@@ -684,7 +813,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdTable2.setText(table);
             }
             CustomerSelection.getInstance().setTableName(table);// can not use it for now, because if input dlg poped up, this line will excuted before input message return back.odIdTable2.getText().toString());
-            menuTableSwitcher.setDisplayedChild(0);
+            menuMarkSwitcher.setDisplayedChild(0);
         }
     };
 
@@ -717,6 +846,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             odIdCategoryGrid.getChildAt(idx).setBackgroundColor(AppData.getThemColor());
         }
     };
+
     IXOnItemClickListener categoryXAdapterClick2 = new IXOnItemClickListener() {
         @Override
         public void onClickItem(View view, int idx) {
@@ -760,8 +890,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.odIdTable2:
                 L.d(TAG, "ClickedTableButton");
                 if(tables.size() > 0) {
-                    if (menuTableSwitcher.getDisplayedChild() == 0){
-                        menuTableSwitcher.setDisplayedChild(1);
+                    if (menuMarkSwitcher.getDisplayedChild() == 0){
+                        menuMarkSwitcher.setDisplayedChild(2);
                     }
                 }
                 break;
@@ -820,8 +950,31 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.odMnLoutMarkBtn:
                 marksOfCurDish = dishesXAdapter.get(i).getMarkList();
                 showMarksPanel(dishesXAdapter.get(i).getDish());
-
                 break;
+
+            default:
+                Bill order = billsXAdapter.getData().get(i);
+
+                String tableName = order.getBillIdx();
+                int p = tableName.indexOf("\n");
+                if(p > -1){
+                    billIdx.setText("    Will append new selection to bill: " + Integer.valueOf(tableName.substring(0,p).trim()));
+                    tableName = tableName.substring(p + 1);
+                }else{
+                    billIdx.setText("    Will append new selection to bill: " + Integer.valueOf(tableName));
+                }
+                String timeString = order.getTime();
+                table.setText(TABLE + tableName);
+                time.setText("    Time:" + timeString.substring(0, timeString.length() - 3));
+                subtoal.setText("    Sub: $" + String.format("%.2f", Float.valueOf(order.getPrice())));
+                total.setText("       Total: $" + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
+//        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
+                final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getBillIdx(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
+
+                XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
+                adapter.setData(data);
+                ordersView.setAdapter(adapter);
+
         }
     }
 
@@ -966,7 +1119,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTableTbtn.setChecked(true);
         loadOrderMenu();
         if(tables.size() == 0) {
-            odIdTable2.setText(AppData.getCustomData(AppData.kitchenBillIdx));
+            odIdTable2.setText(AppData.getCustomData(AppData.billIdx));
         }else{
             odIdTable2.setText("");
             CustomerSelection.getInstance().setTableName("");

@@ -49,13 +49,13 @@ public class  AppData extends Thread{
     //no need to sync, because every pad may has differnet configs----
     public static final String autoSearchBeiYang = "autoSearchBeiYang";
     public static final String autoSearchWifiLabel = "autoSearchWifiLabel";
-    public static final String BeiYangPrinter = "BeiYangPrinter";
+    public static final String beiYangPrinter = "beiYangPrinter";
+    public static final String billIdx = "billIdx";
     public static final String code = "code";//activation
     public static final String ContentToSend = "ContentToSend";
     public static final String debug = "debug";
     public static final String endTime = "endTime";
     public static final String font = "font";
-    public static final String kitchenBillIdx = "kitchenBillIdx";
     public static final String labelFont = "fontlb";
     public static final String limitation = "limitation";
     public static final String lastsuccess = "lastsuccess";
@@ -68,12 +68,12 @@ public class  AppData extends Thread{
 
     //to sync
     public static final String adminPassword = "adminPassword";
-    public static final String AllowDownloadFromOtherStore = "AllowDownloadFromOtherServer";
+    public static final String allowDownloadFromOtherStore = "allowDownloadFromOtherServer";
     public static final String appmode = "appmode";
     public static final String categoryLayoutStyle = "category_layout_style";
     public static final String clientMode = "clmode";
-    public static final String ColorOnSelect = "cos";
-    public static final String ColorOfTheme = "cot";
+    public static final String colorOnSelect = "cos";
+    public static final String colorOfTheme = "cot";
     public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
     public static final String column = "column";
@@ -107,7 +107,7 @@ public class  AppData extends Thread{
     public static final String sendSM = "sendSM";
     public static final String csphone = "csphone";
     public static final String menuNameLength = "menuNameLength";
-    public static final String priceonkitchenbill = "priceonkitchenbill";
+    public static final String priceOnkitchenbill = "priceonkitchenbill";
     public static final String reportPrinter = "reportPrinter";
     public static final String reportFont = "reportFont";
     public static final String reportWidth = "reportWidth";
@@ -130,13 +130,13 @@ public class  AppData extends Thread{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            AllowDownloadFromOtherStore, appmode, categoryLayoutStyle, clientMode, ColorOnSelect, ColorOfTheme,
+            allowDownloadFromOtherStore, appmode, categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
-            line_height, menuNameLength, priceonkitchenbill, reportFont, reportPrinter,
+            line_height, menuNameLength, priceOnkitchenbill, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
             StartX, StartY, TableMark, TableSelectable, taxrate,
@@ -144,8 +144,8 @@ public class  AppData extends Thread{
             WifiLabelPrinter};
 
     public static String[] keysNotToSync = new String[]{
-            autoSearchBeiYang, autoSearchWifiLabel, BeiYangPrinter, code, ContentToSend,
-            debug, endTime, font, kitchenBillIdx, labelFont,
+            autoSearchBeiYang, autoSearchWifiLabel, beiYangPrinter, billIdx, code, ContentToSend,
+            debug, endTime, font, labelFont,
             limitation, lastsuccess, lastsuccessStr, mode, number,
             reportIdx, reportStartDate, startTime};
 
@@ -428,7 +428,7 @@ public class  AppData extends Thread{
     }
 
     public static int getThemColor() {
-        String color = getCustomData(AppData.ColorOfTheme);
+        String color = getCustomData(AppData.colorOfTheme);
         if(color == null || color.length() != 6){
             color = "1584BD";
         }
@@ -629,11 +629,11 @@ public class  AppData extends Thread{
                 showToast("App has set categoryLayoutStyle to: " + inputedSN);
                 return;
             case "cos":
-                AppData.putCustomData(AppData.ColorOnSelect, inputedSN);
+                AppData.putCustomData(AppData.colorOnSelect, inputedSN);
                 showToast("App has set ColorOnSelect to: " + inputedSN);
                 return;
             case "cot":
-                AppData.putCustomData(AppData.ColorOfTheme, inputedSN);
+                AppData.putCustomData(AppData.colorOfTheme, inputedSN);
                 showToast("App has set ColorOfTheme to: " + inputedSN);
                 return;
             case "cn":
@@ -725,7 +725,7 @@ public class  AppData extends Thread{
                 showToast("App has set menuNameLength to: " + inputedSN);
                 return;
             case "pric":
-                AppData.putCustomData(AppData.priceonkitchenbill, inputedSN);
+                AppData.putCustomData(AppData.priceOnkitchenbill, inputedSN);
                 showToast("App has set priceonkitchenbill to: " + inputedSN);
                 return;
             case "r":

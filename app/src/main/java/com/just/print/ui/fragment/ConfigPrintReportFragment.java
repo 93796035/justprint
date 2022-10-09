@@ -123,7 +123,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
             saleRecordDao.deleteAll();
             billDao.deleteAll();
             AppData.putCustomData(AppData.reportStartDate, String.valueOf(now));
-            AppData.putCustomData(AppData.kitchenBillIdx, "1");        //reset kitchenbillIndex
+            AppData.putCustomData(AppData.billIdx, "1");        //reset kitchenbillIndex
 
             AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
             getActivity().finish();

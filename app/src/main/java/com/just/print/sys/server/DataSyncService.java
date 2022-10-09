@@ -48,6 +48,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     public ArrayList<SelectionDetail> lastSelection;
     public String tableName;
     public String billIndex;
+    public Double totalPrice;
+    public String opentime;
     private OrderFragmentActivity orderActivity;
 
     public static DataSyncService getInstance() {
@@ -72,6 +74,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 try {
                     urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/SanjiPos/newOrders","POST");
                     JSONObject json = new JSONObject();//创建json对象
+                    json.put("totalPrice", totalPrice);
+                    json.put("opentime", opentime);
                     json.put("waiter", AppData.getUserName());
                     json.put("table", URLEncoder.encode(tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                     json.put("billIndex", billIndex);//把数据put进json对象中
