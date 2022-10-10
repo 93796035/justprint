@@ -108,7 +108,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private static ImageButton odIdCancel;
 
     @XViewByID(R.id.odIdConfigBtn2)
-    private static ImageButton odIdConfigBtn2;
+    private ImageButton odIdConfigBtn2;
 
     @XViewByID(R.id.odIdSndBtn2)
     private ImageButton odIdSndBtn2;
@@ -186,7 +186,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     XAdapter2<String> categoryXAdapter;
     XAdapter2<String> categoryXAdapter2;
     XAdapter2<String> itemXAdapter;
-    XAdapter2<Mark> tableXAdapter;
+    private static XAdapter2<Mark> tableXAdapter;
     XAdapter2<Mark> markAllXAdapter;
 
     private List<Mark> shortCutMarks;
@@ -205,8 +205,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         getEventBus().register(EVENT_ADD_MENU, this);
         new StupidReflect(this, getView()).init();
 
-        //设置餐桌号用
-        loadTables();
         //CustomerSelection.getInstance().setTableName(odIdTableNumEt.getText().toString());
         storedMenu = null;
         //the model of the menus.
@@ -361,9 +359,12 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         //add shortcut Marks.
         initShortCutMarks();
 
-        tableXAdapter = new XAdapter2<Mark>(getActivity(), tables, TableIdentifierViewHolder.class);
+        tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);
         tableXAdapter.setClickItemListener(this.tableXAdapterClick);
+        loadTables();
+        tableXAdapter.setData(tables);
         odTableGrid.setAdapter(tableXAdapter);
+
 
         //init MarkSelection panel
         markAllXAdapter = new XAdapter2<Mark>(getContext(), OrderMarksSelectionViewHolder.class);
@@ -430,6 +431,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 return mark.getState() - t1.getState();
             }
         });
+        tableXAdapter.setData(tables);
     }
 
     boolean longClickFlag = false;
@@ -526,6 +528,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         if(curTable.equals(table.getName())){
                             table.setVersion(Long.valueOf(AppData.getCurrentBillIdx()) * -1);
                             markDao.insertOrReplace(table);
+                            break;
                         }
                     }
                 }
@@ -537,7 +540,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
+                }else if(!"false".equals(AppData.getCustomData(AppData.startFromTableSelection))){
+                    loadTables();
+                    menuTableSwitcher.setDisplayedChild(1);
                 }
+
                 break;
             case R.id.odIdDelBtn:
                 if( menuMarkSwitcher.getDisplayedChild() == 0) {
@@ -635,17 +642,22 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 break;
 
             case R.id.OKCloseTable:
+                String tableName = tvTable2.getText().toString().substring(UC.TABLE.length());
                 //update the table status to be -1 means no bill on it, the table closed..
                 MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
                 List<Mark> tables = markDao.loadAll();
                 for (Mark table : tables) {
-                    if(tvTable2.getText().equals(table.getName())){
+                    if(tableName.equals(table.getName())){
                         table.setVersion(-1L);
                         markDao.insertOrReplace(table);
+                        loadTables();
+                        break;
                     }
                 }
                 findViewById(R.id.billOnTable).setVisibility(View.GONE);
-                menuTableSwitcher.setDisplayedChild(0);
+                if("false".equals(AppData.getCustomData(AppData.startFromTableSelection))) {
+                    menuTableSwitcher.setDisplayedChild(0);
+                }
                 break;
 //            case R.id.odMarkSelectionCancel:
 //                categoryArea.setVisibility(View.VISIBLE);

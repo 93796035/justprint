@@ -1,6 +1,7 @@
 package com.just.print.ui.holder;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.widget.Button;
 
 import com.just.print.R;
@@ -28,5 +29,10 @@ public class TableIdentifierViewHolder extends XViewHolder<Mark>{
     @Override
     public void onResetView(Mark s, int i) {
         textView.setText(s.getName());
+        if(s.getVersion() < -1){
+            textView.setTextColor(Color.BLUE);
+        }else{
+            textView.setTextColor(Color.BLACK);
+        }
     }
 }
