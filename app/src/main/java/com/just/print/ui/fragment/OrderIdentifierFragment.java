@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -149,27 +150,30 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     FlowListView billListView;
 
     @XViewByID(R.id.billIdx)
-    TextView billIdx;
+    TextView tvBillIdx;
     @XViewByID(R.id.billIdx2)
-    TextView billIdx2;
+    TextView tvBillIdx2;
     @XViewByID(R.id.table)
-    TextView table;
+    TextView tvTable;
     @XViewByID(R.id.table2)
-    TextView table2;
+    TextView tvTable2;
     @XViewByID(R.id.time)
     TextView tvOpenTime;
     @XViewByID(R.id.openTime)
     TextView tvOpenTime2;
 
     @XViewByID(R.id.subtotal)
-    TextView subtoal;
+    TextView tvSubtoal;
     @XViewByID(R.id.subtotal2)
-    TextView subtoal2;
+    TextView tvSubtoal2;
     @XViewByID(R.id.total)
-    TextView total;
+    TextView tvTotal;
     @XViewByID(R.id.total2)
-    TextView total2;
-
+    TextView tvTotal2;
+    @XViewByID(R.id.cancelShowingBill)
+    Button cancelShowingBill;
+    @XViewByID(R.id.OKCloseTable)
+    Button OKCloseTable;
     @XViewByID(R.id.orderList)
     ListView ordersView;
     @XViewByID(R.id.orderList2)
@@ -378,6 +382,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
+        if(!"false".equals(AppData.getCustomData(AppData.startFromTableSelection))) {
+            menuTableSwitcher.setDisplayedChild(1);
+        }
     }
 
     @XClick({R.id.odInfoOK})
@@ -473,7 +480,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         return false;
     }
 
-    @XClick({R.id.OKSelectBillId, R.id.cancelSelectBillId, R.id.odIdConfigBtn,R.id.odIdConfigBtn2, R.id.odIdSndBtn, R.id.odIdSndBtn2, R.id.odIdDelBtn, R.id.odIdOkBtn, R.id.odIdCancel})
+    @XClick({R.id.OKSelectBillId, R.id.cancelSelectBillId, R.id.odIdConfigBtn,R.id.odIdConfigBtn2,
+            R.id.odIdSndBtn, R.id.odIdSndBtn2, R.id.odIdDelBtn, R.id.odIdOkBtn, R.id.odIdCancel,
+            R.id.cancelShowingBill, R.id.OKCloseTable})
     private void exeControlCommand(View v) {
         if(longClickFlag){
             longClickFlag = false;
@@ -596,16 +605,16 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.OKSelectBillId:
                 //in case the billIdx is not a number, report error, and do nothing.
                 try {
-                    billIdToMregeTo = billIdx.getText().toString().substring(UC.ORDER_NUMBER.length());
+                    billIdToMregeTo = tvBillIdx.getText().toString().substring(UC.ORDER_NUMBER.length());
                 }catch (Exception e){
                     L.e("OrderIdentifierFragment",
-                            "Unexcepted id in label:" + billIdx.getText().toString().substring("    Will append new selection to bill: ".length()), e);
+                            "Unexcepted id in label:" + tvBillIdx.getText().toString().substring("    Will append new selection to bill: ".length()), e);
                     billIdToMregeTo = null;
                     isCancel = false;
                     return;
                 }
 
-                CustomerSelection.getInstance().setTableName(table.getText().toString().substring(UC.TABLE.length()));
+                CustomerSelection.getInstance().setTableName(tvTable.getText().toString().substring(UC.TABLE.length()));
                 String orderContent2 = printCurrentSelection(billIdToMregeTo, isCancel);
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent2);
@@ -619,6 +628,24 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 findViewById(R.id.recentOrders).setVisibility(View.INVISIBLE);
 
                 isCancel = false;
+                break;
+            case R.id.cancelShowingBill:
+                findViewById(R.id.billOnTable).setVisibility(View.GONE);
+                menuTableSwitcher.setDisplayedChild(0);
+                break;
+
+            case R.id.OKCloseTable:
+                //update the table status to be -1 means no bill on it, the table closed..
+                MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
+                List<Mark> tables = markDao.loadAll();
+                for (Mark table : tables) {
+                    if(tvTable2.getText().equals(table.getName())){
+                        table.setVersion(-1L);
+                        markDao.insertOrReplace(table);
+                    }
+                }
+                findViewById(R.id.billOnTable).setVisibility(View.GONE);
+                menuTableSwitcher.setDisplayedChild(0);
                 break;
 //            case R.id.odMarkSelectionCancel:
 //                categoryArea.setVisibility(View.VISIBLE);
@@ -991,7 +1018,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 showMarksPanel(dishesXAdapter.get(i).getDish());
                 break;
 
-            default:
+            default: //when items on recent bill list view is clicked
                 Bill order = billsXAdapter.getData().get(i);
                 showOrderDetail(order);
         }
@@ -1010,18 +1037,18 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         adapter.setData(data);
         //updating the ui for bill selection panel
 
-        billIdx.setText(UC.ORDER_NUMBER + billID);
-        table.setText(UC.TABLE + tableName);
+        tvBillIdx.setText(UC.ORDER_NUMBER + billID);
+        tvTable.setText(UC.TABLE + tableName);
         tvOpenTime.setText(UC.OPEN_TIME + openTime);
-        subtoal.setText(UC.SUB_TOTAL + subTotalStr);
-        total.setText(UC.TOTAL + totalStr);
+        tvSubtoal.setText(UC.SUB_TOTAL + subTotalStr);
+        tvTotal.setText(UC.TOTAL + totalStr);
         ordersView.setAdapter(adapter);
         //updating panel for table selection panel
-        billIdx2.setText(UC.ORDER_NUMBER + billID);
-        table2.setText(UC.TABLE + tableName);
+        tvBillIdx2.setText(UC.ORDER_NUMBER + billID);
+        tvTable2.setText(UC.TABLE + tableName);
         tvOpenTime2.setText(UC.OPEN_TIME + openTime);
-        subtoal2.setText(UC.SUB_TOTAL + subTotalStr);
-        total2.setText(UC.TOTAL + totalStr);
+        tvSubtoal2.setText(UC.SUB_TOTAL + subTotalStr);
+        tvTotal2.setText(UC.TOTAL + totalStr);
         XAdapter2<SaleRecord> adapter2 = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter2.setData(data);
 

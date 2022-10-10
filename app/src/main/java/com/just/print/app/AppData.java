@@ -124,6 +124,7 @@ public class  AppData extends Thread{
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
+    public static final String startFromTableSelection = "startFromTableSelection";
     public static final String TableMark = "tablemark";
     public static final String TableSelectable = "tableselectable";
     public static final String taxrate = "taxrate";
@@ -142,7 +143,7 @@ public class  AppData extends Thread{
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
-            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
+            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip, startFromTableSelection,
             StartX, StartY, TableMark, TableSelectable, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
