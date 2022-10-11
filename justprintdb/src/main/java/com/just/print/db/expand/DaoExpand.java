@@ -28,7 +28,7 @@ public final class DaoExpand {
     }
 
     static public <T, K> List<T> queryAllNotDeletedMark(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Version.notEq(State.delete)).list();
+        return dao.queryBuilder().where(MenuDao.Properties.Version.gt(State.delete)).list();
     }
 
     static public List<Menu> queryMenuByCategory(MenuDao menuDao, Category category) {
@@ -72,7 +72,7 @@ public final class DaoExpand {
     }
 
     public static List<Mark> queryAllMarks(MarkDao markDao) {
-        return markDao.queryBuilder().where(MenuDao.Properties.Version.notEq(State.delete)).list();
+        return markDao.queryBuilder().where(MenuDao.Properties.Version.gt(State.delete)).list();
     }
 
     static public List<Menu> queryFuzzyMenu(MenuDao menuDao, String ID) {

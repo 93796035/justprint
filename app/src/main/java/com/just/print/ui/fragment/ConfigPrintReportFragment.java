@@ -56,8 +56,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
     @XClick({R.id.verifyPassword})
     private void verifyPassword(@XGetValueByView(fromId = R.id.etMark) String mark) {
         //maybe we should hide the functions into a "more..." button.
-        String adminPassword = AppData.getCustomData(AppData.adminPassword);
-        if(adminPassword != null && !adminPassword.equals(mark)){
+        if(!AppData.getAdminPassword().equals(mark)){
             showToast("Please input correct password!");
             return;
         }

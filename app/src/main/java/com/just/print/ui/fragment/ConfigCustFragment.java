@@ -47,8 +47,7 @@ public class ConfigCustFragment extends BaseFragment implements OnClickItemListe
 
     @XClick({R.id.verifyPassword})
     private void verifyPassword(@XGetValueByView(fromId = R.id.adminPassword) String password) {
-        String adminPassword = AppData.getCustomData(AppData.adminPassword);
-        if(adminPassword != null && !adminPassword.equals(password)){
+        if(!AppData.getAdminPassword().equals(password)){
             showToast("Please input correct password!");
             return;
         }

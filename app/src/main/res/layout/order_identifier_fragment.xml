@@ -121,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ToggleButton
-                android:id="@+id/odIdTableTbtn"
+                android:id="@+id/odIdTableBtn1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/tag_bg"
@@ -134,19 +134,19 @@
                 android:textOn=""
                 android:layout_weight="1" />
             <ImageButton
-                android:id="@+id/odIdConfigBtn"
+                android:id="@+id/odIdConfigBtn1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:src="@drawable/setting"/>
             <ImageButton
-                android:id="@+id/odIdDelBtn"
+                android:id="@+id/odIdCancelBtn1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:src="@drawable/erase"/>
             <ImageButton
-                android:id="@+id/odIdOkBtn"
+                android:id="@+id/odIdSndBtn1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -239,7 +239,7 @@
                                 </LinearLayout>
                                 -->
                                 <GridView
-                                    android:id="@+id/odIdMarksGrid"
+                                    android:id="@+id/odIdShortCutMarksGrid"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:numColumns="2">
@@ -296,7 +296,7 @@
 
                             <!-- send button @NOTE:seems must give it a height, and have to give it a weight-->
                             <Button
-                                android:id="@+id/odIdSndBtn"
+                                android:id="@+id/odIdSndBtn0"
                                 android:layout_width="match_parent"
                                 android:layout_height="123dp"
                                 android:layout_weight="1"
@@ -332,7 +332,7 @@
                                     android:textOn="T" />
 
                                 <ImageButton
-                                    android:id="@+id/odIdCancel"
+                                    android:id="@+id/odIdCancelBtn2"
                                     android:layout_width="match_parent"
                                     android:layout_height="60dp"
                                     android:layout_weight="1"
@@ -409,11 +409,12 @@
                     android:layout_weight="6"
                     android:orientation="vertical">
                     <TextView
+                        android:id="@+id/tableSelectionView"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:textSize="24sp"
                         android:gravity="center"
-                        android:text="Table Selection" />
+                        android:text="Table" />
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="5dp"

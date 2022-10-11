@@ -74,6 +74,7 @@ public class  AppData extends Thread{
     public static final String adminPassword = "adminPassword";
     public static final String allowDownloadFromOtherStore = "allowDownloadFromOtherServer";
     public static final String appmode = "appmode";
+    public static final String autoCloseTable = "autoCloseTable";
     public static final String categoryLayoutStyle = "category_layout_style";
     public static final String clientMode = "clmode";
     public static final String colorOnSelect = "cos";
@@ -124,7 +125,6 @@ public class  AppData extends Thread{
     public static final String sendReport = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
-    public static final String startFromTableSelection = "startFromTableSelection";
     public static final String TableMark = "tablemark";
     public static final String TableSelectable = "tableselectable";
     public static final String taxrate = "taxrate";
@@ -135,7 +135,7 @@ public class  AppData extends Thread{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            allowDownloadFromOtherStore, appmode, categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
+            allowDownloadFromOtherStore, appmode, autoCloseTable, categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
@@ -143,7 +143,7 @@ public class  AppData extends Thread{
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
-            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip, startFromTableSelection,
+            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
             StartX, StartY, TableMark, TableSelectable, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
@@ -502,6 +502,19 @@ public class  AppData extends Thread{
         }catch(Exception e){
             return 1;
         }
+    }
+
+    public static String getAdminPassword() {
+        String ap = getCustomData(AppData.adminPassword);
+        return StringUtils.isBlank(ap) ? "2266" : ap;
+    }
+    public static String getUserPassword() {
+        String up = getCustomData(AppData.userPassword);
+        return StringUtils.isBlank(up) ? "8888" : "up";
+    }
+    public static String getOrderPassword() {
+        String op = getCustomData(AppData.orderpassword);
+        return StringUtils.isBlank(op) ? "1111" : op;
     }
 
     @Override

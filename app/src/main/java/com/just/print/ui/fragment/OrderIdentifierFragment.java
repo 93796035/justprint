@@ -89,23 +89,47 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XViewByID(R.id.odInfoInputed)
     EditText odInfoInputed;
 
+    @XViewByID(R.id.odIdInput)
+    private TextView odIdInput;
+
+    @XViewByID(R.id.odIdfrName)
+    private TextView odIdfrName;
+
+    //two switchers---------------------------
     @XViewByID(R.id.menuMarkSwitcher)
     private ViewSwitcher menuMarkSwitcher;
-
-    @XViewByID(R.id.categoryArea)
-    private LinearLayout categoryArea;
 
     @XViewByID(R.id.menuTableSwitcher)
     private ViewSwitcher menuTableSwitcher;
 
+    //for selecting menu operations--------------
+    @XViewByID(R.id.categoryArea)
+    private LinearLayout categoryArea;
+
+    @XViewByID(R.id.odIdCategoryGrid)
+    private GridView odIdCategoryGrid;
+    @XViewByID(R.id.categoryFlowList)
+    FlowListView categoryFlowList;
+
+    @XViewByID(R.id.odMenuGv)
+    private GridView odMenuGv;
+
+    @XViewByID(R.id.odIdShortCutMarksGrid)
+    private GridView odIdShortCutMarksGrid;
+
     @XViewByID(R.id.odIdFrLoutMenuList)
     private ListView odIdFrLoutMenuList;
 
+    //buttons on top area in mainDialog----------------
+    @XViewByID(R.id.odIdTableBtn1)
+    ToggleButton odIdTable1;
+
+    //buttons on bottom area in mainDialog----------------
     @XViewByID(R.id.odIdTable2)
     private static ToggleButton odIdTable2;
 
-    @XViewByID(R.id.odIdCancel)
-    private static ImageButton odIdCancel;
+    @XViewByID(R.id.odIdCancelBtn2)
+    private static ImageButton odIdCancel2;
 
     @XViewByID(R.id.odIdConfigBtn2)
     private ImageButton odIdConfigBtn2;
@@ -113,35 +137,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     @XViewByID(R.id.odIdSndBtn2)
     private ImageButton odIdSndBtn2;
 
-    @XViewByID(R.id.odIdDelBtn)
-    private ImageButton odIdDelBtn;
-
-    @XViewByID(R.id.odIdOkBtn)
-    private ImageButton odIdOkBtn;
-
-    @XViewByID(R.id.odIdInput)
-    private TextView odIdInput;
-
-    @XViewByID(R.id.odIdfrName)
-    private TextView odIdfrName;
-
-    @XViewByID(R.id.odIdCategoryGrid)
-    private GridView odIdCategoryGrid;
-
-    @XViewByID(R.id.categoryFlowList)
-    FlowListView categoryFlowList;
-
-    @XViewByID(R.id.odMenuGv)
-    private GridView odMenuGv;
-
+    //elements on for selecting bill and selecting table---------------
     @XViewByID(R.id.odTableGrid)
     private GridView odTableGrid;
-
-    @XViewByID(R.id.odIdMarksGrid)
-    private GridView odIdMarksGrid;
-
-    @XViewByID(R.id.odIdTableTbtn)
-    ToggleButton odIdTableTbtn;
 
     @XViewByID(R.id.allMarkList)
     GridView markAllList;
@@ -205,7 +203,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         getEventBus().register(EVENT_ADD_MENU, this);
         new StupidReflect(this, getView()).init();
 
-        //CustomerSelection.getInstance().setTableName(odIdTableNumEt.getText().toString());
         storedMenu = null;
         //the model of the menus.
         if(AppData.isMode2()) {
@@ -218,12 +215,15 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
             List<Menu> menus;
             findViewById(R.id.odIdInfo).setVisibility(View.GONE);
-            findViewById(R.id.odIdSndBtn).setVisibility(View.GONE);
             findViewById(R.id.topButtons).setVisibility(View.GONE);
+            findViewById(R.id.odIdTableBtn1).setVisibility(View.GONE);
+            findViewById(R.id.odIdCancelBtn1).setVisibility(View.GONE);
+            findViewById(R.id.odIdConfigBtn1).setVisibility(View.GONE);
+            findViewById(R.id.odIdSndBtn0).setVisibility(View.GONE);
             odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryFlowListPane).setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryArea).setBackgroundColor(AppData.getThemColor());
-            odIdCancel.setOnLongClickListener(this);
+            odIdCancel2.setOnLongClickListener(this);
             odIdSndBtn2.setOnLongClickListener(this);
 
             if("flow".equals(AppData.getCategoryLayoutStyle())){
@@ -274,7 +274,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
             if("true".equals(AppData.getCustomData(AppData.clientMode))){
                 odIdTable2.setVisibility(View.GONE);
-                odIdCancel.setVisibility(View.GONE);
+                odIdCancel2.setVisibility(View.GONE);
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
 
@@ -282,7 +282,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdTable2.setVisibility(View.GONE);
             }
             if("true".equals(AppData.getCustomData(AppData.HideRubber))){
-                odIdCancel.setVisibility(View.GONE);
+                odIdCancel2.setVisibility(View.GONE);
             }
             if("true".equals(AppData.getCustomData(AppData.HideSetting))){
                 odIdConfigBtn2.setVisibility(View.GONE);
@@ -321,7 +321,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             ary.add("canc");
 
             items = ary.toArray(items);
-            View btnSend = findViewById(R.id.odIdSndBtn);
+            View btnSend = findViewById(R.id.odIdSndBtn0);
             btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
         }
 
@@ -338,16 +338,17 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odMenuGv.setAdapter(itemXAdapter);
 //        odMenuGv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
-        odIdTableTbtn.setTextOn(null);
-        odIdTableTbtn.setTextOff(null);
-        odIdTableTbtn.setText("");
-        odIdTableTbtn.setChecked(true);
-        odIdTableTbtn.setOnClickListener(this);
+        odIdTable1.setTextOn(null);
+        odIdTable1.setTextOff(null);
+        odIdTable1.setText("");
+        odIdTable1.setChecked(true);
+        odIdTable1.setOnClickListener(this);
         if(tableSelectable == null
             || tableSelectable.length() < 1
             || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
             odIdTable2.setOnClickListener(this);
         }
+
         //initSelected dishes part.
         dishesXAdapter = new XAdapter2<SelectionDetail>(getContext(), OrderMenuViewHolder.class);
         dishesXAdapter.setClickItemListener(this);
@@ -359,6 +360,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         //add shortcut Marks.
         initShortCutMarks();
 
+        findViewById(R.id.tableSelectionView).setBackgroundColor(AppData.getThemColor());
         tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);
         tableXAdapter.setClickItemListener(this.tableXAdapterClick);
         loadTables();
@@ -383,7 +385,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
-        if(!"false".equals(AppData.getCustomData(AppData.startFromTableSelection))) {
+        if(tables.size() > 0) {
             menuTableSwitcher.setDisplayedChild(1);
         }
     }
@@ -472,7 +474,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE);
                 findViewById(R.id.recentOrders).setVisibility(View.VISIBLE);
                 break;
-            case R.id.odIdCancel:
+            case R.id.odIdCancelBtn2:
                 longClickFlag = true;
                 isCancel = true;
                 findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE);
@@ -482,8 +484,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         return false;
     }
 
-    @XClick({R.id.OKSelectBillId, R.id.cancelSelectBillId, R.id.odIdConfigBtn,R.id.odIdConfigBtn2,
-            R.id.odIdSndBtn, R.id.odIdSndBtn2, R.id.odIdDelBtn, R.id.odIdOkBtn, R.id.odIdCancel,
+    @XClick({R.id.OKSelectBillId, R.id.cancelSelectBillId,
+             R.id.odIdCancelBtn1, R.id.odIdCancelBtn2, R.id.odIdConfigBtn1, R.id.odIdConfigBtn2, R.id.odIdSndBtn0, R.id.odIdSndBtn1, R.id.odIdSndBtn2,
             R.id.cancelShowingBill, R.id.OKCloseTable})
     private void exeControlCommand(View v) {
         if(longClickFlag){
@@ -492,11 +494,19 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         }
         List<SelectionDetail> selectionDetails = CustomerSelection.getInstance().getSelectedDishes();
         switch (v.getId()) {
-            case R.id.odIdConfigBtn:
+            case R.id.odIdConfigBtn1:
             case R.id.odIdConfigBtn2:
                 startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
                 break;
-            case R.id.odIdCancel:
+            case R.id.odIdCancelBtn1:
+                if( menuMarkSwitcher.getDisplayedChild() == 0) {
+                    DelOneText();
+                }else{
+                    categoryArea.setVisibility(View.VISIBLE);
+                    menuMarkSwitcher.setDisplayedChild(0);
+                }
+                break;
+            case R.id.odIdCancelBtn2:
                 //check if dish selected.
                 if(selectionDetails == null || selectionDetails.size() == 0){
                     showToast("Nothing selected!");
@@ -505,7 +515,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 }
                 printCurrentSelection(billIdToMregeTo,true);
                 break;
-            case R.id.odIdSndBtn:
+            case R.id.odIdSndBtn0:
             case R.id.odIdSndBtn2:
                 //check if dish selected.
                 if(selectionDetails == null || selectionDetails.size() == 0){
@@ -521,14 +531,18 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         menuTableSwitcher.setDisplayedChild(1);
                         return;
                     }
-                    //update the table status.
-                    MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
-                    List<Mark> tables = markDao.loadAll();
-                    for (Mark table : tables) {
-                        if(curTable.equals(table.getName())){
-                            table.setVersion(Long.valueOf(AppData.getCurrentBillIdx()) * -1);
-                            markDao.insertOrReplace(table);
-                            break;
+                    //so...table selected...update the table status.
+                    String aotoCloseTables = AppData.getCustomData(AppData.autoCloseTable);
+                    if(!"all".equalsIgnoreCase(aotoCloseTables)
+                        && !aotoCloseTables.contains(curTable)) {
+                        MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
+                        List<Mark> tables = markDao.loadAll();
+                        for (Mark table : tables) {
+                            if (curTable.equals(table.getName())) {
+                                table.setVersion(Long.valueOf(AppData.getCurrentBillIdx()) * -1);
+                                markDao.insertOrReplace(table);
+                                break;
+                            }
                         }
                     }
                 }
@@ -540,29 +554,17 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
-                }else if(!"false".equals(AppData.getCustomData(AppData.startFromTableSelection))){
+                }else if(tables.size() > 0){
                     loadTables();
                     menuTableSwitcher.setDisplayedChild(1);
                 }
-
                 break;
-            case R.id.odIdDelBtn:
-                if( menuMarkSwitcher.getDisplayedChild() == 0) {
-                    DelOneText();
-                }else{
-                    categoryArea.setVisibility(View.VISIBLE);
-                    menuMarkSwitcher.setDisplayedChild(0);
-                }
-                break;
-            case R.id.odIdOkBtn:
+            case R.id.odIdSndBtn1:
                 if(AppData.isMode2()){
                     findViewById(R.id.topButtons).setVisibility(View.GONE);
                 }
-                String adminPassword = AppData.getCustomData(AppData.adminPassword);
-                if(adminPassword == null || adminPassword.length() < 6){
-                    adminPassword = "AA88AA";
-                }
-                if(adminPassword.equals(odIdTableTbtn.getText().toString()) || adminPassword.equals(odIdInput.getText().toString())){
+                String adminPassword = AppData.getAdminPassword();
+                if(adminPassword.equals(odIdTable1.getText().toString()) || adminPassword.equals(odIdInput.getText().toString())){
                     //print report
                     List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
 
@@ -575,12 +577,12 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         findViewById(R.id.topButtons).setVisibility(View.INVISIBLE);
                         findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
                     }
-                    odIdTableTbtn.setText("");
+                    odIdTable1.setText("");
                     odIdInput.setText("");
                 }else if( menuMarkSwitcher.getDisplayedChild() == 0) {
-                    if (odIdTableTbtn.isChecked()) {    //waiting for input table num status. always allowed!
-                        odIdTableTbtn.setChecked(false);
-                        CustomerSelection.getInstance().setTableName(odIdTableTbtn.getText().toString());
+                    if (odIdTable1.isChecked()) {    //waiting for input table num status. always allowed!
+                        odIdTable1.setChecked(false);
+                        CustomerSelection.getInstance().setTableName(odIdTable1.getText().toString());
                     } else {                            //inputting dishes status. need to check print status.
 //this is marked off because we changed to allow user to add new order, just when user try to send will do a check and pump to ask if will go on.
 //                        if (bkOfLastSelection != null) {      //categorizedContent not all send to printer yet.
@@ -640,7 +642,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 findViewById(R.id.billOnTable).setVisibility(View.GONE);
                 menuTableSwitcher.setDisplayedChild(0);
                 break;
-
             case R.id.OKCloseTable:
                 String tableName = tvTable2.getText().toString().substring(UC.TABLE.length());
                 //update the table status to be -1 means no bill on it, the table closed..
@@ -655,9 +656,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     }
                 }
                 findViewById(R.id.billOnTable).setVisibility(View.GONE);
-                if("false".equals(AppData.getCustomData(AppData.startFromTableSelection))) {
-                    menuTableSwitcher.setDisplayedChild(0);
-                }
                 break;
 //            case R.id.odMarkSelectionCancel:
 //                categoryArea.setVisibility(View.VISIBLE);
@@ -805,10 +803,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         } else if (i == items.length - 3) {         //following are fixed buttons.
                             InputText("+");
                         } else if (i == items.length - 2) {
-                            odIdTableTbtn.setText("TOGO");
-                            CustomerSelection.getInstance().setTableName(odIdTableTbtn.getText().toString());
+                            odIdTable1.setText("TOGO");
+                            CustomerSelection.getInstance().setTableName(odIdTable1.getText().toString());
                         } else if (i == items.length - 1) {
-                            odIdTableTbtn.setText("");
+                            odIdTable1.setText("");
                             //added the selected dish with negative price. (return a non-null string means print success.
                             if (printCurrentSelection(billIdToMregeTo, true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
                                 isCancel = true;
@@ -826,7 +824,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                             }
                         }
 
-                        if (!odIdTableTbtn.isChecked()) {
+                        if (!odIdTable1.isChecked()) {
                             tmpMenu = SearchMenuFromDB(odIdInput.getText().toString());
                             if (null != tmpMenu) {
                                 odIdfrName.setText(tmpMenu.getMname());
@@ -958,10 +956,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     public void onClick(View v) {
         int num;
         switch (v.getId()) {
-            case R.id.odIdTableTbtn:
+            case R.id.odIdTableBtn1:
                 L.d(TAG, "ClickTableButton");
-                if (odIdTableTbtn.isChecked()) {
-                    odIdTableTbtn.setText("");
+                if (odIdTable1.isChecked()) {
+                    odIdTable1.setText("");
                 }
                 break;
             case R.id.odIdTable2:
@@ -969,6 +967,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if(tables.size() > 0) {
                     if (menuMarkSwitcher.getDisplayedChild() == 0){
                         loadTables();
+                        //hide unnecessary buttons.
                         menuTableSwitcher.setDisplayedChild(1);
                     }
                 }
@@ -977,17 +976,17 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private void InputText(String str) {
-        if (odIdTableTbtn.isChecked()) {
-            odIdTableTbtn.append(str);
+        if (odIdTable1.isChecked()) {
+            odIdTable1.append(str);
         } else {
             odIdInput.append(str);
         }
     }
 
     private void DelOneText() {
-        if (odIdTableTbtn.isChecked()) {
-            if (odIdTableTbtn.length() > 0) {
-                odIdTableTbtn.setText(odIdTableTbtn.getText().subSequence(0, odIdTableTbtn.length() - 1));
+        if (odIdTable1.isChecked()) {
+            if (odIdTable1.length() > 0) {
+                odIdTable1.setText(odIdTable1.getText().subSequence(0, odIdTable1.length() - 1));
             }
         } else {
             if (odIdInput.length() > 0) {
@@ -1182,7 +1181,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
     private void initShortCutMarks() {
         if("true".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))) {
-            odIdMarksGrid.setVisibility(View.GONE);
+            odIdShortCutMarksGrid.setVisibility(View.GONE);
         }else{
             shortCutMarks = new ArrayList<Mark>(3);
             List<Mark> marks = new ArrayList<Mark>();
@@ -1192,7 +1191,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             marks.add(allMarks.get(1));
             markShorCutXAdapter = new XAdapter2<Mark>(getActivity(), marks, OrderIdentifierMarkViewHolder.class);
             markShorCutXAdapter.setClickItemListener(this.itemXAdapterClick);
-            odIdMarksGrid.setAdapter(markShorCutXAdapter);
+            odIdShortCutMarksGrid.setAdapter(markShorCutXAdapter);
         }
     }
 
@@ -1206,8 +1205,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
         //bk and clear bkOfLastTable
         //bkOfLastTable = odIdTableTbtn.getText();
-        odIdTableTbtn.setText("");
-        odIdTableTbtn.setChecked(true);
+        odIdTable1.setText("");
+        odIdTable1.setChecked(true);
         loadOrderMenu();
         if(tables.size() == 0) {
             odIdTable2.setText(AppData.getCustomData(AppData.billIdx));

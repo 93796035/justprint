@@ -96,24 +96,17 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
 
     @XClick({R.id.verifyPassword})
     private void onConfirmPassword(View view) {
-        String up = AppData.getCustomData(AppData.userPassword);
-        String ap = AppData.getCustomData(AppData.adminPassword);
-        String op = AppData.getCustomData(AppData.orderpassword);
-        if(StringUtils.isBlank(ap)){ap = "2266";}
-        if(StringUtils.isBlank(up)){up = "8888";}
-        if(StringUtils.isBlank(op)){op = "1111";}
-
         String inputContent = this.password.getText().toString().trim();
         if (StringUtils.isEmpty(inputContent) || inputContent.length() < 2) {
             showToast("Please input the right password");
         } else {
-            if(!up.equals(inputContent)){
-                if(ap.equals(inputContent)){
+            if(!AppData.getUserPassword().equals(inputContent)){
+                if(AppData.getAdminPassword().equals(inputContent)){
                     List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
                     findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
-                }else if(op.equals(inputContent)){
+                }else if(AppData.getOrderPassword().equals(inputContent)){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
                     saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();

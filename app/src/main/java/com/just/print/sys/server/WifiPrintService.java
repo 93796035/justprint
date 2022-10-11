@@ -1175,13 +1175,13 @@ public class WifiPrintService implements Runnable{
     }
 
     private String formatContentForPrint(List<SelectionDetail> list, String kitchenBillIdx, boolean isCancel, Double priceOfBill, String printerIp) {
-        boolean isCloudPrinter = isCloudPrinter(printerIp);
         L.d(TAG, "formatContentForPrint");
 
         determinTheWidth(printerIp);
 
         //leave 2 space, incase the printer prints extra characters at the left corner.
         String SEPRATOR = isCancel ? "<" : " ";
+        boolean isCloudPrinter = isCloudPrinter(printerIp);
 
         StringBuilder content = new StringBuilder();
         //tiltle---could be used for kithch name, empty lines.......
@@ -1221,10 +1221,9 @@ public class WifiPrintService implements Runnable{
 //        if (width < 20) {
 //            content.append("\n\n");
 //        }
-        //table name and bill index and  print time.......................
-        DateFormat df = new SimpleDateFormat("HH:mm");
+        //table name and bill index and print time.......................
         String tableName = CustomerSelection.getInstance().getTableName();
-        String dateStr = df.format(new Date());
+        String dateStr = new SimpleDateFormat("HH:mm").format(new Date());
         String format_style = AppData.getCustomData(AppData.format_style);
         if("1".equals(format_style)){
             String billIdx_Position = AppData.getCustomData(AppData.title_position);
@@ -1245,7 +1244,8 @@ public class WifiPrintService implements Runnable{
         }else if("3".equals(format_style)){
             //table name
             if(tableName != null && tableName.length() > 0) {
-                if(isCloudPrinter && StringUtils.isNumber(tableName)){
+                //it's specially for Mr.Liu when it's for here, no need to print a label.
+                if(isWifiLabelPrinter(printerIp) && StringUtils.isNumber(tableName)){
                     return null;
                 }
                 String tablename_position = AppData.getCustomData(AppData.title_position);
