@@ -223,6 +223,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             odIdCategoryGrid.setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryFlowListPane).setBackgroundColor(AppData.getThemColor());
             findViewById(R.id.categoryArea).setBackgroundColor(AppData.getThemColor());
+            findViewById(R.id.billSelectButtonArea).setBackgroundColor(AppData.getThemColor());
             odIdCancel2.setOnLongClickListener(this);
             odIdSndBtn2.setOnLongClickListener(this);
 
