@@ -23,6 +23,7 @@ import com.just.print.ui.fragment.OrderIdentifierFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.Command;
 import com.just.print.util.L;
+import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;
 import com.just.print.printer.jiabo.DeviceConnFactoryManager;
 import com.just.print.printer.jiabo.ThreadPool;
@@ -600,7 +601,7 @@ public class WifiPrintService implements Runnable{
 
     private void sendToAikaServer(Double totalPrice, String billIndex, String openTime) {
         DataSyncService dataSyncService = DataSyncService.getInstance();
-        if (dataSyncService.serverIpAndPort != null && dataSyncService.serverIpAndPort.length() > 8) {
+        if (dataSyncService.aikaServerIpAndPort != null && dataSyncService.aikaServerIpAndPort.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             dataSyncService.billIndex = billIndex;
             dataSyncService.totalPrice = totalPrice;
@@ -682,14 +683,14 @@ public class WifiPrintService implements Runnable{
             } else if(isWifiLabelPrinter(curPrintIp)) {
                 JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content, width);
             } else if(isCloudPrinter(curPrintIp)) {
-                AppData.sendToCloudPrinter(content, curPrintIp);
+                NetUtils.sendToCloudPrinter(content, curPrintIp);
             } else {
                 doZiJiangPrint(font, content);
                 //if it's a 'togo"
                 if(content.contains("(TOGO)")){
                     String labelPrinterSN = AppData.getLabelSN();//get the cloud label printer.
                     if(labelPrinterSN != null && labelPrinterSN.length() > 6) {//for now the sn is like 987623454,longger than 6
-                        AppData.sendToCloudPrinter(content, labelPrinterSN);
+                        NetUtils.sendToCloudPrinter(content, labelPrinterSN);
                     }
                 }
 

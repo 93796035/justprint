@@ -30,35 +30,42 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 数据同步服务
+ * currently includ
+ * 1/sending new order to SanjiPos,
+ * 2/download new order of current store from stgo.
  */
 public class DataSyncService extends BaseFragmentActivity implements Runnable{
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
     private static DataSyncService dataSyncService;
-    protected static String serverIpAndPort;
-    protected String lastDownLoad;
+    protected static String aikaServerIpAndPort;
+    protected static String stgoServerURL;
+    protected static String ErrorLogURL;
+
+    protected static String lastDownLoad = AppData.getCustomData(AppData.sendSM);;
     private static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    public static Vector<String> debugMsgs = new Vector<String>();
 
     public ArrayList<SelectionDetail> lastSelection;
     public String tableName;
     public String billIndex;
     public Double totalPrice;
     public String opentime;
-    private OrderFragmentActivity orderActivity;
+    private OrderFragmentActivity orderFragmentActivity;
 
     public static DataSyncService getInstance() {
         if(dataSyncService == null) {
             dataSyncService = new DataSyncService();
-            serverIpAndPort = AppData.getCustomData(AppData.serverip);
-            if(serverIpAndPort != null && serverIpAndPort.length() > 8) {
-                executorService.execute(dataSyncService);
-            }
+            aikaServerIpAndPort = AppData.getCustomData(AppData.serverip);
+            stgoServerURL = AppData.getSERVER_URL();
+            ErrorLogURL = "https://team.sharethegoodones.com"; //not allowed to customize.
+            executorService.execute(dataSyncService);
         }
         return dataSyncService;
     }
@@ -68,11 +75,11 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
 
     @Override
     public void run() {     //must use bk, because if use CustomerSelection.getInstance().getSelectedDishes(), it might be cleaned before thread started.
+        HttpURLConnection urlConnection = null;
         while(true) {
             if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
-                HttpURLConnection urlConnection = null;
                 try {
-                    urlConnection = AppData.prepareConnection("http://" + serverIpAndPort + "/SanjiPos/newOrders","POST");
+                    urlConnection = NetUtils.prepareConnection("http://" + aikaServerIpAndPort + "/SanjiPos/newOrders","POST");
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("totalPrice", totalPrice);
                     json.put("opentime", opentime);
@@ -102,7 +109,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         json.put("orderContent", orderContent.toString());
                     }
 
-                    AppData.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
+                    NetUtils.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
 
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
                         String rjson = NetUtils.readBackFromConnection(urlConnection);
@@ -113,7 +120,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         Log.e("L", "response code is:" + urlConnection.getResponseCode());
                     }
                 } catch (Exception e) {
-                    Log.e("L", "Exception happened when sending dishes to server: " + serverIpAndPort);//rjson={"json":true}
+                    Log.e("L", "Exception happened when sending dishes to server: " + aikaServerIpAndPort);//rjson={"json":true}
                 } finally {
                     if (urlConnection != null) {
                         urlConnection.disconnect();//使用完关闭TCP连接，释放资源
@@ -121,30 +128,32 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 }
             }
 
+            //===================Second Job==================================
+            //I put the content download from stgo under sendSM flag. (when first use, should manually set sendSM to "true"
+            //then every second will send message to stgo to ask for new order of it's store, if new order returned, then send SM.
             lastDownLoad = AppData.getCustomData(AppData.sendSM);
             if(lastDownLoad != null && lastDownLoad.length() > 0 && !"null".equalsIgnoreCase(lastDownLoad) && !"false".equalsIgnoreCase(lastDownLoad)){ //if the lastDownLoad
                 // is set, then download new orders.
                 String account = AppData.getShopName();
                 //download new records after last download time:
-                HttpURLConnection urlConnection = null;
                 try {
                     //TODO: this one should use "GET" as method, while don't know why it get can not reach back end from here. so I have to keep post for now.
-                    urlConnection = AppData.prepareConnection(AppData.getSERVER_URL() + "requestNewOrders" + "/" + account + "/" + lastDownLoad, "POST");
+                    urlConnection = NetUtils.prepareConnection(stgoServerURL + "requestNewOrders" + "/" + account + "/" + lastDownLoad, "POST");
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("lastDownLoad", lastDownLoad);
                     json.put("shop",  account);
                     json.put("licence", AppData.getLicense());
                     String newLastDownload = null;
-                    AppData.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
+                    NetUtils.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
                         String rjson = NetUtils.readBackFromConnection(urlConnection);
                         //send sms
-                        newLastDownload = processTheOrders(rjson);
+                        newLastDownload = prepareSMContent(rjson);
                         Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
                     } else {
                         Log.e("L", "response code is:" + urlConnection.getResponseCode());
                     }
-
+                    //put it into config, so the data still there even the app closed.next start up will keep working on it.
                     AppData.putCustomData(AppData.sendSM, newLastDownload != null ? newLastDownload : lastDownLoad);
                 } catch (Exception e) {
                     Log.e("L", "Exception happened when requestNewOrders from server: " + e);
@@ -155,11 +164,42 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 }
             }
 
+            //third job, sync error messages======================================
+            if(debugMsgs.size() > 0) {
+                String msg = debugMsgs.get(0);
+                debugMsgs.remove(0);
+
+                try {
+                    urlConnection = NetUtils.prepareConnection(ErrorLogURL +"/useraccounts/loglog", "POST");
+
+                    JSONObject json = new JSONObject();//创建json对象
+                    json.put("tag", URLEncoder.encode(AppData.getUserName(), "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                    json.put("msg", URLEncoder.encode(msg, "UTF-8"));//把数据put进json对象中
+                    String jsonstr = json.toString();//把JSON对象按JSON的编码格式转换为字符串
+
+                    NetUtils.writeOut(urlConnection, jsonstr);
+
+                    if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
+
+                        String rjson = NetUtils.readBackFromConnection(urlConnection);
+
+                        Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
+                    } else {
+                        Log.d("L", "response code is:" + urlConnection.getResponseCode());
+                    }
+                } catch (Exception e) {
+                    Log.d("L", "Exception happened when sending log to server: " + ErrorLogURL +"/useraccounts/loglog");//rjson={"json":true}
+                } finally {
+                    if(urlConnection != null) {
+                        urlConnection.disconnect();//使用完关闭TCP连接，释放资源
+                    }
+                }
+            }
             AppUtils.sleep(1000);
         }
     }
 
-    private String processTheOrders(String jsonStr){
+    private String prepareSMContent(String jsonStr){
         int lastId = 0;
         String idFR;
         try {
@@ -203,7 +243,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     public static String SMS_SEND_ACTIOIN = "SMS_SEND_ACTIOIN";
     public static String SMS_DELIVERED_ACTION = "SMS_DELIVERED_ACTION";
 
-    protected void sendSMSMessage(String phoneNumber, String content) {
+    private void sendSMSMessage(String phoneNumber, String content) {
 
         if(PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber)){
             if (ContextCompat.checkSelfPermission(NingMengStyle.app.getApplicationContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
@@ -234,16 +274,16 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 }
             }
         }else{//没有权限，向用户请求权限
-            if (ActivityCompat.shouldShowRequestPermissionRationale(orderActivity, Manifest.permission.SEND_SMS)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(orderFragmentActivity, Manifest.permission.SEND_SMS)) {
                 //TODO: show an guid for user to open the permission.
             } else {
-                ActivityCompat.requestPermissions(orderActivity, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
+                ActivityCompat.requestPermissions(orderFragmentActivity, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
             }
         }
     }
 
 
     public void setActivity(OrderFragmentActivity orderActivity) {
-        this.orderActivity = orderActivity;
+        this.orderFragmentActivity = orderActivity;
     }
 }

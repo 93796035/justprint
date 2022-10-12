@@ -59,7 +59,7 @@ public class DbUtil extends Thread{
     }
 
     public static void syncConfigOntoServer(String license, String shopName, boolean isUpload) {
-        AppData.remoteUrlAndPort = AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig");
+        NetUtils.remoteUrlAndPort = AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig");
         JSONObject json = new JSONObject();//创建json对象
         try {
             json.put("filepath", URLEncoder.encode(license + shopName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
@@ -68,7 +68,7 @@ public class DbUtil extends Thread{
             L.e("DatabaseUtil", "Exception when encoding content into json: license+shopName:" + license + shopName + " cofigrationStr:" + getConfigurations(), e);
         }
         AppData.putCustomData(AppData.ContentToSend, json.toString());
-        new AppData().start();
+        new NetUtils().start();
     }
 
     private static String getConfigurations() {

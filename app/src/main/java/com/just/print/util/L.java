@@ -4,27 +4,17 @@ import android.util.Log;
 
 import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
-import com.just.print.ui.activity.MainFragmentActivity;
-
-import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-import java.net.URLEncoder;
-import java.util.Vector;
+import com.just.print.sys.server.DataSyncService;
 
 /**
  * Created by Simon&Nicholas on 7/28/2017.
  */
 
-public class L extends Thread{
-    private static final String ErrorLogURL = "https://team.sharethegoodones.com";
+public class L{
     private static int index = 0;
 
-    private static L instance = null;
-    private static Vector<String> msgs = new Vector<String>();
-
-    public static boolean debug = false;
-
+    public static boolean debug = false;    //I don't use the value from AppData directly,
+                        // because sometimes I want to temorary set it, not save to config.(when restart, I want the flag be cleaned)
     public static void d(String tag, Object msg){
         if(debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + String.valueOf(msg));
@@ -55,48 +45,6 @@ public class L extends Thread{
     }
 
     private static void sendToServer(String tag, String msg){
-        if(instance == null) {
-            instance = new L();
-            instance.start();
-        }
-        msgs.add(index++ + "_" + msg);
-    }
-
-    @Override
-    public void run() {
-        super.run();
-        HttpURLConnection urlConnection = null;
-        while(true){
-            if(msgs.size() > 0) {
-                String msg = msgs.get(0);
-                msgs.remove(0);
-                try {
-                    urlConnection = AppData.prepareConnection(ErrorLogURL +"/useraccounts/loglog", "POST");
-
-                    JSONObject json = new JSONObject();//创建json对象
-                    json.put("tag", URLEncoder.encode(AppData.getUserName(), "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
-                    json.put("msg", URLEncoder.encode(msg, "UTF-8"));//把数据put进json对象中
-                    String jsonstr = json.toString();//把JSON对象按JSON的编码格式转换为字符串
-
-                    AppData.writeOut(urlConnection, jsonstr);
-
-                    if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
-
-                        String rjson = NetUtils.readBackFromConnection(urlConnection);
-
-                        Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
-                    } else {
-                        Log.d("L", "response code is:" + urlConnection.getResponseCode());
-                    }
-                } catch (Exception e) {
-                    Log.d("L", "Exception happened when sending log to server: " + ErrorLogURL +"/useraccounts/loglog");//rjson={"json":true}
-                } finally {
-                    if(urlConnection != null) {
-                        urlConnection.disconnect();//使用完关闭TCP连接，释放资源
-                    }
-                }
-            }
-            AppUtils.sleep(1000);
-        }
+        DataSyncService.debugMsgs.add(index++ +"_" + tag + "_" + msg);
     }
 }

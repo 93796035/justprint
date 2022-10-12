@@ -18,6 +18,7 @@ import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.holder.ConfigPrinterViewHolder;
 import com.just.print.util.DbUtil;
+import com.just.print.util.NetUtils;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;
 import com.stupid.method.reflect.StupidReflect;
@@ -151,7 +152,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
             mModifyCache.update();
             mModifyCache = null;
             if(ip.indexOf(".") == -1){
-                AppData.sendToCloudPrinter(AppData.DEFAULT_LABELPRINTER_SIZE,ip);
+                NetUtils.sendToCloudPrinter(AppData.DEFAULT_LABELPRINTER_SIZE,ip);
             }
             printerXAdapter.notifyDataSetChanged();
         }
