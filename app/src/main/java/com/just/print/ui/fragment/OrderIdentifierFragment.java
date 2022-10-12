@@ -176,7 +176,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     ListView ordersView;
     @XViewByID(R.id.orderList2)
     ListView ordersView2;
-
+    //inputted table name-------------------
+    @XViewByID(R.id.tableName)
+    private EditText etTableName;
+    @XViewByID(R.id.temporallyAddedLabel)
+    private EditText temporallyAddedLabel;
     private Menu storedMenu;
 
     XAdapter2<Mark> markShorCutXAdapter;
@@ -737,6 +741,31 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 marksOfCurDish.add(mark.clone());
             }
         }
+
+        String temperalLabel = temporallyAddedLabel.getText().toString();
+        if(temperalLabel.length() > 0){
+            Mark temporaryMark = new Mark();
+            int p = temperalLabel.indexOf("$");
+            if(p > 0){
+                String priceStr = temperalLabel.substring(p + 1).trim();
+                temporaryMark.setState((int)(Float.valueOf(priceStr) * 100));
+                temperalLabel = temperalLabel.substring(0, p);
+            }else{
+                temporaryMark.setState(0);
+            }
+
+            p = temperalLabel.indexOf( "*");
+            if(p > 0){
+                String QT = temperalLabel.substring(p + 1).trim();
+                temporaryMark.setQt(Integer.valueOf(QT));
+                temperalLabel = temperalLabel.substring(0, p);
+            }else{
+                temporaryMark.setQt(1);
+            }
+            temporaryMark.setName(temperalLabel);
+            marksOfCurDish.add(temporaryMark);
+            temporallyAddedLabel.setText("");
+        }
         categoryArea.setVisibility(View.VISIBLE);
         menuMarkSwitcher.setDisplayedChild(0);
         loadOrderMenu();
@@ -899,6 +928,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTable2.setText(tableName);
         CustomerSelection.getInstance().setTableName(tableName);
         //print code:
+        etTableName.setText("");
         findViewById(R.id.inputTableName).setVisibility(View.INVISIBLE);
         findViewById(R.id.mainDialog).setVisibility(View.VISIBLE);
     }
@@ -1155,7 +1185,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         dishesXAdapter.notifyDataSetChanged();
     }
 
-    private List<Mark> sortMarks(List<Mark> unsortedMarks) {
+    public static List<Mark> sortMarks(List<Mark> unsortedMarks) {
         List<Mark> sortedMarks = new ArrayList<Mark>();
         for (int i = 0; i < unsortedMarks.size(); i++) {
             Mark mark = unsortedMarks.get(i);

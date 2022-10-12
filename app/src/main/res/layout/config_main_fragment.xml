@@ -74,6 +74,11 @@
             android:padding="8dp"
             android:text="Table Management" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
         <TextView
             android:id="@+id/configCusManager"
             android:layout_width="match_parent"
@@ -88,6 +93,10 @@
             android:padding="8dp"
             android:text="JustPrint" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
         <TextView
             android:id="@+id/uploadDB"
             android:layout_width="match_parent"
@@ -115,6 +124,11 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="Download Configuration" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@android:color/darker_gray"/>
 
         <TextView
             android:id="@+id/reactivate"

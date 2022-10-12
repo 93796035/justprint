@@ -2,6 +2,7 @@ package com.just.print.ui.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -114,6 +115,8 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         if(categoryXAdapter.size() > 0) {
             curCategoryName.setText(categoryXAdapter.get(0).getCname());
         }
+        curCategoryName.setTextColor(Color.WHITE);
+        curCategoryName.setBackgroundColor(AppData.getThemColor());
     }
 
     IXOnItemClickListener categoryAdapterClick = new IXOnItemClickListener() {
@@ -455,7 +458,8 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             //that id is changed and new id duplicated with ohter one.
             if(modifyingMenu == null                             //if it's adding
                 || !menu.getID().equals(modifyingMenu.getID())){ //or it's modifying, but id changed
-                 showToast("the code is used already");      //but changed to be duplicated with existing menu.
+                 showToast("Save the item before choosing \"Pop up label automatically\". \n" +
+                         "Edit the item after saving.");      //but changed to be duplicated with existing menu.
                  return;
             }
         }
@@ -613,19 +617,16 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
-        final List<Mark> data = DaoExpand.queryAllMarks(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> data = DaoExpand.queryAllMarks(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
         data.removeAll(addedMarks);
-        if (data.size() == 0) {
-            showToast("Please add Mark first");
-            return;
-        }
         if (data.size() == 0) {
             showToast("No marks to select");
             return;
         }
-        final CharSequence[] items = new CharSequence[data.size()];
-        for (int i = 0, s = data.size(); i < s; i++) {
-            Mark p = data.get(i);
+        final List<Mark> newData = OrderIdentifierFragment.sortMarks(data);
+        final CharSequence[] items = new CharSequence[newData.size()];
+        for (int i = 0, s = newData.size(); i < s; i++) {
+            Mark p = newData.get(i);
             items[i] = p.getName() + "_" + p.getId();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -634,7 +635,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             builder.setSingleChoiceItems(items, -1, new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    addedMarks.add(data.get(which));
+                    addedMarks.add(newData.get(which));
                     addMarksAdapter.notifyDataSetChanged();
                     dialog.dismiss();
                 }
@@ -645,9 +646,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isSelected) {
                     if(isSelected) {
-                        addedMarks.add(data.get(which));
+                        addedMarks.add(newData.get(which));
                     }else{
-                        addedMarks.remove(data.get(which));
+                        addedMarks.remove(newData.get(which));
                     }
                     addMarksAdapter.notifyDataSetChanged();
                 }

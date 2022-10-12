@@ -215,8 +215,6 @@ public class DatabaseUtil extends Thread{
         }
     }
 
-
-
     private class MediaUpload {
 
         private String filepath;
