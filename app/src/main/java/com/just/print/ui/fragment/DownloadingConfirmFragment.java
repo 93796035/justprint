@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.BaseFragment;
-import com.just.print.util.DatabaseUtil;
+import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -64,7 +64,7 @@ public class DownloadingConfirmFragment extends BaseFragment{
                 return;
             }
         }
-        DatabaseUtil.syncDbOntoServer(license, store_name.getText().toString(),false);
+        DbUtil.syncDbOntoServer(license, store_name.getText().toString(),false);
         getActivity().finish();
     }
 

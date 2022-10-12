@@ -20,7 +20,7 @@ import com.just.print.db.bean.Menu;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.AppUtils;
-import com.just.print.util.StringUtils;
+import com.just.print.util.NetUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -105,7 +105,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     AppData.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
 
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
-                        String rjson = AppData.readBackFromConnection(urlConnection);
+                        String rjson = NetUtils.readBackFromConnection(urlConnection);
 
                         Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
                         lastSelection.clear();
@@ -137,7 +137,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     String newLastDownload = null;
                     AppData.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
-                        String rjson = AppData.readBackFromConnection(urlConnection);
+                        String rjson = NetUtils.readBackFromConnection(urlConnection);
                         //send sms
                         newLastDownload = processTheOrders(rjson);
                         Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}

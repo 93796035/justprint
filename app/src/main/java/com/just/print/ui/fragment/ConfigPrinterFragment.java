@@ -17,6 +17,7 @@ import com.just.print.db.bean.Printer;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.holder.ConfigPrinterViewHolder;
+import com.just.print.util.DbUtil;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;
 import com.stupid.method.reflect.StupidReflect;
@@ -102,7 +103,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
         }else if(orderPrint.isChecked() && classPrint.isChecked()){
             type = 3;
         }
-        AppData.createPrinter(ip.toString(),
+        DbUtil.createPrinter(ip.toString(),
                 name.getText().toString(),
                 checkBox.isChecked() ? 1 : 0,
                 type,//checkid == R.id.orderPrint ? 1 : 0,

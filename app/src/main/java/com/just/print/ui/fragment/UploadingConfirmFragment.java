@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.just.print.R;
 import com.just.print.app.AppData;
 import com.just.print.app.BaseFragment;
-import com.just.print.util.DatabaseUtil;
+import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 
@@ -40,7 +40,7 @@ public class UploadingConfirmFragment extends BaseFragment{
             showToast("Please activate the application first.");
             return;
         }
-        DatabaseUtil.syncDbOntoServer(license, AppData.getShopName(),true);
+        DbUtil.syncDbOntoServer(license, AppData.getShopName(),true);
         getActivity().finish();
     }
 

@@ -13,7 +13,7 @@ import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
 import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
-import com.just.print.util.DatabaseUtil;
+import com.just.print.util.DbUtil;
 import com.just.print.util.StringUtils;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
@@ -81,7 +81,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
                 if (status && result2 != null && result2.isExists()) {
 
                     byte[] datas = Base64Util.decode(result2.getFileBase64());
-                    DatabaseUtil.writeDBByte(datas);
+                    DbUtil.writeDBByte(datas);
                 }
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -146,10 +146,10 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
         AppData.saveShopName(getContext(), shopName);
         AppData.createShopDB(getContext(), shopName);
 
-        AppData.createPrinter("192.168.8.10","10",1,1, "");
-        AppData.createPrinter("192.168.8.20","20",1,1, "");
-        AppData.createPrinter("192.168.8.30","30",1,1, "");
-        AppData.createPrinter("192.168.8.40","40",1,1, "");
+        DbUtil.createPrinter("192.168.8.10","10",1,1, "");
+        DbUtil.createPrinter("192.168.8.20","20",1,1, "");
+        DbUtil.createPrinter("192.168.8.30","30",1,1, "");
+        DbUtil.createPrinter("192.168.8.40","40",1,1, "");
 
         //initialize the days left and the stated days on cloud.
         AppData.startActivate();

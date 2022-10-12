@@ -4,6 +4,7 @@ import android.util.Base64;
 
 import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
+import com.just.print.db.bean.Printer;
 
 import org.json.JSONObject;
 
@@ -25,7 +26,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.Date;
 
-public class DatabaseUtil extends Thread{
+public class DbUtil extends Thread{
 
     final private static String DATABASE_NAME_PREFFIX = "JustPrinter_"; //data/user/0/com.just.print/databases/ ; /data/data/com.whatsapp/databases/msgstore.db
     private static File file = null;
@@ -42,7 +43,7 @@ public class DatabaseUtil extends Thread{
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
         file = NingMengStyle.app.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + AppData.getShopName(NingMengStyle.app.getApplicationContext()));
         if (file.exists()){
-            DatabaseUtil util = new DatabaseUtil();
+            DbUtil util = new DbUtil();
             if(license != null && license.length() > 0){
                 util.license = license;
             }
@@ -58,7 +59,7 @@ public class DatabaseUtil extends Thread{
     }
 
     public static void syncConfigOntoServer(String license, String shopName, boolean isUpload) {
-        AppData.schema = AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig");
+        AppData.remoteUrlAndPort = AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig");
         JSONObject json = new JSONObject();//创建json对象
         try {
             json.put("filepath", URLEncoder.encode(license + shopName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
@@ -79,7 +80,29 @@ public class DatabaseUtil extends Thread{
     }
 
     public static void main(String args[]){
-        new DatabaseUtil().run();
+        new DbUtil().run();
+    }
+
+    //don't know why this is here----------------------------------------------
+    public static void createPrinter(
+            String ip,
+            String name,
+            int fullPrintMode, //是否全单打印,1 全单打印,0单独打印
+            int checkid,
+            String note) {
+        Printer printer = new Printer();
+        printer.setFirstPrint(fullPrintMode);
+        printer.setPname(name);
+        printer.setIp(ip);
+        printer.setType(checkid);// 1: 顺序打印,0 :类别打印
+        printer.setNote(note);
+        //        if (checkBox.isChecked()) {
+        //            //DaoExpand.updateAllPrintTo0(getDaoMaster().newSession().getPrinterDao());
+        //            printer.setFirstPrint(1);
+        //        }
+        printer.setState(com.just.print.db.expand.State.def);
+        NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
+        printer.updateAndUpgrade();
     }
 
     @Override

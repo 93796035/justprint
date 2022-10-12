@@ -36,7 +36,7 @@ public class ActivateFragmentActivity extends BaseFragmentActivity {
         AppData.setActivateCode(inputedSN, textView);
 
         while(true) {
-            //when inputted activate code, should not go to login activity(that activaty will check name and store name then go to Main Interface)
+            //when inputted activate code, should not go to login activity(that activity will check name and store name then go to Main Interface)
             AppUtils.sleep(1000);
             String number = AppData.getCustomData(AppData.number);
             if(Long.valueOf(number) > 0){

@@ -3,28 +3,22 @@ package com.just.print.app;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 import android.widget.TextView;
 
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.expand.DaoExpand;
-import com.just.print.ui.activity.MainFragmentActivity;
 import com.just.print.ui.fragment.LoginFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.L;
+import com.just.print.util.NetUtils;
 import com.just.print.util.SharedPreferencesHelper;
 import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -164,52 +158,20 @@ public class  AppData extends Thread{
     private static final String codeNumberConsidered = "codeNumberConsidered";
     private static final String addingDefaultCode = "addingDefaultCode";
 
+    public static String remoteUrlAndPort;
+
+    //basic save and get functions========================================================
+    public static void putCustomData(String key, String value) {
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
+    }
+    public static String getCustomData(String key) {
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
+    }
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
     }
 
-    /**
-     * 判断店铺是否存在
-     * @return true 存在,false 不存在
-     **/
-    private static boolean existShop(Context context, String shopName) {
-        String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
-        return shoplist.contains(shopName);
-    }
-
-    public static void createShopDB(Context context, String shopName) {
-        if (!existShop(context, shopName)) {
-            String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
-            getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopName);
-        }
-        NingMengStyle.app.initDaoMaster(shopName);
-    }
-
-    public static void createPrinter(
-            String ip,
-            String name,
-            int fullPrintMode, //是否全单打印,1 全单打印,0单独打印
-            int checkid,
-            String note) {
-        Printer printer = new Printer();
-        printer.setFirstPrint(fullPrintMode);
-        printer.setPname(name);
-        printer.setIp(ip);
-        printer.setType(checkid);// 1: 顺序打印,0 :类别打印
-        printer.setNote(note);
-        //        if (checkBox.isChecked()) {
-        //            //DaoExpand.updateAllPrintTo0(getDaoMaster().newSession().getPrinterDao());
-        //            printer.setFirstPrint(1);
-        //        }
-        printer.setState(com.just.print.db.expand.State.def);
-        NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
-        printer.updateAndUpgrade();
-    }
-
-    public static void saveCustomizedLastCharOnPanel(Context context, String character) {
-        getShopData(context).putString(KEY_CUST_LAST_CHAR, character);
-    }
-
+    //ServerUrls======================================================
     public static String getSERVER_URL(){
         String serverURL = AppData.getCustomData(AppData.server_url);
         if(serverURL == null || serverURL.length() < 10) {
@@ -236,86 +198,6 @@ public class  AppData extends Thread{
             emailServer = emailServer + "/";
         }
         return emailServer;
-    }
-
-    public static String getCustomizedLastCharOnPanel(Context context){
-        return getShopData(context).getString(KEY_CUST_LAST_CHAR, "");
-    }
-
-    public static void saveShopName(Context context, String shopName) {
-        getShopData(context).putString(KEY_SHOP_NAME, shopName);
-    }
-
-    public static String getShopName(){
-        return getShopName(NingMengStyle.app.getApplicationContext());
-    }
-
-    public static String getShopName(Context context) {
-        return getShopData(context).getString(KEY_SHOP_NAME, "");
-    }
-
-    public static void saveUserName(Context context, String userName) {
-        getShopData(context).putString("userName", userName);
-    }
-
-    public static String getUserName() {
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("userName", "");
-    }
-
-    public static String getUserName(Context context) {
-        return getShopData(context).getString("userName", "");
-    }
-
-    public static String getLicense() {
-        return getLicense(NingMengStyle.app.getApplicationContext());
-    }
-
-    public static String getLicense(Context context) {
-        return getShopData(context).getString("license", "");
-    }
-
-    public static void setActivateCode(String inputedSN, TextView textView) {
-        inputedSN = inputedSN.trim();
-        if(inputedSN.startsWith("-") && (inputedSN.indexOf(":") > 1 || inputedSN.indexOf("：") > 1)){
-            setCustomValue(inputedSN, textView);
-            return;
-        }else if(inputedSN.startsWith("-") && (inputedSN.endsWith("?") || inputedSN.endsWith("？"))) {
-            displayCustomValue(inputedSN);
-            return;
-        }else if (inputedSN.length() != 6) {
-            showToast("Please input correct license code");
-            return;
-        }
-
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
-        startActivate();
-    }
-
-    public static void putCustomData(String key, String value) {
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
-    }
-    public static String getCustomData(String key) {
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
-    }
-
-    public static String getLastModifyTime(){
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("LastSyncDate","");
-    }
-
-    public static void updataeLastModifyTime(String lastUpdateTime) {
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("LastSyncDate",
-                lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
-    }
-
-    //return the current billIdx saved in config. if not set yet, then check the bill ids in db, then give a next one.
-    public static String getCurrentBillIdx() {
-        String billIdx = AppData.getCustomData(AppData.billIdx);
-        if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
-            List<Bill> orders = DaoExpand.queryRecentBill(
-                    NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
-            billIdx = String.valueOf(orders.get(0).getId() + 1);
-        }
-        return billIdx;
     }
 
     public static HttpURLConnection prepareConnection(String uri, String method) throws Exception {
@@ -353,23 +235,78 @@ public class  AppData extends Thread{
         bw.close();//使用完关闭
     }
 
-    //When there are more mode2 than mode 1, will open the commented line.
-    public static boolean isMode2() {
-        return !"1".equals(getCustomData(AppData.appmode)) && !"3".equals(getCustomData(AppData.appmode));
+    //store name, user name, activate code, time left===============================================
+    private static boolean isShopExist(Context context, String shopName) {
+        String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
+        return shoplist.contains(shopName);
     }
 
-    public static String schema;
+    public static void createShopDB(Context context, String shopName) {
+        if (!isShopExist(context, shopName)) {
+            String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
+            getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopName);
+        }
+        NingMengStyle.app.initDaoMaster(shopName);
+    }
+
+    public static void saveShopName(Context context, String shopName) {
+        getShopData(context).putString(KEY_SHOP_NAME, shopName);
+    }
+
+    public static String getShopName(){
+        return getShopName(NingMengStyle.app.getApplicationContext());
+    }
+
+    public static String getShopName(Context context) {
+        return getShopData(context).getString(KEY_SHOP_NAME, "");
+    }
+    //user-------------------------------------
+    public static void saveUserName(Context context, String userName) {
+        getShopData(context).putString("userName", userName);
+    }
+
+    public static String getUserName() {
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("userName", "");
+    }
+
+    public static String getUserName(Context context) {
+        return getShopData(context).getString("userName", "");
+    }
+    //activate code-----------------------------------------------
+    public static String getLicense() {
+        return getLicense(NingMengStyle.app.getApplicationContext());
+    }
+
+    public static String getLicense(Context context) {
+        return getShopData(context).getString("license", "");
+    }
+
+    public static void setActivateCode(String inputedSN, TextView textView) {
+        inputedSN = inputedSN.trim();
+        if(inputedSN.startsWith("-") && (inputedSN.indexOf(":") > 1 || inputedSN.indexOf("：") > 1)){
+            setCustomValueWithShortCut(inputedSN, textView);
+            return;
+        }else if(inputedSN.startsWith("-") && (inputedSN.endsWith("?") || inputedSN.endsWith("？"))) {
+            displayCusValueOfKey(inputedSN);
+            return;
+        }else if (inputedSN.length() != 6) {
+            showToast("Please input correct license code");
+            return;
+        }
+
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
+        startActivate();
+    }
 
     public static void startActivate() {
-        AppData.schema = AppData.getSERVER_URL() + "activeJustPrintAccount";
-        String accountInfo = AppData.getJsonObjectForActivate();
+        AppData.remoteUrlAndPort = AppData.getSERVER_URL() + "activeJustPrintAccount";
+        String accountInfo = AppData.getAccountJsonForActivate();
         if(accountInfo != null){
             AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
             new AppData().start();
         }
     }
-
-    private static String getJsonObjectForActivate() {
+    private static String getAccountJsonForActivate() {
         StringBuilder content = new StringBuilder(AppData.getLicense());
         content.append(",");
         content.append(AppData.getShopName());
@@ -386,11 +323,93 @@ public class  AppData extends Thread{
         }
         return json.toString();
     }
+    private static void displayCusValueOfKey(String inputedSN) {
+        inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
+        String answer = AppData.getCustomData(inputedSN);
+        if(answer == null || answer.length() == 0) {
+            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
+        }
+        showToast(inputedSN + " = " + answer);
+    }
+
+    //time left calculating----------------------------------------------
+    public static String getLastModifyTime(){
+        return getShopData(NingMengStyle.app.getApplicationContext()).getString("LastSyncDate","");
+    }
+
+    public static void updataeLastModifyTime(String lastUpdateTime) {
+        getShopData(NingMengStyle.app.getApplicationContext()).putString("LastSyncDate",
+                lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
+    }
+
+    //==========================================================
+    //interface style-------------------------------------
+    public static boolean isMode2() {
+        return !"1".equals(getCustomData(AppData.appmode)) && !"3".equals(getCustomData(AppData.appmode));
+    }
+
+    public static int getScreenOrientation() {
+        return "true".equals(getCustomData(AppData.isScreenHorizontal)) ?
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    }
+
+    public static int getThemColor() {
+        String color = getCustomData(AppData.colorOfTheme);
+        if(color == null || color.length() != 6){
+            color = "1584BD";
+        }
+        return Color.parseColor("#" + color);
+    }
+
+    public static String getCategoryLayoutStyle() {
+        return getCustomData(AppData.categoryLayoutStyle);
+    }
+
+    public static int getMarkNumColumn() {
+        String cols = getCustomData(AppData.labelColumn);
+        try{
+            return Integer.parseInt(cols);
+        }catch(Exception e){
+            return 1;
+        }
+    }
+
+    public static int getSendButtonHeight() {   //it's only works for mode1
+        String height = getCustomData(AppData.SendButtonHeight);
+        if(height == null || height.length() <= 2){
+            return 123;
+        }else{
+            try{
+                return Integer.valueOf(height.trim());
+            }catch(Exception e){
+                return 123;
+            }
+        }
+    }
+
+    public static boolean hasCategory() {
+        if(isMode2()) {
+            return "true".equals(getCustomData(AppData.hasCategory));
+        }
+        return true;
+    }
+
+    //=============================================================
+    //return the current billIdx saved in config. if not set yet, then check the bill ids in db, then give a next one.
+    public static String getCurrentBillIdx() {
+        String billIdx = AppData.getCustomData(AppData.billIdx);
+        if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
+            List<Bill> orders = DaoExpand.queryRecentBill(
+                    NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
+            billIdx = String.valueOf(orders.get(0).getId() + 1);
+        }
+        return billIdx;
+    }
 
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getEmailServer() + "sendReport";
+            AppData.remoteUrlAndPort = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
@@ -421,7 +440,7 @@ public class  AppData extends Thread{
     public static boolean notifyCheck(String orderContent) {
         String email = AppData.getCustomData(AppData.sendReport);
         if(email != null && email.indexOf("@") > 0) {
-            AppData.schema = AppData.getEmailServer() + "sendReport";
+            AppData.remoteUrlAndPort = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
@@ -445,43 +464,11 @@ public class  AppData extends Thread{
         return true;
     }
 
-    public static int getThemColor() {
-        String color = getCustomData(AppData.colorOfTheme);
-        if(color == null || color.length() != 6){
-            color = "1584BD";
-        }
-        return Color.parseColor("#" + color);
-    }
-
-    public static int getSendButtonHeight() {
-        String height = getCustomData(AppData.SendButtonHeight);
-        if(height == null || height.length() <= 2){
-            return 123;
-        }else{
-            try{
-                return Integer.valueOf(height.trim());
-            }catch(Exception e){
-                return 123;
-            }
-        }
-    }
-
-    public static boolean hasCategory() {
-        if(isMode2()) {
-            return "true".equals(getCustomData(AppData.hasCategory));
-        }
-        return true;
-    }
-
     public static String getLabelSN() {
         return getCustomData(AppData.labelSN);
     }
 
-    public static int getScreenOrientation() {
-        return "true".equals(getCustomData(AppData.isScreenHorizontal)) ?
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-    }
-
+    //print format------------------------------------
     public static boolean isCodeNumberConsidered() {
         return "true".equals(getCustomData(AppData.codeNumberConsidered));
     }
@@ -493,19 +480,8 @@ public class  AppData extends Thread{
     public static String getForcePopUpList() {
         return getCustomData(AppData.forcePopUpMenuList);
     }
-    public static String getCategoryLayoutStyle() {
-        return getCustomData(AppData.categoryLayoutStyle);
-    }
 
-    public static int getMarkNumColumn() {
-        String cols = getCustomData(AppData.labelColumn);
-        try{
-            return Integer.parseInt(cols);
-        }catch(Exception e){
-            return 1;
-        }
-    }
-
+    //passwords-----------------------------------------------
     public static String getAdminPassword() {
         String ap = getCustomData(AppData.adminPassword);
         return StringUtils.isBlank(ap) ? "2266" : ap;
@@ -519,30 +495,51 @@ public class  AppData extends Thread{
         return StringUtils.isBlank(op) ? "1111" : op;
     }
 
+    //communication thread method===========================================
+    // 打印机编号，必须要在管理后台里添加打印机或调用API接口添加之后，才能调用API
+    public static void sendToCloudPrinter(String content, String sn) {
+        if (sn != null && sn.length() > 0) {
+            JSONObject json = new JSONObject();//创建json对象
+            try {
+                json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
+                String size = AppData.getCustomData(AppData.width);
+                size = (size == null || size.length() == 0) ? "24" : size;
+                json.put("width", size);
+            }catch(Exception e){
+                L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
+            }
+            AppData.remoteUrlAndPort = AppData.getSERVER_URL() + "cloudPrint";
+            AppData.putCustomData(AppData.ContentToSend, json.toString());
+            new AppData().run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
+            //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
+        }
+    }
+
     @Override
     public void run() {
         super.run();
         String contentToSend = AppData.getCustomData(AppData.ContentToSend);
-        if(contentToSend != null && contentToSend.length() > 0 && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
+        if(contentToSend.length() > 0 && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
             HttpURLConnection urlConnection = null;
             try {
-                urlConnection = prepareConnection(schema, "POST");
+                urlConnection = prepareConnection(remoteUrlAndPort, "POST");
                 writeOut(urlConnection, contentToSend);
 
                 if(urlConnection.getResponseCode()==HttpURLConnection.HTTP_OK){//得到服务端的返回码是否连接成功
 
-                    String responseString = readBackFromConnection(urlConnection);
+                    String responseString = NetUtils.readBackFromConnection(urlConnection);
                     AppData.putCustomData(AppData.ContentToSend, null);
-                    long time = 0;
+                    long timeLeft = 0;
                     try{
-                        time = Long.valueOf(responseString);    // if returned a number, then it must be  left time---(the activation case)
-                        if(time > 0){//if success
+                        timeLeft = Long.valueOf(responseString);    // if returned a number, then it must be  left time---(the activation case)
+                        if(timeLeft > 0){//if success
                             AppData.putCustomData(AppData.number,responseString);
                             AppData.putCustomData(AppData.lastsuccess, String.valueOf(new Date().getTime()));
 
                             showToast("Application is activated successfully!");
                         }else{
-                            showToast("No time left on server: "+ time);
+                            showToast("No time left on server: "+ timeLeft);
                         }
                     }catch (Exception e){
                         if(responseString.length() > 2) {           //for the sending content to cloud printer case, the return value is "", for uploading, the return is "OK".
@@ -561,7 +558,6 @@ public class  AppData extends Thread{
             }
         }
     }
-
     private void absortTheConfiguration(String responseString) {
         String[] strs = responseString.split(",");
         int count = 0;
@@ -578,64 +574,8 @@ public class  AppData extends Thread{
         ToastUtil.showToast(count + " configurations in this device has been refreshed successfully.");
     }
 
-    @NonNull
-    public static String readBackFromConnection(HttpURLConnection urlConnection) throws IOException, JSONException {
-        //------------字节流读取服务端返回的数据------------
-        //InputStream in = urlConnection.getInputStream();//用输入流接收服务端返回的回应数据
-        //BufferedInputStream bis = new BufferedInputStream(in);//高效缓冲流包装它，这里用的是字节流来读取数据的，当然也可以用字符流
-        //byte[] b = new byte[1024];
-        //int len = -1;
-        //StringBuffer buffer = new StringBuffer();//用来接收数据的StringBuffer对象
-        //while((len=bis.read(b))!=-1){
-        //buffer.append(new String(b, 0, len));//把读取到的字节数组转化为字符串
-        //}
-        //in.close();
-        //bis.close();
-        //Log.d("zxy", buffer.toString());//{"json":true}
-        //JSONObject rjson = new JSONObject(buffer.toString());//把返回来的json编码格式的字符串数据转化成json对象
-        //------------字符流读取服务端返回的数据------------
-        InputStream in = urlConnection.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String str = null;
-        StringBuffer buffer = new StringBuffer();
-        while((str = br.readLine())!=null){//BufferedReader特有功能，一次读取一行数据
-            buffer.append(str);
-        }
-        in.close();
-        br.close();
-        return buffer.toString();
-    }
-
-    private static void displayCustomValue(String inputedSN) {
-        inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
-        String answer = AppData.getCustomData(inputedSN);
-        if(answer == null || answer.length() == 0) {
-            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
-        }
-        showToast(inputedSN + " = " + answer);
-    }
-
-    // 打印机编号，必须要在管理后台里添加打印机或调用API接口添加之后，才能调用API
-    public static void sendToCloudPrinter(String content, String sn) {
-        if (sn != null && sn.length() > 0) {
-            JSONObject json = new JSONObject();//创建json对象
-            try {
-                json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
-                json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
-                String size = AppData.getCustomData(AppData.width);
-                size = (size == null || size.length() == 0) ? "24" : size;
-                json.put("width", size);
-            }catch(Exception e){
-                L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
-            }
-            AppData.schema = AppData.getSERVER_URL() + "cloudPrint";
-            AppData.putCustomData(AppData.ContentToSend, json.toString());
-            new AppData().run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
-            //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
-        }
-    }
-
-    private static void setCustomValue(String inputedSN, TextView textView) {
+    //shortcuts==============================not sure if it's faster than click way=======================
+    private static void setCustomValueWithShortCut(String inputedSN, TextView textView) {
         int p = inputedSN.indexOf(":");
         if(p == -1){
             p = inputedSN.indexOf("：");
@@ -676,9 +616,8 @@ public class  AppData extends Thread{
                 showToast("App has set conbineMarkPrice to: " + inputedSN);
                 return;
             case AppData.debug:
-                MainFragmentActivity.debug = Boolean.valueOf(inputedSN);
-                AppData.putCustomData(AppData.debug, String.valueOf(MainFragmentActivity.debug));
-                if(MainFragmentActivity.debug) {
+                AppData.putCustomData(AppData.debug, inputedSN);
+                if(Boolean.valueOf(inputedSN)) {
                     showToast("App is in debug mode, when bug appears again, please write down the system time and report.");
 
                     StringBuilder sb = new StringBuilder();
@@ -840,6 +779,14 @@ public class  AppData extends Thread{
                 showToast(SettingType + " is set to " + inputedSN);
                 return;
         }
+    }
+
+    //used when customizing menu number layout in mode1,seems not used anymore?-----------------------------------
+    public static void saveCustomizedLastCharOnPanel(Context context, String character) {
+        getShopData(context).putString(KEY_CUST_LAST_CHAR, character);
+    }
+    public static String getCustomizedLastCharOnPanel(Context context){
+        return getShopData(context).getString(KEY_CUST_LAST_CHAR, "");
     }
 
 }

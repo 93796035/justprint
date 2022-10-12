@@ -23,30 +23,32 @@ public class L extends Thread{
     private static L instance = null;
     private static Vector<String> msgs = new Vector<String>();
 
+    public static boolean debug = false;
+
     public static void d(String tag, Object msg){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
+        if(debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + String.valueOf(msg));
         }
         Log.d(tag, String.valueOf(msg));
     }
 
     public static void e(String tag, String msg, Throwable e){
-        MainFragmentActivity.debug = true;
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
+        debug = true;
+        if(debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.i(tag, msg, e);
     }
 
     public static void i(String tag, String msg){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
+        if(debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.i(tag, msg);
     }
 
     public static void w(String tag, String msg, Throwable e){
-        if(MainFragmentActivity.debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
+        if(debug && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())) {
             sendToServer(AppData.getShopName() + "_" + AppData.getUserName(), tag + ":" + msg);
         }
         Log.d(tag, msg, e);
@@ -80,7 +82,7 @@ public class L extends Thread{
 
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
 
-                        String rjson = AppData.readBackFromConnection(urlConnection);
+                        String rjson = NetUtils.readBackFromConnection(urlConnection);
 
                         Log.d("zxy", "rjson=" + rjson);//rjson={"json":true}
                     } else {

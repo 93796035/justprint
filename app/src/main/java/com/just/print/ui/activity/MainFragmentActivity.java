@@ -19,7 +19,6 @@ public class MainFragmentActivity extends BaseFragmentActivity {
 
     //    ServiceConnection serviceConnection;
 //    UDPService udp;
-    public static boolean debug = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +26,11 @@ public class MainFragmentActivity extends BaseFragmentActivity {
         setContentView(R.layout.main_activity);
         new StupidReflect(this).init();
 
-        //this block should be useless, because dubug is already set value.
-        // or maybe onCreate method could be called more than one time? so every time swith back to this page,
+        //this block should be useless, because dubug is already set value.-----no, it's static, so give a init here.
+        // or maybe onCreate method could be called more than one time? so every time switch back to this page,
         // the oncreate will be called again? so we can update the debug setting without restart app?
         try {
-            debug = Boolean.valueOf(AppData.getCustomData(AppData.debug));
+            L.debug = Boolean.valueOf(AppData.getCustomData(AppData.debug));
         }catch(Exception e){
             L.i("the value of debug in customerr Data ", "can  not be parsered into a boolean!");
         }
@@ -100,7 +99,7 @@ public class MainFragmentActivity extends BaseFragmentActivity {
         String lastsuccessStr = AppData.getCustomData(AppData.lastsuccessStr);    L.d("lastSuccessStr:",lastsuccessStr);
         try{
             Long lastSuccess= Long.valueOf(lastsuccessStr);
-            timepassed = new Date().getTime() - lastSuccess;L.d("timePassed:",timepassed);        //time passed since last open.
+            timepassed = new Date().getTime() - lastSuccess;            L.d("timePassed:",timepassed);        //time passed since last open.
         }catch(Exception e){
             L.e("MainActivity", "the lastsuccessStr is not valid long", e);
         }
