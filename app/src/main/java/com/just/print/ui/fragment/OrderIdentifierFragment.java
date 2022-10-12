@@ -364,6 +364,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         allMarks = sortMarks(DaoExpand.queryAllMarks(NingMengStyle.getMarkDao()));//deleted is used for table name....
         //add shortcut Marks.
         initShortCutMarks();
+        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel))) {
+            findViewById(R.id.temporaryLabelArea).setVisibility(View.VISIBLE);
+        }
 
         findViewById(R.id.tableSelectionView).setBackgroundColor(AppData.getThemColor());
         tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);

@@ -73,6 +73,7 @@ public class  AppData extends Thread{
     //to sync
     public static final String adminPassword = "adminPassword";
     public static final String allowDownloadFromOtherStore = "allowDownloadFromOtherServer";
+    public static final String allowTemporaryLabel = "allowTemporaryLabel";
     public static final String appmode = "appmode";
     public static final String autoCloseTable = "autoCloseTable";
     public static final String categoryLayoutStyle = "category_layout_style";
@@ -135,7 +136,8 @@ public class  AppData extends Thread{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            allowDownloadFromOtherStore, appmode, autoCloseTable, categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
+            allowDownloadFromOtherStore, allowTemporaryLabel, appmode, autoCloseTable, categoryLayoutStyle,
+            clientMode, colorOnSelect, colorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
