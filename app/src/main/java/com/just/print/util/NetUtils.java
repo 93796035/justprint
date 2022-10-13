@@ -27,6 +27,36 @@ public class NetUtils extends Thread{
 
     public static String remoteUrlAndPort;
 
+    //activate==============================================
+    public static void startActivate() {
+        remoteUrlAndPort = AppData.getSERVER_URL() + "activeJustPrintAccount";
+        String accountInfo = getAccountJsonForActivate();
+        if(accountInfo != null){
+            AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
+            new NetUtils().start();
+        }
+    }
+
+    public static String getAccountJsonForActivate() {
+        StringBuilder content = new StringBuilder(AppData.getLicense());
+        content.append(",");
+        content.append(AppData.getShopName());
+        content.append("-");
+        content.append(AppData.getUserName());//如果有需要对特殊和不可见字符进行编码，使用URLEncoder.encode
+
+        JSONObject json = new JSONObject();//创建json对象
+        try {
+            json.put("username", content.toString());//使用URLEncoder.encode对特殊和不可见字符进行编码
+        }catch(Exception e){
+            showToast("Please provide valid shop name, user name and license number!");
+            L.e("TAG", "USERLOGIN_FAILED", e);
+            return null;
+        }
+        return json.toString();
+    }
+
+    //send to cloud printer=======================================================
+    // actually send to STGO, then send to cloud printer from there
     public static void sendToCloudPrinter(String content, String sn) {
         if (sn != null && sn.length() > 0) {
             JSONObject json = new JSONObject();//创建json对象
@@ -46,6 +76,7 @@ public class NetUtils extends Thread{
         }
     }
 
+    //the run method=========================================================
     @Override
     public void run() {
         super.run();

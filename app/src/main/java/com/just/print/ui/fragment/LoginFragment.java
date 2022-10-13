@@ -14,6 +14,7 @@ import com.just.print.sys.model.QueryShopResult;
 import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
 import com.just.print.util.DbUtil;
+import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
@@ -152,7 +153,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
         DbUtil.createPrinter("192.168.8.40","40",1,1, "");
 
         //initialize the days left and the stated days on cloud.
-        AppData.startActivate();
+        NetUtils.startActivate();
         startActivity(new Intent(getContext(), OrderFragmentActivity.class));
         getActivity().finish();
     }

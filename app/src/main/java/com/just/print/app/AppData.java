@@ -257,41 +257,7 @@ public class AppData{
         }
 
         getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
-        startActivate();
-    }
-
-    public static void startActivate() {
-        NetUtils.remoteUrlAndPort = AppData.getSERVER_URL() + "activeJustPrintAccount";
-        String accountInfo = AppData.getAccountJsonForActivate();
-        if(accountInfo != null){
-            AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
-            new NetUtils().start();
-        }
-    }
-    private static String getAccountJsonForActivate() {
-        StringBuilder content = new StringBuilder(AppData.getLicense());
-        content.append(",");
-        content.append(AppData.getShopName());
-        content.append("-");
-        content.append(AppData.getUserName());//如果有需要对特殊和不可见字符进行编码，使用URLEncoder.encode
-
-        JSONObject json = new JSONObject();//创建json对象
-        try {
-            json.put("username", content.toString());//使用URLEncoder.encode对特殊和不可见字符进行编码
-        }catch(Exception e){
-            showToast("Please provide valid shop name, user name and license number!");
-            L.e("TAG", "USERLOGIN_FAILED", e);
-            return null;
-        }
-        return json.toString();
-    }
-    private static void displayCusValueOfKey(String inputedSN) {
-        inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
-        String answer = AppData.getCustomData(inputedSN);
-        if(answer == null || answer.length() == 0) {
-            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
-        }
-        showToast(inputedSN + " = " + answer);
+        NetUtils.startActivate();
     }
 
     //time left calculating----------------------------------------------
@@ -662,6 +628,16 @@ public class AppData{
                 showToast(SettingType + " is set to " + inputedSN);
                 return;
         }
+    }
+
+    //to check a value of a specific key-----------------------------------------------------
+    private static void displayCusValueOfKey(String inputedSN) {
+        inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
+        String answer = AppData.getCustomData(inputedSN);
+        if(answer == null || answer.length() == 0) {
+            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
+        }
+        showToast(inputedSN + " = " + answer);
     }
 
     //used when customizing menu number layout in mode1,seems not used anymore?-----------------------------------
