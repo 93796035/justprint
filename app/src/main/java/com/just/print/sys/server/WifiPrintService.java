@@ -1225,7 +1225,7 @@ public class WifiPrintService implements Runnable{
         //table name and bill index and print time.......................
         String tableName = CustomerSelection.getInstance().getTableName();
         String dateStr = new SimpleDateFormat("HH:mm").format(new Date());
-        String format_style = AppData.getCustomData(AppData.format_style);
+        String format_style = AppData.getCustomData(AppData.format_style, "3");
         if("1".equals(format_style)){
             String billIdx_Position = AppData.getCustomData(AppData.title_position);
             if ("left".equals(billIdx_Position)) {

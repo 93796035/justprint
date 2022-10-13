@@ -257,7 +257,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             try {
                 ((GridView) findViewById(R.id.odMenuGv)).setNumColumns(Integer.valueOf(col));
-                int tableViewColumn = Integer.valueOf(col);
+                int tableViewColumn = 4;
                 try{
                     tableViewColumn = Integer.valueOf(AppData.getCustomData(AppData.tblcol));
                 }catch(Exception e){}

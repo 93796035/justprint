@@ -157,6 +157,13 @@ public class AppData{
     public static String getCustomData(String key) {
         return getShopData(NingMengStyle.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
     }
+    public static String getCustomData(String key, String defaultValue) {
+        String value = getCustomData(key);
+        if(value.length() < 1){
+            return defaultValue;
+        }
+        return value;
+    }
     private static SharedPreferencesHelper getShopData(Context context) {
         return SharedPreferencesHelper.getCache(context, KEY_SHOP_XML);
     }

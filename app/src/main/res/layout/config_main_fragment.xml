@@ -76,7 +76,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="3dp"
             android:background="@android:color/darker_gray"/>
 
         <TextView
@@ -95,14 +95,8 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="3dp"
             android:background="@android:color/darker_gray"/>
-        <TextView
-            android:id="@+id/uploadDB"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Upload Menus" />
 
         <TextView
             android:id="@+id/downloadDB"
@@ -112,18 +106,30 @@
             android:text="Download Menus" />
 
         <TextView
-            android:id="@+id/uploadConfig"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Upload Configuration" />
-
-        <TextView
             android:id="@+id/downloadConfig"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="Download Configuration" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TextView
+            android:id="@+id/uploadDB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Upload Menus" />
+
+        <TextView
+            android:id="@+id/uploadConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Upload Configuration" />
 
         <View
             android:layout_width="match_parent"
