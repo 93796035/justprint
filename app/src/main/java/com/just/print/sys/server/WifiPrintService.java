@@ -356,7 +356,7 @@ public class WifiPrintService implements Runnable{
                 mName = menu.getID() + " ";
             }
             if(AppData.showName) {
-                mName += menu.getMname();             //dish name
+                mName += menu.getName();             //dish name
             }
 
             String markNames = "";
@@ -601,7 +601,7 @@ public class WifiPrintService implements Runnable{
 
     private void sendToAikaServer(Double totalPrice, String billIndex, String openTime) {
         DataSyncService dataSyncService = DataSyncService.getInstance();
-        if (dataSyncService.aikaServerIpAndPort != null && dataSyncService.aikaServerIpAndPort.length() > 8) {
+        if (dataSyncService.server_url_pos != null && dataSyncService.server_url_pos.length() > 8) {
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             dataSyncService.billIndex = billIndex;
             dataSyncService.totalPrice = totalPrice;
@@ -1138,7 +1138,7 @@ public class WifiPrintService implements Runnable{
         for(Map.Entry<Category, List<Menu>> entry: OrderCategoryFragment.getCategorizedContent().entrySet()){
             List<Menu> list = entry.getValue();
             for (Menu menu: list) {
-                if(name.equals(menu.getMname()) || name.equals(menu.getID() + " " + menu.getMname())){
+                if(name.equals(menu.getName()) || name.equals(menu.getID() + " " + menu.getName())){
                     return entry.getKey().getCname();
                 }
             }
@@ -1313,11 +1313,11 @@ public class WifiPrintService implements Runnable{
 
                 if(AppData.cloudShowName != null){
                     if (AppData.cloudShowName) {
-                        sb.append(dd.getDish().getMname());             //dish name
+                        sb.append(dd.getDish().getName());             //dish name
                     }
                 }else{
                     if (AppData.showName) {
-                        sb.append(dd.getDish().getMname());             //dish name
+                        sb.append(dd.getDish().getName());             //dish name
                     }
                 }
             }else {
@@ -1328,7 +1328,7 @@ public class WifiPrintService implements Runnable{
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
                 if (showName.length() == 0 ? AppData.showName : !"true".equals(showName)) {
-                    sb.append(dd.getDish().getMname());             //dish name
+                    sb.append(dd.getDish().getName());             //dish name
                 }
             }
 

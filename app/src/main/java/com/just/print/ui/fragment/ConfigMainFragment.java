@@ -13,6 +13,7 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
+import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
@@ -33,6 +34,7 @@ import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -102,10 +104,23 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         } else {
             if(!AppData.getUserPassword().equals(inputContent)){
                 if(AppData.getAdminPassword().equals(inputContent)){
+                    //if there's unclosed table, exit.
+                    HashSet bills = new HashSet();
+                    for(Mark table : OrderIdentifierFragment.tables){
+                        if(table.getVersion() != -1){
+                            bills.add(String.valueOf(table.getVersion() * -1));
+                            showToast("Unclosed table will not be calculated into report!");
+                        }
+                    }
                     List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    for(int i = orders.size() - 1; i >= 0; i--){
+                        if(bills.contains(orders.get(i).getbId())){
+                            orders.remove(i);
+                        }
+                    }
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);
+                    findViewById(R.id.alertReportResetDlg).setVisibility(View.VISIBLE);
                 }else if(AppData.getOrderPassword().equals(inputContent)){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
@@ -174,8 +189,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
 
     @XClick({R.id.buttonCancel})
     private void notResetReport(){
-        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
+        findViewById(R.id.alertReportResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertReportResetDlg).setMinimumHeight(0);
         //check if need to send email
         try{
             int reportIdx = 1;
@@ -201,15 +216,38 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         }
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
-        NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
-        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
+        //if the bill and sales belongs to an unclosed table, don't clean it.
+        HashSet billIds = new HashSet();
+        for(Mark table : OrderIdentifierFragment.tables){
+            if(table.getVersion() != -1){
+                billIds.add(String.valueOf(table.getVersion() * -1));
+                showToast("Unclosed table will not be calculated into report!");
+            }
+        }
+        SaleRecordDao saleRecord = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
+        List<SaleRecord> orders = saleRecord.loadAll();
+        for(int i = orders.size() - 1; i >= 0; i--){
+            if(billIds.contains(orders.get(i).getbId())){
+                orders.remove(i);
+            }
+        }
+        saleRecord.deleteInTx(orders);
+        BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
+        List<Bill> bills = billDao.loadAll();
+        for(int i = bills.size() - 1; i >= 0; i--){
+            if(billIds.contains(bills.get(i).getId().toString())){
+                bills.remove(i);
+            }
+        }
+        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteInTx(bills);
+
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
         AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
 
         AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
 
-        findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
-        findViewById(R.id.alertResetDlg).setMinimumHeight(0);
+        findViewById(R.id.alertReportResetDlg).setVisibility(View.INVISIBLE);
+        findViewById(R.id.alertReportResetDlg).setMinimumHeight(0);
 
         startActivity(new Intent(getContext(), ConfigFragmentActivity.class));
     }

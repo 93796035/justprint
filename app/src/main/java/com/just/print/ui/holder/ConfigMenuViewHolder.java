@@ -29,7 +29,7 @@ public class ConfigMenuViewHolder extends XViewHolder<Menu> {
 
     @Override
     public void onResetView(Menu menu, int i) {
-        mname.setText(menu.getMname());
+        mname.setText(menu.getName());
         msg.setText(menu.getID());
         if (menu.getM2M_MenuPrintList() != null)
             msg.append("   P" + menu.getM2M_MenuPrintList().size());

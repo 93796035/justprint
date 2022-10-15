@@ -153,7 +153,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
         DbUtil.createPrinter("192.168.8.40","40",1,1, "");
 
         //initialize the days left and the stated days on cloud.
-        NetUtils.startActivate();
+        NetUtils.activate();
         startActivity(new Intent(getContext(), OrderFragmentActivity.class));
         getActivity().finish();
     }

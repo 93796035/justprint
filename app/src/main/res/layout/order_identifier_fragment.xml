@@ -478,7 +478,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="20dp"
                             android:textSize="14sp"
-                            android:text="    BillId:#" />
+                            android:text="    Order:#" />
                         <TextView
                             android:id="@+id/openTime"
                             android:layout_width="wrap_content"
@@ -500,7 +500,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="14sp"
-                            android:text="  Sub: $" />
+                            android:text="    Sub: $" />
                         <TextView
                             android:id="@+id/total2"
                             android:layout_width="wrap_content"
@@ -643,7 +643,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:textSize="14sp"
-                    android:text="    BillId:#" />
+                    android:text="    Order:#" />
                 <TextView
                     android:id="@+id/table"
                     android:layout_width="wrap_content"
@@ -672,7 +672,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:text="  Sub: $" />
+                    android:text="    Sub: $" />
                 <TextView
                     android:id="@+id/total"
                     android:layout_width="wrap_content"

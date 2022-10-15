@@ -219,7 +219,7 @@ public class OrderCategoryFragment extends BaseFragment {
                 }
             });
             showMarks.setAdapter(markAdapter);
-            showTitle.setText(men.getMname());
+            showTitle.setText(men.getName());
             showCount.setText(Integer.toString(mCount));
             buttonAdd.setOnClickListener(this);
             buttonReduce.setOnClickListener(this);

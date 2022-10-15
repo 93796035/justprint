@@ -73,7 +73,7 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
         this.menu = menu;
 
         odMId.setText(AppData.showID ? menu.getDish().getID() : "");
-        odMName.setText(AppData.showName ? menu.getDish().getMname() : "");
+        odMName.setText(AppData.showName ? menu.getDish().getName() : "");
 //        L.d(TAG, Integer.toString(menu.getDishNum()));
         odMNNum.setText(Integer.toString(menu.getDishNum()));
         odMnLoutMarkTv.setText("");

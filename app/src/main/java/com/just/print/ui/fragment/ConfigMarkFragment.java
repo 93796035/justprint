@@ -31,7 +31,7 @@ import java.util.List;
 
 public class ConfigMarkFragment extends BaseFragment implements OnClickItemListener {
 
-    @XViewByID(R.id.gridView)
+    @XViewByID(R.id.gridView_Mark)
     FlowListView gridView;
     XAdapter2<Mark> markXAdapter;
 

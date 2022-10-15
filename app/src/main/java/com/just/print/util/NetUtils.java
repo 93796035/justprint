@@ -25,15 +25,17 @@ import java.util.Date;
 //response for one time message send. for regulaly sending message to server, please use DAtaSyncService.
 public class NetUtils extends Thread{
 
-    public static String remoteUrlAndPort;
+    public String remoteUrlAndPort;
+    public NetUtils(String url){
+        remoteUrlAndPort = url;
+    }
 
     //activate==============================================
-    public static void startActivate() {
-        remoteUrlAndPort = AppData.getSERVER_URL() + "activeJustPrintAccount";
+    public static void activate() {
         String accountInfo = getAccountJsonForActivate();
         if(accountInfo != null){
             AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
-            new NetUtils().start();
+            new NetUtils(AppData.getSERVER_URL() + "activeJustPrintAccount").start();
         }
     }
 
@@ -69,9 +71,8 @@ public class NetUtils extends Thread{
             }catch(Exception e){
                 L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
             }
-            remoteUrlAndPort = AppData.getSERVER_URL() + "cloudPrint";
             AppData.putCustomData(AppData.ContentToSend, json.toString());
-            new NetUtils().run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
+            new NetUtils(AppData.getSERVER_URL() + "cloudPrint").run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
             //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
         }
     }

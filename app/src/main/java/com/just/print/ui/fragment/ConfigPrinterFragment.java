@@ -40,7 +40,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
     @XViewByID(R.id.password)
     EditText password;
 
-    @XViewByID(R.id.printList)
+    @XViewByID(R.id.listView_printer)
     private ListView printerListView = null;
     /**
      * for storing tempral modification

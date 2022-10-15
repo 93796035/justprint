@@ -60,7 +60,7 @@ public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Menu> {
     @Override
     public void onResetView(Menu menu, int i) {
         code.setText(menu.getID());
-        title.setText(menu.getMname());
+        title.setText(menu.getName());
         button.setTextColor(Color.rgb(000, 000, 000));
         List<SelectionDetail> selections =  CustomerSelection.getInstance().getSelectedDishes();
         if(selections != null) {

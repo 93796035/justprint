@@ -39,7 +39,7 @@
         android:visibility="gone">
 
         <ListView
-            android:id="@+id/printList"
+            android:id="@+id/listView_printer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/viewSwitcher"

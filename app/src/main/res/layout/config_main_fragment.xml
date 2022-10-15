@@ -76,7 +76,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="3dp"
+            android:layout_height="1dp"
             android:background="@android:color/darker_gray"/>
 
         <TextView
@@ -146,7 +146,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/alertResetDlg"
+        android:id="@+id/alertReportResetDlg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -226,7 +226,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:textSize="14sp"
-                android:text="    BillId:#" />
+                android:text="    Order:#" />
         </LinearLayout>
         <View
             android:layout_width="match_parent"
@@ -265,7 +265,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
-                android:text="  Sub: $" />
+                android:text="    Sub: $" />
             <TextView
                 android:id="@+id/total"
                 android:layout_width="wrap_content"

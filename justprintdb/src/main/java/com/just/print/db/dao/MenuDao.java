@@ -70,7 +70,7 @@ public class MenuDao extends AbstractDao<Menu, String> {
     protected void bindValues(SQLiteStatement stmt, Menu entity) {
         stmt.clearBindings();
  
-        String mname = entity.getMname();
+        String mname = entity.getName();
         if (mname != null) {
             stmt.bindString(1, mname);
         }
@@ -130,7 +130,7 @@ public class MenuDao extends AbstractDao<Menu, String> {
     /** @inheritdoc */
     @Override
     public void readEntity(Cursor cursor, Menu entity, int offset) {
-        entity.setMname(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
+        entity.setName(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
         entity.setID(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setPrice(cursor.isNull(offset + 2) ? null : cursor.getDouble(offset + 2));
         entity.setCid(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));

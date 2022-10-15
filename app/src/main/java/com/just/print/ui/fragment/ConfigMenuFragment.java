@@ -163,7 +163,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
                     modifyingMenu = menuXAdapter.get(i);
                     ((EditText)findViewById(R.id.etMenuID)).setText(menuXAdapter.get(i).getID());
-                    ((EditText)findViewById(R.id.etMenu)).setText(menuXAdapter.get(i).getMname());
+                    ((EditText)findViewById(R.id.etMenu)).setText(menuXAdapter.get(i).getName());
                     Double price = menuXAdapter.get(i).getPrice();
                     ((EditText)findViewById(R.id.price)).setText(price == null ? "" : price.toString());
 
@@ -223,7 +223,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
 
                     new AlertDialog.Builder(getActivity())
-                            .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getMname() + "\"?")
+                            .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getName() + "\"?")
                             .setTitle("Notice")
                             .setNegativeButton("Delete", new MenuDeleteListener(menuXAdapter.get(i)))
                             .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -477,7 +477,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menu = new Menu();
             menu.setID(mid.getText().toString().trim());
             menu.setState(State.def);
-            menu.setMname(mname.getText().toString().trim());
+            menu.setName(mname.getText().toString().trim());
             menu.setCid(mCategory.getId());
             menu.setPrice(price);
             menuDao.insert(menu);
@@ -486,7 +486,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menuDao.delete(modifyingMenu);
             modifyingMenu.setID(mid.getText().toString().trim());
             modifyingMenu.setState(State.def);
-            modifyingMenu.setMname(mname.getText().toString().trim());
+            modifyingMenu.setName(mname.getText().toString().trim());
             modifyingMenu.setCid(mCategory.getId());
             modifyingMenu.setPrice(price);
             menuDao.insert(modifyingMenu);

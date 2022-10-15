@@ -32,6 +32,6 @@ public class OrderIdentifierViewHolder extends XViewHolder<Menu> {
     @Override
     public void onResetView(Menu menu, int i) {
         odIdCID.setText(menu.getID());
-        odIdCName.setText(menu.getMname());
+        odIdCName.setText(menu.getName());
     }
 }

@@ -29,7 +29,7 @@ public class AppData{
     public static String labelLines = "lls";
 
     private static final String SERVER_URL = "http://216.137.179.176/"; //A2hosting is good but can not send email
-    private static final String EMAIL_SERVER = "https://www.sharethegoodones.com/";
+    private static final String EMAIL_SERVER_URL = "https://www.sharethegoodones.com/";
 
     public static final String KEY_SHOP_XML = "KEY_SHOP_XML";
     public static final String KEY_SHOP_LIST = "KEY_SHOP_LIST";
@@ -103,13 +103,13 @@ public class AppData{
     public static final String reportPrinter = "reportPrinter";
     public static final String reportFont = "reportFont";
     public static final String reportWidth = "reportWidth";
-    public static final String sep_str1 = "sep_str1";
-    public static final String sep_str2 = "sep_str2";
+    public static final String sep_str1 = "dividing_line_main";
+    public static final String sep_str2 = "dividing_line_slave";
     public static final String ShowMarkPirce = "ShowMarkPirce";
-    public static final String server_url = "server_url";
-    public static final String email_server = "email_server";
-    public static final String serverip = "serverip";
-    public static final String sendReport = "sendreport";
+    public static final String server_url_website = "server_url_website";
+    public static final String server_url_email = "server_url_email";
+    public static final String server_url_pos = "server_url_pos";
+    public static final String email_address_report = "sendreport";
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
     public static final String TableMark = "tablemark";
@@ -125,13 +125,13 @@ public class AppData{
             allowDownloadFromOtherStore, allowTemporaryLabel, appmode, autoCloseTable, categoryLayoutStyle,
             clientMode, colorOnSelect, colorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
-            emailorder, email_server, font_h, font_w, forcePopUpMenuList, format_style,
+            emailorder, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
             HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
-            sendOnlyWhenReset, sendReport, sendSM, server_url, serverip,
+            sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
             StartX, StartY, TableMark, TableSelectable, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
@@ -170,7 +170,7 @@ public class AppData{
 
     //ServerUrls======================================================
     public static String getSERVER_URL(){
-        String serverURL = AppData.getCustomData(AppData.server_url);
+        String serverURL = AppData.getCustomData(AppData.server_url_website);
         if(serverURL == null || serverURL.length() < 10) {
             serverURL = AppData.SERVER_URL;
         }
@@ -184,9 +184,9 @@ public class AppData{
     }
 
     public static String getEmailServer(){
-        String emailServer = AppData.getCustomData(AppData.email_server);
+        String emailServer = AppData.getCustomData(AppData.server_url_email);
         if(emailServer == null || emailServer.length() < 10) {
-            emailServer = AppData.EMAIL_SERVER;
+            emailServer = AppData.EMAIL_SERVER_URL;
         }
         if(!emailServer.startsWith("http://") && !emailServer.startsWith("https://")){
             emailServer = "http://" + emailServer;
@@ -257,7 +257,7 @@ public class AppData{
         }
 
         getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
-        NetUtils.startActivate();
+        NetUtils.activate();
     }
 
     //time left calculating----------------------------------------------
@@ -335,14 +335,13 @@ public class AppData{
     }
 
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
-        String email = AppData.getCustomData(AppData.sendReport);
+        String email = AppData.getCustomData(AppData.email_address_report);
         if(email != null && email.indexOf("@") > 0) {
-            NetUtils.remoteUrlAndPort = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils().start();
+                new NetUtils(AppData.getEmailServer() + "sendReport").start();
                 return false;
             }
             boolean  sendOnlyWhenResetFlag = "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
@@ -359,21 +358,20 @@ public class AppData{
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + reportContent, e);
             }
             AppData.putCustomData(AppData.ContentToSend,json.toString());
-            new NetUtils().start();
+            new NetUtils(EMAIL_SERVER_URL).start();
             return true;
         }
         return true;
     }
 
     public static boolean notifyCheck(String orderContent) {
-        String email = AppData.getCustomData(AppData.sendReport);
+        String email = AppData.getCustomData(AppData.email_address_report);
         if(email != null && email.indexOf("@") > 0) {
-            NetUtils.remoteUrlAndPort = AppData.getEmailServer() + "sendReport";
             //if there's already a content, means it's email of last time. then send it out first.
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils().start();
+                new NetUtils(AppData.getEmailServer() + "sendReport").start();
             }
             boolean  sendOnlyWhenResetFlag = "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
             JSONObject json = new JSONObject();//创建json对象
@@ -386,7 +384,7 @@ public class AppData{
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + orderContent, e);
             }
             AppData.putCustomData(AppData.ContentToSend,json.toString());
-            new NetUtils().start();
+            new NetUtils(EMAIL_SERVER_URL).start();
             return true;
         }
         return true;
@@ -560,7 +558,7 @@ public class AppData{
                 showToast("reportWidth is set to : " + inputedSN);
                 return;
             case "s":
-                AppData.putCustomData(AppData.sendReport, inputedSN);
+                AppData.putCustomData(AppData.email_address_report, inputedSN);
                 showToast("App has set sendReport to: " + inputedSN);
                 return;
             case "s1":
@@ -580,11 +578,11 @@ public class AppData{
                 showToast("App has set sendOnlyWhenReset to: " + inputedSN);
                 return;
             case "surl":
-                AppData.putCustomData(AppData.server_url, inputedSN);
+                AppData.putCustomData(AppData.server_url_website, inputedSN);
                 showToast("App has set server_url to: " + inputedSN);
                 return;
             case "sip":
-                AppData.putCustomData(AppData.serverip, inputedSN);
+                AppData.putCustomData(AppData.server_url_pos, inputedSN);
                 showToast("App has set serverip to: " + inputedSN);
                 return;
             case "smp":

@@ -27,7 +27,7 @@ public class OrderCCategoryViewHolder extends XExpadnViewHolder<Menu> {
 
     @Override
     public void onResetView(Menu menu, int i) {
-        cname.setText(menu.getMname());
+        cname.setText(menu.getName());
     }
 
     @Override

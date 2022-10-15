@@ -65,7 +65,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-
 public class OrderIdentifierFragment extends BaseFragment implements View.OnClickListener, View.OnLongClickListener, OnClickItemListener, EventBus.EventHandler{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String EVENT_ADD_MENU = "EVENT_ADD_MENU=";
@@ -860,7 +859,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         if (!odIdTable1.isChecked()) {
                             tmpMenu = SearchMenuFromDB(odIdInput.getText().toString());
                             if (null != tmpMenu) {
-                                odIdfrName.setText(tmpMenu.getMname());
+                                odIdfrName.setText(tmpMenu.getName());
                             } else {
                                 odIdfrName.setText("");
                             }
@@ -1035,7 +1034,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             Collections.sort(mnlist, new Comparator<Menu>() {
                 @Override
                 public int compare(Menu m1, Menu m2) {
-                    return m1.getMname().compareTo(m2.getMname());
+                    return m1.getName().compareTo(m2.getName());
                 }
             });
             storedMenu = mnlist.get(0);

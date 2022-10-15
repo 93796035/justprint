@@ -25,7 +25,7 @@ import java.util.List;
 
 public class ConfigPrinterStatusFragment extends BaseFragment implements OnClickItemListener {
 
-    @XViewByID(R.id.gridView)
+    @XViewByID(R.id.flowListView_printer)
     FlowListView gridView;
     XAdapter2<Mark> markXAdapter;
 
