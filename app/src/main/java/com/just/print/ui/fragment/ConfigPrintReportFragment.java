@@ -9,6 +9,7 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
+import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
@@ -22,6 +23,7 @@ import com.stupid.method.widget.flowlayout.FlowListView;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import static com.just.print.util.ToastUtil.showToast;
@@ -132,7 +134,21 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
     private void printReport(){
         //print code:
         now = new Date().getTime(); //remem the now for later use.
-        reportContent = WifiPrintService.getInstance().exePrintReportCommand(saleRecordDao.loadAll(), String.valueOf(now));
+        HashSet billsNotCount = new HashSet();
+        for(Mark table : OrderIdentifierFragment.tables){
+            if(table.getVersion() != -1){
+                billsNotCount.add(String.valueOf(table.getVersion() * -1));
+                showToast("Unclosed table will not be calculated into report!");
+            }
+        }
+        List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+        for(int i = orders.size() - 1; i >= 0; i--){
+            if(billsNotCount.contains(orders.get(i).getbId())){
+                orders.remove(i);
+            }
+        }
+
+        reportContent = WifiPrintService.getInstance().exePrintReportCommand(billsNotCount, orders, String.valueOf(now));
     }
 
 //    @Override

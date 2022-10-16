@@ -104,21 +104,21 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         } else {
             if(!AppData.getUserPassword().equals(inputContent)){
                 if(AppData.getAdminPassword().equals(inputContent)){
-                    //if there's unclosed table, exit.
-                    HashSet bills = new HashSet();
+                    //if there's unclosed table, move relevant bill out of the report and show notice .
+                    HashSet billsNotCount = new HashSet();
                     for(Mark table : OrderIdentifierFragment.tables){
                         if(table.getVersion() != -1){
-                            bills.add(String.valueOf(table.getVersion() * -1));
+                            billsNotCount.add(String.valueOf(table.getVersion() * -1));
                             showToast("Unclosed table will not be calculated into report!");
                         }
                     }
                     List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     for(int i = orders.size() - 1; i >= 0; i--){
-                        if(bills.contains(orders.get(i).getbId())){
+                        if(billsNotCount.contains(orders.get(i).getbId())){
                             orders.remove(i);
                         }
                     }
-                    reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
+                    reportContent = WifiPrintService.getInstance().exePrintReportCommand(billsNotCount, orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
                     findViewById(R.id.alertReportResetDlg).setVisibility(View.VISIBLE);
                 }else if(AppData.getOrderPassword().equals(inputContent)){

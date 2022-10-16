@@ -63,6 +63,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 public class OrderIdentifierFragment extends BaseFragment implements View.OnClickListener, View.OnLongClickListener, OnClickItemListener, EventBus.EventHandler{
@@ -573,13 +574,25 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 String adminPassword = AppData.getAdminPassword();
                 if(adminPassword.equals(odIdTable1.getText().toString()) || adminPassword.equals(odIdInput.getText().toString())){
                     //print report
+                    HashSet billsNotCount = new HashSet();
+                    for(Mark table : OrderIdentifierFragment.tables){
+                        if(table.getVersion() != -1){
+                            billsNotCount.add(String.valueOf(table.getVersion() * -1));
+                            showToast("Unclosed table will not be calculated into report!");
+                        }
+                    }
                     List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    for(int i = orders.size() - 1; i >= 0; i--){
+                        if(billsNotCount.contains(orders.get(i).getbId())){
+                            orders.remove(i);
+                        }
+                    }
 
                     if(orders == null || orders.size() == 0){
                         showToast("No report to print! The sales record has been cleaned!");
                     }else {
                         //print code:
-                        reportContent = WifiPrintService.getInstance().exePrintReportCommand(orders, String.valueOf(new Date().getTime()));
+                        reportContent = WifiPrintService.getInstance().exePrintReportCommand(billsNotCount, orders, String.valueOf(new Date().getTime()));
                         findViewById(R.id.menuMarkSwitcher).setVisibility(View.INVISIBLE);
                         findViewById(R.id.topButtons).setVisibility(View.INVISIBLE);
                         findViewById(R.id.alertResetDlg).setVisibility(View.VISIBLE);

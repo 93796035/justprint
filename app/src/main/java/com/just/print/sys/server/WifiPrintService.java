@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -416,7 +417,7 @@ public class WifiPrintService implements Runnable{
     }
 
     //The start time and end time are long format, need to be translate for print.
-    public String exePrintReportCommand(List<SaleRecord> saleRecords, String endTime){
+    public String exePrintReportCommand(HashSet billsNotCount, List<SaleRecord> saleRecords, String endTime){
         if(isErrorPrinterListEmpty()){    //if errorPrinterList is emptly will return true.
             showToast("PRINTING...");   //otherwise will show notice to check printer and restart app and return false.
         }
@@ -438,7 +439,7 @@ public class WifiPrintService implements Runnable{
 //            categorizedRecs.put(category, list);
 //        }
         HashMap<String, SaleRecord> map = new HashMap<String, SaleRecord>();
-        //combine the records
+        //combine the records by dish name
         for(SaleRecord saleRecord : saleRecords){
 
             String name = saleRecord.getMname();
@@ -475,11 +476,52 @@ public class WifiPrintService implements Runnable{
             contentFR = contentFR.substring(0, p);
             p = contentFR.lastIndexOf('$');
             float f = Float.valueOf(contentFR.substring(p + 1));
-            contentFR = contentFR + " TOTAL:  $" + f * tax;
-            ipContentMap.get(printerIP).add(contentFR + "\n\n\n");
-        }else {
-            ipContentMap.get(printerIP).add(contentFR);
+            contentFR = contentFR + " TOTAL:  $" + f * tax  + "\n\n\n";
         }
+        //if has tableToCal set, then need to add one more part----------------------------
+        String tableToCalculate = AppData.getCustomData(AppData.tableToCalculate).toLowerCase();
+        if(tableToCalculate.length() == 0){
+            tableToCalculate = "uber,skip,doordash";
+        }
+        if(tableToCalculate.length() > 3){
+            contentFR += ">>>>>>>>>>>>>>>table statistics<<<<<<<<<<<<<<\n";
+            contentFR += "name        QT         sub        total\n";
+            List<String> names = new ArrayList<>();
+            HashMap<String, Integer> billQT = new HashMap();
+            HashMap<String, Float> sub = new HashMap<>();
+            List<Bill> bills = NingMengStyle.app.getDaoMaster().newSession().getBillDao().loadAll();
+            for(Bill bill : bills) {
+                String tableName = bill.getBillIdx().toLowerCase();
+                if(!billsNotCount.contains(bill.getId()) && (tableToCalculate.contains("," + tableName + ",")
+                        || tableToCalculate.startsWith(tableName + ",")
+                        || tableToCalculate.startsWith(tableName + ","))){
+                    names.add(tableName);
+                    if(billQT.get(tableName) == null){
+                        billQT.put(tableName, 1);
+                    }else{
+                        billQT.put(tableName, billQT.get(tableName) + 1);
+                    }
+                    if(sub.get(tableName) == null){
+                        sub.put(tableName, Float.valueOf(bill.getPrice()));
+                    }else{
+                        sub.put(tableName, sub.get(tableName) + Float.valueOf(bill.getPrice()));
+                    }
+                }
+            }
+            for(String name : names){
+                contentFR += name;
+                int lengthLeft = width - name.length();
+                String qt = billQT.get(name).toString();
+                contentFR += generateString(lengthLeft  / 3 - qt.length(), " ") + qt;
+                Float subTotal = sub.get(name);
+                contentFR += subTotal + generateString(lengthLeft / 3 - subTotal.toString().length(), " ");
+                Float total = subTotal * (1 + tax);
+                contentFR += subTotal + generateString(lengthLeft / 3 - total.toString().length(), " ");
+                contentFR += "\n";
+            }
+            contentFR += "\n\n\n\n";
+        }
+
 
         showToast("PRINTING REPORT ON " + printerIP);
         return contentFR;

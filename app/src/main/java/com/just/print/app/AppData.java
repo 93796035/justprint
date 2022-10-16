@@ -114,6 +114,7 @@ public class AppData{
     public static final String SendButtonHeight = "sendbuttonheight";
     public static final String TableMark = "tablemark";
     public static final String TableSelectable = "tableselectable";
+    public static final String tableToCalculate = "tableToCalculate";
     public static final String taxrate = "taxrate";
     public static final String title_position = "title_position";
     public static final String userPassword = "userPassword";
@@ -132,7 +133,7 @@ public class AppData{
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
-            StartX, StartY, TableMark, TableSelectable, taxrate,
+            StartX, StartY, TableMark, TableSelectable, tableToCalculate, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
 
