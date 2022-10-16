@@ -45,7 +45,7 @@ import java.util.concurrent.Executors;
 
 /**
  * currently includ
- * 1/sending new order to SanjiPos,
+ * 1/sending new order to AikaPos,
  * 2/download new order of current store from stgo.
  */
 public class DataSyncService extends BaseFragmentActivity implements Runnable{
@@ -87,11 +87,11 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
         HttpURLConnection urlConnection = null;
         while(true) {
             //if serverIp set, send a request to AikaPos for latest menu
-            // it shouldn't hurt to keep bothering the sanjipos，if there's connection issue, we can give alert immediately;//
+            // it shouldn't hurt to keep bothering the AikaPos，if there's connection issue, we can give alert immediately;//
             if(server_url_pos.length() > 8){
                 try {
                     //=============================first job===================================================
-                    urlConnection = NetUtils.prepareConnection("http://" + server_url_pos + "/SanjiPos/synchronizeFromServer", "POST");
+                    urlConnection = NetUtils.prepareConnection("http://" + server_url_pos + "/AikaPos/synchronizeFromServer", "POST");
                     JSONObject json = new JSONObject();//创建json对象
                     //put in timestamp.------------------------
                     json.put("lastModifiedTime", lastModifiedTime);//if later then time on server, nothing happens, if late will get menu from server.
@@ -140,22 +140,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                             AppData.updataeLastModifyTime((String)jsonObject.get(5));
                         }
                         //add relation between dish and mark and printers
-                        List<Menu> menus = menuDao.loadAll();
-                        List<Printer> printers = printerDao.loadAll();
-                        M2M_MenuPrintDao menu2PrinterDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
-                        menu2PrinterDao.deleteAll();
-                        for(Menu menu : menus){                         //go through each menu
-                            String strPrinters = menu.getPrinters();    //fetch out the printers property in it.
-                            if(strPrinters != null){
-                                String[] printerIdxs = strPrinters.split(",");      //split the string to get each index of the printer.
-                                for(String id : printerIdxs){                               //go through each index.
-                                    M2M_MenuPrint m2m_MenuPrint = new M2M_MenuPrint();
-                                    m2m_MenuPrint.setMenu(menu);
-                                    m2m_MenuPrint.setPrint(printers.get(Integer.valueOf(id)));
-                                    menu2PrinterDao.insert(m2m_MenuPrint);                      //create relation between the menu and printers.
-                                }
-                            }
-                        }
+                        createRelationShip(menuDao, printerDao);
                         if(lastSelection != null) {
                             lastSelection.clear();
                         }
@@ -236,6 +221,25 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
             }
 
             AppUtils.sleep(1000);
+        }
+    }
+
+    private void createRelationShip(MenuDao menuDao, PrinterDao printerDao) {
+        List<Menu> menus = menuDao.loadAll();
+        List<Printer> printers = printerDao.loadAll();
+        M2M_MenuPrintDao menu2PrinterDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
+        menu2PrinterDao.deleteAll();
+        for(Menu menu : menus){                         //go through each menu
+            String strPrinters = menu.getPrinters();    //fetch out the printers property in it.
+            if(strPrinters != null){
+                String[] printerIdxs = strPrinters.split(",");      //split the string to get each index of the printer.
+                for(String id : printerIdxs){                               //go through each index.
+                    M2M_MenuPrint m2m_MenuPrint = new M2M_MenuPrint();
+                    m2m_MenuPrint.setMenu(menu);
+                    m2m_MenuPrint.setPrint(printers.get(Integer.valueOf(id)));
+                    menu2PrinterDao.insert(m2m_MenuPrint);                      //create relation between the menu and printers.
+                }
+            }
         }
     }
 
@@ -320,7 +324,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 menu.setID(jo.getString("MName"));
                 menu.setName(jo.getString("MName"));
                 menu.setPrinter(jo.getString("printer"));
-                menu.setPrice(jo.getDouble("price"));
+                menu.setPrice(Double.valueOf(jo.getInt("price"))/100);
                 menu.setState(State.def);
                 menu.setCid(getCategoryId(jo.getString("CATEGORY"), categories));
                 menuDao.insert(menu);
