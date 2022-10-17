@@ -613,7 +613,7 @@ public class AppData{
             case "w":
                 AppData.putCustomData(AppData.width, inputedSN);
                 if("16".equals(inputedSN)){
-                    AppData.putCustomData("font", "29, 33, 34");
+                    AppData.putCustomData(AppData.font, "29, 33, 34");
                 }
                 showToast("App has set width to: " + inputedSN);
                 return;

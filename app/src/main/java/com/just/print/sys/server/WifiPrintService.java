@@ -360,10 +360,10 @@ public class WifiPrintService implements Runnable{
                 mName += menu.getName();             //dish name
             }
 
-            String markNames = "";
             Double price = menu.getPrice() * number;
             Double markTotalPrice = 0.0;
 
+            String markNames = "";
             List<Mark> marks = selectionDetail.getMarkList();
             for (Mark mark : marks) {
                 markTotalPrice += ((float) mark.getVersion()) / 100.0 * mark.getQt();
@@ -484,8 +484,16 @@ public class WifiPrintService implements Runnable{
             tableToCalculate = "uber,skip,doordash";
         }
         if(tableToCalculate.length() > 3){
-            contentFR += ">>>>>>>>>>>>>>>table statistics<<<<<<<<<<<<<<\n";
-            contentFR += "name        QT         sub        total\n";
+            String seperatorText= "togo statistics";
+            String decoration = generateString((width - seperatorText.length())/2, ">");
+
+            contentFR += decoration + seperatorText + decoration + "\n";
+
+            int lengthLeft = width - "type".length();
+            contentFR += generateString(lengthLeft  / 3 - "QT".length(), " ") + "QT";
+            contentFR += generateString(lengthLeft  / 3 - "bef tax".length(), " ") + "bef tax";
+            contentFR += generateString(lengthLeft  / 3 - "aft tax".length(), " ") + "aft tax\n";
+
             List<String> names = new ArrayList<>();
             HashMap<String, Integer> billQT = new HashMap();
             HashMap<String, Float> sub = new HashMap<>();
@@ -510,7 +518,7 @@ public class WifiPrintService implements Runnable{
             }
             for(String name : names){
                 contentFR += name;
-                int lengthLeft = width - name.length();
+                lengthLeft = width - name.length();
                 String qt = billQT.get(name).toString();
                 contentFR += generateString(lengthLeft  / 3 - qt.length(), " ") + qt;
                 Float subTotal = sub.get(name);

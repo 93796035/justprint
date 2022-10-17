@@ -33,6 +33,7 @@ import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.expand.DaoExpand;
+import com.just.print.db.expand.State;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
@@ -621,7 +622,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                             }
                         }
                     }
-                }else{
+                }else{  //the button is working for label selection interface.
                     updateSelectionOfCurrentDish();
                 }
                 break;
@@ -724,7 +725,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
         NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
-        AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
+        AppData.putCustomData(AppData.billIdx, "1");        //reset kitchenbillIndex
 
         AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
 
@@ -763,10 +764,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             int p = temperalLabel.indexOf("$");
             if(p > 0){
                 String priceStr = temperalLabel.substring(p + 1).trim();
-                temporaryMark.setState((int)(Float.valueOf(priceStr) * 100));
+                temporaryMark.setVersion((long)(Float.valueOf(priceStr) * 100));
                 temperalLabel = temperalLabel.substring(0, p);
             }else{
-                temporaryMark.setState(0);
+                temporaryMark.setVersion(0l);
             }
 
             p = temperalLabel.indexOf( "*");

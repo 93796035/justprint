@@ -273,8 +273,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 JSONObject jo = jsonMarks.getJSONObject(i);
                 Mark mark = new Mark();
                 mark.setName(jo.getString("name"));
-                mark.setState((int)(jo.getDouble("price") * 100));
-                mark.setVersion(Long.valueOf(State.def));
+                mark.setVersion((long)(jo.getDouble("price") * 100));
+                mark.setState(State.def);
                 mark.setId(markDao.insert(mark));
                 marks.add(mark);
             }

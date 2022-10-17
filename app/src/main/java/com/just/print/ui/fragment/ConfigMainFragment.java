@@ -242,7 +242,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteInTx(bills);
 
         AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
-        AppData.putCustomData("kitchenBillIdx", "1");        //reset kitchenbillIndex
+        AppData.putCustomData(AppData.billIdx, "1");        //reset kitchenbillIndex
 
         AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
 
