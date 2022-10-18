@@ -529,8 +529,7 @@ public class WifiPrintService implements Runnable{
             }
             contentFR += "\n\n\n\n";
         }
-
-
+        ipContentMap.get(printerIP).add(contentFR);
         showToast("PRINTING REPORT ON " + printerIP);
         return contentFR;
     }
