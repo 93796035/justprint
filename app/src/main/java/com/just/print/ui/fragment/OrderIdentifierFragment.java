@@ -33,7 +33,6 @@ import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.expand.DaoExpand;
-import com.just.print.db.expand.State;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
@@ -278,19 +277,19 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdTable2.setText(AppData.getCustomData(AppData.billIdx));
             }
 
-            if("true".equals(AppData.getCustomData(AppData.clientMode))){
+            if("1".equals(AppData.getCustomData(AppData.clientMode)) || "true".equals(AppData.getCustomData(AppData.clientMode))){
                 odIdTable2.setVisibility(View.GONE);
                 odIdCancel2.setVisibility(View.GONE);
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
 
-            if("true".equals(AppData.getCustomData(AppData.HideTable))){
+            if("1".equals(AppData.getCustomData(AppData.HideTable)) || "true".equals(AppData.getCustomData(AppData.HideTable))){
                 odIdTable2.setVisibility(View.GONE);
             }
-            if("true".equals(AppData.getCustomData(AppData.HideRubber))){
+            if("1".equals(AppData.getCustomData(AppData.HideRubber)) || "true".equals(AppData.getCustomData(AppData.HideRubber))){
                 odIdCancel2.setVisibility(View.GONE);
             }
-            if("true".equals(AppData.getCustomData(AppData.HideSetting))){
+            if("1".equals(AppData.getCustomData(AppData.HideSetting)) || "true".equals(AppData.getCustomData(AppData.HideSetting))){
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
         }else{
@@ -351,6 +350,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTable1.setOnClickListener(this);
         if(tableSelectable == null
             || tableSelectable.length() < 1
+            || "1".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))
             || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
             odIdTable2.setOnClickListener(this);
         }
@@ -365,7 +365,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         allMarks = sortMarks(DaoExpand.queryAllMarks(NingMengStyle.getMarkDao()));//deleted is used for table name....
         //add shortcut Marks.
         initShortCutMarks();
-        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel))) {
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel))) {
             findViewById(R.id.temporaryLabelArea).setVisibility(View.VISIBLE);
         }
 
@@ -384,7 +384,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         markAllList.setAdapter(markAllXAdapter);
         markAllList.setNumColumns(AppData.getMarkNumColumn());
 
-        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
             findViewById(R.id.mainDialog).setVisibility(View.GONE);
         }else{
             findViewById(R.id.odInfoCollect).setVisibility(View.GONE);
@@ -394,7 +394,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
-        if(tables.size() > 0) {
+        if(AppData.isStarFromTableSelection() && tables.size() > 0) {
             menuTableSwitcher.setDisplayedChild(1);
         }
     }
@@ -556,11 +556,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     }
                 }
                 String orderContent = printCurrentSelection(billIdToMregeTo, false);
-                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
+                if("1".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent);
                 }
                 showToast("ORDER SENT, THANK YOU.");
-                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
+                if("1".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
                 }else if(tables.size() > 0){
@@ -646,11 +646,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
                 CustomerSelection.getInstance().setTableName(tvTable.getText().toString().substring(UC.TABLE.length()));
                 String orderContent2 = printCurrentSelection(billIdToMregeTo, isCancel);
-                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
+                if("1".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.emailorder))){
                     AppData.notifyCheck(orderContent2);
                 }
                 showToast("ORDER SENT, THANK YOU.");
-                if("true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
+                if("1".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
                 }
@@ -1227,7 +1227,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private void initShortCutMarks() {
-        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))) {
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))) {
             odIdShortCutMarksGrid.setVisibility(View.GONE);
         }else{
             shortCutMarks = new ArrayList<Mark>(3);

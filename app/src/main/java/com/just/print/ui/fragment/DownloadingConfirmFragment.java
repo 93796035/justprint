@@ -40,7 +40,8 @@ public class DownloadingConfirmFragment extends BaseFragment{
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
 
-        if(!"true".equals(AppData.getCustomData(AppData.allowDownloadFromOtherStore))) {
+        if(!("1".equals(AppData.getCustomData(AppData.allowDownloadFromOtherStore))
+        ||"true".equals(AppData.getCustomData(AppData.allowDownloadFromOtherStore)))) {
             findViewById(R.id.notice2).setVisibility(View.GONE);
             findViewById(R.id.inputArea).setVisibility(View.GONE);
         }

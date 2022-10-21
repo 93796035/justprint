@@ -42,7 +42,8 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
         findViewById(R.id.odmnadd).setOnClickListener(this);
         findViewById(R.id.odmnreduce).setOnClickListener(this);
         findViewById(R.id.odMnLoutMarkBtn).setOnClickListener(this);
-        if("true".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))){
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))
+                ||"true".equalsIgnoreCase(AppData.getCustomData(AppData.HideMark))){
             findViewById(R.id.odMnLoutMarkBtn).setVisibility(View.INVISIBLE);
         }
     }

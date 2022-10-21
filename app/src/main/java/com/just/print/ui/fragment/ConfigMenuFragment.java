@@ -380,7 +380,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private String getDefaultCode() {
         String defautlCode = "";
-        if(!"true".equals(AppData.isAddingDefaultCode())){
+        if(!("1".equals(AppData.isAddingDefaultCode()) || "true".equals(AppData.isAddingDefaultCode()))){
             return defautlCode;
         }
         int endCode = parseInt(previouseCode);
@@ -630,7 +630,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             items[i] = p.getName() + "_" + p.getId();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        if("true".equals(AppData.getCustomData(AppData.isSingleMark))){
+        if("1".equals(AppData.getCustomData(AppData.isSingleMark)) || "true".equals(AppData.getCustomData(AppData.isSingleMark))){
             builder.setTitle("Please choose a mark");
             builder.setSingleChoiceItems(items, -1, new OnClickListener() {
                 @Override

@@ -94,6 +94,7 @@ public class AppData{
     public static final String labelsize = "labelsize";
     public static final String line_height = "line_height";
     public static final String gap = "gap";
+    public static final String starFromTableSelection = "StarFromTableSelection";
     public static final String StartX = "startx";
     public static final String StartY = "starty";
     public static final String sendSM = "sendSM";
@@ -133,7 +134,7 @@ public class AppData{
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
-            StartX, StartY, TableMark, TableSelectable, tableToCalculate, taxrate,
+            starFromTableSelection, StartX, StartY, TableMark, TableSelectable, tableToCalculate, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
 
@@ -144,7 +145,8 @@ public class AppData{
             reportIdx, reportStartDate, startTime};
 
     public static boolean showID = "false".equals(AppData.getCustomData(AppData.HideKitchenBillId));
-    public static boolean showName = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillName));
+    public static boolean showName = !("1".equals(AppData.getCustomData(AppData.HideKitchenBillName))
+            || "true".equals(AppData.getCustomData(AppData.HideKitchenBillName)));
     public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
     public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
     private static final String labelSN = "labelsn";
@@ -278,8 +280,9 @@ public class AppData{
     }
 
     public static int getScreenOrientation() {
-        return "true".equals(getCustomData(AppData.isScreenHorizontal)) ?
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        return ("1".equals(getCustomData(AppData.isScreenHorizontal))
+                || "true".equals(getCustomData(AppData.isScreenHorizontal))) ?
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     public static int getThemColor() {
@@ -318,7 +321,7 @@ public class AppData{
 
     public static boolean hasCategory() {
         if(isMode2()) {
-            return "true".equals(getCustomData(AppData.hasCategory));
+            return "1".equals(getCustomData(AppData.hasCategory)) || "true".equals(getCustomData(AppData.hasCategory));
         }
         return true;
     }
@@ -345,7 +348,8 @@ public class AppData{
                 new NetUtils(AppData.getEmailServer() + "sendReport").start();
                 return false;
             }
-            boolean  sendOnlyWhenResetFlag = "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
+            boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
+                    || "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
             if(sendOnlyWhenResetFlag && !isReset){
                 return true;
             }
@@ -374,7 +378,8 @@ public class AppData{
                 showToast("Found uncompleted task!");
                 new NetUtils(AppData.getEmailServer() + "sendReport").start();
             }
-            boolean  sendOnlyWhenResetFlag = "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
+            boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
+                    ||"true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
             JSONObject json = new JSONObject();//创建json对象
             try {
                 String mobileMark = LoginFragment.getUserName();
@@ -397,11 +402,11 @@ public class AppData{
 
     //print format------------------------------------
     public static boolean isCodeNumberConsidered() {
-        return "true".equals(getCustomData(AppData.codeNumberConsidered));
+        return "1".equals(getCustomData(AppData.codeNumberConsidered)) || "true".equals(getCustomData(AppData.codeNumberConsidered));
     }
 
     public static boolean isAddingDefaultCode() {
-        return "true".equals(getCustomData(AppData.addingDefaultCode));
+        return "1".equals(getCustomData(AppData.addingDefaultCode)) || "true".equals(getCustomData(AppData.addingDefaultCode));
     }
 
     public static String getForcePopUpList() {
@@ -647,4 +652,7 @@ public class AppData{
         return getShopData(context).getString(KEY_CUST_LAST_CHAR, "");
     }
 
+    public static boolean isStarFromTableSelection() {
+        return "1".equals(getCustomData(AppData.starFromTableSelection)) || "true".equals(getCustomData(AppData.starFromTableSelection));
+    }
 }

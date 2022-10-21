@@ -371,7 +371,7 @@ public class WifiPrintService implements Runnable{
             }
 
             //if set as conbine mark price into dish price, mark name into the dish name. do not save sale records for each mark.
-            if("true".equals(AppData.getCustomData(AppData.conbineMarkPrice))) {
+            if("1".equals(AppData.getCustomData(AppData.conbineMarkPrice)) || "true".equals(AppData.getCustomData(AppData.conbineMarkPrice))) {
                 price += markTotalPrice;
                 //becuase there's no enough column, and modifying table schema will cause version compatibility issue.
                 //so hide mark into name for now. if AppData.conbineMarkPrice not set, dont add this into the name, because there
@@ -394,7 +394,7 @@ public class WifiPrintService implements Runnable{
             priceFR += price;
 
             //while by defalut, mark price is not added into salesrecord, so, generate saleRecord for the marks.
-            if (!"true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {
+            if (!("1".equals(AppData.getCustomData(AppData.combineMarkPrice)) || "true".equals(AppData.getCustomData(AppData.combineMarkPrice)))) {
                 for (Mark mark : marks) {
                     Double markPrice = ((float) mark.getVersion()) / 100.0 * mark.getQt();
                     // even no price for this mark, still create saleorder, to show it up in salesorder panel
@@ -471,7 +471,7 @@ public class WifiPrintService implements Runnable{
             //do nothing.
         }
         String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime, tax);
-        if("true".equals(AppData.getCustomData(AppData.hideCancelItem))) {
+        if("1".equals(AppData.getCustomData(AppData.hideCancelItem)) || "true".equals(AppData.getCustomData(AppData.hideCancelItem))) {
             int p = contentFR.indexOf(" ITEMS CANCEL:  ");
             contentFR = contentFR.substring(0, p);
             p = contentFR.lastIndexOf('$');
@@ -930,7 +930,7 @@ public class WifiPrintService implements Runnable{
         }
 
         beiYangPrinter = "";    //@note: we don't want to return a null back to cause any null pointer.
-        if( "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchBeiYang))) {
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchBeiYang)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchBeiYang))) {
             for (int i = 0; i < SearchPortMAX; i++) {
                 port_info[i] = new SearchPortInfo();
             }
@@ -959,7 +959,7 @@ public class WifiPrintService implements Runnable{
         }
 
         wifiLabelPrinter = "192.168.6.122";    //@note: we don't want to return a null back to cause any null pointer.
-        if( "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchWifiLabel))) {
+        if("1".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchWifiLabel)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.autoSearchWifiLabel))) {
            //TODO： auto check if any of the printers are wifiLabel
 
         }
@@ -1376,7 +1376,7 @@ public class WifiPrintService implements Runnable{
                     sb.append(dd.getDish().getID());                //dish id
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
-                if (showName.length() == 0 ? AppData.showName : !"true".equals(showName)) {
+                if (showName.length() == 0 ? AppData.showName : !("1".equals(showName)) || "true".equals(showName))) {
                     sb.append(dd.getDish().getName());             //dish name
                 }
             }
@@ -1390,7 +1390,7 @@ public class WifiPrintService implements Runnable{
             }
             content.append(generateString(width, sep_str2)).append("\n");
         }
-        if("true".equals(AppData.getCustomData(AppData.priceOnkitchenbill))) {
+        if("1".equals(AppData.getCustomData(AppData.priceOnkitchenbill)) || "true".equals(AppData.getCustomData(AppData.priceOnkitchenbill))) {
             return content.append(priceOfBill).append("\n").toString();
         }else {
             return content.substring(0, content.length() - (width + 1));

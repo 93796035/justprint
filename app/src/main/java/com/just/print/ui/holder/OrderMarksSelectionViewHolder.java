@@ -73,7 +73,7 @@ public class OrderMarksSelectionViewHolder extends XViewHolder<Mark> {
     public void onResetView(Mark mark, int i) {
         this.mark = mark;
         markName.setText(mark.getName());
-        if("true".equals(AppData.getCustomData(AppData.ShowMarkPirce))) {
+        if("1".equals(AppData.getCustomData(AppData.ShowMarkPirce)) || "true".equals(AppData.getCustomData(AppData.ShowMarkPirce))) {
             markPrice.setText(String.valueOf(mark.getVersion() / 100.0));
         }else{
             markPrice.setText("");  //in case it's already displaying a "0", user changed setting, then we need to make "0" become "".
