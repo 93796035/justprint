@@ -76,7 +76,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        if("false".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+        if("false".equalsIgnoreCase(AppData.getCustomData(AppData.allowNoTableSelected))) {
             findViewById(R.id.configTableManager).setVisibility(View.GONE);
         }
 

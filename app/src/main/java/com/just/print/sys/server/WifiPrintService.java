@@ -1376,7 +1376,7 @@ public class WifiPrintService implements Runnable{
                     sb.append(dd.getDish().getID());                //dish id
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
-                if (showName.length() == 0 ? AppData.showName : !("1".equals(showName)) || "true".equals(showName))) {
+                if (showName.length() == 0 ? AppData.showName : !("1".equals(showName) || "true".equals(showName))) {
                     sb.append(dd.getDish().getName());             //dish name
                 }
             }

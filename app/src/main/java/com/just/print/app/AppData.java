@@ -59,6 +59,7 @@ public class AppData{
     //to sync
     public static final String adminPassword = "adminPassword";
     public static final String allowDownloadFromOtherStore = "allowDownloadFromOtherServer";
+    public static final String allowNoTableSelected = "AllowNotSelectTable";
     public static final String allowTemporaryLabel = "allowTemporaryLabel";
     public static final String appmode = "appmode";
     public static final String autoCloseTable = "autoCloseTable";
@@ -94,7 +95,7 @@ public class AppData{
     public static final String labelsize = "labelsize";
     public static final String line_height = "line_height";
     public static final String gap = "gap";
-    public static final String starFromTableSelection = "StarFromTableSelection";
+    public static final String startFromTableSelection = "StartFromTableSelection";
     public static final String StartX = "startx";
     public static final String StartY = "starty";
     public static final String sendSM = "sendSM";
@@ -114,7 +115,6 @@ public class AppData{
     public static final String sendOnlyWhenReset = "sendonlywhenreset";
     public static final String SendButtonHeight = "sendbuttonheight";
     public static final String TableMark = "tablemark";
-    public static final String TableSelectable = "tableselectable";
     public static final String tableToCalculate = "tableToCalculate";
     public static final String taxrate = "taxrate";
     public static final String title_position = "title_position";
@@ -124,8 +124,8 @@ public class AppData{
     public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
-            allowDownloadFromOtherStore, allowTemporaryLabel, appmode, autoCloseTable, categoryLayoutStyle,
-            clientMode, colorOnSelect, colorOfTheme,
+            allowDownloadFromOtherStore, allowNoTableSelected, allowTemporaryLabel, appmode, autoCloseTable,
+            categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
             combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
             emailorder, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
@@ -134,7 +134,7 @@ public class AppData{
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
-            starFromTableSelection, StartX, StartY, TableMark, TableSelectable, tableToCalculate, taxrate,
+            startFromTableSelection, StartX, StartY, TableMark, tableToCalculate, taxrate,
             tblcol, title_position, userPassword, waitTime, width,
             WifiLabelPrinter};
 
@@ -600,7 +600,7 @@ public class AppData{
                 showToast("userPassword is set to: " + inputedSN);
                 return;
             case "ts":
-                AppData.putCustomData(AppData.TableSelectable, inputedSN);
+                AppData.putCustomData(AppData.allowNoTableSelected, inputedSN);
                 showToast("TableSelectable is set to: " + inputedSN);
                 return;
             case "tpos":
@@ -652,7 +652,7 @@ public class AppData{
         return getShopData(context).getString(KEY_CUST_LAST_CHAR, "");
     }
 
-    public static boolean isStarFromTableSelection() {
-        return "1".equals(getCustomData(AppData.starFromTableSelection)) || "true".equals(getCustomData(AppData.starFromTableSelection));
+    public static boolean getStartFromTableSelection() {
+        return "1".equals(getCustomData(AppData.startFromTableSelection)) || "true".equals(getCustomData(AppData.startFromTableSelection));
     }
 }

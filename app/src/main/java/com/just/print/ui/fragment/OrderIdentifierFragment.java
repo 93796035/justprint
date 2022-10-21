@@ -200,15 +200,23 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     String[] items;// = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "H", "S", "U", "+", "togo", "canc"};
 
     public static List<Mark> tables = new ArrayList<Mark>();
-    String tableSelectable = AppData.getCustomData(AppData.TableSelectable);
+    boolean allowNoTableSelected = "1".equals(AppData.getCustomData(AppData.allowNoTableSelected))
+            || "true".equals(AppData.getCustomData(AppData.allowNoTableSelected));
     private String billIdToMregeTo;
     @Override
     public void onCreated(Bundle savedInstanceState) {
         getEventBus().register(EVENT_ADD_MENU, this);
         new StupidReflect(this, getView()).init();
 
-        storedMenu = null;
-        //the model of the menus.
+        storedMenu = null;        //the model of the menus.
+
+        findViewById(R.id.tableSelectionView).setBackgroundColor(AppData.getThemColor());
+        tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);
+        tableXAdapter.setClickItemListener(this.tableXAdapterClick);
+        loadTables();
+        tableXAdapter.setData(tables);
+        odTableGrid.setAdapter(tableXAdapter);
+
         if(AppData.isMode2()) {
             //prepare the categoryNames and items.
             List<Category> categories = OrderCategoryFragment.getCategoryList();
@@ -271,7 +279,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             for (int i = 0; i < menus.size(); i++) {
                 items[i] = menus.get(i).getID().trim();
             }
-            if(!"false".equalsIgnoreCase(tableSelectable)) {
+            if(tables.size() > 0) {
                 odIdTable2.setText("T");
             }else{
                 odIdTable2.setText(AppData.getCustomData(AppData.billIdx));
@@ -348,10 +356,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTable1.setText("");
         odIdTable1.setChecked(true);
         odIdTable1.setOnClickListener(this);
-        if(tableSelectable == null
-            || tableSelectable.length() < 1
-            || "1".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))
-            || "true".equalsIgnoreCase(AppData.getCustomData(AppData.TableSelectable))) {
+
+        if(tables.size() > 0) {
             odIdTable2.setOnClickListener(this);
         }
 
@@ -368,14 +374,6 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         if("1".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.allowTemporaryLabel))) {
             findViewById(R.id.temporaryLabelArea).setVisibility(View.VISIBLE);
         }
-
-        findViewById(R.id.tableSelectionView).setBackgroundColor(AppData.getThemColor());
-        tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);
-        tableXAdapter.setClickItemListener(this.tableXAdapterClick);
-        loadTables();
-        tableXAdapter.setData(tables);
-        odTableGrid.setAdapter(tableXAdapter);
-
 
         //init MarkSelection panel
         markAllXAdapter = new XAdapter2<Mark>(getContext(), OrderMarksSelectionViewHolder.class);
@@ -394,7 +392,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
-        if(AppData.isStarFromTableSelection() && tables.size() > 0) {
+        if(AppData.getStartFromTableSelection() && tables.size() > 0) {
             menuTableSwitcher.setDisplayedChild(1);
         }
     }
@@ -470,7 +468,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         switch (view.getId()) {
             case R.id.odIdSndBtn2:
                 //check if table selected.
-                if (!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0) {
+                if (!allowNoTableSelected && tables.size() > 0) {
                     String curTable = odIdTable2.getText().toString();
                     if (curTable.length() == 0 || "T".equals(curTable)) {
                         loadTables();
@@ -533,7 +531,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     return;
                 }
                 //check if table not selected.
-                if(!"false".equalsIgnoreCase(tableSelectable) && tables.size() > 0){
+                if(!allowNoTableSelected && tables.size() > 0){
                     String curTable = odIdTable2.getText().toString();
                     if(curTable.length() == 0 || "T".equals(curTable)){
                         loadTables();
@@ -563,7 +561,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 if("1".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode)) || "true".equalsIgnoreCase(AppData.getCustomData(AppData.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
-                }else if(tables.size() > 0){
+                }else if(AppData.getStartFromTableSelection() && tables.size() > 0){
                     loadTables();
                     menuTableSwitcher.setDisplayedChild(1);
                 }
