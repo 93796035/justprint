@@ -333,7 +333,7 @@ public class AppData{
         if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
             List<Bill> orders = DaoExpand.queryRecentBill(
                     NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
-            billIdx = String.valueOf(orders.get(0).getId() + 1);
+            billIdx = String.valueOf(orders.size() > 0? orders.get(0).getId() : 0 + 1);
         }
         return billIdx;
     }

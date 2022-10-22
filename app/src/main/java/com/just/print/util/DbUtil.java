@@ -174,6 +174,8 @@ public class DbUtil extends Thread{
 
                         writeDBByte(receivedContent);
                         ToastUtil.showToast("menu in this device has been refreshed successfully.");
+                        //clean the bills
+                        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
                     }else{
                         ToastUtil.showToast("Menu is saved onto server successfully.");
                     }
