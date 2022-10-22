@@ -660,7 +660,7 @@ public class AppData{
         if(AppData.taxRate != null){
             return AppData.taxRate;
         }
-        taxRate = 1.4975f;
+        taxRate = 1.14975f;
         try{
             taxRate = Float.valueOf(AppData.getCustomData(AppData.taxrate));
             if(taxRate < 1){
