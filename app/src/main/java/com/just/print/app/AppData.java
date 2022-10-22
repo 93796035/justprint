@@ -67,11 +67,10 @@ public class AppData{
     public static final String clientMode = "clmode";
     public static final String colorOnSelect = "cos";
     public static final String colorOfTheme = "cot";
+    public static final String column = "column";
     public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
-    public static final String column = "column";
     public static final String tblcol = "tblcol";
-    public static final String conbineMarkPrice = "conbineMarkPrice";
     public static final String emailorder = "emailorder";
     public static final String font_h = "font_h";
     public static final String font_w = "font_w";
@@ -126,7 +125,7 @@ public class AppData{
     public static String[] keysToSync = new String[]{adminPassword,
             allowDownloadFromOtherStore, allowNoTableSelected, allowTemporaryLabel, appmode, autoCloseTable,
             categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
-            combineMarkPrice, column, conbineMarkPrice, csphone, custChars,
+            combineMarkPrice, column, csphone, custChars,
             emailorder, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
@@ -465,8 +464,8 @@ public class AppData{
                 showToast("App has set column to: " + inputedSN);
                 return;
             case "cmp":
-                AppData.putCustomData(AppData.conbineMarkPrice, inputedSN);
-                showToast("App has set conbineMarkPrice to: " + inputedSN);
+                AppData.putCustomData(AppData.combineMarkPrice, inputedSN);
+                showToast("App has set combineMarkPrice to: " + inputedSN);
                 return;
             case AppData.debug:
                 AppData.putCustomData(AppData.debug, inputedSN);
@@ -654,5 +653,22 @@ public class AppData{
 
     public static boolean getStartFromTableSelection() {
         return "1".equals(getCustomData(AppData.startFromTableSelection)) || "true".equals(getCustomData(AppData.startFromTableSelection));
+    }
+
+    static Float taxRate = null;
+    public static Float getTaxRate() {
+        if(AppData.taxRate != null){
+            return AppData.taxRate;
+        }
+        taxRate = 1.4975f;
+        try{
+            taxRate = Float.valueOf(AppData.getCustomData(AppData.taxrate));
+            if(taxRate < 1){
+                taxRate += 1;
+            }
+            taxRate = ((int)(taxRate * 100))/100.0f;
+        }catch (Exception e){
+        }
+        return taxRate;
     }
 }

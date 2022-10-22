@@ -540,7 +540,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     }
                     //so...table selected...update the table status.
                     String aotoCloseTables = AppData.getCustomData(AppData.autoCloseTable);
-                    if(!"all".equalsIgnoreCase(aotoCloseTables)
+                    if(!"".equalsIgnoreCase(aotoCloseTables)
+                        && !"all".equalsIgnoreCase(aotoCloseTables)
                         && !aotoCloseTables.contains(curTable)) {
                         MarkDao markDao = NingMengStyle.app.getDaoMaster().newSession().getMarkDao();
                         List<Mark> tables = markDao.loadAll();
@@ -1085,7 +1086,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         String tableName = order.getBillIdx();
         String openTime = order.getTime().substring(0, order.getTime().length() - 3);
         String subTotalStr = String.format("%.2f", Float.valueOf(order.getPrice()));
-        String totalStr = String.format("%.2f", Float.valueOf(order.getPrice())*1.49);
+        String totalStr = String.format("%.2f", Float.valueOf(order.getPrice()) * AppData.getTaxRate());
         //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
         final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
 

@@ -259,7 +259,7 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         table.setText(UC.TABLE + order.getBillIdx());
         time.setText(UC.OPEN_TIME + order.getTime().substring(0, order.getTime().length() - 3));
         subtoal.setText(UC.SUB_TOTAL + String.format("%.2f", Float.valueOf(order.getPrice())));
-        total.setText(UC.TOTAL + String.format("%.2f", Float.valueOf(order.getPrice())*1.49));
+        total.setText(UC.TOTAL + String.format("%.2f", Float.valueOf(order.getPrice()) * AppData.getTaxRate()));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
         final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
 

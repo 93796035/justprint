@@ -372,7 +372,7 @@ public class WifiPrintService implements Runnable{
             }
 
             //if set as conbine mark price into dish price, mark name into the dish name. do not save sale records for each mark.
-            if("1".equals(AppData.getCustomData(AppData.conbineMarkPrice)) || "true".equals(AppData.getCustomData(AppData.conbineMarkPrice))) {
+            if("1".equals(AppData.getCustomData(AppData.combineMarkPrice)) || "true".equals(AppData.getCustomData(AppData.combineMarkPrice))) {
                 price += markTotalPrice;
                 //becuase there's no enough column, and modifying table schema will cause version compatibility issue.
                 //so hide mark into name for now. if AppData.conbineMarkPrice not set, dont add this into the name, because there
@@ -465,31 +465,31 @@ public class WifiPrintService implements Runnable{
         if (startTime == null || startTime.length() < 1) {
             startTime = AppData.getCustomData(AppData.lastsuccess);
         }
-        float tax = 1.15f;
-        try{
-            tax = Float.valueOf(AppData.getCustomData(AppData.taxrate));
-        }catch (Exception e){
-            //do nothing.
-        }
-        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime, tax);
+        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime);
         if("1".equals(AppData.getCustomData(AppData.hideCancelItem)) || "true".equals(AppData.getCustomData(AppData.hideCancelItem))) {
             int p = contentFR.indexOf(" ITEMS CANCEL:  ");
             contentFR = contentFR.substring(0, p);
             p = contentFR.lastIndexOf('$');
             float f = Float.valueOf(contentFR.substring(p + 1));
-            contentFR = contentFR + " TOTAL:  $" + f * tax  + "\n\n\n";
+            contentFR = contentFR + " TOTAL:  $" + f * AppData.getTaxRate()  + "\n\n\n";
         }
         //if has tableToCal set, then need to add one more part----------------------------
         String tableToCalculate = AppData.getCustomData(AppData.tableToCalculate).toLowerCase();
         if(tableToCalculate.length() == 0){
-            tableToCalculate = "uber,skip,doordash";
+            tableToCalculate = "uber,skip,doordash,";
+        }
+        if(!tableToCalculate.endsWith(",")){
+            tableToCalculate += ",";
+        }
+        if(!tableToCalculate.startsWith(",")){
+            tableToCalculate = "," + tableToCalculate;
         }
         if(tableToCalculate.length() > 3){
-            String seperatorText= "togo statistics";
+            String seperatorText= "";
             String decoration = generateString((width - seperatorText.length())/2, ">");
 
             contentFR += decoration + seperatorText + decoration + "\n";
-
+            contentFR += "type";
             int lengthLeft = width - "type".length();
             contentFR += generateString(lengthLeft  / 3 - "QT".length(), " ") + "QT";
             contentFR += generateString(lengthLeft  / 3 - "bef tax".length(), " ") + "bef tax";
@@ -501,9 +501,8 @@ public class WifiPrintService implements Runnable{
             List<Bill> bills = NingMengStyle.app.getDaoMaster().newSession().getBillDao().loadAll();
             for(Bill bill : bills) {
                 String tableName = bill.getBillIdx().toLowerCase();
-                if(!billsNotCount.contains(bill.getId()) && (tableToCalculate.contains("," + tableName + ",")
-                        || tableToCalculate.startsWith(tableName + ",")
-                        || tableToCalculate.startsWith(tableName + ","))){
+                if(!billsNotCount.contains(bill.getId())
+                    && (tableToCalculate.contains("," + tableName + ","))){
                     names.add(tableName);
                     if(billQT.get(tableName) == null){
                         billQT.put(tableName, 1);
@@ -523,9 +522,10 @@ public class WifiPrintService implements Runnable{
                 String qt = billQT.get(name).toString();
                 contentFR += generateString(lengthLeft  / 3 - qt.length(), " ") + qt;
                 Float subTotal = sub.get(name);
-                contentFR += subTotal + generateString(lengthLeft / 3 - subTotal.toString().length(), " ");
-                Float total = subTotal * (1 + tax);
-                contentFR += subTotal + generateString(lengthLeft / 3 - total.toString().length(), " ");
+                contentFR += generateString(lengthLeft / 3 - subTotal.toString().length(), " ") + subTotal;
+                Float total = subTotal * AppData.getTaxRate();
+                total = ((int)(total * 100))/100.0f;
+                contentFR += generateString(lengthLeft / 3 - total.toString().length(), " ") + total;
                 contentFR += "\n";
             }
             contentFR += "\n\n\n\n";
@@ -980,7 +980,7 @@ public class WifiPrintService implements Runnable{
 //        }
 //    }
 
-    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime, float tax) {
+    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime) {
         L.d(TAG,"formatContentForPrintReport");
 
         //translate the time format
@@ -1135,7 +1135,7 @@ public class WifiPrintService implements Runnable{
         content.append(" SUBTOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
         content.append(generateString(width, SEP_STR1)).append("\n");
         content.append(" SUBTOTAL:    $").append(String.format("%.2f", total + cancTotal));
-        content.append(" TOTAL:    $").append(String.format("%.2f", (total + cancTotal) * tax));
+        content.append(" TOTAL:    $").append(String.format("%.2f", (total + cancTotal) * AppData.getTaxRate()));
             //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getPrice()).append(" *\n");
         content.append("\n\n\n\n\n");
         return content.toString();
