@@ -117,8 +117,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
     }
 
     private void loadPrinter() {
-        List<Printer> list = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());
-        WifiPrintService.getInstance().reInitPrintRelatedMaps();
+        List<Printer> list = WifiPrintService.getInstance().reInitPrintRelatedMaps();
         printerXAdapter.setData(list);
     }
 
@@ -154,7 +153,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
             if(ip.indexOf(".") == -1){
                 NetUtils.sendToCloudPrinter(AppData.DEFAULT_LABELPRINTER_SIZE,ip);
             }
-            printerXAdapter.notifyDataSetChanged();
+            loadPrinter();
         }
         modifyViewSwitch.setDisplayedChild(0);
     }

@@ -154,7 +154,7 @@ public class WifiPrintService implements Runnable{
         L.d(TAG,"Create Service Successful");
     }
 
-    public void reInitPrintRelatedMaps(){
+    public List<Printer> reInitPrintRelatedMaps(){
         ipPrinterMap = new HashMap<String,Printer>();
         ipContentMap = new HashMap<String,List<String>>();
         ipSelectionsMap = new HashMap<String,List<SelectionDetail>>();
@@ -166,6 +166,7 @@ public class WifiPrintService implements Runnable{
             ipContentMap.put(ip,new ArrayList<String>());
             ipSelectionsMap.put(ip,new ArrayList<SelectionDetail>());
         }
+        return printerList;
     }
 
     //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. because it means that last time didn't print successfully
