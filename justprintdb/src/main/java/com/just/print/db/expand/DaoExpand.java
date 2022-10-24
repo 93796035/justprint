@@ -15,6 +15,7 @@ import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.SaleRecordDao;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -107,7 +108,7 @@ public final class DaoExpand {
 
     static public List<Bill> queryRecentBill(BillDao billDao, int num) {
         List<Bill> bills = billDao.loadAll();
-        bills.sort(new Comparator<Bill>() {
+        Collections.sort(bills, new Comparator<Bill>() {
             @Override
             public int compare(Bill o1, Bill o2) {
                 Long billIdx1 = o1.getId();
