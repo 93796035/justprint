@@ -70,6 +70,7 @@ public class AppData{
     public static final String column = "column";
     public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
+    public static final String custTogos = "custTogos";
     public static final String tblcol = "tblcol";
     public static final String emailorder = "emailorder";
     public static final String font_h = "font_h";
@@ -89,7 +90,6 @@ public class AppData{
     public static final String isSingleMark = "isSingleMark";
     public static final String isScreenHorizontal = "isScreenHorizontal";
     public static final String kitchentitle = "kitchentitle";
-    public static final String KEY_CUST_LAST_CHAR = "KEY_CUST_LAST_CHAR";
     public static final String labelColumn = "label_columns";
     public static final String labelsize = "labelsize";
     public static final String line_height = "line_height";
@@ -125,11 +125,11 @@ public class AppData{
     public static String[] keysToSync = new String[]{adminPassword,
             allowDownloadFromOtherStore, allowNoTableSelected, allowTemporaryLabel, appmode, autoCloseTable,
             categoryLayoutStyle, clientMode, colorOnSelect, colorOfTheme,
-            combineMarkPrice, column, csphone, custChars,
+            combineMarkPrice, column, csphone, custChars, custTogos,
             emailorder, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
-            HideTable, isSingleMark, isScreenHorizontal, KEY_CUST_LAST_CHAR, kitchentitle, labelColumn, labelsize,
+            HideTable, isSingleMark, isScreenHorizontal, kitchentitle, labelColumn, labelsize,
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
@@ -518,7 +518,7 @@ public class AppData{
                 showToast("App has switched limitation to: " + inputedSN);
                 return;
             case "lastchar":
-                AppData.putCustomData(AppData.KEY_CUST_LAST_CHAR, inputedSN);
+                AppData.putCustomData(AppData.custTogos, inputedSN);
                 showToast("Please restart app to apply new layout.");
                 return;
             case "layo":
@@ -645,10 +645,10 @@ public class AppData{
 
     //used when customizing menu number layout in mode1,seems not used anymore?-----------------------------------
     public static void saveCustomizedLastCharOnPanel(Context context, String character) {
-        getShopData(context).putString(KEY_CUST_LAST_CHAR, character);
+        getShopData(context).putString(custTogos, character);
     }
     public static String getCustomizedLastCharOnPanel(Context context){
-        return getShopData(context).getString(KEY_CUST_LAST_CHAR, "");
+        return getShopData(context).getString(custTogos, "");
     }
 
     public static boolean getStartFromTableSelection() {

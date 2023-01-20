@@ -78,6 +78,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private String reportContent;
     private XAdapter2<Bill> billsXAdapter;
     private BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();;
+    String custChars;
 
     public static OrderIdentifierFragment getInstance(){
         if(instance == null){
@@ -305,34 +306,34 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             categoryFlowList.setVisibility(View.GONE);
             findViewById(R.id.odIdTools).setVisibility(View.GONE);
             //the "must have" buttons
-            items = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C"};
             List<String> ary = new ArrayList<String>();
-            for (int i = 0; i < items.length; i++) {
-                ary.add(items[i]);
+            for (int i = 1; i <= 9; i++) {
+                ary.add(String.valueOf(i));
             }
-            //the flexible buttons which difined by KEY_CUST_LAST_CHAR
-            String definedLast = AppData.getCustomData(AppData.KEY_CUST_LAST_CHAR);
-            if (!StringUtils.isBlank(definedLast)) {
-                char maxChar = definedLast.charAt(0);
-                char lastChar = items[items.length - 1].charAt(0);
-                while (lastChar < maxChar) {
-                    lastChar++;
-                    ary.add(String.valueOf(lastChar));
-                }
-            }
+            ary.add(String.valueOf(0));
+
             //add the custChars, if not defined, then add an s and a u.
-            String custChars = AppData.getCustomData(AppData.custChars);
+            custChars = AppData.getCustomData(AppData.custChars);
             if (custChars.length() == 0) {
-                custChars = "SU";
+                custChars = "ABC*DFH+";
             }
             for (int i = 0; i < custChars.length(); i++) {
                 ary.add(custChars.substring(i, i + 1));
             }
-            //other fixed buttons.
-            ary.add("+");
-            ary.add("togo");
-            ary.add("canc");
 
+            //the table shortcut including dordash/skip/uber... are difined by custTogos
+            String definedLast = AppData.getCustomData(AppData.custTogos);
+            if("".equals(definedLast)){
+                definedLast = "Doda,Uber,Skip,Fant";
+            }
+            String[] lables = definedLast.split(",");
+            for (String label : lables) {
+                ary.add(label.trim());
+            }
+            //cancel button must be put as the last element.
+            ary.add("Canc");
+
+            items = new String[ary.size()];
             items = ary.toArray(items);
             View btnSend = findViewById(R.id.odIdSndBtn0);
             btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AppData.getSendButtonHeight()));
@@ -532,7 +533,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 }
                 //check if table not selected.
                 if(!allowNoTableSelected && tables.size() > 0){
-                    String curTable = odIdTable2.getText().toString();
+                    String curTable = (v.getId() == R.id.odIdSndBtn0 ? odIdTable1 : odIdTable2).getText().toString();
                     if(curTable.length() == 0 || "T".equals(curTable)){
                         loadTables();
                         menuTableSwitcher.setDisplayedChild(1);
@@ -844,29 +845,18 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
                     } else {
                         if (i < 10) {
-                            InputText(Integer.toString((i + 1) % 10));
-                        } else if (i == items.length - 3) {         //following are fixed buttons.
-                            InputText("+");
-                        } else if (i == items.length - 2) {
-                            odIdTable1.setText("TOGO");
-                            CustomerSelection.getInstance().setTableName(odIdTable1.getText().toString());
+                            appendText(Integer.toString((i + 1) % 10));
                         } else if (i == items.length - 1) {
                             odIdTable1.setText("");
                             //added the selected dish with negative price. (return a non-null string means print success.
                             if (printCurrentSelection(billIdToMregeTo, true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
                                 isCancel = true;
                             }
+                        } else if (i < 10 + custChars.length()) {         //following are fixed buttons.
+                            appendText(items[i]);
                         } else {
-                            String custChars = AppData.getCustomData(AppData.custChars);
-                            if (custChars.length() == 0) {
-                                custChars = "SU";
-                            }
-                            int p = i - (items.length - 3 - custChars.length());
-                            if (p >= 0) {
-                                InputText(custChars.substring(p, p + 1));
-                            } else {
-                                InputText(Character.toString((char) (i % 10 + 'A')));
-                            }
+                            odIdTable1.setText(items[i]);
+                            CustomerSelection.getInstance().setTableName(odIdTable1.getText().toString());
                         }
 
                         if (!odIdTable1.isChecked()) {
@@ -1021,7 +1011,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         }
     }
 
-    private void InputText(String str) {
+    private void appendText(String str) {
         if (odIdTable1.isChecked()) {
             odIdTable1.append(str);
         } else {
