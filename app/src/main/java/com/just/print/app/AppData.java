@@ -91,6 +91,7 @@ public class AppData{
     public static final String isScreenHorizontal = "isScreenHorizontal";
     public static final String kitchentitle = "kitchentitle";
     public static final String labelColumn = "label_columns";
+    public static final String labelPrinters = "labelPrinters";//lan printer is currently using JiaBoPrinter;
     public static final String labelsize = "labelsize";
     public static final String line_height = "line_height";
     public static final String gap = "gap";
@@ -120,7 +121,6 @@ public class AppData{
     public static final String userPassword = "userPassword";
     public static final String waitTime = "waitTime";
     public static final String width = "width";
-    public static final String WifiLabelPrinter = "wlp";//"JiaBoPrinter";
 
     public static String[] keysToSync = new String[]{adminPassword,
             allowDownloadFromOtherStore, allowNoTableSelected, allowTemporaryLabel, appmode, autoCloseTable,
@@ -129,13 +129,13 @@ public class AppData{
             emailorder, font_h, font_w, forcePopUpMenuList, format_style,
             gap, hasCategory, hideCancelItem, HideKitchenBillId, HideKitchenBillId_Cloud,
             HideKitchenBillName, HideKitchenBillName_Cloud, HideMark, HideRubber, HideSetting,
-            HideTable, isSingleMark, isScreenHorizontal, kitchentitle, labelColumn, labelsize,
+            HideTable, isSingleMark, isScreenHorizontal, kitchentitle,
+            labelPrinters, labelColumn, labelsize,
             line_height, menuNameLength, priceOnkitchenbill, recentBillAmount, reportFont, reportPrinter,
             reportWidth, sep_str1, sep_str2, ShowMarkPirce, SendButtonHeight,
             sendOnlyWhenReset, email_address_report, sendSM, server_url_email, server_url_pos, server_url_website,
             startFromTableSelection, StartX, StartY, TableMark, tableToCalculate, taxrate,
-            tblcol, title_position, userPassword, waitTime, width,
-            WifiLabelPrinter};
+            tblcol, title_position, userPassword, waitTime, width};
 
     public static String[] keysNotToSync = new String[]{
             autoSearchBeiYang, autoSearchWifiLabel, beiYangPrinter, billIdx, code, ContentToSend,
@@ -148,7 +148,6 @@ public class AppData{
             || "true".equals(AppData.getCustomData(AppData.HideKitchenBillName)));
     public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
     public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
-    private static final String labelSN = "labelsn";
     private static final String codeNumberConsidered = "codeNumberConsidered";
     private static final String addingDefaultCode = "addingDefaultCode";
 
@@ -395,10 +394,6 @@ public class AppData{
         return true;
     }
 
-    public static String getLabelSN() {
-        return getCustomData(AppData.labelSN);
-    }
-
     //print format------------------------------------
     public static boolean isCodeNumberConsidered() {
         return "1".equals(getCustomData(AppData.codeNumberConsidered)) || "true".equals(getCustomData(AppData.codeNumberConsidered));
@@ -492,6 +487,10 @@ public class AppData{
             case "f":
                 AppData.putCustomData(AppData.font, inputedSN);
                 showToast("App has set font to: " + inputedSN);
+                return;
+            case "fpmm":
+                AppData.putCustomData(AppData.forcePopUpMenuList, inputedSN);
+                showToast("App has set popUpMenuMarkList to: " + inputedSN);
                 return;
             case "fsty":
                 AppData.putCustomData(AppData.format_style, inputedSN);
@@ -621,9 +620,9 @@ public class AppData{
                 }
                 showToast("App has set width to: " + inputedSN);
                 return;
-            case "fpmm":
-                AppData.putCustomData(AppData.forcePopUpMenuList, inputedSN);
-                showToast("App has set popUpMenuMarkList to: " + inputedSN);
+            case "wlp":
+                AppData.putCustomData(AppData.labelPrinters, inputedSN);
+                showToast("App has set labelCloudPrinterSN to: " + inputedSN);
                 return;
 
             default:
@@ -670,5 +669,13 @@ public class AppData{
         }catch (Exception e){
         }
         return taxRate;
+    }
+
+    public static String getCustomChars() {
+        return getCustomData(AppData.custChars, "ABC*DFH+");
+    }
+
+    public static String getCustomTogos() {
+        return getCustomData(AppData.custTogos, "Doda,Uber,Skip,Fant");
     }
 }

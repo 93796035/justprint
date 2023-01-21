@@ -215,6 +215,16 @@ public class WifiPrintService implements Runnable{
                 L.d(TAG,"Adding a dish to ipSelectionsMap, ip:" + ip);
                 ipSelectionsMap.get(ip).add(selectionDetail);
             }
+            if(isTogoTypeOrder(CustomerSelection.getInstance().getTableName())){
+                String snOrIpOflabelPrinters = AppData.getCustomData(AppData.labelPrinters);
+                if(snOrIpOflabelPrinters.length() > 0){
+                    String[] ipOrSNs = snOrIpOflabelPrinters.split(",");
+                    for (String ipOrSN : ipOrSNs) {
+                        L.d(TAG,"Adding a dish to ipSelectionsMap with key:" + ipOrSN);
+                        ipSelectionsMap.get(ipOrSN).add(selectionDetail);
+                    }
+                }
+            }
         }
 
         //2、遍历ipSelectionsMap，如对应打印机type为0, 则对其后的value(dishes)按照类别进行排序
@@ -734,18 +744,34 @@ public class WifiPrintService implements Runnable{
                 JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content, width);
             } else if(isCloudPrinter(curPrintIp)) {
                 NetUtils.sendToCloudPrinter(content, curPrintIp);
+            } else if(isLabelPrinter(curPrintIp)){ //for now the sn is like 987623454,longger than 6
+                NetUtils.sendToCloudPrinter(content, curPrintIp);
             } else {
                 doZiJiangPrint(font, content);
-                //if it's a 'togo"
-                if(content.contains("(TOGO)")){
-                    String labelPrinterSN = AppData.getLabelSN();//get the cloud label printer.
-                    if(labelPrinterSN != null && labelPrinterSN.length() > 6) {//for now the sn is like 987623454,longger than 6
-                        NetUtils.sendToCloudPrinter(content, labelPrinterSN);
-                    }
-                }
-
             }
         }
+    }
+
+    //if the order is a kind of togo order.
+    private boolean isTogoTypeOrder(String content) {
+        String custTogos = AppData.getCustomTogos();
+        String[] lables = custTogos.split(",");
+        for (String label : lables) {
+            if(content.contains(label.trim())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //if the printer is a cloud label printer.
+    private boolean isLabelPrinter(String ipOrSN){
+        if(ipOrSN == null){
+            L.e("WifiPrintService", "unexpected null printerSN in isCloudLabel parameter!!!!!", null);
+            return false;
+        }
+        String labelPrinters = AppData.getCustomData(AppData.labelPrinters);//get the cloud label printer.
+        return labelPrinters.contains(ipOrSN);
     }
 
     private boolean isPrintingReport(List<String> contents) {
@@ -954,7 +980,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private String prepareWifiLabelPrinterStr(){
-        String wifiLabelPrinter = AppData.getCustomData(AppData.WifiLabelPrinter);
+        String wifiLabelPrinter = AppData.getCustomData(AppData.labelPrinters);
         if(wifiLabelPrinter != null && wifiLabelPrinter.length() > 7){
             return wifiLabelPrinter;
         }

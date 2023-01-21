@@ -77,8 +77,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private List<Mark> marksOfCurDish;
     private String reportContent;
     private XAdapter2<Bill> billsXAdapter;
-    private BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();;
-    String custChars;
+    private BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
 
     public static OrderIdentifierFragment getInstance(){
         if(instance == null){
@@ -313,20 +312,14 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             ary.add(String.valueOf(0));
 
             //add the custChars, if not defined, then add an s and a u.
-            custChars = AppData.getCustomData(AppData.custChars);
-            if (custChars.length() == 0) {
-                custChars = "ABC*DFH+";
-            }
+            String custChars = AppData.getCustomChars();
             for (int i = 0; i < custChars.length(); i++) {
                 ary.add(custChars.substring(i, i + 1));
             }
 
             //the table shortcut including dordash/skip/uber... are difined by custTogos
-            String definedLast = AppData.getCustomData(AppData.custTogos);
-            if("".equals(definedLast)){
-                definedLast = "Doda,Uber,Skip,Fant";
-            }
-            String[] lables = definedLast.split(",");
+            String custTogos = AppData.getCustomTogos();
+            String[] lables = custTogos.split(",");
             for (String label : lables) {
                 ary.add(label.trim());
             }
@@ -852,7 +845,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                             if (printCurrentSelection(billIdToMregeTo, true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
                                 isCancel = true;
                             }
-                        } else if (i < 10 + custChars.length()) {         //following are fixed buttons.
+                        } else if (i < 10 + AppData.getCustomChars().length()) {         //following are fixed buttons.
                             appendText(items[i]);
                         } else {
                             odIdTable1.setText(items[i]);
