@@ -221,7 +221,10 @@ public class WifiPrintService implements Runnable{
                     String[] ipOrSNs = snOrIpOflabelPrinters.split(",");
                     for (String ipOrSN : ipOrSNs) {
                         L.d(TAG,"Adding a dish to ipSelectionsMap with key:" + ipOrSN);
-                        ipSelectionsMap.get(ipOrSN).add(selectionDetail);
+                        List<SelectionDetail> selections = ipSelectionsMap.get(ipOrSN);
+                        if(!selections.contains(selectionDetail)){
+                            selections.add(selectionDetail);
+                        }
                     }
                 }
             }
@@ -590,7 +593,6 @@ public class WifiPrintService implements Runnable{
                         break;  //stop for getting categorizedContent for other printers, stop here, when one printer finished, open connection to an other printer and print again.
                     }
                 }
-
             } else if (isReadyToPrint()) {//check if this round is a good time to do actual print work? (two flags are both true)
                 timeCounter = 0;
                 L.d(TAG, "Flags both set, checking the categorizedContent fllowing current ip:" + curPrintIp);
@@ -1321,10 +1323,6 @@ public class WifiPrintService implements Runnable{
         }else if("3".equals(format_style)){
             //table name
             if(tableName != null && tableName.length() > 0) {
-                //it's specially for Mr.Liu when it's for here, no need to print a label.
-                if(isWifiLabelPrinter(printerIp) && StringUtils.isNumber(tableName)){
-                    return null;
-                }
                 String tablename_position = AppData.getCustomData(AppData.title_position);
                 if ("left".equals(tablename_position)) {
                     //add nothing

@@ -678,4 +678,12 @@ public class AppData{
     public static String getCustomTogos() {
         return getCustomData(AppData.custTogos, "Doda,Uber,Skip,Fant");
     }
+
+    public static String getDensity() {
+        String density = getCustomData(AppData.DENSITY);
+        if("".equals(density)){
+            density = "4";
+        }
+        return density;
+    }
 }

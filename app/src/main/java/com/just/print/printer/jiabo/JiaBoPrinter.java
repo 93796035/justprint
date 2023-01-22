@@ -179,10 +179,10 @@ public class JiaBoPrinter {
             }
             tsc.addReference(startX, startY);// 设置原点坐标
 
-            String denStr = AppData.getCustomData(AppData.DENSITY);
-            LabelCommand.DENSITY density = LabelCommand.DENSITY.DNESITY4;
-            if(denStr != null && LabelCommand.DENSITY.valueOf(denStr) != null){
-                density = LabelCommand.DENSITY.valueOf(denStr);
+            String denStr = AppData.getDensity();
+            LabelCommand.DENSITY density = getMatchedEnum(denStr, LabelCommand.DENSITY.values());
+            if(density == null) {
+                density = LabelCommand.DENSITY.DNESITY4;
             }
             tsc.addDensity(density );//设置浓度
             tsc.addTear(EscCommand.ENABLE.ON); // 撕纸模式开启
@@ -225,6 +225,15 @@ public class JiaBoPrinter {
             list.add(tsc.getCommand());
         }
         return list;// 返回数据
+    }
+
+    private static LabelCommand.DENSITY getMatchedEnum(String denStr, LabelCommand.DENSITY[] values) {
+        for (LabelCommand.DENSITY value : values) {
+            if(String.valueOf(value.getValue()).equals(denStr)){
+                return value;
+            }
+        }
+        return null;
     }
 
     private static List<List<String>> getDevidedListsBaseOnLabelHeight(List<String> allLines, int linesOfEachLabel) {
