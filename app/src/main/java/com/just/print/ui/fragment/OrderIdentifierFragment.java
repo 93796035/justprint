@@ -566,7 +566,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     findViewById(R.id.topButtons).setVisibility(View.GONE);
                 }
                 String adminPassword = AppData.getAdminPassword();
-                if(adminPassword.equals(odIdTable1.getText().toString()) || adminPassword.equals(odIdInput.getText().toString())){
+                if(adminPassword.equals(odIdTable1.getText().toString())
+                        || adminPassword.equals(odIdInput.getText().toString())){
                     //print report
                     HashSet billsNotCount = new HashSet();
                     for(Mark table : OrderIdentifierFragment.tables){
@@ -907,6 +908,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 findViewById(R.id.inputTableName).setVisibility(View.VISIBLE);
             }else {
                 odIdTable2.setText(tableName);
+                odIdTable1.setText(tableName);
             }
             //check if there's a unclosed bill on this table.
             if(selectedTable.getVersion() == -1){ //negative means a mark is used as table, -1 means closed table
