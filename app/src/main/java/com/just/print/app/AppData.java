@@ -292,7 +292,11 @@ public class AppData{
     }
 
     public static String getCategoryLayoutStyle() {
-        return getCustomData(AppData.categoryLayoutStyle);
+        String flow = getCustomData(AppData.categoryLayoutStyle);
+        if(StringUtils.isBlank(flow)){
+            flow = "flow";
+        }
+        return flow;
     }
 
     public static int getMarkNumColumn() {
