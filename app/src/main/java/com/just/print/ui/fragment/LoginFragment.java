@@ -135,16 +135,27 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
 
     @XClick({R.id.createShop})
     private void createShop(@XGetValueByView(fromId = R.id.shopName) String shopName) {
-        if (StringUtils.isEmpty(shopName)) {
+        if (shopName == null || shopName.trim().length() == 0) {
             showToast("Please input the name of the store.");
             return;
         }
-
+        shopName = shopName.trim();//user might type enter instead of click confirm button....remove the possible "\n" at the end or begining...
         int p = shopName.indexOf("-p:");
         if(p > -1){// means theres parameters
             String password = shopName.substring(p+3).trim();
             AppData.putCustomData(AppData.adminPassword, password);
             shopName = shopName.substring(0, p).trim();
+        }
+
+        if(shopName.contains("\n")){
+            String first = shopName.substring(0, shopName.indexOf("\n"));
+            int n = shopName.lastIndexOf("\n");
+            String last = shopName.substring(n + 1);
+            if(first.equals(last)){
+                shopName = first;
+            }else{
+                shopName = first.length() > last.length() ? first : last;
+            }
         }
 
         AppData.saveShopName(getContext(), shopName);
