@@ -418,7 +418,7 @@ public class AppData{
     }
     public static String getUserPassword() {
         String up = getCustomData(AppData.userPassword);
-        return StringUtils.isBlank(up) ? "8888" : "up";
+        return StringUtils.isBlank(up) ? "8888" : up;
     }
     public static String getOrderPassword() {
         String op = getCustomData(AppData.orderpassword);

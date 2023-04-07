@@ -124,7 +124,10 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
                 AppData.putCustomData(AppData.userPassword, password);
                 userName = userName.substring(0, p).trim();
             }
-
+            int n = userName.lastIndexOf("\n");
+            if(n > -1){// means theres parameters
+                userName = userName.substring(n+1).trim();
+            }
             AppData.saveUserName(getContext(), userName);
             this.userName.setEnabled(false);
         }
