@@ -15,13 +15,11 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.db.bean.Category;
-import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.dao.CategoryDao;
-import com.just.print.db.dao.M2M_MenuMarkDao;
 import com.just.print.db.dao.M2M_MenuPrintDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.MenuDao;
@@ -256,7 +254,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 printer.setType(jo.getInt("type"));
                 printer.setState(jo.getInt("state"));
                 printer.setNote(jo.getString("note"));
-                printer.setState(State.def);
+                printer.setState(State.ACTIVE);
                 printer.setId(printerDao.insert(printer));
                 printers.add(printer);
             }
@@ -274,7 +272,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 Mark mark = new Mark();
                 mark.setName(jo.getString("name"));
                 mark.setVersion((long)(jo.getDouble("price") * 100));
-                mark.setState(State.def);
+                mark.setState(State.ACTIVE);
                 mark.setId(markDao.insert(mark));
                 marks.add(mark);
             }
@@ -306,7 +304,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 Category category = new Category();
                 category.setCname(jo.getString("name"));
                 category.setDisplayIdx(Double.valueOf(jo.getString("dspIndex")));
-                category.setState(State.def);
+                category.setState(State.ACTIVE);
                 category.setId(categoryDao.insert(category));
                 categories.add(category);
             }
@@ -325,7 +323,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 menu.setName(jo.getString("MName"));
                 menu.setPrinter(jo.getString("printer"));
                 menu.setPrice(Double.valueOf(jo.getInt("price"))/100);
-                menu.setState(State.def);
+                menu.setState(State.ACTIVE);
                 menu.setCid(getCategoryId(jo.getString("CATEGORY"), categories));
                 menuDao.insert(menu);
                 if(jo.getBoolean("prompMenu")){

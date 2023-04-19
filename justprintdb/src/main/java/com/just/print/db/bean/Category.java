@@ -147,7 +147,7 @@ public class Category {
     }
 
     public void logicDelete() {
-        state = com.just.print.db.expand.State.delete;
+        state = com.just.print.db.expand.State.DELETED;
         cname = "$" + cname;
         updateAndUpgrade();
     }

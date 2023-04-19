@@ -53,7 +53,7 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
     private void addPrinter(@XGetValueByView(fromId = R.id.etMark) String mark) {
 
         Mark mark1 = new Mark();
-        mark1.setState(State.def);
+        mark1.setState(State.ACTIVE);
         mark1.setName(mark);
         NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
         mark1.updateAndUpgrade();

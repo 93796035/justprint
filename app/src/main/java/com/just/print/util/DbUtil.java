@@ -1,5 +1,6 @@
 package com.just.print.util;
 
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Base64;
 
 import com.just.print.app.AppData;
@@ -99,7 +100,7 @@ public class DbUtil extends Thread{
         //            //DaoExpand.updateAllPrintTo0(getDaoMaster().newSession().getPrinterDao());
         //            printer.setFirstPrint(1);
         //        }
-        printer.setState(com.just.print.db.expand.State.def);
+        printer.setState(com.just.print.db.expand.State.ACTIVE);
         NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
         printer.updateAndUpgrade();
     }
@@ -182,8 +183,10 @@ public class DbUtil extends Thread{
                 }else{
 //                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
                 }
-            } catch (Exception e) {
-                ToastUtil.showToast("Can not connnect with sever, please make sure the device connected with internet first, and try again!");
+            }catch (SQLiteDatabaseCorruptException dbcorrupException) {
+                ToastUtil.showToast("Menu downloaded, found no bill to clean.");
+            }catch (Exception e) {
+                ToastUtil.showToast("Can not connect with sever, please make sure the device connected with internet first, and try again!");
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
             }finally{
                 urlConnection.disconnect();//使用完关闭TCP连接，释放资源

@@ -414,17 +414,17 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     }
 
     @XClick({R.id.addMenu})
-    private void addMenu(@XGetValueByView(fromId = R.id.etMenuID) TextView mid,
-                         @XGetValueByView(fromId = R.id.etMenu) TextView mname,
-                         @XGetValueByView(fromId = R.id.price) TextView mprice,
-                         @XGetValueByView(fromId = R.id.selectPrint) TextView print,
-                         @XGetValueByView(fromId = R.id.selectMark) TextView mark) {
-
+    private void addOrModifyMenu(@XGetValueByView(fromId = R.id.etMenuID) TextView mid,
+                                 @XGetValueByView(fromId = R.id.etMenu) TextView mname,
+                                 @XGetValueByView(fromId = R.id.price) TextView mprice,
+                                 @XGetValueByView(fromId = R.id.selectPrint) TextView print,
+                                 @XGetValueByView(fromId = R.id.selectMark) TextView mark) {
+        //valid category
         if (mCategory == null) {
             showToast("Please choose a category");
             return;
         }
-
+        //valid price
         if (mid.getText().length() == 0 || mname.getText().length() == 0 || mprice.getText().length() == 0 ) {
             if(mid.getText().length() == 0) {
                 showToast("Please input code");
@@ -442,24 +442,19 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             showToast("Please input valid price. e.g. 15.99");
             return;
         }
-        //should allow dish without printer in mode 2
+        //valid printer
         if (addedPrints == null || addedPrints.size() == 0) {
-            if(!AppData.isMode2()) {
+            if(!AppData.isMode2()) {    //allow dish without printer in mode 2
                 showToast("Please select printer");
                 return;
             }
         }
-
-        Menu menu = menuDao.load(mid.getText().toString());
-
-        if(menu != null && menu.getState() == State.def) { //if not allow, then if it's adding should give a check.
-            //to filter out "is adding" and "code is ocupied" case. while modify case no need to check
-            //because it will update existing one anyway.....wait a second, still need to check the case
-            //that id is changed and new id duplicated with ohter one.
-            if(modifyingMenu == null                             //if it's adding
-                || !menu.getID().equals(modifyingMenu.getID())){ //or it's modifying, but id changed
-                 showToast("Save the item before choosing \"Pop up label automatically\". \n" +
-                         "Edit the item after saving.");      //but changed to be duplicated with existing menu.
+        //valid menuId
+        Menu menu = menuDao.load(mid.getText().toString());     //to filter out "is adding" and "menucode is ocupied" case.
+        //modify case also need to check, in case that id is changed and new id duplicated with ohter menu.
+        if(menu != null && menu.getState() == State.ACTIVE) {
+            if(modifyingMenu == null || !menu.getID().equals(modifyingMenu.getID())){ //creating or it's modifying
+                 showToast("This menu name already exist, please choose a different name.");
                  return;
             }
         }
@@ -476,7 +471,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         if(modifyingMenu == null){   //adding case
             menu = new Menu();
             menu.setID(mid.getText().toString().trim());
-            menu.setState(State.def);
+            menu.setState(State.ACTIVE);
             menu.setName(mname.getText().toString().trim());
             menu.setCid(mCategory.getId());
             menu.setPrice(price);
@@ -485,7 +480,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }else{              //updating....now it's allow duplicate name case..
             menuDao.delete(modifyingMenu);
             modifyingMenu.setID(mid.getText().toString().trim());
-            modifyingMenu.setState(State.def);
+            modifyingMenu.setState(State.ACTIVE);
             modifyingMenu.setName(mname.getText().toString().trim());
             modifyingMenu.setCid(mCategory.getId());
             modifyingMenu.setPrice(price);
@@ -527,12 +522,11 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         //process the popup selection
         if(originalSelectStatus != showMarkSelection.isChecked()){
             if(showMarkSelection.isChecked()){
-                AppData.putCustomData(AppData.forcePopUpMenuList,
-                AppData.getForcePopUpList() + ";" + modifyingMenu.getID());
+                AppData.putCustomData(AppData.forcePopUpMenuList, AppData.getForcePopUpList() + ";" + menu.getID());
             }else{
                 String existingStr = AppData.getForcePopUpList();
-                int p = existingStr.indexOf(modifyingMenu.getID());
-                String newValue = existingStr.substring(0, p) + existingStr.substring(p + modifyingMenu.getID().length());
+                int p = existingStr.indexOf(menu.getID());
+                String newValue = existingStr.substring(0, p) + existingStr.substring(p + menu.getID().length());
                 newValue = newValue.replace(";;", ";");
                 if(newValue.startsWith(";")){   //if it's the first, then there will be a ";" left in the position 0.
                     newValue = newValue.substring(1, newValue.length());
@@ -575,7 +569,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         cat.setCname(cname.getText().toString());
         cat.setDisplayIdx(idx);
 
-        cat.setState(State.def);
+        cat.setState(State.ACTIVE);
         NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
         cat.updateAndUpgrade();
         AppData.updataeLastModifyTime(null);

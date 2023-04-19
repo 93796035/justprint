@@ -14,7 +14,6 @@ import com.just.print.db.dao.MenuDao;
 import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.SaleRecordDao;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,7 +28,7 @@ public final class DaoExpand {
     }
 
     static public <T, K> List<T> queryAllNotDeletedMark(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Version.gt(State.delete)).list();
+        return dao.queryBuilder().where(MenuDao.Properties.Version.gt(State.DELETED)).list();
     }
 
     static public List<Menu> queryMenuByCategory(MenuDao menuDao, Category category) {
@@ -37,15 +36,15 @@ public final class DaoExpand {
     }
 
     public static final <T> QueryBuilder<T> addQueryBuilderNotDelete(QueryBuilder<T> builder) {
-        return builder.where(MenuDao.Properties.State.notEq(State.delete));
+        return builder.where(MenuDao.Properties.State.notEq(State.DELETED));
     }
 
     static public <T, K> QueryBuilder<T> queryAllNotDeleted(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.delete));
+        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.DELETED));
     }
 
     static public List<Menu> queryMenuByCategory(Category category, MenuDao dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Cid.eq(category.getId()), MenuDao.Properties.State.notEq(State.delete)).list();
+        return dao.queryBuilder().where(MenuDao.Properties.Cid.eq(category.getId()), MenuDao.Properties.State.notEq(State.DELETED)).list();
     }
 
     static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {
@@ -65,15 +64,15 @@ public final class DaoExpand {
     }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao, String shop) {
-        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.delete)).list();
+        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.DELETED)).list();
     }
 
     static public <T, K> List<T> queryAllTables(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Version.le(State.delete)).list();
+        return dao.queryBuilder().where(MenuDao.Properties.Version.le(State.DELETED)).list();
     }
 
     public static List<Mark> queryAllMarks(MarkDao markDao) {
-        return markDao.queryBuilder().where(MenuDao.Properties.Version.gt(State.delete)).list();
+        return markDao.queryBuilder().where(MenuDao.Properties.Version.gt(State.DELETED)).list();
     }
 
     static public List<Menu> queryFuzzyMenu(MenuDao menuDao, String ID) {

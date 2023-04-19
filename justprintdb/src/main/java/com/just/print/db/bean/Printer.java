@@ -165,7 +165,7 @@ public class Printer {
     }
 
     public void logicDelete() {
-        state = com.just.print.db.expand.State.delete;
+        state = com.just.print.db.expand.State.DELETED;
         updateAndUpgrade();
     }
 
