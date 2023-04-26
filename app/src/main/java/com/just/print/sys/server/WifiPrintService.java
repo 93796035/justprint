@@ -478,7 +478,8 @@ public class WifiPrintService implements Runnable{
         if (startTime == null || startTime.length() < 1) {
             startTime = AppData.getCustomData(AppData.lastsuccess);
         }
-        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime);
+        double[] totalContainer = new double[2];
+        String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime, totalContainer);
         if("1".equals(AppData.getCustomData(AppData.hideCancelItem)) || "true".equals(AppData.getCustomData(AppData.hideCancelItem))) {
             int p = contentFR.indexOf(" ITEMS CANCEL:  ");
             contentFR = contentFR.substring(0, p);
@@ -535,13 +536,22 @@ public class WifiPrintService implements Runnable{
                 String qt = billQT.get(name).toString();
                 contentFR += generateString(lengthLeft  / 3 - qt.length(), " ") + qt;
                 Float subTotal = sub.get(name);
+                totalContainer[0] -= subTotal;
                 contentFR += generateString(lengthLeft / 3 - subTotal.toString().length(), " ") + subTotal;
                 Float total = subTotal * AppData.getTaxRate();
                 total = ((int)(total * 100))/100.0f;
+                totalContainer[1] -= total;
                 contentFR += generateString(lengthLeft / 3 - total.toString().length(), " ") + total;
                 contentFR += "\n";
             }
-            contentFR += "\n\n\n\n";
+            //after uber/skip/fantuan.... will be a line to indecate the money excluded the third party
+            seperatorText= "After Third Party";
+            decoration = generateString((width - seperatorText.length())/2, ">");
+            contentFR += decoration + seperatorText + decoration + "\n";
+            contentFR += "Subtotal:$" + String.format("%.2f", totalContainer[0]) + "    ";
+            contentFR += "Total:$" + String.format("%.2f", totalContainer[1]) + "\n";
+
+            contentFR += "\n\n\n";
         }
         ipContentMap.get(printerIP).add(contentFR);
         showToast("PRINTING REPORT ON " + printerIP);
@@ -1008,7 +1018,7 @@ public class WifiPrintService implements Runnable{
 //        }
 //    }
 
-    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime) {
+    private String formatContentForPrintReport(List<SaleRecord> saleRecords, String startTime, String endTime, double[] totalValueContainer) {
         L.d(TAG,"formatContentForPrintReport");
 
         //translate the time format
@@ -1162,8 +1172,10 @@ public class WifiPrintService implements Runnable{
         content.append(" ITEMS CANCEL:  ").append(qtCancel).append("\n");
         content.append(" SUBTOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
         content.append(generateString(width, SEP_STR1)).append("\n");
-        content.append(" SUBTOTAL:    $").append(String.format("%.2f", total + cancTotal));
-        content.append(" TOTAL:    $").append(String.format("%.2f", (total + cancTotal) * AppData.getTaxRate()));
+        totalValueContainer[0] = total + cancTotal;
+        totalValueContainer[1] = totalValueContainer[0] * AppData.getTaxRate();
+        content.append(" SUBTOTAL:    $").append(String.format("%.2f", totalValueContainer[0]));
+        content.append(" TOTAL:    $").append(String.format("%.2f", totalValueContainer[1]));
             //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getPrice()).append(" *\n");
         content.append("\n\n\n\n\n");
         return content.toString();
