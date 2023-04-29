@@ -68,6 +68,7 @@ public class AppData{
     public static final String colorOnSelect = "cos";
     public static final String colorOfTheme = "cot";
     public static final String column = "column";
+    public static final String colorOfTheme2 = "cot2";
     public static final String combineMarkPrice = "combineMarkPrice";
     public static final String custChars = "custChars";
     public static final String custTogos = "custTogos";
@@ -286,11 +287,18 @@ public class AppData{
     public static int getThemColor() {
         String color = getCustomData(AppData.colorOfTheme);
         if(color == null || color.length() != 6){
-            color = "1584BD";
+            color = "5aacdb";
         }
         return Color.parseColor("#" + color);
     }
 
+    public static int getThemColor2() {
+        String color = getCustomData(AppData.colorOfTheme2);
+        if(color == null || color.length() != 6){
+            color = "EE4C20";
+        }
+        return Color.parseColor("#" + color);
+    }
     public static String getCategoryLayoutStyle() {
         String flow = getCustomData(AppData.categoryLayoutStyle);
         if(StringUtils.isBlank(flow)){

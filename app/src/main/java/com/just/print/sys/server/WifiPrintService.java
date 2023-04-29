@@ -58,6 +58,7 @@ public class WifiPrintService implements Runnable{
     public static String ERROR = "2";
 
     private HashMap<String,Printer> ipPrinterMap;
+    private String[] ipOrSNs;
     private HashMap<String,List<SelectionDetail>> ipSelectionsMap;
     private HashMap<String,List<String>> ipContentMap;
 
@@ -166,7 +167,27 @@ public class WifiPrintService implements Runnable{
             ipContentMap.put(ip,new ArrayList<String>());
             ipSelectionsMap.put(ip,new ArrayList<SelectionDetail>());
         }
+        //Just in case user forget to add label printer into the printer panel
+        checkIfThereAreUnLoggedLabelPrinters();
         return printerList;
+    }
+
+    private void checkIfThereAreUnLoggedLabelPrinters() {
+        String snOrIpOflabelPrinters = AppData.getCustomData(AppData.labelPrinters);
+        if(snOrIpOflabelPrinters.length() > 0) {
+            ipOrSNs = snOrIpOflabelPrinters.split(",");
+            for (String ipOrSN : ipOrSNs) {
+                if (!ipPrinterMap.containsKey(ipOrSN)) {
+                    ipPrinterMap.put(ipOrSN, new Printer());
+                }
+                if (!ipContentMap.containsKey(ipOrSN)) {
+                    ipContentMap.put(ipOrSN, new ArrayList<String>());
+                }
+                if (!ipSelectionsMap.containsKey(ipOrSN)) {
+                    ipSelectionsMap.put(ipOrSN, new ArrayList<SelectionDetail>());
+                }
+            }
+        }
     }
 
     //if the ipContnetMap(the final map which contains the content to be printed) not empty, will return error. because it means that last time didn't print successfully
@@ -222,6 +243,10 @@ public class WifiPrintService implements Runnable{
                     for (String ipOrSN : ipOrSNs) {
                         L.d(TAG,"Adding a dish to ipSelectionsMap with key:" + ipOrSN);
                         List<SelectionDetail> selections = ipSelectionsMap.get(ipOrSN);
+                        if(selections == null){
+                            selections = new ArrayList<>();
+                            ipSelectionsMap.put(ipOrSN, selections);
+                        }
                         if(!selections.contains(selectionDetail)){
                             selections.add(selectionDetail);
                         }
@@ -237,7 +262,10 @@ public class WifiPrintService implements Runnable{
             List<SelectionDetail> dishList = (List<SelectionDetail>) entry.getValue(); //get all dishes to be printed in this printer.
 
             L.d(TAG,"ip:" + key + ", list size:" + dishList.size());
-            if(ipPrinterMap.get(key).getType() != 1 && dishList.size() > 0){
+            //just incase the key is an lable printer, maybe it's forgot to be added into the printer management panel, so added a null check.
+            if(ipPrinterMap.get(key) != null
+                    && !Integer.valueOf(1).equals(ipPrinterMap.get(key).getType())
+                    && dishList.size() > 0){
                 //order the dishes in this this printer.
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<SelectionDetail>() {
                     @Override
@@ -268,8 +296,8 @@ public class WifiPrintService implements Runnable{
                     L.d("ERROR!", "the dishList are different from ipSelectionsMap.get(printerIP)!!!!");
                 }
                 Printer printer = ipPrinterMap.get(printerIP);
-                if(printer.getFirstPrint() == 1){  //全单封装---following each printerip(key), there will be only one formatted string
-                    if(printer.getType() == 0){   //if category is set then cut by category.
+                if(Integer.valueOf(1).equals(printer.getFirstPrint())){  //全单封装---following each printerip(key), there will be only one formatted string
+                    if(Integer.valueOf(0).equals(printer.getType())){   //if category is set then cut by category.
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();
                         String currentCategory = null;
                         for(SelectionDetail selectionDetail : dishList){
@@ -694,8 +722,8 @@ public class WifiPrintService implements Runnable{
         return beiYangPrinters.contains(printerIP);
     }
 
-    private boolean isWifiLabelPrinter(String printerIP){
-        return wifiLabelPrinters.contains(printerIP);
+    private boolean isWifiLabelPrinter(String printerIP){ //must be ip, otherwise is not wifi lable, it's cloud label
+        return wifiLabelPrinters.contains(printerIP) && printerIP.indexOf(".") < printerIP.lastIndexOf(".");
     }
 
     private boolean isCloudPrinter(String printerIP){

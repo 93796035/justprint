@@ -14,6 +14,7 @@
         android:button="@null"
         android:minHeight="10dp"
         android:minWidth="25dp"
+        android:textSize="16dp"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"

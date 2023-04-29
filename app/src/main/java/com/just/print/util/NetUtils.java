@@ -63,8 +63,8 @@ public class NetUtils extends Thread{
         if (sn != null && sn.length() > 0) {
             JSONObject json = new JSONObject();//创建json对象
             try {
-                json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                 json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
+                json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                 String size = AppData.getCustomData(AppData.width);
                 size = (size == null || size.length() == 0) ? "24" : size;
                 json.put("width", size);

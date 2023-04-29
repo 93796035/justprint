@@ -41,6 +41,7 @@ public class OrderFragmentActivity extends BaseFragmentActivity {
             if (viewPager != null) {
                 viewPager.setAdapter(adapter);
                 viewPager.setCurrentItem(1);
+                findViewById(R.id.pager).setBackgroundColor(AppData.getThemColor());
                 viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                     public void onPageScrollStateChanged(int state) {}
                     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
