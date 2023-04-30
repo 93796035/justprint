@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -515,8 +516,9 @@ public class WifiPrintService implements Runnable{
             float f = Float.valueOf(contentFR.substring(p + 1));
             contentFR = contentFR + " TOTAL:  $" + f * AppData.getTaxRate()  + "\n\n\n";
         }
-        //if has tableToCal set, then need to add one more part----------------------------
+        //if has tableToCal(table is also used to indicate uber/skip.....) set, then need to add one more part----------------------------
         String tableToCalculate = AppData.getCustomData(AppData.tableToCalculate).toLowerCase();
+        tableToCalculate.replace("，",",");
         if(tableToCalculate.length() == 0){
             tableToCalculate = "uber,skip,doordash,";
         }
@@ -537,7 +539,7 @@ public class WifiPrintService implements Runnable{
             contentFR += generateString(lengthLeft  / 3 - "bef tax".length(), " ") + "bef tax";
             contentFR += generateString(lengthLeft  / 3 - "aft tax".length(), " ") + "aft tax\n";
 
-            List<String> names = new ArrayList<>();
+            Set<String> names = new HashSet<>();
             HashMap<String, Integer> billQT = new HashMap();
             HashMap<String, Float> sub = new HashMap<>();
             List<Bill> bills = NingMengStyle.app.getDaoMaster().newSession().getBillDao().loadAll();
@@ -794,10 +796,11 @@ public class WifiPrintService implements Runnable{
 
     //if the order is a kind of togo order.
     private boolean isTogoTypeOrder(String content) {
-        String custTogos = AppData.getCustomTogos();
+        String content_lowered = content.toLowerCase();
+        String custTogos = AppData.getCustomTogos().toLowerCase();
         String[] lables = custTogos.split(",");
         for (String label : lables) {
-            if(content.contains(label.trim())){
+            if(content_lowered.contains(label.trim())){
                 return true;
             }
         }

@@ -72,7 +72,9 @@ public class NetUtils extends Thread{
                 L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
             }
             AppData.putCustomData(AppData.ContentToSend, json.toString());
-            new NetUtils(AppData.getSERVER_URL() + "cloudPrint").run();//not usring start, because don't want it run in an thread, so when is a seperate print, one bill will generate
+            new NetUtils(AppData.getSERVER_URL() + "cloudPrint").start();
+            //is following old comment a real problem? what is “seperate print"???
+            //it's ran in an thread, so when is a seperate print, one bill will generate
             //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
         }
     }
