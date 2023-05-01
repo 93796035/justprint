@@ -516,7 +516,7 @@ public class AppData{
                 AppData.putCustomData(AppData.hideCancelItem, inputedSN);
                 showToast("App has set hideCancelItem to: " + inputedSN);
                 return;
-            case "":
+            case "hiid":
                 AppData.putCustomData(AppData.HideKitchenBillId, inputedSN);
                 showToast("App has set HideKitchenBillId to: " + inputedSN);
                 return;

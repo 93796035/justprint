@@ -1415,39 +1415,54 @@ public class WifiPrintService implements Runnable{
 //                sb.append(generateString(width - occupiedLength - (dd.getDishNum() < 10 ? 2 : 3), SEPRATOR));
                 sb.append(dd.getDishNum()).append("x ");
             }
-            if(isCloudPrinter){
-                if (AppData.cloudShowID != null) { //guess these condition
-                    if (AppData.cloudShowID) {
-                        sb.append(dd.getDish().getID());                //dish id
-                        sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
-                    }else{
-                        //do nothing.
+
+            String ipSpecifiedHideID = AppData.getCustomData(printerIp + AppData.HideKitchenBillId);
+            String ipSpecifiedHideName = AppData.getCustomData(printerIp + AppData.HideKitchenBillName);
+            if(ipSpecifiedHideID.length() > 0){    //if ip specified property is set
+                if(Boolean.FALSE.equals(ipSpecifiedHideID)) {
+                    sb.append(dd.getDish().getID());                //dish id
+                    sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                }
+            }else{  //if ip specified property is not set then go here.
+                if(isCloudPrinter) { //for cloud printer check cloudShowID then check showID
+                    if (AppData.cloudShowID != null) { //guess these condition
+                        if (AppData.cloudShowID) {
+                            sb.append(dd.getDish().getID());                //dish id
+                            sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                        }
+                    } else {
+                        if (AppData.showID) {
+                            sb.append(dd.getDish().getID());                //dish id
+                            sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                        }
                     }
-                }else{
+                }else{              //for wifi printer, check showID directly.
                     if (AppData.showID) {
                         sb.append(dd.getDish().getID());                //dish id
                         sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                     }
                 }
+            }
 
-                if(AppData.cloudShowName != null){
-                    if (AppData.cloudShowName) {
-                        sb.append(dd.getDish().getName());             //dish name
+            if(ipSpecifiedHideName.length() > 0){   //if IPspecified property is set.
+                if(Boolean.FALSE.equals(ipSpecifiedHideName)) {
+                    sb.append(dd.getDish().getName());             //dish name
+                }
+            }else{                                  //otherwise go here.
+                if(isCloudPrinter){     //for cloud printer check cloudShowName then check showName
+                    if(AppData.cloudShowName != null){
+                        if (AppData.cloudShowName) {
+                            sb.append(dd.getDish().getName());             //dish name
+                        }
+                    }else{
+                        if (AppData.showName) {
+                            sb.append(dd.getDish().getName());             //dish name
+                        }
                     }
-                }else{
+                }else{                  //for wifi printer, check showName directly.
                     if (AppData.showName) {
                         sb.append(dd.getDish().getName());             //dish name
                     }
-                }
-            }else {
-                String showID = AppData.getCustomData(printerIp + AppData.HideKitchenBillId);
-                String showName = AppData.getCustomData(printerIp + AppData.HideKitchenBillName);
-                if (showID.length() == 0 ? AppData.showID : "false".equals(showID)) {
-                    sb.append(dd.getDish().getID());                //dish id
-                    sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
-                }
-                if (showName.length() == 0 ? AppData.showName : !("1".equals(showName) || "true".equals(showName))) {
-                    sb.append(dd.getDish().getName());             //dish name
                 }
             }
 
