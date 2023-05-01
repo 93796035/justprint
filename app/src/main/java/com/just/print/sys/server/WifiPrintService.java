@@ -577,7 +577,7 @@ public class WifiPrintService implements Runnable{
             //after uber/skip/fantuan.... will be a line to indecate the money excluded the third party
             seperatorText= "After Third Party";
             decoration = generateString((width - seperatorText.length())/2, ">");
-            contentFR += decoration + seperatorText + decoration + "\n";
+            contentFR += decoration + seperatorText + decoration + "\n\n";
             contentFR += "Subtotal:$" + String.format("%.2f", totalContainer[0]) + "    ";
             contentFR += "Total:$" + String.format("%.2f", totalContainer[1]) + "\n";
 
