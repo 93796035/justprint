@@ -26,8 +26,10 @@ import java.util.Date;
 public class NetUtils extends Thread{
 
     public String remoteUrlAndPort;
-    public NetUtils(String url){
-        remoteUrlAndPort = url;
+    private String contentToSend;
+    public NetUtils(String url, String contentToSend){
+        this.remoteUrlAndPort = url;
+        this.contentToSend = contentToSend;
     }
 
     //activate==============================================
@@ -35,7 +37,7 @@ public class NetUtils extends Thread{
         String accountInfo = getAccountJsonForActivate();
         if(accountInfo != null){
             AppData.putCustomData(AppData.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
-            new NetUtils(AppData.getSERVER_URL() + "activeJustPrintAccount").start();
+            new NetUtils(AppData.getSERVER_URL() + "activeJustPrintAccount", accountInfo).start();
         }
     }
 
@@ -72,8 +74,9 @@ public class NetUtils extends Thread{
                 L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
             }
             AppData.putCustomData(AppData.ContentToSend, json.toString());
-            new NetUtils(AppData.getSERVER_URL() + "cloudPrint").start();
-            //is following old comment a real problem? what is “seperate print"???
+            new NetUtils(AppData.getSERVER_URL() + "cloudPrint", json.toString()).start();
+            //is following old comment a real problem? what is “seperate print"??? and now we've already put the copy of the
+            //contnet "into" the thread through the constructor.
             //it's ran in an thread, so when is a seperate print, one bill will generate
             //many lable print in short time, the threads will use a contentToSend which is alreaded rewote by next print task.
         }
@@ -83,7 +86,6 @@ public class NetUtils extends Thread{
     @Override
     public void run() {
         super.run();
-        String contentToSend = AppData.getCustomData(AppData.ContentToSend);
         if(contentToSend.length() > 0 && AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
             HttpURLConnection urlConnection = null;
             try {

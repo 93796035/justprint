@@ -147,8 +147,12 @@ public class AppData{
     public static boolean showID = "false".equals(AppData.getCustomData(AppData.HideKitchenBillId));
     public static boolean showName = !("1".equals(AppData.getCustomData(AppData.HideKitchenBillName))
             || "true".equals(AppData.getCustomData(AppData.HideKitchenBillName)));
-    public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
-    public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ? null : Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
+    public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ?
+            Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId)) :
+            Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
+    public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ?
+            Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName)) :
+            Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
     private static final String codeNumberConsidered = "codeNumberConsidered";
     private static final String addingDefaultCode = "addingDefaultCode";
 
@@ -355,7 +359,7 @@ public class AppData{
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils(AppData.getEmailServer() + "sendReport").start();
+                new NetUtils(AppData.getEmailServer() + "sendReport", unSendcontent).start();
                 return false;
             }
             boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
@@ -373,7 +377,7 @@ public class AppData{
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + reportContent, e);
             }
             AppData.putCustomData(AppData.ContentToSend,json.toString());
-            new NetUtils(EMAIL_SERVER_URL).start();
+            new NetUtils(EMAIL_SERVER_URL, json.toString()).start();
             return true;
         }
         return true;
@@ -386,7 +390,7 @@ public class AppData{
             String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils(AppData.getEmailServer() + "sendReport").start();
+                new NetUtils(AppData.getEmailServer() + "sendReport", unSendcontent).start();
             }
             boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
                     ||"true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
@@ -400,7 +404,7 @@ public class AppData{
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + orderContent, e);
             }
             AppData.putCustomData(AppData.ContentToSend,json.toString());
-            new NetUtils(EMAIL_SERVER_URL).start();
+            new NetUtils(EMAIL_SERVER_URL, json.toString()).start();
             return true;
         }
         return true;

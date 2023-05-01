@@ -1416,10 +1416,12 @@ public class WifiPrintService implements Runnable{
                 sb.append(dd.getDishNum()).append("x ");
             }
             if(isCloudPrinter){
-                if (AppData.cloudShowID != null) {
+                if (AppData.cloudShowID != null) { //guess these condition
                     if (AppData.cloudShowID) {
                         sb.append(dd.getDish().getID());                //dish id
                         sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
+                    }else{
+                        //do nothing.
                     }
                 }else{
                     if (AppData.showID) {

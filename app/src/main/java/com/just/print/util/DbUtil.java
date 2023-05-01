@@ -68,7 +68,7 @@ public class DbUtil extends Thread{
             L.e("DatabaseUtil", "Exception when encoding content into json: license+shopName:" + license + shopName + " cofigrationStr:" + getConfigurations(), e);
         }
         AppData.putCustomData(AppData.ContentToSend, json.toString());
-        new NetUtils(AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig")).start();
+        new NetUtils(AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig"), json.toString()).start();
     }
 
     private static String getConfigurations() {
