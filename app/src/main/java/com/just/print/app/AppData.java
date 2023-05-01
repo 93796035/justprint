@@ -144,13 +144,13 @@ public class AppData{
             limitation, lastsuccess, lastsuccessStr, mode, number,
             reportIdx, reportStartDate, startTime};
 
-    public static boolean showID = "false".equals(AppData.getCustomData(AppData.HideKitchenBillId));
+    public static boolean showID = "false".equals(AppData.getCustomData(AppData.HideKitchenBillId));//don't show id by default?
     public static boolean showName = !("1".equals(AppData.getCustomData(AppData.HideKitchenBillName))
             || "true".equals(AppData.getCustomData(AppData.HideKitchenBillName)));
-    public static Boolean cloudShowID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ?
+    public static Boolean cloudHideID = AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ?
             Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId)) :
             Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
-    public static Boolean cloudShowName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ?
+    public static Boolean cloudHideName = AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ?
             Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName)) :
             Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
     private static final String codeNumberConsidered = "codeNumberConsidered";

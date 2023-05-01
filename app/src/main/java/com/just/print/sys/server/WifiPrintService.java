@@ -1419,14 +1419,14 @@ public class WifiPrintService implements Runnable{
             String ipSpecifiedHideID = AppData.getCustomData(printerIp + AppData.HideKitchenBillId);
             String ipSpecifiedHideName = AppData.getCustomData(printerIp + AppData.HideKitchenBillName);
             if(ipSpecifiedHideID.length() > 0){    //if ip specified property is set
-                if(Boolean.FALSE.equals(ipSpecifiedHideID)) {
+                if(!Boolean.valueOf(ipSpecifiedHideID)) {
                     sb.append(dd.getDish().getID());                //dish id
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
             }else{  //if ip specified property is not set then go here.
                 if(isCloudPrinter) { //for cloud printer check cloudShowID then check showID
-                    if (AppData.cloudShowID != null) { //guess these condition
-                        if (AppData.cloudShowID) {
+                    if (AppData.cloudHideID != null) { //guess these condition
+                        if (!AppData.cloudHideID) {
                             sb.append(dd.getDish().getID());                //dish id
                             sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                         }
@@ -1445,13 +1445,13 @@ public class WifiPrintService implements Runnable{
             }
 
             if(ipSpecifiedHideName.length() > 0){   //if IPspecified property is set.
-                if(Boolean.FALSE.equals(ipSpecifiedHideName)) {
+                if(!Boolean.valueOf(ipSpecifiedHideName)) {
                     sb.append(dd.getDish().getName());             //dish name
                 }
             }else{                                  //otherwise go here.
                 if(isCloudPrinter){     //for cloud printer check cloudShowName then check showName
-                    if(AppData.cloudShowName != null){
-                        if (AppData.cloudShowName) {
+                    if(AppData.cloudHideName != null){
+                        if (AppData.cloudHideName) {
                             sb.append(dd.getDish().getName());             //dish name
                         }
                     }else{
