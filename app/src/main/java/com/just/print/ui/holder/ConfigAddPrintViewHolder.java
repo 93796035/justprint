@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.db.bean.Printer;
+import com.just.print.util.L;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -28,6 +29,10 @@ public class ConfigAddPrintViewHolder extends XViewHolder<Printer> {
 
     @Override
     public void onResetView(Printer printer, int i) {
+        if(printer == null) {
+            L.e("ConfigAddPrintViewHolder", "unexpected null printer", null);
+            return;
+        }
         ip.setText(printer.getIp());
         name.setText(printer.getPname());
     }

@@ -784,9 +784,7 @@ public class WifiPrintService implements Runnable{
                 doBeiYangPrint(font, content);  //check if it's nbna printer, check printer status
             } else if(isWifiLabelPrinter(curPrintIp)) {
                 JiaBoPrinter.getInstance().printLabel(curPrintIp, String.valueOf(POSPORT), content, width);
-            } else if(isCloudPrinter(curPrintIp)) {
-                NetUtils.sendToCloudPrinter(content, curPrintIp);
-            } else if(isLabelPrinter(curPrintIp)){ //for now the sn is like 987623454,longger than 6
+            } else if(isCloudPrinter(curPrintIp) || isLabelPrinter(curPrintIp)){ //for now the sn is like 987623454,longger than 6
                 NetUtils.sendToCloudPrinter(content, curPrintIp);
             } else {
                 doZiJiangPrint(font, content);
