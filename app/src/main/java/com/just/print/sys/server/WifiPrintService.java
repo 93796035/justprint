@@ -1422,19 +1422,12 @@ public class WifiPrintService implements Runnable{
                     sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                 }
             }else{  //if ip specified property is not set then go here.
-                if(isCloudPrinter) { //for cloud printer check cloudShowID then check showID
-                    if (AppData.cloudHideID != null) { //guess these condition
-                        if (!AppData.cloudHideID) {
-                            sb.append(dd.getDish().getID());                //dish id
-                            sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
-                        }
-                    } else {
-                        if (AppData.showID) {
-                            sb.append(dd.getDish().getID());                //dish id
-                            sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
-                        }
+                if (isCloudPrinter) { //for cloud printer check cloudShowID then check showID
+                    if (!AppData.cloudHideID) {
+                        sb.append(dd.getDish().getID());                //dish id
+                        sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
                     }
-                }else{              //for wifi printer, check showID directly.
+                } else {              //for wifi printer, check showID directly.
                     if (AppData.showID) {
                         sb.append(dd.getDish().getID());                //dish id
                         sb.append(generateString(5 - dd.getDish().getID().length(), SEPRATOR));
