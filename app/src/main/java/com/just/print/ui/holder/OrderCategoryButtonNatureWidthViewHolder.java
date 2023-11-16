@@ -6,7 +6,6 @@ import android.widget.Button;
 
 import com.just.print.R;
 import com.stupid.method.adapter.XViewHolder;
-import com.stupid.method.reflect.StupidReflect;
 
 /**
  * Created by qiqi on 2016/11/23.

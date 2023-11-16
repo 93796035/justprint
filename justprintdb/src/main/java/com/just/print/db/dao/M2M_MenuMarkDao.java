@@ -5,10 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.just.print.db.bean.M2M_MenuMark;
-import com.just.print.db.bean.M2M_MenuMark;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.Menu;
-import com.just.print.db.bean.Printer;
 
 import java.util.ArrayList;
 import java.util.List;

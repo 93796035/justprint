@@ -3,21 +3,6 @@ import android.telephony.gsm.SmsManager;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-
-import java.io.*;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.os.*;
-
-import android.view.View.OnClickListener;
-
-import com.just.print.R;
 
 public class JSSMS extends Activity {
 

@@ -11,10 +11,8 @@ import android.widget.ViewSwitcher;
 
 import com.just.print.R;
 import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Printer;
-import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.holder.ConfigPrinterViewHolder;
 import com.just.print.util.DbUtil;

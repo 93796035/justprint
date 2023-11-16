@@ -1,9 +1,7 @@
 package com.just.print.ui.fragment;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
@@ -11,7 +9,6 @@ import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;
 import com.just.print.app.BaseFragment;
 import com.just.print.util.AppUtils;
-import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;

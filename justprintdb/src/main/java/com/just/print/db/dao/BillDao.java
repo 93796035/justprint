@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.just.print.db.bean.Bill;
-import com.just.print.db.bean.Mark;
 
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
