@@ -235,7 +235,16 @@ public class WifiPrintService implements Runnable{
                 }
                 String ip = printer.getIp();
                 L.d(TAG,"Adding a dish to ipSelectionsMap, ip:" + ip);
-                ipSelectionsMap.get(ip).add(selectionDetail);
+                //if the ip is a lableprinter, then
+                if(isLabelPrinter(ip) || isWifiLabelPrinter(ip)){
+                     int count = selectionDetail.getDishNum();
+                     for(int i = 1; i <= count; i++){
+                         selectionDetail.setDishNum(i);
+                         ipSelectionsMap.get(ip).add(selectionDetail);
+                     }
+                }else {
+                    ipSelectionsMap.get(ip).add(selectionDetail);
+                }
             }
             if(isTogoTypeOrder(CustomerSelection.getInstance().getTableName())){
                 String snOrIpOflabelPrinters = AppData.getCustomData(AppData.labelPrinters);
