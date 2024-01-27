@@ -47,4 +47,13 @@ public class SelectionDetail {
 	public void setpIP(String pIP) {
 		this.pIP = pIP;
 	}
+
+	public SelectionDetail clone(){
+		SelectionDetail selectionDetail = new SelectionDetail();
+		selectionDetail.setDishNum(dishNum);
+		selectionDetail.setDish(dish);
+		selectionDetail.setMarkList(this.markList);
+		selectionDetail.setpIP(this.pIP);
+		return selectionDetail;
+	}
 }

@@ -240,7 +240,7 @@ public class WifiPrintService implements Runnable{
                      int count = selectionDetail.getDishNum();
                      for(int i = 1; i <= count; i++){
                          selectionDetail.setDishNum(i);
-                         ipSelectionsMap.get(ip).add(selectionDetail);
+                         ipSelectionsMap.get(ip).add(selectionDetail.clone());
                      }
                 }else {
                     ipSelectionsMap.get(ip).add(selectionDetail);
@@ -272,7 +272,7 @@ public class WifiPrintService implements Runnable{
             List<SelectionDetail> dishList = (List<SelectionDetail>) entry.getValue(); //get all dishes to be printed in this printer.
 
             L.d(TAG,"ip:" + key + ", list size:" + dishList.size());
-            //just incase the key is an lable printer, maybe it's forgot to be added into the printer management panel, so added a null check.
+            //just in case the key is an label printer, maybe it's forgot to be added into the printer management panel, so added a null check.
             if(ipPrinterMap.get(key) != null
                     && !Integer.valueOf(1).equals(ipPrinterMap.get(key).getType())
                     && dishList.size() > 0){
@@ -1280,7 +1280,7 @@ public class WifiPrintService implements Runnable{
             font = AppData.getCustomData(AppData.font);
         }
 
-        if(!StringUtils.isBlank(font)){ //???should we do something when the font is set? like if the font is set to double witch, we should make hte width less...no?
+        if(!StringUtils.isBlank(font)){ //???should we do something when the font is set? like if the font is set to double width, we should make the width smaller...no?
             String w = AppData.getCustomData(printerIp + AppData.width);
             if(StringUtils.isBlank(w)) {
                 w = AppData.getCustomData(AppData.width);
