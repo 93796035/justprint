@@ -17,7 +17,7 @@ import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
-import com.just.print.ui.fragment.LoginFragment;
+import com.just.print.ui.fragment.RegisterFragment;
 import com.just.print.ui.fragment.OrderCategoryFragment;
 import com.just.print.ui.fragment.OrderIdentifierFragment;
 import com.just.print.util.AppUtils;
@@ -290,7 +290,7 @@ public class WifiPrintService implements Runnable{
 
         //3、再次遍历ipSelectionsMap, 封装打印信息
         //add a kitchenBill on top, so when there's issue in printer, user can found a bill was miss printed.
-        String mobileIdx = LoginFragment.getUserName();     //used for knowing printed from which mobile.
+        String mobileIdx = RegisterFragment.getUserName();     //used for knowing printed from which mobile.
         if(!StringUtils.isBlank(mobileIdx)){                            //@TODO: should be improved by using pos to print, then no need this mobile Mark anymore.
             kitchenBillIdx = mobileIdx + kitchenBillIdx;
         }
@@ -832,7 +832,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private StringBuilder getReportFirstLineContent() {
-        String mobileMark = LoginFragment.getUserName();
+        String mobileMark = RegisterFragment.getUserName();
         StringBuilder content = new StringBuilder(mobileMark == null ? "" : mobileMark);
         String idx = AppData.getCustomData(AppData.reportIdx);
         return content.append(idx == null || idx.length() == 0 ? "1" : idx);

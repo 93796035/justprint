@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.just.print.db.bean.Bill;
 import com.just.print.db.expand.DaoExpand;
-import com.just.print.ui.fragment.LoginFragment;
+import com.just.print.ui.fragment.RegisterFragment;
 import com.just.print.util.L;
 import com.just.print.util.NetUtils;
 import com.just.print.util.SharedPreferencesHelper;
@@ -373,7 +373,7 @@ public class AppData{
             }
             JSONObject json = new JSONObject();//创建json对象
             try {
-                String mobileMark = isReset && !sendOnlyWhenResetFlag ? "(RESET)" + LoginFragment.getUserName() : LoginFragment.getUserName();
+                String mobileMark = isReset && !sendOnlyWhenResetFlag ? "(RESET)" + RegisterFragment.getUserName() : RegisterFragment.getUserName();
                 json.put("idx", mobileMark + "-" + idx);
                 json.put("email", email);//使用URLEncoder.encode对特殊和不可见字符进行编码
                 json.put("content", URLEncoder.encode(reportContent, "UTF-8"));//把数据put进json对象中
@@ -400,7 +400,7 @@ public class AppData{
                     ||"true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
             JSONObject json = new JSONObject();//创建json对象
             try {
-                String mobileMark = LoginFragment.getUserName();
+                String mobileMark = RegisterFragment.getUserName();
                 json.put("idx", "Just Print Order");
                 json.put("email", email);//使用URLEncoder.encode对特殊和不可见字符进行编码
                 json.put("content", URLEncoder.encode(orderContent, "UTF-8"));//把数据put进json对象中

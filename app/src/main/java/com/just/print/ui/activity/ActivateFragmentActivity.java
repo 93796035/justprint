@@ -36,11 +36,11 @@ public class ActivateFragmentActivity extends BaseFragmentActivity {
         AppData.setActivateCode(inputedSN, textView);
         //keep waiting untile the number is bigger than 0, other wise stop moving forward.
         while(true) {
-            //when inputted activate code, why go to LoginFragmentActivity?(that activity will check name and store name then go to Main Interface)
+            //when inputted activate code, why go to RegisterFragmentActivity?(that activity will check name and store name then go to Main Interface)
             AppUtils.sleep(1000);
             String number = AppData.getCustomData(AppData.number);
             if(Long.valueOf(number) > 0){
-                startActivity(new Intent(this, LoginFragmentActivity.class));
+                startActivity(new Intent(this, RegisterFragmentActivity.class));
                 break;
             }
         }

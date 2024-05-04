@@ -28,10 +28,10 @@
         <service android:name="com.just.print.net.UDPService" />
 
         <!--activity android:name="com.just.print.ui.activity.ConfigFragmentActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.just.print.ui.activity.LoginFragmentActivity" android:screenOrientation="portrait" />
+        <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity" android:screenOrientation="portrait" />
         <activity android:name="com.just.print.ui.activity.OrderFragmentActivity" android:screenOrientation="portrait" /-->
         <activity android:name="com.just.print.ui.activity.ConfigFragmentActivity"/>
-        <activity android:name="com.just.print.ui.activity.LoginFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.OrderFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.ActivateFragmentActivity" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
     </application>

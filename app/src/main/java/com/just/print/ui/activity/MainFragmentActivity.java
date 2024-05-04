@@ -53,7 +53,7 @@ public class MainFragmentActivity extends BaseFragmentActivity {
             if (timeLeft < 3024000000l) {   //3024000000L == 35days
                 ToastUtil.showToast("Application is about to expire! Please re-activate it!");
             }
-            startActivity(new Intent(this, LoginFragmentActivity.class));
+            startActivity(new Intent(this, RegisterFragmentActivity.class));
         } else {
             ToastUtil.showToast("Application expired! Please re-activate it!");
             startActivity(new Intent(this, ActivateFragmentActivity.class));

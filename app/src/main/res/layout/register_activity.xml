@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.just.print.ui.activity.LoginFragmentActivity">
+    tools:context="com.just.print.ui.activity.RegisterFragmentActivity">
 
     <FrameLayout
         android:id="@+id/content"

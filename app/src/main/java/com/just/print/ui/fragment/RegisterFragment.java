@@ -25,7 +25,7 @@ import com.stupid.method.reflect.annotation.XViewByID;
 /**
  * the interface is for inputting shop name and user name.
  */
-public class LoginFragment extends BaseFragment implements UDPService.UDPCallback {
+public class RegisterFragment extends BaseFragment implements UDPService.UDPCallback {
     private static String registeredName;
     public static String getUserName() {
         return registeredName;
@@ -33,7 +33,7 @@ public class LoginFragment extends BaseFragment implements UDPService.UDPCallbac
 
     @Override
     protected int getLayoutId() {
-        return R.layout.login_fragment;
+        return R.layout.register_fragment;
     }
 
     @XViewByID(R.id.userName)
