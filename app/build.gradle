@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.just.print"
-        minSdkVersion 19
-        targetSdkVersion 25
+        minSdkVersion 21
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
     }
@@ -39,7 +39,7 @@ dependencies {
     api project(':justprintdb')
     // compile 'com.alibaba:fastjson:1.2.20'
     //compile 'com.android.support:support-v4:21.0.3'
-    compile files('libs/gprintersdkv2.jar')
+//    compile files('libs/gprintersdkv2.jar')
     implementation files('libs/gprintersdkv2.jar')
     implementation 'org.apache.httpcomponents:httpcore:4.4.13'
     implementation 'org.apache.httpcomponents:httpclient:4.5.12'
