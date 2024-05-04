@@ -9,7 +9,7 @@ import java.util.List;
 public class SelectionDetail {
 
 	private Menu dish;
-	private int dishNum;
+	private float dishNum;
 	private String pIP;
 	private List<Mark> markList;//don't know why, but if I initialize it here, it will still be null when getting it....
 
@@ -32,11 +32,11 @@ public class SelectionDetail {
 		this.dish = dish;
 	}
 
-	public int getDishNum() {
+	public float getDishNum() {
 		return dishNum;
 	}
 
-	public void setDishNum(int dishNum) {
+	public void setDishNum(float dishNum) {
 		this.dishNum = dishNum;
 	}
 

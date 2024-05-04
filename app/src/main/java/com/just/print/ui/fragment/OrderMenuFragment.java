@@ -115,7 +115,7 @@ public class OrderMenuFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void onClickItem(View view, int i) {
-        int num;
+        float num;
         switch (view.getId()) {
             case R.id.odmnadd:
                 num = menuXAdapter.get(i).getDishNum();

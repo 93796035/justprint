@@ -237,9 +237,9 @@ public class WifiPrintService implements Runnable{
                 L.d(TAG,"Adding a dish to ipSelectionsMap, ip:" + ip);
                 //if the ip is a lableprinter, then
                 if(isLabelPrinter(ip) || isWifiLabelPrinter(ip)){
-                     int count = selectionDetail.getDishNum();
+                     float count = selectionDetail.getDishNum();
                      for(int i = 1; i <= count; i++){
-                         selectionDetail.setDishNum(i);
+                         selectionDetail.setDishNum(Float.valueOf(i +"." + (int)count));
                          ipSelectionsMap.get(ip).add(selectionDetail.clone());
                      }
                 }else {
@@ -401,7 +401,7 @@ public class WifiPrintService implements Runnable{
         //save the menu into database.
         SaleRecordDao saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
-            int number = selectionDetail.getDishNum();
+            float number = selectionDetail.getDishNum();
             Menu menu = selectionDetail.getDish();
 
             String mName = "";
@@ -1313,7 +1313,7 @@ public class WifiPrintService implements Runnable{
         boolean isCloudPrinter = isCloudPrinter(printerIp);
 
         StringBuilder content = new StringBuilder();
-        //tiltle---could be used for kithch name, empty lines.......
+        //tiltle---could be used for kitchen name, empty lines.......
         String title = AppData.getCustomData(AppData.kitchentitle);
         if (title.length() > 0) {
             if (title.toLowerCase(Locale.ROOT).endsWith("lines")) {

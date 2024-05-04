@@ -53,12 +53,12 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
         switch (v.getId()) {
             case R.id.odmnadd:
                 menu.setDishNum(menu.getDishNum() + 1);
-                odMNNum.setText(Integer.toString(menu.getDishNum()));
+                odMNNum.setText(Integer.toString((int)menu.getDishNum()));
                 break;
             case R.id.odmnreduce:
                 if (menu.getDishNum() > 1) {
                     menu.setDishNum(menu.getDishNum() - 1);
-                    odMNNum.setText(Integer.toString(menu.getDishNum()));
+                    odMNNum.setText(Integer.toString((int)menu.getDishNum()));
                 }
                 break;
             default:
@@ -76,7 +76,7 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
         odMId.setText(AppData.showID ? menu.getDish().getID() : "");
         odMName.setText(AppData.showName ? menu.getDish().getName() : "");
 //        L.d(TAG, Integer.toString(menu.getDishNum()));
-        odMNNum.setText(Integer.toString(menu.getDishNum()));
+        odMNNum.setText(Integer.toString((int)menu.getDishNum()));
         odMnLoutMarkTv.setText("");
         List<Mark> marks = menu.getMarkList();
         if (marks != null) {
