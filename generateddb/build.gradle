@@ -3,5 +3,5 @@ apply plugin: 'java'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'junit:junit:4.12'
+    implementation 'junit:junit:4.13.2'
 }

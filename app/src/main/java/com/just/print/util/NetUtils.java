@@ -2,7 +2,7 @@ package com.just.print.util;
 
 import static com.just.print.util.ToastUtil.showToast;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.just.print.app.AppData;
 import com.just.print.app.NingMengStyle;

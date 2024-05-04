@@ -15,8 +15,6 @@ import com.just.print.sys.model.AbsRequest;
 import com.just.print.sys.model.AbsResult;
 import com.just.print.util.AppUtils;
 import com.just.print.util.L;
-import com.stupid.method.http.IXHttp;
-import com.stupid.method.http.impl.asyncHttp.XAsyncIXHttp;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -47,7 +45,6 @@ public class UDPService extends Service implements TCPSever.TcpServerReadOver {
     Channel channel;
     WeakHashMap<Context, String> l;
     String deviceID;
-    IXHttp http = new XAsyncIXHttp();
 
     @Override
     public void onReadOver(String host, byte[] input) {
