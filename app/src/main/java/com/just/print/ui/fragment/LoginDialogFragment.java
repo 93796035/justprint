@@ -27,9 +27,7 @@ public class LoginDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_login, null);
 
-        // 设置按钮事件
         view.findViewById(R.id.button_ok).setOnClickListener(v -> {
-            // 处理登录逻辑
             dismiss();
         });
 
@@ -48,7 +46,7 @@ public class LoginDialogFragment extends DialogFragment {
 
     private void onNumberClick(View v) {
         Button button = (Button) v;
-//        EditText passwordField = getDialog().findViewById(R.id.password_field);
-//        passwordField.append(button.getText());
+        EditText passwordField = getDialog().findViewById(R.id.password_field);
+        passwordField.append(button.getText());
     }
 }
