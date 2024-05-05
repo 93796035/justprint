@@ -72,7 +72,7 @@
         android:clickable="true"
         android:visibility="gone">
 
-        <include layout="@layout/config_category_fragment_add" />
+        <include layout="@layout/fragment_add_config_category" />
     </RelativeLayout>
 
     <RelativeLayout

@@ -23,7 +23,7 @@ public class MainFragmentActivity extends BaseFragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.activity_main);
         new StupidReflect(this).init();
 
         //this block should be useless, because dubug is already set value.-----no, it's static, so give a init here.

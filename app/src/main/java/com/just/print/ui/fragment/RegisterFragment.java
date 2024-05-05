@@ -11,6 +11,7 @@ import com.just.print.app.BaseFragment;
 import com.just.print.net.UDPService;
 import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
+import com.just.print.ui.activity.LoginFragmentActivity;
 import com.just.print.ui.activity.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
 import com.just.print.util.DbUtil;
@@ -53,7 +54,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         if (!StringUtils.isEmpty(shopName)) {
             //showToast(shopName);
             AppData.createShopDB(getContext(), shopName);
-            startActivity(new Intent(getContext(), OrderFragmentActivity.class));
+            startActivity(new Intent(getContext(), LoginFragmentActivity.class));
             getActivity().finish();
         }
 

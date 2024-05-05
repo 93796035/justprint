@@ -34,7 +34,7 @@ public class ConfigCustFragment extends BaseFragment implements OnClickItemListe
 
     @Override
     protected int getLayoutId() {
-        return R.layout.config_cust_fragment;
+        return R.layout.fragment_config_cust;
     }
 
     private String onEditCust = null;

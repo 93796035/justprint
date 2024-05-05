@@ -42,7 +42,7 @@ public class ConfigFragmentActivity extends BaseFragmentActivity implements Even
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sys_config_activity);
+        setContentView(R.layout.activity_config);
         register(CHANGE_PAGE, this);
         //why not use beginTransaction().add()?
         getSupportFragmentManager().beginTransaction().add(R.id.content, getFragment(ConfigMainFragment.class), ConfigMainFragment.class.getName())

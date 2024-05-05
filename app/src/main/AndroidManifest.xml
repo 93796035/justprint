@@ -18,8 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="com.just.print.ui.activity.MainFragmentActivity"
-            android:exported="true">
+        <activity android:name="com.just.print.ui.activity.MainFragmentActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -32,9 +31,12 @@
         <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity" android:screenOrientation="portrait" />
         <activity android:name="com.just.print.ui.activity.OrderFragmentActivity" android:screenOrientation="portrait" /-->
         <activity android:name="com.just.print.ui.activity.ConfigFragmentActivity"/>
-        <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.OrderFragmentActivity"/>
-        <activity android:name="com.just.print.ui.activity.ActivateFragmentActivity" android:screenOrientation="portrait" android:label="@string/title_activity_activate"/>
+        <activity android:name="com.just.print.ui.activity.BillFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.TableFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.LoginFragmentActivity" android:screenOrientation="landscape"/>
+        <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.ActivateFragmentActivity" android:screenOrientation="landscape" android:label="@string/title_activity_activate"/>
     </application>
 
 </manifest>

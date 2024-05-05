@@ -14,7 +14,7 @@ public class RegisterFragmentActivity extends BaseFragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.register_activity);
+        setContentView(R.layout.activity_register);
         beginTransaction().add(R.id.content, fragment, fragment.getClass().getName()).commit();
     }
 
