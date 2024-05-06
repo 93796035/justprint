@@ -7,13 +7,13 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Menu;
 import com.just.print.db.dao.CategoryDao;
-import com.just.print.db.dao.MenuDao;
+import com.just.print.db.dao.DishDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
@@ -37,64 +37,64 @@ import java.util.Map;
 
 public class OrderCategoryFragment extends BaseFragment {
     private static List<Category> categoryList;
-    private static Map<Category, List<Menu>> categorizedContent;
-    public static Comparator comparator = new Comparator<Menu>() {
+    private static Map<Category, List<Dish>> categorizedContent;
+    public static Comparator comparator = new Comparator<Dish>() {
         @Override
-        public int compare(Menu m1, Menu m2) {
-            String id1 = m1.getID();
-            String id2 = m2.getID();
-            int minLen = id1.length() > id2.length() ? id2.length() : id1.length();
-            for (int i = 0; i < minLen; i++) {
-                char c1 = id1.charAt(i);
-                char c2 = id2.charAt(i);
-                if (c1 >= '0' && c1 <= '9' && c2 >= '0' && c2 <= '9') { //if it's number, then treat specially.
-                    String s1 = id1.substring(i);
-                    String s2 = id2.substring(i);
-                    try {
-                        return Integer.valueOf(s1) - Integer.valueOf(s2);
-                    } catch (Exception e) {
-                        try {
-                            int numInseid1 = 0;
-                            boolean matched1 = false;
-                            for (int j = 0; j < s1.length(); j++) {
-                                char ch1 = s1.charAt(j);
-                                if (ch1 >= '0' && ch1 <= '9') {
-                                    continue;
-                                } else {
-                                    numInseid1 = Integer.valueOf(s1.substring(0, j));
-                                    matched1 = true;
-                                    break;
-                                }
-                            }
-                            if (!matched1) {
-                                numInseid1 = Integer.valueOf(s1);
-                            }
-
-                            int numInseid2 = 0;
-                            boolean matched2 = false;
-                            for (int j = 0; j < s2.length(); j++) {
-                                char ch1 = s2.charAt(j);
-                                if (ch1 >= '0' && ch1 <= '9') {
-                                    continue;
-                                } else {
-                                    numInseid2 = Integer.valueOf(s2.substring(0, j));
-                                    matched2 = true;
-                                    break;
-                                }
-                            }
-                            if (!matched2) {
-                                numInseid2 = Integer.valueOf(s2);
-                            }
-                            return numInseid1 == numInseid2 ? s1.compareTo(s2) : numInseid1 - numInseid2;
-                        } catch (Exception exp) {
-                            exp.printStackTrace();
-                        }
-                    }
-                } else if (c1 != c2) {
-                    return c1 - c2;
-                }
-            }
-            return id1.length() - id2.length();
+        public int compare(Dish m1, Dish m2) {
+            Long id1 = m1.getId();
+            Long id2 = m2.getId();
+//            int minLen = id1 == id2.length() ? id2.length() : id1.length();
+//            for (int i = 0; i < minLen; i++) {
+//                char c1 = id1.charAt(i);
+//                char c2 = id2.charAt(i);
+//                if (c1 >= '0' && c1 <= '9' && c2 >= '0' && c2 <= '9') { //if it's number, then treat specially.
+//                    String s1 = id1.substring(i);
+//                    String s2 = id2.substring(i);
+//                    try {
+//                        return Integer.valueOf(s1) - Integer.valueOf(s2);
+//                    } catch (Exception e) {
+//                        try {
+//                            int numInseid1 = 0;
+//                            boolean matched1 = false;
+//                            for (int j = 0; j < s1.length(); j++) {
+//                                char ch1 = s1.charAt(j);
+//                                if (ch1 >= '0' && ch1 <= '9') {
+//                                    continue;
+//                                } else {
+//                                    numInseid1 = Integer.valueOf(s1.substring(0, j));
+//                                    matched1 = true;
+//                                    break;
+//                                }
+//                            }
+//                            if (!matched1) {
+//                                numInseid1 = Integer.valueOf(s1);
+//                            }
+//
+//                            int numInseid2 = 0;
+//                            boolean matched2 = false;
+//                            for (int j = 0; j < s2.length(); j++) {
+//                                char ch1 = s2.charAt(j);
+//                                if (ch1 >= '0' && ch1 <= '9') {
+//                                    continue;
+//                                } else {
+//                                    numInseid2 = Integer.valueOf(s2.substring(0, j));
+//                                    matched2 = true;
+//                                    break;
+//                                }
+//                            }
+//                            if (!matched2) {
+//                                numInseid2 = Integer.valueOf(s2);
+//                            }
+//                            return numInseid1 == numInseid2 ? s1.compareTo(s2) : numInseid1 - numInseid2;
+//                        } catch (Exception exp) {
+//                            exp.printStackTrace();
+//                        }
+//                    }
+//                } else if (c1 != c2) {
+//                    return c1 - c2;
+//                }
+//            }
+            return (int)(id1 - id2);
         }
     };
 
@@ -115,12 +115,12 @@ public class OrderCategoryFragment extends BaseFragment {
         return R.layout.order_category_fragment;
     }
 
-    public XExpadnAdapter<Category, Menu> categoryExXAdapter;
+    public XExpadnAdapter<Category, Dish> categoryExXAdapter;
 
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        categoryExXAdapter = new XExpadnAdapter<Category, Menu>(getContext(), TtitleCategoryViewHolder.class,
+        categoryExXAdapter = new XExpadnAdapter<Category, Dish>(getContext(), TtitleCategoryViewHolder.class,
                 SubTitleMenuExpandViewHolder.class);
         odExCategory.setAdapter(categoryExXAdapter);
 
@@ -133,7 +133,7 @@ public class OrderCategoryFragment extends BaseFragment {
             }
             @Override
             public void onClickChild(View view, int i, int i1) {
-                addMenu((Menu) categoryExXAdapter.getChild(i, i1),1,null);
+                addMenu((Dish) categoryExXAdapter.getChild(i, i1),1,null);
                 //new addMenuCtrl((Menu) categoryExXAdapter.getChild(i, i1)).show();
             }
         });
@@ -142,7 +142,7 @@ public class OrderCategoryFragment extends BaseFragment {
     /**
      * 在这里添加到点菜列表里
      */
-    private void addMenu(Menu menu, int count, List<Mark> marks) {
+    private void addMenu(Dish menu, int count, List<Mark> marks) {
         //使用MenuService封装的静态对象List保存菜单。菜单只由该对象管理
         //List对象为DishesDetailModel
         SelectionDetail ddm = new SelectionDetail();
@@ -157,17 +157,17 @@ public class OrderCategoryFragment extends BaseFragment {
 
     public static List<Category> getCategoryList(){
         if(categoryList == null) {
-            categoryList = DaoExpand.queryAllNotDeleted(NingMengStyle.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+            categoryList = DaoExpand.queryAllNotDeleted(AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         }
         return categoryList;
     }
 
-    public static Map<Category, List<Menu>> getCategorizedContent(){
+    public static Map<Category, List<Dish>> getCategorizedContent(){
         if(categorizedContent == null){
             categorizedContent = new LinkedHashMap<>();
-            MenuDao dao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
+            DishDao dao = AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao();
             for (Category ca : getCategoryList()) {
-                List<Menu> menus = DaoExpand.queryMenuByCategory(ca, dao);
+                List<Dish> menus = DaoExpand.queryMenuByCategory(ca, dao);
                 Collections.sort(menus, comparator);
                 categorizedContent.put(ca, menus);
             }
@@ -195,14 +195,14 @@ public class OrderCategoryFragment extends BaseFragment {
 
     class addMenuCtrl implements View.OnClickListener {
         int mCount = 1;
-        final Menu mMenu;
+        final Dish mMenu;
         XAdapter2<Mark> markAdapter;
 
         List<Mark> marks = new ArrayList<Mark>(3);
 
-        addMenuCtrl(Menu men) {
+        addMenuCtrl(Dish men) {
             mMenu = men;
-            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getMarkDao()), MarkViewHolder.class);
+            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao()), MarkViewHolder.class);
             markAdapter.setClickItemListener(new OnClickItemListener() {
                 @Override
                 public void onClickItem(View view, int i) {
@@ -219,7 +219,7 @@ public class OrderCategoryFragment extends BaseFragment {
                 }
             });
             showMarks.setAdapter(markAdapter);
-            showTitle.setText(men.getName());
+            showTitle.setText(men.getName1());
             showCount.setText(Integer.toString(mCount));
             buttonAdd.setOnClickListener(this);
             buttonReduce.setOnClickListener(this);

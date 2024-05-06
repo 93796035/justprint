@@ -633,7 +633,7 @@ public class SlidingMenu extends RelativeLayout {
     /**
      * Sets the behind width.
      *
-     * @param i The width the Sliding Menu will open to, in pixels
+     * @param i The width the Sliding Dish will open to, in pixels
      */
     @SuppressWarnings("deprecation")
     public void setBehindWidth(int i) {

@@ -8,8 +8,8 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.ui.holder.ConfigTableViewHolder;
@@ -68,17 +68,17 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
                          @XGetValueByView(fromId = R.id.dspIdxTable) String dspIdx) {
 
         Mark table = new Mark();        //currently we are using Mark to save table( when deleted flag is set, then it's table.
-        table.setName(tableName);
+        table.setName1(tableName);
 
         try{
             table.setState((int)(Float.valueOf(dspIdx) * 100)); //table can be ordered by name, so this field can be used for other stuff if needed.
         }catch(NumberFormatException e){
             table.setState(0);
         }
-        table.setVersion(-1l);  //negative means it's a table not mark. while we can still give it some nubmer to indicate the bill.
-        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
-        table.updateAndUpgrade();
-        AppData.updataeLastModifyTime(null);
+        table.setVersion(-1);  //negative means it's a table not mark. while we can still give it some nubmer to indicate the bill.
+        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
+//        table.updateAndUpgrade();
+        BarOption.updataeLastModifyTime(null);
         loadTables();
     }
 
@@ -89,7 +89,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
         final Mark table = tableXAdapter.getItem(i);
         onEditTable = table;
 
-        name.setText(table.getName());
+        name.setText(table.getName1());
         dspIdx.setText(String.valueOf(((float) table.getState()) / 100.00));
 
         if (modifyViewSwitch.getDisplayedChild() == 0){
@@ -105,7 +105,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
 //                return;
 //            }
 
-            onEditTable.setName(name.getText().toString());
+            onEditTable.setName1(name.getText().toString());
 
             try{
                 onEditTable.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
@@ -116,7 +116,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
             onEditTable.update();
             onEditTable = null;
             tableXAdapter.notifyDataSetChanged();
-            AppData.updataeLastModifyTime(null);
+            BarOption.updataeLastModifyTime(null);
         }
         modifyViewSwitch.setDisplayedChild(0);
     }
@@ -126,7 +126,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
         final Mark table = tableXAdapter.getItem(onEditIdx);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Are you sure to delete \"" + table.getName() + "\"?");
+        builder.setMessage("Are you sure to delete \"" + table.getName1() + "\"?");
         builder.setTitle("Notice").setNegativeButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

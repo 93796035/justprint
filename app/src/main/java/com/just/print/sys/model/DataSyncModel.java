@@ -1,8 +1,8 @@
 package com.just.print.sys.model;
 
 import com.just.print.db.bean.Category;
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.sys.server.DefaultService;
 
@@ -21,7 +21,7 @@ public class DataSyncModel extends AbsModel {
     private int maxMarV;
     private List<Mark> marks;
     private int maxMV;
-    private List<Menu> menus;
+    private List<Dish> menus;
 
     public int getMaxVersion() {
         return maxVersion;
@@ -87,11 +87,11 @@ public class DataSyncModel extends AbsModel {
         this.marks = marks;
     }
 
-    public List<Menu> getMenus() {
+    public List<Dish> getMenus() {
         return menus;
     }
 
-    public void setMenus(List<Menu> menus) {
+    public void setMenus(List<Dish> menus) {
         this.menus = menus;
     }
 

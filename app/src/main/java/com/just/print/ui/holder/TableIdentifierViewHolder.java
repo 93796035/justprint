@@ -28,7 +28,7 @@ public class TableIdentifierViewHolder extends XViewHolder<Mark>{
 
     @Override
     public void onResetView(Mark s, int i) {
-        textView.setText(s.getName());
+        textView.setText(s.getName1());
         if(s.getVersion() < -1){
             textView.setTextColor(Color.BLUE);
         }else{

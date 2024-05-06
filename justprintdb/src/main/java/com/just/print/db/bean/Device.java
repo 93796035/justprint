@@ -16,6 +16,8 @@ public class Device {
 
     private String ip;
     private String userName;
+    private Integer state;
+    private Integer version;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -30,9 +32,11 @@ public class Device {
     public Device() {
     }
 
-    public Device(String ip, String userName) {
+    public Device(String ip, String userName, Integer state, Integer version) {
         this.ip = ip;
         this.userName = userName;
+        this.state = state;
+        this.version = version;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -55,6 +59,22 @@ public class Device {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */

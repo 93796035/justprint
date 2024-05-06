@@ -20,7 +20,7 @@ public class Log {
     private java.util.Date date;
     private Integer logType;
     private Integer state;
-    private Long version;
+    private Integer version;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -39,7 +39,7 @@ public class Log {
         this.id = id;
     }
 
-    public Log(Long id, String msg, String uName, java.util.Date date, Integer logType, Integer state, Long version) {
+    public Log(Long id, String msg, String uName, java.util.Date date, Integer logType, Integer state, Integer version) {
         this.id = id;
         this.msg = msg;
         this.uName = uName;
@@ -103,11 +103,11 @@ public class Log {
         this.state = state;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

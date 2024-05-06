@@ -23,19 +23,19 @@ import java.util.WeakHashMap;
  */
 public class SharedPreferencesHelper {
 
+    private static final WeakHashMap<Context, Map<String, SharedPreferencesHelper>> mCache
+            = new WeakHashMap<Context, Map<String, SharedPreferencesHelper>>(3);
+
     private static final String empty = "";
-
-    private static final WeakHashMap<Context, Map<String, SharedPreferencesHelper>> mCache = new WeakHashMap<Context, Map<String, SharedPreferencesHelper>>(
-            3);
-
     private static final String tag = "SharePreferenceHelper";
 
-    /***
-     * 线程安全
-     **/
+    final private SharedPreferences sharedPreferences;
+    public SharedPreferencesHelper(Context context, String name) {
+        sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+    }
+
     public static SharedPreferencesHelper getCache(Context context, String name) {
-        Map<String, SharedPreferencesHelper> hashmap = null;
-        hashmap = mCache.get(context);// 根据主键 取出 主键缓存,
+        Map<String, SharedPreferencesHelper> hashmap = mCache.get(context);// 根据主键 取出 主键缓存,
 
         if (hashmap == null) {// 如果二级缓存是否为空,
             synchronized (mCache) {// 给一级缓存加线程锁
@@ -45,12 +45,10 @@ public class SharedPreferencesHelper {
                             2);
                     mCache.put(context, hashmap);
                 }
-
             }
-
         }
-        SharedPreferencesHelper result = null;
-        result = hashmap.get(name);
+
+        SharedPreferencesHelper result = hashmap.get(name);
         if (result == null) {
             synchronized (hashmap) {
                 result = hashmap.get(name);
@@ -84,16 +82,6 @@ public class SharedPreferencesHelper {
     public synchronized static void onLowMemory() {
 
         mCache.clear();
-    }
-
-    final private SharedPreferences sp;// SP 杂化轨道,呵呵
-
-    public SharedPreferencesHelper(Context context, String name) {
-        sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-    }
-
-    public SharedPreferencesHelper(SharedPreferences sp) {
-        this.sp = sp;
     }
 
     public SharedPreferencesHelper clear() {
@@ -167,8 +155,7 @@ public class SharedPreferencesHelper {
     }
 
     private SharedPreferences getSharedPreferences() {
-
-        return sp;
+        return sharedPreferences;
     }
 
     public String getString(String key) {

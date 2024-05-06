@@ -15,18 +15,26 @@ import com.just.print.db.dao.SaleRecordDao;
 public class SaleRecord {
 
     private Long id;
-    private String bId;
-    private String mname;
-    private Double number;
-    private Double price;
+    private String tableName;
+    private String customerNumber;
+    private String openTime;
+    private Integer productId;
+    private Float amount;
+    private Float totalPrice;
+    private Float discount;
+    private String modifications;
+    private Integer userId;
+    private Integer billId;
+    private String createdTime;
     private Integer state;
-    private Long version;
+    private Integer version;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
     private transient SaleRecordDao myDao;
+
 
     // KEEP FIELDS - put your custom fields here
     // KEEP FIELDS END
@@ -38,12 +46,19 @@ public class SaleRecord {
         this.id = id;
     }
 
-    public SaleRecord(Long id, String bId, String mname, Double number, Double price, Integer state, Long version) {
+    public SaleRecord(Long id, String tableName, String customerNumber, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer state, Integer version) {
         this.id = id;
-        this.bId = bId;
-        this.mname = mname;
-        this.number = number;
-        this.price = price;
+        this.tableName = tableName;
+        this.customerNumber = customerNumber;
+        this.openTime = openTime;
+        this.productId = productId;
+        this.amount = amount;
+        this.totalPrice = totalPrice;
+        this.discount = discount;
+        this.modifications = modifications;
+        this.userId = userId;
+        this.billId = billId;
+        this.createdTime = createdTime;
         this.state = state;
         this.version = version;
     }
@@ -57,45 +72,112 @@ public class SaleRecord {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getbId() { return bId;}
-    public void setbId(String bId) { this.bId = bId; }
-
-    public String getMname() {
-        return mname;
-    }
-    public void setMname(String mname) {
-        this.mname = mname;
+    public String getTableName() {
+        return tableName;
     }
 
-    public Double getNumber() {
-        return number;
-    }
-    public void setNumber(Double number) {
-        this.number = number;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
-    public Double getPrice() {
-        return price;
+    public String getCustomerNumber() {
+        return customerNumber;
     }
-    public void setPrice(Double price) {
-        this.price = price;
+
+    public void setCustomerNumber(String customerNumber) {
+        this.customerNumber = customerNumber;
+    }
+
+    public String getOpenTime() {
+        return openTime;
+    }
+
+    public void setOpenTime(String openTime) {
+        this.openTime = openTime;
+    }
+
+    public Integer getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
+
+    public Float getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Float amount) {
+        this.amount = amount;
+    }
+
+    public Float getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Float totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Float getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Float discount) {
+        this.discount = discount;
+    }
+
+    public String getModifications() {
+        return modifications;
+    }
+
+    public void setModifications(String modifications) {
+        this.modifications = modifications;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Integer getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Integer billId) {
+        this.billId = billId;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
     public Integer getState() {
         return state;
     }
+
     public void setState(Integer state) {
         this.state = state;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
-    public void setVersion(Long version) {
+
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.db.bean.Mark;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
@@ -49,7 +49,7 @@ public class OrderMarksSelectionViewHolder extends XViewHolder<Mark> {
 
     @Override
     public void onClick(View v) {
-        if(mark.getName() == null || mark.getName().length() == 0){
+        if(mark.getName1() == null || mark.getName1().length() == 0){
             return;
         }
         switch (v.getId()) {
@@ -72,8 +72,8 @@ public class OrderMarksSelectionViewHolder extends XViewHolder<Mark> {
     @Override
     public void onResetView(Mark mark, int i) {
         this.mark = mark;
-        markName.setText(mark.getName());
-        if("1".equals(AppData.getCustomData(AppData.ShowMarkPirce)) || "true".equals(AppData.getCustomData(AppData.ShowMarkPirce))) {
+        markName.setText(mark.getName1());
+        if("1".equals(BarOption.getCustomData(BarOption.ShowMarkPirce)) || "true".equals(BarOption.getCustomData(BarOption.ShowMarkPirce))) {
             markPrice.setText(String.valueOf(mark.getVersion() / 100.0));
         }else{
             markPrice.setText("");  //in case it's already displaying a "0", user changed setting, then we need to make "0" become "".

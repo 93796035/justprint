@@ -6,7 +6,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.sys.server.DataSyncService;
 import com.just.print.ui.adapter.MyPagerAdapter;
@@ -29,7 +29,7 @@ public class OrderFragmentActivity extends BaseFragmentActivity {
         setContentView(R.layout.activity_order);
         new StupidReflect(this).init();
         List<Fragment> fragmentList = new ArrayList<Fragment>();
-        if(AppData.hasCategory()) {
+        if(BarOption.hasCategory()) {
             fragmentList.add(OrderCategoryFragment.getInstance());
         }
         //fragmentList.add(new OrderMenuFragment());
@@ -39,20 +39,20 @@ public class OrderFragmentActivity extends BaseFragmentActivity {
         if (viewPager != null) {
             viewPager.setAdapter(adapter);
             viewPager.setCurrentItem(1);
-            findViewById(R.id.pager).setBackgroundColor(AppData.getThemColor());
+            findViewById(R.id.pager).setBackgroundColor(BarOption.getThemColor());
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 public void onPageScrollStateChanged(int state) {}
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
                 public void onPageSelected(int position) {
-                    if(position == 0 && AppData.hasCategory()){
+                    if(position == 0 && BarOption.hasCategory()){
                         ((OrderCategoryFragment)fragmentList.get(0)).categoryExXAdapter.notifyDataSetChanged();
                    }
                 }
             });
         }
         //the application has logged in, then if has has lastDownLoad, then response for sending sms for
-        if(AppData.getCustomData(AppData.sendSM) != null){
+        if(BarOption.getCustomData(BarOption.sendSM) != null){
             DataSyncService dataSyncService = DataSyncService.getInstance();//initialize and start the data sync thread.....
             dataSyncService.setActivity(this);
         }

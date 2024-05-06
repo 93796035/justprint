@@ -11,19 +11,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
-import com.just.print.db.bean.M2M_MenuMark;
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.dao.CategoryDao;
-import com.just.print.db.dao.M2M_MenuMarkDao;
+import com.just.print.db.dao.DishDao;
 import com.just.print.db.dao.M2M_MenuPrintDao;
-import com.just.print.db.dao.MenuDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.db.expand.State;
 import com.just.print.ui.holder.ConfigAddMarkViewHolder;
@@ -45,7 +43,7 @@ import static android.content.DialogInterface.OnClickListener;
 
 public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChangeListener {//} implements IXOnItemLongClickListener {
 
-    private static Menu modifyingMenu = null;
+    private static Dish modifyingMenu = null;
     public static int curCategory = 0;
 
     private Category modifyingCategory = null;
@@ -88,9 +86,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     @XViewByID(R.id.etMenu)
     private EditText etMenuName;
 
-    MenuDao menuDao;
+    DishDao menuDao;
     private boolean needAutoFill;
-    private XAdapter2<Menu> menuXAdapter;
+    private XAdapter2<Dish> menuXAdapter;
     private boolean originalSelectStatus;
     @Override
     public void onCreated(Bundle savedInstanceState) {
@@ -101,22 +99,22 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         //categoryXAdapter.setLongClickItemListener(this);
         lvCategory.setAdapter(categoryXAdapter);
 
-        menuXAdapter = new XAdapter2<Menu>(getContext(), ConfigMenuViewHolder.class);
+        menuXAdapter = new XAdapter2<Dish>(getContext(), ConfigMenuViewHolder.class);
         menuXAdapter.setClickItemListener(categoryAdapterClick);
         lvMenu.setAdapter(menuXAdapter);
 
         etMenuId.setOnFocusChangeListener(this);
         etMenuName.setOnFocusChangeListener(this);
 
-        menuDao = NingMengStyle.app.getDaoMaster().newSession().getMenuDao();
+        menuDao = AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao();
 
         loadCategory();
         loadMenu();
         if(categoryXAdapter.size() > 0) {
-            curCategoryName.setText(categoryXAdapter.get(0).getCname());
+            curCategoryName.setText(categoryXAdapter.get(0).getName1());
         }
         curCategoryName.setTextColor(Color.WHITE);
-        curCategoryName.setBackgroundColor(AppData.getThemColor());
+        curCategoryName.setBackgroundColor(BarOption.getThemColor());
     }
 
     IXOnItemClickListener categoryAdapterClick = new IXOnItemClickListener() {
@@ -125,7 +123,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             switch (view.getId()) {
                 case android.R.id.content:
                     curCategory = i;
-                    curCategoryName.setText(categoryXAdapter.get(i).getCname());
+                    curCategoryName.setText(categoryXAdapter.get(i).getName1());
                     onChangeCategory(categoryXAdapter.get(i));
                     break;
 
@@ -134,7 +132,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     modifyingCategory = categoryXAdapter.get(i);
                     showCategory();
                     TextView tvCategory = (TextView) findViewById(R.id.tvCategory);
-                    tvCategory.setText(modifyingCategory.getCname());
+                    tvCategory.setText(modifyingCategory.getName1());
                     TextView displayIdx = (TextView) findViewById(R.id.displayIdx);
                     displayIdx.setText(String.valueOf(modifyingCategory.getDisplayIdx()));
 
@@ -142,10 +140,10 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                 case R.id.delCategory:
                     Category cag = categoryXAdapter.get(i);
                     long cid = cag.getId();
-                    List<Menu> mList = menuDao._queryCategory_MenuList(cid);
+                    List<Dish> mList = menuDao._queryCategory_DishList(cid);
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Are you sure to delete \"" + cag.getCname() + "\"?")
+                    builder.setMessage("Are you sure to delete \"" + cag.getName1() + "\"?")
                             .setTitle("Notice");
                     builder.setNegativeButton("Delete", new CategoryDeleteListener(mList, cag));
                     builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -162,9 +160,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     findViewById(R.id.menuLayout).setVisibility(View.VISIBLE);
 
                     modifyingMenu = menuXAdapter.get(i);
-                    ((EditText)findViewById(R.id.etMenuID)).setText(menuXAdapter.get(i).getID());
-                    ((EditText)findViewById(R.id.etMenu)).setText(menuXAdapter.get(i).getName());
-                    Double price = menuXAdapter.get(i).getPrice();
+                    ((EditText)findViewById(R.id.etMenuID)).setText(menuXAdapter.get(i).getId().toString());
+                    ((EditText)findViewById(R.id.etMenu)).setText(menuXAdapter.get(i).getName1());
+                    Float price = menuXAdapter.get(i).getPrice();
                     ((EditText)findViewById(R.id.price)).setText(price == null ? "" : price.toString());
 
                     //preparing printers
@@ -183,11 +181,11 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                         }
                     });
 
-                    //preparing marks
-                    addedMarks = new ArrayList<Mark>();
-                    for(M2M_MenuMark m2m_p : menuXAdapter.get(i).getM2M_MenuMarkList()){
-                        addedMarks.add(m2m_p.getMark());
-                    }
+//                    //preparing marks
+//                    addedMarks = new ArrayList<Mark>();
+//                    for(M2M_MenuMark m2m_p : menuXAdapter.get(i).getM2M_MenuMarkList()){
+//                        addedMarks.add(m2m_p.getMark());
+//                    }
 
                     addMarksAdapter = new XAdapter2<Mark>(getContext(), addedMarks, ConfigAddMarkViewHolder.class);
                     addMarkListView.setAdapter(addMarksAdapter);
@@ -200,14 +198,14 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     });
 
                     //initial autoPopup check box status
-                    originalSelectStatus = AppData.getForcePopUpList().contains(menuXAdapter.get(i).getID());
+                    originalSelectStatus = BarOption.getForcePopUpList().contains(menuXAdapter.get(i).getId().toString());
                     showMarkSelection.setChecked(originalSelectStatus);
                     break;
                 case R.id.delMenu:
                     //menuXAdapter.get(i).logicDelete();
                     /*
                     M2M_MenuPrintDao m2mDao = getDaoMaster().newSession().getM2M_MenuPrintDao();
-                    List<M2M_MenuPrint> m2mList = m2mDao._queryMenu_M2M_MenuPrintList(menuXAdapter.get(i).getID());
+                    List<M2M_MenuPrint> m2mList = m2mDao._queryMenu_M2M_MenuPrintList(menuXAdapter.get(i).getId());
                     for(M2M_MenuPrint tmp:m2mList){
                         m2mDao.delete(tmp);
                     }
@@ -219,11 +217,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                         m2m.delete();
                     }
                     */
-                    M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
-                    M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
 
                     new AlertDialog.Builder(getActivity())
-                            .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getName() + "\"?")
+                            .setMessage("Are you sure to delete \"" + menuXAdapter.get(i).getName1() + "\"?")
                             .setTitle("Notice")
                             .setNegativeButton("Delete", new MenuDeleteListener(menuXAdapter.get(i)))
                             .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -239,23 +235,18 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     };
 
     private class CategoryDeleteListener implements DialogInterface.OnClickListener{
-        List<Menu> menus;
+        List<Dish> menus;
         Category category;
-        public CategoryDeleteListener(List<Menu> menus, Category category){
+        public CategoryDeleteListener(List<Dish> menus, Category category){
             this.menus = menus;
             this.category = category;
         }
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            for(Menu menu:menus) {
+            for(Dish menu:menus) {
                 //delete menu-printer maps
                 List<M2M_MenuPrint> m2mList = menu.getM2M_MenuPrintList();
                 for(M2M_MenuPrint m2m:m2mList) {
-                    m2m.delete();
-                }
-                //delete menu-mark maps
-                List<M2M_MenuMark> m2mList2 = menu.getM2M_MenuMarkList();
-                for(M2M_MenuMark m2m:m2mList2) {
                     m2m.delete();
                 }
                 // delete menu.
@@ -267,8 +258,8 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     }
 
     private class MenuDeleteListener implements DialogInterface.OnClickListener{
-        Menu menu;
-        public MenuDeleteListener(Menu menu){
+        Dish menu;
+        public MenuDeleteListener(Dish menu){
             this.menu = menu;
         }
         @Override
@@ -277,10 +268,6 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
             List<M2M_MenuPrint> m2mList = menu.getM2M_MenuPrintList();
             for(M2M_MenuPrint m2m : m2mList) {
-                m2m.delete();
-            }
-            List<M2M_MenuMark> m2mList2 = menu.getM2M_MenuMarkList();
-            for(M2M_MenuMark m2m : m2mList2) {
                 m2m.delete();
             }
 
@@ -292,7 +279,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
     private void onChangeCategory(Category category) {
         mCategory = category;
         if (category != null) {
-            tvMenuTitle.setText(category.getCname());
+            tvMenuTitle.setText(category.getName1());
             loadMenu();
         }
     }
@@ -316,7 +303,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             if (view == etMenuId){
                 String menuId = etMenuId.getText().toString();
                 int p = menuId.indexOf(".");
-                if(p > 0 && AppData.isCodeNumberConsidered()){
+                if(p > 0 && BarOption.isCodeNumberConsidered()){
                     String intPart = menuId.substring(0, p);
                     if(Integer.valueOf(intPart) > 0){
                         etMenuName.setText(menuId.substring(p + 1));
@@ -380,7 +367,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private String getDefaultCode() {
         String defautlCode = "";
-        if(!("1".equals(AppData.isAddingDefaultCode()) || "true".equals(AppData.isAddingDefaultCode()))){
+        if(!("1".equals(BarOption.isAddingDefaultCode()) || "true".equals(BarOption.isAddingDefaultCode()))){
             return defautlCode;
         }
         int endCode = parseInt(previouseCode);
@@ -435,25 +422,25 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             }
             return;
         }
-        Double price = 0.0;
+        Float price = 0.0f;
         try{
-            price =Double.valueOf(String.valueOf(mprice.getText()));
+            price =Float.valueOf(String.valueOf(mprice.getText()));
         } catch(Exception e){
             showToast("Please input valid price. e.g. 15.99");
             return;
         }
         //valid printer
         if (addedPrints == null || addedPrints.size() == 0) {
-            if(!AppData.isMode2()) {    //allow dish without printer in mode 2
+            if(!BarOption.isMode2()) {    //allow dish without printer in mode 2
                 showToast("Please select printer");
                 return;
             }
         }
         //valid menuId
-        Menu menu = menuDao.load(mid.getText().toString());     //to filter out "is adding" and "menucode is ocupied" case.
+        Dish menu = menuDao.load(Long.valueOf(mid.getText().toString()));     //to filter out "is adding" and "menucode is ocupied" case.
         //modify case also need to check, in case that id is changed and new id duplicated with ohter menu.
         if(menu != null && menu.getState() == State.ACTIVE) {
-            if(modifyingMenu == null || !menu.getID().equals(modifyingMenu.getID())){ //creating or it's modifying
+            if(modifyingMenu == null || !menu.getId().equals(modifyingMenu.getId())){ //creating or it's modifying
                  showToast("This menu name already exist, please choose a different name.");
                  return;
             }
@@ -462,27 +449,27 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         if (menu != null && menu.getState() == State.delete){
             menu.setID(mid.getText().toString().trim());
             menu.setState(State.def);
-            menu.setMname(mname.getText().toString().trim());
-            menu.setCid(mCategory.getId());
+            menu.setName1(mname.getText().toString().trim());
+            menu.setCategoryId(mCategory.getId());
             menu.updateAndUpgrade();
         }
         */
 
         if(modifyingMenu == null){   //adding case
-            menu = new Menu();
-            menu.setID(mid.getText().toString().trim());
+            menu = new Dish();
+            menu.setId(Long.valueOf(mid.getText().toString()));
             menu.setState(State.ACTIVE);
-            menu.setName(mname.getText().toString().trim());
-            menu.setCid(mCategory.getId());
+            menu.setName1(mname.getText().toString().trim());
+            menu.setCategoryId(mCategory.getId());
             menu.setPrice(price);
             menuDao.insert(menu);
-            previouseCode = menu.getID();
+            previouseCode = menu.getId().toString();
         }else{              //updating....now it's allow duplicate name case..
             menuDao.delete(modifyingMenu);
-            modifyingMenu.setID(mid.getText().toString().trim());
+            modifyingMenu.setId(Long.valueOf(mid.getText().toString()));
             modifyingMenu.setState(State.ACTIVE);
-            modifyingMenu.setName(mname.getText().toString().trim());
-            modifyingMenu.setCid(mCategory.getId());
+            modifyingMenu.setName1(mname.getText().toString().trim());
+            modifyingMenu.setCategoryId(mCategory.getId());
             modifyingMenu.setPrice(price);
             menuDao.insert(modifyingMenu);
             menu = modifyingMenu;
@@ -492,7 +479,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 //        menu.updateAndUpgrade();    //is this useful or not?
 
         //add printer link
-        M2M_MenuPrintDao m2mDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuPrintDao();
+        M2M_MenuPrintDao m2mDao = AikaStyleApplication.instance.getDaoMaster().newSession().getM2M_MenuPrintDao();
         if(modifyingMenu != null) {
             for (M2M_MenuPrint p : modifyingMenu.getM2M_MenuPrintList()) {
                 m2mDao.delete(p);   //remove a record from db.
@@ -500,42 +487,28 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }
         for (Printer p : addedPrints) { //re-add record into db
             M2M_MenuPrint m2m = new M2M_MenuPrint();
-            m2m.setMenu(menu);
+            m2m.setDishId(menu.getId());
             m2m.setPrint(p);
             m2mDao.insertOrReplace(m2m);
-        }
-
-        //add mark link
-        M2M_MenuMarkDao m2mDao2 = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
-        if(modifyingMenu != null) {
-            for (M2M_MenuMark remark : modifyingMenu.getM2M_MenuMarkList()) {
-                m2mDao2.delete(remark);
-            }
-        }
-        for (Mark p : addedMarks) {
-            M2M_MenuMark m2m = new M2M_MenuMark();
-            m2m.setMenu(menu);
-            m2m.setMark(p);
-            m2mDao2.insertOrReplace(m2m);
         }
 
         //process the popup selection
         if(originalSelectStatus != showMarkSelection.isChecked()){
             if(showMarkSelection.isChecked()){
-                AppData.putCustomData(AppData.forcePopUpMenuList, AppData.getForcePopUpList() + ";" + menu.getID());
+                BarOption.putCustomData(BarOption.forcePopUpMenuList, BarOption.getForcePopUpList() + ";" + menu.getId());
             }else{
-                String existingStr = AppData.getForcePopUpList();
-                int p = existingStr.indexOf(menu.getID());
-                String newValue = existingStr.substring(0, p) + existingStr.substring(p + menu.getID().length());
+                String existingStr = BarOption.getForcePopUpList();
+                int p = existingStr.indexOf(menu.getId().toString());
+                String newValue = existingStr.substring(0, p) + existingStr.substring(p + menu.getId().toString().length());
                 newValue = newValue.replace(";;", ";");
                 if(newValue.startsWith(";")){   //if it's the first, then there will be a ";" left in the position 0.
                     newValue = newValue.substring(1, newValue.length());
                 }
-                AppData.putCustomData(AppData.forcePopUpMenuList, newValue);
+                BarOption.putCustomData(BarOption.forcePopUpMenuList, newValue);
             }
         }
 
-        AppData.updataeLastModifyTime(null);
+        BarOption.updataeLastModifyTime(null);
         modifyingMenu = null;
         findViewById(R.id.menuLayout).setVisibility(View.GONE);
         loadMenu();
@@ -550,10 +523,10 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }
 
         String idxString = displayIdx.getText().toString();
-        double idx = 0.0;
+        Integer idx = 0;
         if(idxString.length() > 0) {
             try {
-                idx = Double.valueOf(idxString);
+                idx = Integer.valueOf(idxString);
             } catch (Exception e) {
                 showToast("Please input a valid number to indicate the display order");
                 return;
@@ -566,13 +539,13 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }else {
             cat = modifyingCategory;
         }
-        cat.setCname(cname.getText().toString());
+        cat.setName1(cname.getText().toString());
         cat.setDisplayIdx(idx);
 
         cat.setState(State.ACTIVE);
-        NingMengStyle.app.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
+        AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
         cat.updateAndUpgrade();
-        AppData.updataeLastModifyTime(null);
+        BarOption.updataeLastModifyTime(null);
         loadCategory();
         cname.setText("");
         modifyingCategory = null;
@@ -581,7 +554,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     @XClick({R.id.selectPrint})
     private void selectPrint(final TextView view) {
-        final List<Printer> data = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getPrinterDao());
+        final List<Printer> data = DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao());
         data.removeAll(addedPrints);
         if (data.size() == 0) {
             showToast("Please add printer first");
@@ -611,7 +584,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
-        List<Mark> data = DaoExpand.queryAllMarks(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> data = DaoExpand.queryAllMarks(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
         data.removeAll(addedMarks);
         if (data.size() == 0) {
             showToast("No marks to select");
@@ -621,10 +594,10 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         final CharSequence[] items = new CharSequence[newData.size()];
         for (int i = 0, s = newData.size(); i < s; i++) {
             Mark p = newData.get(i);
-            items[i] = p.getName() + "_" + p.getId();
+            items[i] = p.getName1() + "_" + p.getId();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        if("1".equals(AppData.getCustomData(AppData.isSingleMark)) || "true".equals(AppData.getCustomData(AppData.isSingleMark))){
+        if("1".equals(BarOption.getCustomData(BarOption.isSingleMark)) || "true".equals(BarOption.getCustomData(BarOption.isSingleMark))){
             builder.setTitle("Please choose a mark");
             builder.setSingleChoiceItems(items, -1, new OnClickListener() {
                 @Override
@@ -659,7 +632,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private void loadCategory() {
 
-        List<Category> list = DaoExpand.queryAllNotDeleted(NingMengStyle.app.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+        List<Category> list = DaoExpand.queryAllNotDeleted(AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         categoryXAdapter.setData(list);
         categoryXAdapter.notifyDataSetChanged();
 
@@ -672,7 +645,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private void loadMenu() {
         if (mCategory != null) {
-            List<Menu> menuList = DaoExpand.queryMenuByCategory(NingMengStyle.app.getDaoMaster().newSession().getMenuDao(), mCategory);
+            List<Dish> menuList = DaoExpand.queryMenuByCategory(AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao(), mCategory);
             Collections.sort(menuList, OrderCategoryFragment.comparator);
             menuXAdapter.setData(menuList);
             menuXAdapter.notifyDataSetChanged();
@@ -689,7 +662,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 //        modifyingCategory = categoryXAdapter.get(i);
 //        showCategory();
 //        TextView tvCategory = (TextView) findViewById(R.id.tvCategory);
-//        tvCategory.setText(modifyingCategory.getCname());
+//        tvCategory.setText(modifyingCategory.getName1());
 //
 //        return true;
 //    }

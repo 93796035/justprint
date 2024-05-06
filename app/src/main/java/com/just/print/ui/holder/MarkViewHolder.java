@@ -30,7 +30,7 @@ public class MarkViewHolder extends XViewHolder<Mark> {
 
     @Override
     public void onResetView(Mark mark, int i) {
-        textView.setText(mark.getName());
+        textView.setText(mark.getName1());
         textView.setChecked(mark.select);
     }
 }

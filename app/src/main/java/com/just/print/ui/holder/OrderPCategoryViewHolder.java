@@ -27,7 +27,7 @@ public class OrderPCategoryViewHolder extends XExpadnViewHolder<Category> {
 
     @Override
     public void onResetView(Category category, int i) {
-        cname.setText(category.getCname());
+        cname.setText(category.getName1());
     }
 
     @Override

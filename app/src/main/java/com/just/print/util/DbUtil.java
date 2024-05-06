@@ -3,8 +3,8 @@ package com.just.print.util;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Base64;
 
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.db.bean.Printer;
 
 import org.json.JSONObject;
@@ -32,8 +32,8 @@ public class DbUtil extends Thread{
     final private static String DATABASE_NAME_PREFFIX = "JustPrinter_"; //data/user/0/com.just.print/databases/ ; /data/data/com.whatsapp/databases/msgstore.db
     private static File file = null;
 
-    String license = AppData.getLicense();
-    String storName = AppData.getShopName();
+    String license = BarOption.getLicense();
+    String storName = BarOption.getShopName();
     boolean isUpload = false;
     /**
      * Call this method from any activity in your app (
@@ -42,7 +42,7 @@ public class DbUtil extends Thread{
      */
     public static void syncDbOntoServer(String license, String storeName, boolean isUpload) {
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
-        file = NingMengStyle.app.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + AppData.getShopName(NingMengStyle.app.getApplicationContext()));
+        file = AikaStyleApplication.instance.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + BarOption.getShopName(AikaStyleApplication.instance.getApplicationContext()));
         if (file.exists()){
             DbUtil util = new DbUtil();
             if(license != null && license.length() > 0){
@@ -55,7 +55,7 @@ public class DbUtil extends Thread{
             util.start();
         }else{
             L.e("DatabaseUtil", "can not find database!", null);
-            ToastUtil.showToast(NingMengStyle.app.getApplicationContext(), "Can not find the menu file.");
+            ToastUtil.showToast(AikaStyleApplication.instance.getApplicationContext(), "Can not find the menu file.");
         }
     }
 
@@ -67,14 +67,14 @@ public class DbUtil extends Thread{
         }catch(Exception e){
             L.e("DatabaseUtil", "Exception when encoding content into json: license+shopName:" + license + shopName + " cofigrationStr:" + getConfigurations(), e);
         }
-        AppData.putCustomData(AppData.ContentToSend, json.toString());
-        new NetUtils(AppData.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig"), json.toString()).start();
+        BarOption.putCustomData(BarOption.ContentToSend, json.toString());
+        new NetUtils(BarOption.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig"), json.toString()).start();
     }
 
     private static String getConfigurations() {
         StringBuilder configurations = new StringBuilder();
-        for(int i = 0; i < AppData.keysToSync.length; i++) {
-            configurations.append(",").append(AppData.keysToSync[i]).append(":").append(AppData.getCustomData(AppData.keysToSync[i]));
+        for(int i = 0; i < BarOption.keysToSync.length; i++) {
+            configurations.append(",").append(BarOption.keysToSync[i]).append(":").append(BarOption.getCustomData(BarOption.keysToSync[i]));
         }
         return configurations.substring(1);
     }
@@ -101,19 +101,19 @@ public class DbUtil extends Thread{
         //            printer.setFirstPrint(1);
         //        }
         printer.setState(com.just.print.db.expand.State.ACTIVE);
-        NingMengStyle.app.getDaoMaster().newSession().getPrinterDao().insert(printer);
+        AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao().insert(printer);
         printer.updateAndUpgrade();
     }
 
     @Override
     public void run() {
         super.run();
-        if(AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
+        if(AppUtils.hasInternet(AikaStyleApplication.instance.getApplicationContext())){
 
             HttpURLConnection urlConnection = null;
             URL url = null;
             try {
-                StringBuilder sb = new StringBuilder(AppData.getSERVER_URL());
+                StringBuilder sb = new StringBuilder(BarOption.getSERVER_URL());
 
                 if(isUpload) {
                     sb.append("uploadDb?filepath=");
@@ -122,7 +122,7 @@ public class DbUtil extends Thread{
                 }
                 sb.append(license + storName);
                 sb.append("&submitDate=");
-                sb.append(isUpload ? AppData.getLastModifyTime() : "");
+                sb.append(isUpload ? BarOption.getLastModifyTime() : "");
                 url = new URL(sb.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -176,7 +176,7 @@ public class DbUtil extends Thread{
                         writeDBByte(receivedContent);
                         ToastUtil.showToast("menu in this device has been refreshed successfully.");
                         //clean the bills
-                        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteAll();
+                        AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao().deleteAll();
                     }else{
                         ToastUtil.showToast("Menu is saved onto server successfully.");
                     }
@@ -192,7 +192,7 @@ public class DbUtil extends Thread{
                 urlConnection.disconnect();//使用完关闭TCP连接，释放资源
             }
         }else{
-            ToastUtil.showToast(NingMengStyle.app.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
+            ToastUtil.showToast(AikaStyleApplication.instance.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
         }
     }
 
@@ -222,8 +222,8 @@ public class DbUtil extends Thread{
 
     public static void writeDBByte(byte[] datas) {
 
-        File file = NingMengStyle.app.getApplicationContext().getDatabasePath(
-                DATABASE_NAME_PREFFIX + AppData.getShopName(NingMengStyle.app.getApplicationContext()));
+        File file = AikaStyleApplication.instance.getApplicationContext().getDatabasePath(
+                DATABASE_NAME_PREFFIX + BarOption.getShopName(AikaStyleApplication.instance.getApplicationContext()));
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }

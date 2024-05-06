@@ -28,7 +28,7 @@ public class ConfigBillViewHolder extends XViewHolder<Bill> {
     @Override
     public void onResetView(Bill bill, int i) {
         String billId = bill.getId().toString();
-        String tableName = bill.getBillIdx();
+        String tableName = bill.getTableName();
 //        String[] parts = billId.split("\n");
 
         if(billId.length() > 3){

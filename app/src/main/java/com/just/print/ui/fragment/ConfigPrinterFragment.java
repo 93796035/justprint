@@ -10,7 +10,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Printer;
 import com.just.print.sys.server.WifiPrintService;
@@ -68,7 +68,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
     @XClick({R.id.verifyPassword})
     private void onVerifyPassword(View view) {
         String inputContent = this.password.getText().toString().trim();
-        if(!AppData.getAdminPassword().equals(inputContent)){
+        if(!BarOption.getAdminPassword().equals(inputContent)){
             showToast("Please input the right password");
             return;
         }
@@ -110,7 +110,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
 
         name.setText("");
         checkBox.setChecked(false);
-        AppData.updataeLastModifyTime(null);
+        BarOption.updataeLastModifyTime(null);
         loadPrinter();
     }
 
@@ -149,7 +149,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
             mModifyCache.update();
             mModifyCache = null;
             if(ip.indexOf(".") == -1){
-                NetUtils.sendToCloudPrinter(AppData.DEFAULT_LABELPRINTER_SIZE,ip);
+                NetUtils.sendToCloudPrinter(BarOption.DEFAULT_LABELPRINTER_SIZE,ip);
             }
             loadPrinter();
         }

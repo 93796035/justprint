@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragment;
 import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
@@ -27,7 +27,7 @@ public class UploadingConfirmFragment extends BaseFragment{
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
 
-        String lastSyncDate = AppData.getLastModifyTime();
+        String lastSyncDate = BarOption.getLastModifyTime();
         if(lastSyncDate == null || lastSyncDate.length() == 0){
             lastSyncDate = "1";
         }
@@ -35,12 +35,12 @@ public class UploadingConfirmFragment extends BaseFragment{
 
     @XClick({R.id.btnConfirmUploadOK})
     private void onButtonOK(){
-        String license = AppData.getLicense();
+        String license = BarOption.getLicense();
         if(license.length() < 6){
             showToast("Please activate the application first.");
             return;
         }
-        DbUtil.syncDbOntoServer(license, AppData.getShopName(),true);
+        DbUtil.syncDbOntoServer(license, BarOption.getShopName(),true);
         getActivity().finish();
     }
 

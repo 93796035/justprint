@@ -1,7 +1,6 @@
 package com.just.print.db.bean;
 
 import com.just.print.db.dao.DaoSession;
-
 import de.greenrobot.dao.DaoException;
 
 import com.just.print.db.dao.MarkDao;
@@ -10,30 +9,36 @@ import com.just.print.db.dao.MarkDao;
 
 // KEEP INCLUDES - put your custom includes here
 // KEEP INCLUDES END
-
 /**
  * Entity mapped to table MARK.
  */
 public class Mark {
 
     private Long id;
-    private String name;
+    private String name1;
+    private String name2;
+    private String name3;
+    private Integer type;
     private Integer state;
-    private Long version;
-    private int qt; //this property is transit not in db.
-    /**
-     * Used to resolve relations
-     */
+    private Integer version;
+
+    /** Used to resolve relations */
     private transient DaoSession daoSession;
 
-    /**
-     * Used for active entity operations.
-     */
-    private transient MarkDao markDao;
+    /** Used for active entity operations. */
+    private transient MarkDao myDao;
 
 
     // KEEP FIELDS - put your custom fields here
     public boolean select;
+
+    private transient int qt;
+    public int getQt() {
+        return qt;
+    }
+    public void setQt(int num) {
+        this.qt = num;
+    }
     // KEEP FIELDS END
 
     public Mark() {
@@ -43,32 +48,61 @@ public class Mark {
         this.id = id;
     }
 
-    public Mark(Long id, String name, Integer state, Long version) {
+    public Mark(Long id, String name1, String name2, String name3, Integer type, Integer state, Integer version) {
         this.id = id;
-        this.name = name;
+        this.name1 = name1;
+        this.name2 = name2;
+        this.name3 = name3;
+        this.type = type;
         this.state = state;
         this.version = version;
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        markDao = daoSession != null ? daoSession.getMarkDao() : null;
+        myDao = daoSession != null ? daoSession.getMarkDao() : null;
     }
 
-    public String getName() {
-        return name;
+    public Long getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Long getId() { return id;}
+    public String getName1() {
+        return name1;
+    }
 
-    public void setId(Long id) { this.id = id;}
+    public void setName1(String name1) {
+        this.name1 = name1;
+    }
+
+    public String getName2() {
+        return name2;
+    }
+
+    public void setName2(String name2) {
+        this.name2 = name2;
+    }
+
+    public String getName3() {
+        return name3;
+    }
+
+    public void setName3(String name3) {
+        this.name3 = name3;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
 
     public Integer getState() {
         return state;
@@ -78,90 +112,52 @@ public class Mark {
         this.state = state;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 
-    public Integer getQt() { return qt; }
-
-    public void setQt(int qt){ this.qt = qt; }
-
-    /**
-     * Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context.
-     */
+    /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */
     public void delete() {
-        if (markDao == null) {
+        if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
-        }
-        markDao.delete(this);
+        }    
+        myDao.delete(this);
     }
 
-    /**
-     * Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context.
-     */
+    /** Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context. */
     public void update() {
-        if (markDao == null) {
+        if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
-        }
-        markDao.update(this);
+        }    
+        myDao.update(this);
     }
 
-    /**
-     * Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context.
-     */
+    /** Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context. */
     public void refresh() {
-        if (markDao == null) {
+        if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
-        }
-        markDao.refresh(this);
+        }    
+        myDao.refresh(this);
     }
 
     // KEEP METHODS - put your custom methods here
-
-    @Override
-    public boolean equals(Object o) {
-
-        return o instanceof Mark && getName().equals(((Mark)o).getName());
-    }
-
-    public void updateAndUpgrade() {
-        //we use version as price so should not update version any more.
-        //version = com.just.print.db.expand.DaoExpand.queryMaxVersion(markDao);
-        update();
-    }
-
-    public void logicDelete() {
-        state = com.just.print.db.expand.State.DELETED;
-        updateAndUpgrade();
-    }
-
-    @Override
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        if(qt == 0) {
-           return "";
-        }else if(qt == 1) {
-           return name;
-        }else{
-           return name + " x" + qt;
-        }
-    }
-
     public Mark clone(){
         Mark mark = new Mark();
-        mark.setQt(getQt());
-        mark.setName(getName());
-        mark.setState(getState());
-        mark.setVersion(getVersion());
+        mark.setName1(name1);
+        mark.setName2(name2);
+        mark.setName3(name3);
+        mark.setId(id);
+        mark.setState(state);
+        mark.setQt(qt);
+        mark.setType(type);
+        mark.setVersion(version);
+        mark.__setDaoSession(daoSession);
         return mark;
     }
+    // KEEP METHODS END
 
 }

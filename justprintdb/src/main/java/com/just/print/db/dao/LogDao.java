@@ -29,7 +29,7 @@ public class LogDao extends AbstractDao<Log, Long> {
         public final static Property Date = new Property(3, java.util.Date.class, "date", false, "DATE");
         public final static Property LogType = new Property(4, Integer.class, "logType", false, "LOG_TYPE");
         public final static Property State = new Property(5, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(6, Long.class, "version", false, "VERSION");
+        public final static Property Version = new Property(6, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -98,7 +98,7 @@ public class LogDao extends AbstractDao<Log, Long> {
             stmt.bindLong(6, state);
         }
  
-        Long version = entity.getVersion();
+        Integer version = entity.getVersion();
         if (version != null) {
             stmt.bindLong(7, version);
         }
@@ -126,7 +126,7 @@ public class LogDao extends AbstractDao<Log, Long> {
             cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)), // date
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // logType
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // state
-            cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6) // version
+            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6) // version
         );
         return entity;
     }
@@ -140,7 +140,7 @@ public class LogDao extends AbstractDao<Log, Long> {
         entity.setDate(cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)));
         entity.setLogType(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
         entity.setState(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
-        entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6));
+        entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
      }
     
     /** @inheritdoc */

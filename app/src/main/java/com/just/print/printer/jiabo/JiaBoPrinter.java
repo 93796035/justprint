@@ -2,7 +2,7 @@ package com.just.print.printer.jiabo;
 
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.LabelCommand;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +75,7 @@ public class JiaBoPrinter {
 
     private static List<Vector<Byte>> prepareWifiLabelContent(String content, int width) {
         List<Vector<Byte>> list = new ArrayList<Vector<Byte>>();
-        String tableMarkStr = AppData.getCustomData(AppData.TableMark);
+        String tableMarkStr = BarOption.getCustomData(BarOption.TableMark);
         if(tableMarkStr == null || tableMarkStr.length() == 0){
             tableMarkStr = "*";
         }
@@ -116,7 +116,7 @@ public class JiaBoPrinter {
         }
         //get the lines for each label
         int linesOfEachLabel = 9;
-        String size = AppData.getCustomData(AppData.labelsize);
+        String size = BarOption.getCustomData(BarOption.labelsize);
         int w = 40;
         int h = 30;
         if(size != null){
@@ -131,7 +131,7 @@ public class JiaBoPrinter {
         }else if(h == 40){
             linesOfEachLabel = 9;
         }
-        String labelLine = AppData.getCustomData(AppData.labelLines);
+        String labelLine = BarOption.getCustomData(BarOption.labelLines);
         if (labelLine != null && labelLine.length() > 0) {
             try {
                 linesOfEachLabel = Integer.valueOf(labelLine);
@@ -148,7 +148,7 @@ public class JiaBoPrinter {
             tsc.addSize(w, h); // 设置标签尺寸宽高，按照实际尺寸设置 单位mm
 
             int gap = 2;
-            String gapStr = AppData.getCustomData(AppData.gap);
+            String gapStr = BarOption.getCustomData(BarOption.gap);
             if (gapStr != null && gapStr.length() > 0) {
                 try {
                     gap = Integer.valueOf(gapStr);
@@ -163,14 +163,14 @@ public class JiaBoPrinter {
 
             int startX = 0;
             int startY = 0;
-            String startXStr = AppData.getCustomData(AppData.StartX);
+            String startXStr = BarOption.getCustomData(BarOption.StartX);
             if (startXStr != null && startXStr.length() > 0) {
                 try {
                     startX = Integer.valueOf(startXStr);
                 } catch (Exception e) {
                 }
             }
-            String startYStr = AppData.getCustomData(AppData.StartY);
+            String startYStr = BarOption.getCustomData(BarOption.StartY);
             if (startYStr != null && startYStr.length() > 0) {
                 try {
                     startY = Integer.valueOf(startYStr);
@@ -179,7 +179,7 @@ public class JiaBoPrinter {
             }
             tsc.addReference(startX, startY);// 设置原点坐标
 
-            String denStr = AppData.getDensity();
+            String denStr = BarOption.getDensity();
             LabelCommand.DENSITY density = getMatchedEnum(denStr, LabelCommand.DENSITY.values());
             if(density == null) {
                 density = LabelCommand.DENSITY.DNESITY4;
@@ -190,7 +190,7 @@ public class JiaBoPrinter {
 
             LabelCommand.FONTMUL fontMul = LabelCommand.FONTMUL.MUL_1;
             int fontSize = 1;
-            String fontSizeStr = AppData.getCustomData(AppData.labelFont);
+            String fontSizeStr = BarOption.getCustomData(BarOption.labelFont);
             if (fontSizeStr != null && fontSizeStr.length() > 0) {
                 try {
                     fontSize = Integer.valueOf(fontSizeStr);

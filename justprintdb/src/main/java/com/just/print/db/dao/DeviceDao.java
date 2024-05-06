@@ -25,6 +25,8 @@ public class DeviceDao extends AbstractDao<Device, Void> {
     public static class Properties {
         public final static Property Ip = new Property(0, String.class, "ip", false, "IP");
         public final static Property UserName = new Property(1, String.class, "userName", false, "USER_NAME");
+        public final static Property State = new Property(2, Integer.class, "state", false, "STATE");
+        public final static Property Version = new Property(3, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -44,7 +46,9 @@ public class DeviceDao extends AbstractDao<Device, Void> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'DEVICE' (" + //
                 "'IP' TEXT," + // 0: ip
-                "'USER_NAME' TEXT);"); // 1: userName
+                "'USER_NAME' TEXT," + // 1: userName
+                "'STATE' INTEGER," + // 2: state
+                "'VERSION' INTEGER);"); // 3: version
     }
 
     /** Drops the underlying database table. */
@@ -67,6 +71,16 @@ public class DeviceDao extends AbstractDao<Device, Void> {
         if (userName != null) {
             stmt.bindString(2, userName);
         }
+ 
+        Integer state = entity.getState();
+        if (state != null) {
+            stmt.bindLong(3, state);
+        }
+ 
+        Integer version = entity.getVersion();
+        if (version != null) {
+            stmt.bindLong(4, version);
+        }
     }
 
     @Override
@@ -86,7 +100,9 @@ public class DeviceDao extends AbstractDao<Device, Void> {
     public Device readEntity(Cursor cursor, int offset) {
         Device entity = new Device( //
             cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // ip
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1) // userName
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // userName
+            cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2), // state
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3) // version
         );
         return entity;
     }
@@ -96,6 +112,8 @@ public class DeviceDao extends AbstractDao<Device, Void> {
     public void readEntity(Cursor cursor, Device entity, int offset) {
         entity.setIp(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
         entity.setUserName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setState(cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2));
+        entity.setVersion(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
      }
     
     /** @inheritdoc */

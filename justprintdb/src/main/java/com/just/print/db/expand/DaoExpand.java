@@ -4,15 +4,16 @@ import android.database.Cursor;
 
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Menu;
 import com.just.print.db.bean.Printer;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.dao.BillDao;
+import com.just.print.db.dao.DishDao;
 import com.just.print.db.dao.MarkDao;
-import com.just.print.db.dao.MenuDao;
 import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.SaleRecordDao;
+import com.just.print.db.dao.UserDao;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,28 +24,32 @@ import de.greenrobot.dao.query.QueryBuilder;
 
 public final class DaoExpand {
 
+    static public <T, K> List<T> queryAllNotDeletedUsers(AbstractDao<T, K> dao) {
+        return dao.queryBuilder().where(UserDao.Properties.State.lt(State.DELETED)).list();
+    }
+
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao) {
         return queryAllNotDeleted(dao).list();
     }
 
     static public <T, K> List<T> queryAllNotDeletedMark(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Version.gt(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.Version.gt(State.DELETED)).list();
     }
 
-    static public List<Menu> queryMenuByCategory(MenuDao menuDao, Category category) {
-        return addQueryBuilderNotDelete(menuDao.queryBuilder().where(MenuDao.Properties.Cid.eq(category.getId()))).list();
+    static public List<Dish> queryMenuByCategory(DishDao menuDao, Category category) {
+        return addQueryBuilderNotDelete(menuDao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()))).list();
     }
 
     public static final <T> QueryBuilder<T> addQueryBuilderNotDelete(QueryBuilder<T> builder) {
-        return builder.where(MenuDao.Properties.State.notEq(State.DELETED));
+        return builder.where(DishDao.Properties.State.notEq(State.DELETED));
     }
 
     static public <T, K> QueryBuilder<T> queryAllNotDeleted(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.DELETED));
+        return dao.queryBuilder().where(DishDao.Properties.State.notEq(State.DELETED));
     }
 
-    static public List<Menu> queryMenuByCategory(Category category, MenuDao dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Cid.eq(category.getId()), MenuDao.Properties.State.notEq(State.DELETED)).list();
+    static public List<Dish> queryMenuByCategory(Category category, DishDao dao) {
+        return dao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()), DishDao.Properties.State.notEq(State.DELETED)).list();
     }
 
     static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {
@@ -54,7 +59,7 @@ public final class DaoExpand {
         }
         List<SaleRecord> records = dao.loadAll();
         for (int i = records.size() - 1; i >= 0; i--) {
-            if (!billId.equals(records.get(i).getbId())) {
+            if (!billId.equals(records.get(i).getBillId())) {
                 records.remove(i);
             }
         }
@@ -64,34 +69,34 @@ public final class DaoExpand {
     }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao, String shop) {
-        return dao.queryBuilder().where(MenuDao.Properties.State.notEq(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.State.notEq(State.DELETED)).list();
     }
 
     static public <T, K> List<T> queryAllTables(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(MenuDao.Properties.Version.le(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.Version.le(State.DELETED)).list();
     }
 
     public static List<Mark> queryAllMarks(MarkDao markDao) {
-        return markDao.queryBuilder().where(MenuDao.Properties.Version.gt(State.DELETED)).list();
+        return markDao.queryBuilder().where(DishDao.Properties.Version.gt(State.DELETED)).list();
     }
 
-    static public List<Menu> queryFuzzyMenu(MenuDao menuDao, String ID) {
-        List<Menu> lists = menuDao.queryBuilder().where(MenuDao.Properties.ID.eq(ID)).list();
+    static public List<Dish> queryFuzzyMenu(DishDao menuDao, String ID) {
+        List<Dish> lists = menuDao.queryBuilder().where(DishDao.Properties.Id.eq(ID)).list();
         if(lists == null || lists.size() == 0){
-            lists = menuDao.queryBuilder().where(MenuDao.Properties.ID.like(ID + "%")).list();
+            lists = menuDao.queryBuilder().where(DishDao.Properties.Id.like(ID + "%")).list();
         }
         if(lists == null || lists.size() == 0){
-            lists = menuDao.queryBuilder().where(MenuDao.Properties.ID.like("%" + ID + "%")).list();
+            lists = menuDao.queryBuilder().where(DishDao.Properties.Id.like("%" + ID + "%")).list();
         }
         return lists;
     }
 
-    static public long queryMaxVersion(AbstractDao dao) {
+    static public int queryMaxVersion(AbstractDao dao) {
 
-        long result = -1;
+        int result = -1;
         Cursor c = dao.getDatabase().rawQuery(String.format("select max(%s) from %s", "VERSION", dao.getTablename()), new String[]{});
         if (c.moveToFirst())
-            result = c.getLong(0);
+            result = c.getInt(0);
         c.close();
         return result;
     }

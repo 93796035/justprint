@@ -1,16 +1,16 @@
 package com.just.print.sys.model;
 
-import com.just.print.db.bean.Menu;
+import com.just.print.db.bean.Dish;
 
 public class DishesDetail {
-    private Menu dish;
+    private Dish dish;
     private int dishNum;
 
-    public Menu getDish() {
+    public Dish getDish() {
         return dish;
     }
 
-    public void setDish(Menu dish) {
+    public void setDish(Dish dish) {
         this.dish = dish;
     }
 

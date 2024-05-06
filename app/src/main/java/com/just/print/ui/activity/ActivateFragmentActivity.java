@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
@@ -27,18 +27,18 @@ public class ActivateFragmentActivity extends BaseFragmentActivity {
     @XClick({R.id.inputCodeButton})
     void submit(@XGetValueByView(fromId = R.id.inputCodeText) TextView textView) {
         //check if has internet.
-        if(!AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
+        if(!AppUtils.hasInternet(AikaStyleApplication.instance.getApplicationContext())){
             showToast("Please connect the device to internet, then try again.");
             return;
         }
 
         String inputedSN = String.valueOf(textView.getText());
-        AppData.setActivateCode(inputedSN, textView);
+        BarOption.setActivateCode(inputedSN, textView);
         //keep waiting untile the number is bigger than 0, other wise stop moving forward.
         while(true) {
             //when inputted activate code, why go to RegisterFragmentActivity?(that activity will check name and store name then go to Main Interface)
             AppUtils.sleep(1000);
-            String number = AppData.getCustomData(AppData.number);
+            String number = BarOption.getCustomData(BarOption.number);
             if(Long.valueOf(number) > 0){
                 startActivity(new Intent(this, RegisterFragmentActivity.class));
                 break;

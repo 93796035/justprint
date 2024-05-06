@@ -4,7 +4,7 @@ import android.content.Context;
 import android.widget.ToggleButton;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.db.bean.Mark;
 import com.stupid.method.adapter.XViewHolder;
 
@@ -37,7 +37,7 @@ public class OrderIdentifierMarkViewHolder extends XViewHolder<Mark>{
     @Override
     public void onCreate(Context context) {
         textView = (ToggleButton) findViewById(R.id.tagid);
-        textView.setTextColor(AppData.getThemColor2());
+        textView.setTextColor(BarOption.getThemColor2());
         textView.setTextOff(null);
         textView.setTextOn(null);
         textView.setOnClickListener(this);
@@ -48,7 +48,7 @@ public class OrderIdentifierMarkViewHolder extends XViewHolder<Mark>{
 //        L.d(TAG,"onResetView");
 //        L.d(TAG,"hashcode: " + String.valueOf(mark.hashCode()));
 //        L.d(TAG,"item: " + String.valueOf(i) + "select: " + String.valueOf(mark.select));
-        textView.setText(mark.getName());
+        textView.setText(mark.getName1());
         textView.setChecked(mark.select);
     }
 }

@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragment;
 import com.just.print.net.UDPService;
 import com.just.print.sys.model.AbsModel;
@@ -43,8 +43,8 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        registeredName = AppData.getUserName(getContext());
-        String shopName = AppData.getShopName(getContext());
+        registeredName = BarOption.getUserName(getContext());
+        String shopName = BarOption.getShopName(getContext());
         if (!StringUtils.isEmpty(registeredName)) {
             userName.setText(registeredName);
             userName.setEnabled(false);
@@ -53,7 +53,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         }
         if (!StringUtils.isEmpty(shopName)) {
             //showToast(shopName);
-            AppData.createShopDB(getContext(), shopName);
+            BarOption.createShopDB(getContext(), shopName);
             startActivity(new Intent(getContext(), LoginFragmentActivity.class));
             getActivity().finish();
         }
@@ -70,7 +70,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
 //        if (!AppData.existShop(getContext(), shopName)) {
 //            QueryShopRequest request = new QueryShopRequest();
 //            request.setShopName(shopName);
-//            NingMengStyle.app.mUDPService.sendRequest(request, 1, this);
+//            AikaStyle.app.mUDPService.sendRequest(request, 1, this);
 //        }
 //    }
 
@@ -89,8 +89,8 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
                     @Override
                     public void run() {
                         if (status && result2 != null && result2.isExists()) {
-                            AppData.saveShopName(getContext(), result2.getShopName());
-                            AppData.createShopDB(getContext(), result2.getShopName());
+                            BarOption.saveShopName(getContext(), result2.getShopName());
+                            BarOption.createShopDB(getContext(), result2.getShopName());
                             //showToast("店铺存在");
                             startActivity(new Intent(getContext(), OrderFragmentActivity.class));
                             getActivity().finish();
@@ -122,14 +122,14 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
             int p = userName.indexOf("-p:");
             if(p > -1){// means theres parameters
                 String password = userName.substring(p+3).trim();
-                AppData.putCustomData(AppData.userPassword, password);
+                BarOption.putCustomData(BarOption.userPassword, password);
                 userName = userName.substring(0, p).trim();
             }
             int n = userName.lastIndexOf("\n");
             if(n > -1){// means theres parameters
                 userName = userName.substring(n+1).trim();
             }
-            AppData.saveUserName(getContext(), userName);
+            BarOption.saveUserName(getContext(), userName);
             this.userName.setEnabled(false);
         }
     }
@@ -144,7 +144,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         int p = shopName.indexOf("-p:");
         if(p > -1){// means theres parameters
             String password = shopName.substring(p+3).trim();
-            AppData.putCustomData(AppData.adminPassword, password);
+            BarOption.putCustomData(BarOption.adminPassword, password);
             shopName = shopName.substring(0, p).trim();
         }
 
@@ -159,8 +159,8 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
             }
         }
 
-        AppData.saveShopName(getContext(), shopName);
-        AppData.createShopDB(getContext(), shopName);
+        BarOption.saveShopName(getContext(), shopName);
+        BarOption.createShopDB(getContext(), shopName);
 
         DbUtil.createPrinter("192.168.8.10","10",1,1, "");
         DbUtil.createPrinter("192.168.8.20","20",1,1, "");

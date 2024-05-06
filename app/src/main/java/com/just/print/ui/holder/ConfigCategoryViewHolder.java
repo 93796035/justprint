@@ -29,6 +29,6 @@ public class ConfigCategoryViewHolder extends XViewHolder<Category> {
 
     @Override
     public void onResetView(Category category, int i) {
-        cname.setText(category.getCname());
+        cname.setText(category.getName1());
     }
 }

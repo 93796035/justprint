@@ -4,12 +4,12 @@ import android.content.Context;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.db.bean.Menu;
+import com.just.print.db.bean.Dish;
 import com.stupid.method.adapter.expand.XExpadnViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-public class OrderCCategoryViewHolder extends XExpadnViewHolder<Menu> {
+public class OrderCCategoryViewHolder extends XExpadnViewHolder<Dish> {
     @XViewByID(R.id.cname)
     TextView cname;
 
@@ -26,8 +26,8 @@ public class OrderCCategoryViewHolder extends XExpadnViewHolder<Menu> {
     }
 
     @Override
-    public void onResetView(Menu menu, int i) {
-        cname.setText(menu.getName());
+    public void onResetView(Dish menu, int i) {
+        cname.setText(menu.getName1());
     }
 
     @Override

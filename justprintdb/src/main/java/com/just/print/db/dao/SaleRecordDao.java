@@ -24,12 +24,19 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Bid = new Property(1, String.class, "mname", false, "B_ID");
-        public final static Property Mname = new Property(2, String.class, "mname", false, "M_NAME");
-        public final static Property Number = new Property(3, Double.class, "number", false, "NUMBER");
-        public final static Property Price = new Property(4, Double.class, "price", false, "PRICE");
-        public final static Property State = new Property(5, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(6, Long.class, "version", false, "VERSION");
+        public final static Property TableName = new Property(1, String.class, "tableName", false, "TABLE_NAME");
+        public final static Property CustomerNumber = new Property(2, String.class, "customerNumber", false, "CUSTOMER_NUMBER");
+        public final static Property OpenTime = new Property(3, String.class, "openTime", false, "OPEN_TIME");
+        public final static Property ProductId = new Property(4, Integer.class, "productId", false, "PRODUCT_ID");
+        public final static Property Amount = new Property(5, Float.class, "amount", false, "AMOUNT");
+        public final static Property TotalPrice = new Property(6, Float.class, "totalPrice", false, "TOTAL_PRICE");
+        public final static Property Discount = new Property(7, Float.class, "discount", false, "DISCOUNT");
+        public final static Property Modifications = new Property(8, String.class, "modifications", false, "MODIFICATIONS");
+        public final static Property UserId = new Property(9, Integer.class, "userId", false, "USER_ID");
+        public final static Property BillId = new Property(10, Integer.class, "billId", false, "BILL_ID");
+        public final static Property CreatedTime = new Property(11, String.class, "createdTime", false, "CREATED_TIME");
+        public final static Property State = new Property(12, Integer.class, "state", false, "STATE");
+        public final static Property Version = new Property(13, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -48,13 +55,20 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'SALE_RECORD' (" + //
-                "'_id' INTEGER PRIMARY KEY ASC UNIQUE ," + // 0: id
-                "'B_ID' TEXT," + // 1: bill id
-                "'M_NAME' TEXT," + // 2: mname
-                "'NUMBER' REAL," + // 3: number
-                "'PRICE' REAL," + // 4: price
-                "'STATE' INTEGER," + // 5: state
-                "'VERSION' INTEGER);"); // 6: version
+                "'_id' INTEGER PRIMARY KEY ," + // 0: id
+                "'TABLE_NAME' TEXT," + // 1: tableName
+                "'CUSTOMER_NUMBER' TEXT," + // 2: customerNumber
+                "'OPEN_TIME' TEXT," + // 3: openTime
+                "'PRODUCT_ID' INTEGER," + // 4: productId
+                "'AMOUNT' REAL," + // 5: amount
+                "'TOTAL_PRICE' REAL," + // 6: totalPrice
+                "'DISCOUNT' REAL," + // 7: discount
+                "'MODIFICATIONS' TEXT," + // 8: modifications
+                "'USER_ID' INTEGER," + // 9: userId
+                "'BILL_ID' INTEGER," + // 10: billId
+                "'CREATED_TIME' TEXT," + // 11: createdTime
+                "'STATE' INTEGER," + // 12: state
+                "'VERSION' INTEGER);"); // 13: version
     }
 
     /** Drops the underlying database table. */
@@ -72,35 +86,70 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         if (id != null) {
             stmt.bindLong(1, id);
         }
-
-        String bid = entity.getbId();
-        if (bid != null) {
-            stmt.bindString(2, bid);
-        }
-
-        String mname = entity.getMname();
-        if (mname != null) {
-            stmt.bindString(3, mname);
-        }
-
-        Double number = entity.getNumber();
-        if (number != null) {
-            stmt.bindDouble(4, number);
+ 
+        String tableName = entity.getTableName();
+        if (tableName != null) {
+            stmt.bindString(2, tableName);
         }
  
-        Double price = entity.getPrice();
-        if (price != null) {
-            stmt.bindDouble(5, price);
+        String customerNumber = entity.getCustomerNumber();
+        if (customerNumber != null) {
+            stmt.bindString(3, customerNumber);
+        }
+ 
+        String openTime = entity.getOpenTime();
+        if (openTime != null) {
+            stmt.bindString(4, openTime);
+        }
+ 
+        Integer productId = entity.getProductId();
+        if (productId != null) {
+            stmt.bindLong(5, productId);
+        }
+ 
+        Float amount = entity.getAmount();
+        if (amount != null) {
+            stmt.bindDouble(6, amount);
+        }
+ 
+        Float totalPrice = entity.getTotalPrice();
+        if (totalPrice != null) {
+            stmt.bindDouble(7, totalPrice);
+        }
+ 
+        Float discount = entity.getDiscount();
+        if (discount != null) {
+            stmt.bindDouble(8, discount);
+        }
+ 
+        String modifications = entity.getModifications();
+        if (modifications != null) {
+            stmt.bindString(9, modifications);
+        }
+ 
+        Integer userId = entity.getUserId();
+        if (userId != null) {
+            stmt.bindLong(10, userId);
+        }
+ 
+        Integer billId = entity.getBillId();
+        if (billId != null) {
+            stmt.bindLong(11, billId);
+        }
+ 
+        String createdTime = entity.getCreatedTime();
+        if (createdTime != null) {
+            stmt.bindString(12, createdTime);
         }
  
         Integer state = entity.getState();
         if (state != null) {
-            stmt.bindLong(6, state);
+            stmt.bindLong(13, state);
         }
  
-        Long version = entity.getVersion();
+        Integer version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(7, version);
+            stmt.bindLong(14, version);
         }
     }
 
@@ -121,12 +170,19 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     public SaleRecord readEntity(Cursor cursor, int offset) {
         SaleRecord entity = new SaleRecord( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // mname
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // mname
-            cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3), // number
-            cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4), // price
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // state
-            cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6) // version
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // tableName
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // customerNumber
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // openTime
+            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // productId
+            cursor.isNull(offset + 5) ? null : cursor.getFloat(offset + 5), // amount
+            cursor.isNull(offset + 6) ? null : cursor.getFloat(offset + 6), // totalPrice
+            cursor.isNull(offset + 7) ? null : cursor.getFloat(offset + 7), // discount
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // modifications
+            cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // userId
+            cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // billId
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // createdTime
+            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // state
+            cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13) // version
         );
         return entity;
     }
@@ -135,12 +191,19 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     @Override
     public void readEntity(Cursor cursor, SaleRecord entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setbId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setMname(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setNumber(cursor.isNull(offset + 3) ? null : cursor.getDouble(offset + 3));
-        entity.setPrice(cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4));
-        entity.setState(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
-        entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6));
+        entity.setTableName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setCustomerNumber(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setOpenTime(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setProductId(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
+        entity.setAmount(cursor.isNull(offset + 5) ? null : cursor.getFloat(offset + 5));
+        entity.setTotalPrice(cursor.isNull(offset + 6) ? null : cursor.getFloat(offset + 6));
+        entity.setDiscount(cursor.isNull(offset + 7) ? null : cursor.getFloat(offset + 7));
+        entity.setModifications(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setUserId(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
+        entity.setBillId(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
+        entity.setCreatedTime(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setState(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
+        entity.setVersion(cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13));
      }
     
     /** @inheritdoc */

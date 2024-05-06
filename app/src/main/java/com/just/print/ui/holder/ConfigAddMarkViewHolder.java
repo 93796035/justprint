@@ -32,6 +32,6 @@ public class ConfigAddMarkViewHolder extends XViewHolder<Mark> {
             return;
         }
         ip.setText(String.valueOf(mark.getId()));
-        name.setText(mark.getName());
+        name.setText(mark.getName1());
     }
 }

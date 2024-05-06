@@ -7,7 +7,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.ui.adapter.MyPagerAdapter;
 import com.just.print.ui.fragment.OrderCategoryFragment;
@@ -30,7 +30,7 @@ public class BillFragmentActivity extends BaseFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill);
         new StupidReflect(this).init();
-        if(AppData.hasCategory()) {
+        if(BarOption.hasCategory()) {
             fragmentList.add(OrderCategoryFragment.getInstance());
         }
         //fragmentList.add(new OrderMenuFragment());
@@ -40,13 +40,13 @@ public class BillFragmentActivity extends BaseFragmentActivity {
             if (viewPager != null) {
                 viewPager.setAdapter(adapter);
                 viewPager.setCurrentItem(1);
-                findViewById(R.id.pager).setBackgroundColor(AppData.getThemColor());
+                findViewById(R.id.pager).setBackgroundColor(BarOption.getThemColor());
                 viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                     public void onPageScrollStateChanged(int state) {}
                     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
                     public void onPageSelected(int position) {
-                        if(position == 0 && AppData.hasCategory()){
+                        if(position == 0 && BarOption.hasCategory()){
                             ((OrderCategoryFragment)fragmentList.get(0)).categoryExXAdapter.notifyDataSetChanged();
                        }
                     }

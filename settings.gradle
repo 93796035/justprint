@@ -1,1 +1,1 @@
-include ':app', ':generateddb', ':justprintdb'
+include ':app', ':dbgenerator', ':justprintdb'

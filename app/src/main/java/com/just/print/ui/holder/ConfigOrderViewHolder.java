@@ -48,8 +48,8 @@ public class ConfigOrderViewHolder extends XViewHolder<SaleRecord> {
     public void onResetView(SaleRecord saleRecord, int i) {
         this.saleRecord = saleRecord;
 
-        odMName.setText(saleRecord.getMname());
-        odMNNum.setText("x" + saleRecord.getNumber().intValue());
-        odPrice.setText("$" + saleRecord.getPrice());
+        odMName.setText(saleRecord.getProductId());
+        odMNNum.setText("x" + saleRecord.getAmount().intValue());
+        odPrice.setText("$" + saleRecord.getTotalPrice());
     }
 }

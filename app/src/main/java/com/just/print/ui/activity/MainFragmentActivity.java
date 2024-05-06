@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
@@ -30,14 +30,14 @@ public class MainFragmentActivity extends BaseFragmentActivity {
         // or maybe onCreate method could be called more than one time? so every time switch back to this page,
         // the oncreate will be called again? so we can update the debug setting without restart app?
         try {
-            L.debug = Boolean.valueOf(AppData.getCustomData(AppData.debug));
+            L.debug = Boolean.valueOf(BarOption.getCustomData(BarOption.debug));
         }catch(Exception e){
             L.i("the value of debug in customerr Data ", "can  not be parsered into a boolean!");
         }
 
         //working time check
         if(isOutOfWorkingTime()
-                && StringUtils.isBlank(AppData.getCustomData(AppData.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
+                && StringUtils.isBlank(BarOption.getCustomData(BarOption.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
             ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
             finish();   //No need to add thread to make it stay. even the app quit, the showToast will still on screen for a few seconds.
             return;
@@ -90,13 +90,13 @@ public class MainFragmentActivity extends BaseFragmentActivity {
     //@in some device, it always return a negative value and cause reactive dlg displayed.
     private long checkDaysleft() {
         //none limitation check
-        if("none".equals(AppData.getCustomData(AppData.limitation))){             L.d("limitationMode", "none");
+        if("none".equals(BarOption.getCustomData(BarOption.limitation))){             L.d("limitationMode", "none");
             return 3024000000l + 1;
         }
 
         //time of last open, @note:if existing last open time is not valid, then use lastSuccess will not be set.
         long timepassed = 0l;
-        String lastsuccessStr = AppData.getCustomData(AppData.lastsuccessStr);    L.d("lastSuccessStr:",lastsuccessStr);
+        String lastsuccessStr = BarOption.getCustomData(BarOption.lastsuccessStr);    L.d("lastSuccessStr:",lastsuccessStr);
         try{
             Long lastSuccess= Long.valueOf(lastsuccessStr);
             timepassed = new Date().getTime() - lastSuccess;            L.d("timePassed:",timepassed);        //time passed since last open.
@@ -106,7 +106,7 @@ public class MainFragmentActivity extends BaseFragmentActivity {
 
         //if timeLeftStr is valid, then it has a chance to turn the timeLeft to be a number bigger than 0.
         long timeLeft = 0;
-        String lastTimeLeft = AppData.getCustomData(AppData.number);               L.d("timeLeft(before deduct:", lastTimeLeft);
+        String lastTimeLeft = BarOption.getCustomData(BarOption.number);               L.d("timeLeft(before deduct:", lastTimeLeft);
         if(StringUtils.isBlank(lastTimeLeft)){
             lastTimeLeft = "1";
         }
@@ -115,8 +115,8 @@ public class MainFragmentActivity extends BaseFragmentActivity {
             timeLeft = Long.valueOf(lastTimeLeft) - Math.abs(timepassed);    L.d("timeLeft - timePassed:", timeLeft);
 
             //update the number and lastsuccess into local cache.
-            AppData.putCustomData(AppData.lastsuccessStr, String.valueOf(new Date().getTime()));
-            AppData.putCustomData(AppData.number, String.valueOf(timeLeft));              L.d("update new number with:", timeLeft);
+            BarOption.putCustomData(BarOption.lastsuccessStr, String.valueOf(new Date().getTime()));
+            BarOption.putCustomData(BarOption.number, String.valueOf(timeLeft));              L.d("update new number with:", timeLeft);
         }catch(Exception e){
             L.e("MainActivity", "the left time number can not be pasered into a long", e);
         }
@@ -126,8 +126,8 @@ public class MainFragmentActivity extends BaseFragmentActivity {
 
     private boolean isOutOfWorkingTime(){
 
-        String startTime = AppData.getCustomData(AppData.startTime);
-        String endTime = AppData.getCustomData(AppData.endTime);
+        String startTime = BarOption.getCustomData(BarOption.startTime);
+        String endTime = BarOption.getCustomData(BarOption.endTime);
         String curTime = "";
 
         DateFormat df = new SimpleDateFormat("HHmm");

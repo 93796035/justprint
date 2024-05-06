@@ -27,13 +27,14 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
         public final static Property Ip = new Property(1, String.class, "ip", false, "IP");
         public final static Property Pname = new Property(2, String.class, "pname", false, "P_NAME");
         public final static Property Note = new Property(3, String.class, "note", false, "NOTE");
-        public final static Property FirstPrint = new Property(4, Integer.class, "firstPrint", false, "FIRST_PRINT");
-        public final static Property Type = new Property(5, Integer.class, "type", false, "TYPE");
+        public final static Property FirstPrint = new Property(4, Integer.class, "firstPrint", false, "STYLE");
+        public final static Property Type = new Property(5, Integer.class, "type", false, "CATEGORY");
         public final static Property State = new Property(6, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(7, Long.class, "version", false, "VERSION");
+        public final static Property Version = new Property(7, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
+
 
     public PrinterDao(DaoConfig config) {
         super(config);
@@ -52,8 +53,8 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
                 "'IP' TEXT," + // 1: ip
                 "'P_NAME' TEXT," + // 2: pname
                 "'NOTE' TEXT," + // 3: note
-                "'FIRST_PRINT' INTEGER," + // 4: firstPrint
-                "'TYPE' INTEGER," + // 5: type
+                "'STYLE' INTEGER," + // 4: firstPrint
+                "'CATEGORY' INTEGER," + // 5: type
                 "'STATE' INTEGER," + // 6: state
                 "'VERSION' INTEGER);"); // 7: version
     }
@@ -104,7 +105,7 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
             stmt.bindLong(7, state);
         }
  
-        Long version = entity.getVersion();
+        Integer version = entity.getVersion();
         if (version != null) {
             stmt.bindLong(8, version);
         }
@@ -133,7 +134,7 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // firstPrint
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // type
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // state
-            cursor.isNull(offset + 7) ? null : cursor.getLong(offset + 7) // version
+            cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7) // version
         );
         return entity;
     }
@@ -148,7 +149,7 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
         entity.setFirstPrint(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
         entity.setType(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setState(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
-        entity.setVersion(cursor.isNull(offset + 7) ? null : cursor.getLong(offset + 7));
+        entity.setVersion(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
      }
     
     /** @inheritdoc */

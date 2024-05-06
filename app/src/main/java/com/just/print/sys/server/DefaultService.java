@@ -1,6 +1,6 @@
 package com.just.print.sys.server;
 
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.net.UDPService;
 import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopRequest;
@@ -34,7 +34,7 @@ public class DefaultService extends AbsService {
         L.d(tag, "queryShop");
         QueryShopResult result = new QueryShopResult();
 
-        File dbfile = NingMengStyle.app.getDBPath(queryShop.getShopName());
+        File dbfile = AikaStyleApplication.instance.getDBPath(queryShop.getShopName());
         if (dbfile.exists()) {
             result.setExists(true);
             result.setFileSize(dbfile.length());

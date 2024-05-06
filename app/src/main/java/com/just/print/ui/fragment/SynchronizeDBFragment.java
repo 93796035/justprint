@@ -6,7 +6,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
+import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.util.DbUtil;
@@ -41,9 +41,9 @@ public class SynchronizeDBFragment extends BaseFragment{
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        store_name.setText(AppData.getShopName());
-        license.setText(AppData.getLicense());
-        String lastSyncDate = AppData.getLastModifyTime();
+        store_name.setText(BarOption.getShopName());
+        license.setText(BarOption.getLicense());
+        String lastSyncDate = BarOption.getLastModifyTime();
         if(lastSyncDate == null || lastSyncDate.length() == 0){
             lastSyncDate = "1";
         }

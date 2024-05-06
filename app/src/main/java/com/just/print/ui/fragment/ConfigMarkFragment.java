@@ -8,11 +8,11 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.dao.M2M_MenuMarkDao;
+import com.just.print.db.dao.M2M_SaleRecordMarkDao;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.holder.ConfigMarkViewHolder;
 import com.stupid.method.adapter.OnClickItemListener;
@@ -67,7 +67,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryAllNotDeletedMark(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryAllNotDeletedMark(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
         Collections.sort(list, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
@@ -84,14 +84,14 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
                          @XGetValueByView(fromId = R.id.priceMark) String price) {
 
         for(Mark mark : markXAdapter.getData()){
-            if(markName.equals(mark.getName())){
+            if(markName.equals(mark.getName1())){
                 showToast("Already existing, please choose a different text");
                 return;
             }
         }
         Mark mark = new Mark();
 
-        mark.setName(markName);
+        mark.setName1(markName);
 
         try{
             mark.setState((int)(Float.valueOf(dspIdx) * 100));
@@ -100,14 +100,14 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         }
 
         try{
-            mark.setVersion((long) (Float.valueOf(price) * 100));
+            mark.setVersion((int) (Float.valueOf(price) * 100));
         }catch(NumberFormatException e){
-            mark.setVersion(0l);
+            mark.setVersion(0);
         }
 
-        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark);
-        mark.updateAndUpgrade();
-        AppData.updataeLastModifyTime(null);
+        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark);
+        mark.update();
+        BarOption.updataeLastModifyTime(null);
         loadMark();
     }
 
@@ -118,7 +118,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         final Mark mark = markXAdapter.getItem(i);
         onEditMark = mark;
 
-        fldName.setText(mark.getName());
+        fldName.setText(mark.getName1());
         dspIdx.setText(String.valueOf(((float) mark.getState()) / 100.00));
         price.setText(String.valueOf(((float) mark.getVersion()) / 100.00));
 
@@ -135,7 +135,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
 //                return;
 //            }
 
-            onEditMark.setName(fldName.getText().toString());
+            onEditMark.setName1(fldName.getText().toString());
 
             try{
                 onEditMark.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
@@ -144,7 +144,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             }
 
             try{
-                onEditMark.setVersion((long) (Float.valueOf(price.getText().toString()) * 100));
+                onEditMark.setVersion((int) (Float.valueOf(price.getText().toString()) * 100));
             }catch(NumberFormatException e){
                 //do nothing.
             }
@@ -152,7 +152,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             onEditMark.update();
             onEditMark = null;
             markXAdapter.notifyDataSetChanged();
-            AppData.updataeLastModifyTime(null);
+            BarOption.updataeLastModifyTime(null);
         }
         modifyViewSwitch.setDisplayedChild(0);
     }
@@ -162,15 +162,15 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         final Mark mark = markXAdapter.getItem(onEditIdx);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Are you sure to delete \"" + mark.getName() + "\"?");
+        builder.setMessage("Are you sure to delete \"" + mark.getName1() + "\"?");
         builder.setTitle("Notice").setNegativeButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 mark.delete();
 
-                M2M_MenuMarkDao targetDao = NingMengStyle.app.getDaoMaster().newSession().getM2M_MenuMarkDao();
-                targetDao._deleteMenu_M2M_MenuMarkList(mark.getId());
+                M2M_SaleRecordMarkDao targetDao = AikaStyleApplication.instance.getDaoMaster().newSession().getM2M_SaleRecordMarkDao();
+//                targetDao._deleteMenu_M2M_MenuMarkList(mark.getId());
                 loadMark();
 
                 modifyViewSwitch.setDisplayedChild(0);

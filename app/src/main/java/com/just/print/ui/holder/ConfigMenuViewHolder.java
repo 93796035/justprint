@@ -4,12 +4,12 @@ import android.content.Context;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.db.bean.Menu;
+import com.just.print.db.bean.Dish;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-public class ConfigMenuViewHolder extends XViewHolder<Menu> {
+public class ConfigMenuViewHolder extends XViewHolder<Dish> {
     @XViewByID(R.id.mname)
     TextView mname;
     @XViewByID(R.id.msg)
@@ -28,9 +28,9 @@ public class ConfigMenuViewHolder extends XViewHolder<Menu> {
     }
 
     @Override
-    public void onResetView(Menu menu, int i) {
-        mname.setText(menu.getName());
-        msg.setText(menu.getID());
+    public void onResetView(Dish menu, int i) {
+        mname.setText(menu.getName1());
+        msg.setText(menu.getId().toString());
         if (menu.getM2M_MenuPrintList() != null)
             msg.append("   P" + menu.getM2M_MenuPrintList().size());
 

@@ -32,6 +32,6 @@ public class ConfigMarkViewHolder extends XViewHolder<Mark> {
 
     @Override
     public void onResetView(Mark mark, int i) {
-        tvMark.setText(mark.getName());
+        tvMark.setText(mark.getName1());
      }
 }

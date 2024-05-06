@@ -9,8 +9,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Mark;
@@ -76,15 +76,15 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        if("false".equalsIgnoreCase(AppData.getCustomData(AppData.allowNoTableSelected))) {
+        if("false".equalsIgnoreCase(BarOption.getCustomData(BarOption.allowNoTableSelected))) {
             findViewById(R.id.configTableManager).setVisibility(View.GONE);
         }
 
         //init the existing bills area.
-        billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
+        billDao = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao();
         List<Bill> orders = new ArrayList<>();
         try{
-            String recentNum = AppData.getCustomData(AppData.recentBillAmount);
+            String recentNum = BarOption.getCustomData(BarOption.recentBillAmount);
             orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
         }catch(Exception e){
             L.e("orders", "exception when fetching sale orders", e);
@@ -102,8 +102,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         if (StringUtils.isEmpty(inputContent) || inputContent.length() < 2) {
             showToast("Please input the right password");
         } else {
-            if(!AppData.getUserPassword().equals(inputContent)){
-                if(AppData.getAdminPassword().equals(inputContent)){
+            if(!BarOption.getUserPassword().equals(inputContent)){
+                if(BarOption.getAdminPassword().equals(inputContent)){
                     //if there's unclosed table, move relevant bill out of the report and show notice .
                     HashSet billsNotCount = new HashSet();
                     for(Mark table : OrderIdentifierFragment.tables){
@@ -112,19 +112,19 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
                             showToast("Unclosed table will not be calculated into report!");
                         }
                     }
-                    List<SaleRecord> orders = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    List<SaleRecord> orders = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao().loadAll();
                     for(int i = orders.size() - 1; i >= 0; i--){
-                        if(billsNotCount.contains(orders.get(i).getbId())){
+                        if(billsNotCount.contains(orders.get(i).getBillId())){
                             orders.remove(i);
                         }
                     }
                     reportContent = WifiPrintService.getInstance().exePrintReportCommand(billsNotCount, orders, String.valueOf(new Date().getTime()));
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
                     findViewById(R.id.alertReportResetDlg).setVisibility(View.VISIBLE);
-                }else if(AppData.getOrderPassword().equals(inputContent)){
+                }else if(BarOption.getOrderPassword().equals(inputContent)){
                     findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
-                    saleRecordDao = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
+                    saleRecordDao = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao();
                     List<SaleRecord> saleRecords = saleRecordDao.loadAll();
                     if(saleRecords == null || saleRecords.size() == 0){
                         getActivity().finish();
@@ -194,8 +194,8 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         //check if need to send email
         try{
             int reportIdx = 1;
-            reportIdx = Integer.valueOf(AppData.getCustomData(AppData.reportIdx));
-            AppData.notifyCheck(reportIdx, reportContent, false);
+            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
+            BarOption.notifyCheck(reportIdx, reportContent, false);
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
@@ -207,11 +207,11 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
         int reportIdx = 1;
         //check if need to send email
         try{
-            reportIdx = Integer.valueOf(AppData.getCustomData(AppData.reportIdx));
+            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
-        if(!AppData.notifyCheck(reportIdx, reportContent, true)){
+        if(!BarOption.notifyCheck(reportIdx, reportContent, true)){
             return;
         }
 
@@ -224,27 +224,27 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
                 showToast("Unclosed table will not be calculated into report!");
             }
         }
-        SaleRecordDao saleRecord = NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao();
+        SaleRecordDao saleRecord = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao();
         List<SaleRecord> orders = saleRecord.loadAll();
         for(int i = orders.size() - 1; i >= 0; i--){
-            if(billIds.contains(orders.get(i).getbId())){
+            if(billIds.contains(orders.get(i).getBillId())){
                 orders.remove(i);
             }
         }
         saleRecord.deleteInTx(orders);
-        BillDao billDao = NingMengStyle.app.getDaoMaster().newSession().getBillDao();
+        BillDao billDao = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao();
         List<Bill> bills = billDao.loadAll();
         for(int i = bills.size() - 1; i >= 0; i--){
             if(billIds.contains(bills.get(i).getId().toString())){
                 bills.remove(i);
             }
         }
-        NingMengStyle.app.getDaoMaster().newSession().getBillDao().deleteInTx(bills);
+        AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao().deleteInTx(bills);
 
-        AppData.putCustomData(AppData.reportStartDate, String.valueOf(new Date().getTime()));
-        AppData.putCustomData(AppData.billIdx, "1");        //reset kitchenbillIndex
+        BarOption.putCustomData(BarOption.reportStartDate, String.valueOf(new Date().getTime()));
+        BarOption.putCustomData(BarOption.billIdx, "1");        //reset kitchenbillIndex
 
-        AppData.putCustomData(AppData.reportIdx, String.valueOf(reportIdx + 1));
+        BarOption.putCustomData(BarOption.reportIdx, String.valueOf(reportIdx + 1));
 
         findViewById(R.id.alertReportResetDlg).setVisibility(View.INVISIBLE);
         findViewById(R.id.alertReportResetDlg).setMinimumHeight(0);
@@ -256,12 +256,12 @@ public class ConfigMainFragment extends BaseFragment implements OnClickItemListe
     public void onClickItem(View view, int idx) {
         Bill order = billsXAdapter.getData().get(idx);
         billIdx.setText(UC.ORDER_NUMBER + order.getId());
-        table.setText(UC.TABLE + order.getBillIdx());
-        time.setText(UC.OPEN_TIME + order.getTime().substring(0, order.getTime().length() - 3));
-        subtoal.setText(UC.SUB_TOTAL + String.format("%.2f", Float.valueOf(order.getPrice())));
-        total.setText(UC.TOTAL + String.format("%.2f", Float.valueOf(order.getPrice()) * AppData.getTaxRate()));
+        table.setText(UC.TABLE + order.getTableName());
+        time.setText(UC.OPEN_TIME + order.getOpenTime().substring(0, order.getOpenTime().length() - 3));
+        subtoal.setText(UC.SUB_TOTAL + String.format("%.2f", Float.valueOf(order.getTotal())));
+        total.setText(UC.TOTAL + String.format("%.2f", Float.valueOf(order.getTotal()) * BarOption.getTaxRate()));
 //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), NingMengStyle.app.getDaoMaster().newSession().getSaleRecordDao());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao());
 
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);

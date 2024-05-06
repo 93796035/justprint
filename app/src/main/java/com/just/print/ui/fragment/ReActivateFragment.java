@@ -5,8 +5,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
@@ -27,19 +27,19 @@ public class ReActivateFragment extends BaseFragment{
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        inputCodeText.setHint("SN code for " + AppData.getShopName());
+        inputCodeText.setHint("SN code for " + BarOption.getShopName());
     }
 
     @XClick({R.id.inputCodeButton})
     void submit(@XGetValueByView(fromId = R.id.inputCodeText) TextView textView) {
         //check if has internet.
-        if(!AppUtils.hasInternet(NingMengStyle.app.getApplicationContext())){
+        if(!AppUtils.hasInternet(AikaStyleApplication.instance.getApplicationContext())){
             showToast("Please connect the device to internet, then try again.");
             return;
         }
 
         String inputedSN = String.valueOf(textView.getText()).trim();
-        AppData.setActivateCode(inputedSN, textView);
+        BarOption.setActivateCode(inputedSN, textView);
 
         getActivity().finish();
     }

@@ -21,7 +21,7 @@ import java.util.List;
 
 import static com.just.print.util.ToastUtil.showToast;
 
-public class AppData{
+public class BarOption {
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
     public static final String DENSITY = "density";
     public static String recentBillAmount = "recentBillAmount";
@@ -144,28 +144,28 @@ public class AppData{
             limitation, lastsuccess, lastsuccessStr, mode, number,
             reportIdx, reportStartDate, startTime};
 
-    public static boolean showID = !"true".equals(AppData.getCustomData(AppData.HideKitchenBillId));//show id by default
-    public static boolean showName = !("1".equals(AppData.getCustomData(AppData.HideKitchenBillName))
-            || "true".equals(AppData.getCustomData(AppData.HideKitchenBillName)));                  //don't show by default.
-    public static Boolean cloudHideID = Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillId_Cloud).length() == 0 ?
-            (AppData.getCustomData(AppData.HideKitchenBillId).length() == 0 ?
-                    String.valueOf(!AppData.showID)
-                    : AppData.getCustomData(AppData.HideKitchenBillId))
-            : AppData.getCustomData(AppData.HideKitchenBillId_Cloud));
-    public static Boolean cloudHideName = Boolean.valueOf(AppData.getCustomData(AppData.HideKitchenBillName_Cloud).length() == 0 ?
-            (AppData.getCustomData(AppData.HideKitchenBillName).length() == 0 ?
-                    String.valueOf(!AppData.showName)
-                    : AppData.getCustomData(AppData.HideKitchenBillName))
-            : AppData.getCustomData(AppData.HideKitchenBillName_Cloud));
+    public static boolean showID = !"true".equals(BarOption.getCustomData(BarOption.HideKitchenBillId));//show id by default
+    public static boolean showName = !("1".equals(BarOption.getCustomData(BarOption.HideKitchenBillName))
+            || "true".equals(BarOption.getCustomData(BarOption.HideKitchenBillName)));                  //don't show by default.
+    public static Boolean cloudHideID = Boolean.valueOf(BarOption.getCustomData(BarOption.HideKitchenBillId_Cloud).length() == 0 ?
+            (BarOption.getCustomData(BarOption.HideKitchenBillId).length() == 0 ?
+                    String.valueOf(!BarOption.showID)
+                    : BarOption.getCustomData(BarOption.HideKitchenBillId))
+            : BarOption.getCustomData(BarOption.HideKitchenBillId_Cloud));
+    public static Boolean cloudHideName = Boolean.valueOf(BarOption.getCustomData(BarOption.HideKitchenBillName_Cloud).length() == 0 ?
+            (BarOption.getCustomData(BarOption.HideKitchenBillName).length() == 0 ?
+                    String.valueOf(!BarOption.showName)
+                    : BarOption.getCustomData(BarOption.HideKitchenBillName))
+            : BarOption.getCustomData(BarOption.HideKitchenBillName_Cloud));
     private static final String codeNumberConsidered = "codeNumberConsidered";
     private static final String addingDefaultCode = "addingDefaultCode";
 
     //basic save and get functions========================================================
     public static void putCustomData(String key, String value) {
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
+        getShopData(AikaStyleApplication.instance.getApplicationContext()).putString("custom_" + key.toLowerCase(), value);
     }
     public static String getCustomData(String key) {
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
+        return getShopData(AikaStyleApplication.instance.getApplicationContext()).getString("custom_" + key.toLowerCase(), "");
     }
     public static String getCustomData(String key, String defaultValue) {
         String value = getCustomData(key);
@@ -180,9 +180,9 @@ public class AppData{
 
     //ServerUrls======================================================
     public static String getSERVER_URL(){
-        String serverURL = AppData.getCustomData(AppData.server_url_website);
+        String serverURL = BarOption.getCustomData(BarOption.server_url_website);
         if(serverURL == null || serverURL.length() < 10) {
-            serverURL = AppData.SERVER_URL;
+            serverURL = BarOption.SERVER_URL;
         }
         if(!serverURL.startsWith("http://") && !serverURL.startsWith("https://")){
             serverURL = "http://" + serverURL;
@@ -194,9 +194,9 @@ public class AppData{
     }
 
     public static String getEmailServer(){
-        String emailServer = AppData.getCustomData(AppData.server_url_email);
+        String emailServer = BarOption.getCustomData(BarOption.server_url_email);
         if(emailServer == null || emailServer.length() < 10) {
-            emailServer = AppData.EMAIL_SERVER_URL;
+            emailServer = BarOption.EMAIL_SERVER_URL;
         }
         if(!emailServer.startsWith("http://") && !emailServer.startsWith("https://")){
             emailServer = "http://" + emailServer;
@@ -208,17 +208,17 @@ public class AppData{
     }
 
     //store name, user name, activate code, time left===============================================
-    private static boolean isShopExist(Context context, String shopName) {
+    private static boolean isMandatoryExist(Context context, String shopName) {
         String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
         return shoplist.contains(shopName);
     }
 
-    public static void createShopDB(Context context, String shopName) {
-        if (!isShopExist(context, shopName)) {
+    public static void createShopDB(Context context, String shopCode) {
+        if (!isMandatoryExist(context, shopCode)) {
             String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
-            getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopName);
+            getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopCode);
         }
-        NingMengStyle.app.initDaoMaster(shopName);
+        AikaStyleApplication.instance.initDaoMaster(shopCode);
     }
 
     public static void saveShopName(Context context, String shopName) {
@@ -226,7 +226,7 @@ public class AppData{
     }
 
     public static String getShopName(){
-        return getShopName(NingMengStyle.app.getApplicationContext());
+        return getShopName(AikaStyleApplication.instance.getApplicationContext());
     }
 
     public static String getShopName(Context context) {
@@ -238,7 +238,7 @@ public class AppData{
     }
 
     public static String getUserName() {
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("userName", "");
+        return getShopData(AikaStyleApplication.instance.getApplicationContext()).getString("userName", "");
     }
 
     public static String getUserName(Context context) {
@@ -246,7 +246,7 @@ public class AppData{
     }
     //activate code-----------------------------------------------
     public static String getLicense() {
-        return getLicense(NingMengStyle.app.getApplicationContext());
+        return getLicense(AikaStyleApplication.instance.getApplicationContext());
     }
 
     public static String getLicense(Context context) {
@@ -266,34 +266,35 @@ public class AppData{
             return;
         }
 
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("license", inputedSN);
+        getShopData(AikaStyleApplication.instance.getApplicationContext()).putString("license", inputedSN);
         NetUtils.activate();
     }
 
     //time left calculating----------------------------------------------
     public static String getLastModifyTime(){
-        return getShopData(NingMengStyle.app.getApplicationContext()).getString("LastSyncDate","");
+        return getShopData(AikaStyleApplication.instance.getApplicationContext()).getString("LastSyncDate","");
     }
 
     public static void updataeLastModifyTime(String lastUpdateTime) {
-        getShopData(NingMengStyle.app.getApplicationContext()).putString("LastSyncDate",
+        getShopData(AikaStyleApplication.instance.getApplicationContext()).putString("LastSyncDate",
                 lastUpdateTime != null && lastUpdateTime.length() > 1 ? lastUpdateTime : String.valueOf(new Date().getTime()));
     }
 
     //==========================================================
     //interface style-------------------------------------
     public static boolean isMode2() {
-        return !"1".equals(getCustomData(AppData.appmode)) && !"3".equals(getCustomData(AppData.appmode));
+        return !"1".equals(getCustomData(BarOption.appmode)) && !"3".equals(getCustomData(BarOption.appmode));
     }
 
     public static int getScreenOrientation() {
-        return ("1".equals(getCustomData(AppData.isScreenHorizontal))
-                || "true".equals(getCustomData(AppData.isScreenHorizontal))) ?
+        return (getCustomData(BarOption.isScreenHorizontal) == null
+                ||"1".equals(getCustomData(BarOption.isScreenHorizontal))
+                || "true".equals(getCustomData(BarOption.isScreenHorizontal))) ?
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     public static int getThemColor() {
-        String color = getCustomData(AppData.colorOfTheme);
+        String color = getCustomData(BarOption.colorOfTheme);
         if(color == null || color.length() != 6){
             color = "5aacdb";
         }
@@ -301,14 +302,14 @@ public class AppData{
     }
 
     public static int getThemColor2() {
-        String color = getCustomData(AppData.colorOfTheme2);
+        String color = getCustomData(BarOption.colorOfTheme2);
         if(color == null || color.length() != 6){
             color = "EE4C20";
         }
         return Color.parseColor("#" + color);
     }
     public static String getCategoryLayoutStyle() {
-        String flow = getCustomData(AppData.categoryLayoutStyle);
+        String flow = getCustomData(BarOption.categoryLayoutStyle);
         if(StringUtils.isBlank(flow)){
             flow = "flow";
         }
@@ -316,7 +317,7 @@ public class AppData{
     }
 
     public static int getMarkNumColumn() {
-        String cols = getCustomData(AppData.labelColumn);
+        String cols = getCustomData(BarOption.labelColumn);
         try{
             return Integer.parseInt(cols);
         }catch(Exception e){
@@ -325,7 +326,7 @@ public class AppData{
     }
 
     public static int getSendButtonHeight() {   //it's only works for mode1
-        String height = getCustomData(AppData.SendButtonHeight);
+        String height = getCustomData(BarOption.SendButtonHeight);
         if(height == null || height.length() <= 2){
             return 123;
         }else{
@@ -339,7 +340,7 @@ public class AppData{
 
     public static boolean hasCategory() {
         if(isMode2()) {
-            return "1".equals(getCustomData(AppData.hasCategory)) || "true".equals(getCustomData(AppData.hasCategory));
+            return "1".equals(getCustomData(BarOption.hasCategory)) || "true".equals(getCustomData(BarOption.hasCategory));
         }
         return true;
     }
@@ -347,27 +348,27 @@ public class AppData{
     //=============================================================
     //return the current billIdx saved in config. if not set yet, then check the bill ids in db, then give a next one.
     public static String getCurrentBillIdx() {
-        String billIdx = AppData.getCustomData(AppData.billIdx);
+        String billIdx = BarOption.getCustomData(BarOption.billIdx);
         if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
             List<Bill> orders = DaoExpand.queryRecentBill(
-                    NingMengStyle.app.getDaoMaster().newSession().getBillDao(),1);
+                    AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao(),1);
             billIdx = String.valueOf(orders.size() > 0? orders.get(0).getId() : 0 + 1);
         }
         return billIdx;
     }
 
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
-        String email = AppData.getCustomData(AppData.email_address_report);
+        String email = BarOption.getCustomData(BarOption.email_address_report);
         if(email != null && email.indexOf("@") > 0) {
             //if there's already a content, means it's email of last time. then send it out first.
-            String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
+            String unSendcontent = BarOption.getCustomData(BarOption.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils(AppData.getEmailServer() + "sendReport", unSendcontent).start();
+                new NetUtils(BarOption.getEmailServer() + "sendReport", unSendcontent).start();
                 return false;
             }
-            boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
-                    || "true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
+            boolean  sendOnlyWhenResetFlag = "1".equals(BarOption.getCustomData(BarOption.sendOnlyWhenReset))
+                    || "true".equals(BarOption.getCustomData(BarOption.sendOnlyWhenReset));
             if(sendOnlyWhenResetFlag && !isReset){
                 return true;
             }
@@ -380,7 +381,7 @@ public class AppData{
             } catch (Exception e) {
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + reportContent, e);
             }
-            AppData.putCustomData(AppData.ContentToSend,json.toString());
+            BarOption.putCustomData(BarOption.ContentToSend,json.toString());
             new NetUtils(EMAIL_SERVER_URL, json.toString()).start();
             return true;
         }
@@ -388,16 +389,16 @@ public class AppData{
     }
 
     public static boolean notifyCheck(String orderContent) {
-        String email = AppData.getCustomData(AppData.email_address_report);
+        String email = BarOption.getCustomData(BarOption.email_address_report);
         if(email != null && email.indexOf("@") > 0) {
             //if there's already a content, means it's email of last time. then send it out first.
-            String unSendcontent = AppData.getCustomData(AppData.ContentToSend);
+            String unSendcontent = BarOption.getCustomData(BarOption.ContentToSend);
             if(unSendcontent != null && unSendcontent.length() > 0){
                 showToast("Found uncompleted task!");
-                new NetUtils(AppData.getEmailServer() + "sendReport", unSendcontent).start();
+                new NetUtils(BarOption.getEmailServer() + "sendReport", unSendcontent).start();
             }
-            boolean  sendOnlyWhenResetFlag = "1".equals(AppData.getCustomData(AppData.sendOnlyWhenReset))
-                    ||"true".equals(AppData.getCustomData(AppData.sendOnlyWhenReset));
+            boolean  sendOnlyWhenResetFlag = "1".equals(BarOption.getCustomData(BarOption.sendOnlyWhenReset))
+                    ||"true".equals(BarOption.getCustomData(BarOption.sendOnlyWhenReset));
             JSONObject json = new JSONObject();//创建json对象
             try {
                 String mobileMark = RegisterFragment.getUserName();
@@ -407,7 +408,7 @@ public class AppData{
             } catch (Exception e) {
                 L.e("DatabaseUtil", "Exception when encoding content into json: email:" + email + " reportContent:" + orderContent, e);
             }
-            AppData.putCustomData(AppData.ContentToSend,json.toString());
+            BarOption.putCustomData(BarOption.ContentToSend,json.toString());
             new NetUtils(EMAIL_SERVER_URL, json.toString()).start();
             return true;
         }
@@ -416,28 +417,28 @@ public class AppData{
 
     //print format------------------------------------
     public static boolean isCodeNumberConsidered() {
-        return "1".equals(getCustomData(AppData.codeNumberConsidered)) || "true".equals(getCustomData(AppData.codeNumberConsidered));
+        return "1".equals(getCustomData(BarOption.codeNumberConsidered)) || "true".equals(getCustomData(BarOption.codeNumberConsidered));
     }
 
     public static boolean isAddingDefaultCode() {
-        return "1".equals(getCustomData(AppData.addingDefaultCode)) || "true".equals(getCustomData(AppData.addingDefaultCode));
+        return "1".equals(getCustomData(BarOption.addingDefaultCode)) || "true".equals(getCustomData(BarOption.addingDefaultCode));
     }
 
     public static String getForcePopUpList() {
-        return getCustomData(AppData.forcePopUpMenuList);
+        return getCustomData(BarOption.forcePopUpMenuList);
     }
 
     //passwords-----------------------------------------------
     public static String getAdminPassword() {
-        String ap = getCustomData(AppData.adminPassword);
+        String ap = getCustomData(BarOption.adminPassword);
         return StringUtils.isBlank(ap) ? "2266" : ap;
     }
     public static String getUserPassword() {
-        String up = getCustomData(AppData.userPassword);
+        String up = getCustomData(BarOption.userPassword);
         return StringUtils.isBlank(up) ? "8888" : up;
     }
     public static String getOrderPassword() {
-        String op = getCustomData(AppData.orderpassword);
+        String op = getCustomData(BarOption.orderpassword);
         return StringUtils.isBlank(op) ? "1111" : op;
     }
 
@@ -451,202 +452,202 @@ public class AppData{
         inputedSN = inputedSN.substring(p + 1);
         switch (SettingType.toLowerCase()) { //we support some short cuts.
             case "ap":   // means theres parameters
-                AppData.putCustomData(AppData.adminPassword, inputedSN);
+                BarOption.putCustomData(BarOption.adminPassword, inputedSN);
                 showToast("App has set adminPassword to: " + inputedSN);
                 return;
             case "am":   // means theres parameters
-                AppData.putCustomData(AppData.appmode, inputedSN);
+                BarOption.putCustomData(BarOption.appmode, inputedSN);
                 showToast("App has set appmode to: " + inputedSN);
                 return;
             case "c":
-                AppData.putCustomData(AppData.code, inputedSN);
+                BarOption.putCustomData(BarOption.code, inputedSN);
                 showToast("App has set code to: " + inputedSN);
                 return;
             case "cls":
-                AppData.putCustomData(AppData.categoryLayoutStyle, inputedSN);
+                BarOption.putCustomData(BarOption.categoryLayoutStyle, inputedSN);
                 showToast("App has set categoryLayoutStyle to: " + inputedSN);
                 return;
             case "cos":
-                AppData.putCustomData(AppData.colorOnSelect, inputedSN);
+                BarOption.putCustomData(BarOption.colorOnSelect, inputedSN);
                 showToast("App has set ColorOnSelect to: " + inputedSN);
                 return;
             case "cot":
-                AppData.putCustomData(AppData.colorOfTheme, inputedSN);
+                BarOption.putCustomData(BarOption.colorOfTheme, inputedSN);
                 showToast("App has set ColorOfTheme to: " + inputedSN);
                 return;
             case "cn":
-                AppData.putCustomData(AppData.column, inputedSN);
+                BarOption.putCustomData(BarOption.column, inputedSN);
                 showToast("App has set column to: " + inputedSN);
                 return;
             case "cmp":
-                AppData.putCustomData(AppData.combineMarkPrice, inputedSN);
+                BarOption.putCustomData(BarOption.combineMarkPrice, inputedSN);
                 showToast("App has set combineMarkPrice to: " + inputedSN);
                 return;
-            case AppData.debug:
-                AppData.putCustomData(AppData.debug, inputedSN);
+            case BarOption.debug:
+                BarOption.putCustomData(BarOption.debug, inputedSN);
                 if(Boolean.valueOf(inputedSN)) {
                     showToast("App is in debug mode, when bug appears again, please write down the system time and report.");
 
                     StringBuilder sb = new StringBuilder();
-                    sb.append("adminPassword:").append(AppData.getCustomData(AppData.adminPassword)).append("\n");
-                    sb.append("lastsuccess:").append(AppData.getCustomData(AppData.lastsuccess)).append("\n");
-                    sb.append("limitation:").append(AppData.getCustomData(AppData.limitation)).append("\n");
-                    sb.append("mode:").append(AppData.getCustomData(AppData.mode)).append("\n");
-                    sb.append("number:").append(AppData.getCustomData(AppData.number)).append("\n");
-                    sb.append("reportStartDate:").append(AppData.getCustomData(AppData.reportStartDate)).append("\n");
-                    sb.append("userPassword:").append(AppData.getCustomData(AppData.userPassword)).append("\n");
+                    sb.append("adminPassword:").append(BarOption.getCustomData(BarOption.adminPassword)).append("\n");
+                    sb.append("lastsuccess:").append(BarOption.getCustomData(BarOption.lastsuccess)).append("\n");
+                    sb.append("limitation:").append(BarOption.getCustomData(BarOption.limitation)).append("\n");
+                    sb.append("mode:").append(BarOption.getCustomData(BarOption.mode)).append("\n");
+                    sb.append("number:").append(BarOption.getCustomData(BarOption.number)).append("\n");
+                    sb.append("reportStartDate:").append(BarOption.getCustomData(BarOption.reportStartDate)).append("\n");
+                    sb.append("userPassword:").append(BarOption.getCustomData(BarOption.userPassword)).append("\n");
                     textView.setText(sb.toString());
                 }else{
                     showToast("debug mode turned off!");
                 }
                 return;
             case "endt":
-                AppData.putCustomData(AppData.endTime, inputedSN);
+                BarOption.putCustomData(BarOption.endTime, inputedSN);
                 showToast("App has set endTime to: " + inputedSN);
                 return;
             case "f":
-                AppData.putCustomData(AppData.font, inputedSN);
+                BarOption.putCustomData(BarOption.font, inputedSN);
                 showToast("App has set font to: " + inputedSN);
                 return;
             case "fpmm":
-                AppData.putCustomData(AppData.forcePopUpMenuList, inputedSN);
+                BarOption.putCustomData(BarOption.forcePopUpMenuList, inputedSN);
                 showToast("App has set popUpMenuMarkList to: " + inputedSN);
                 return;
             case "fsty":
-                AppData.putCustomData(AppData.format_style, inputedSN);
+                BarOption.putCustomData(BarOption.format_style, inputedSN);
                 showToast("App has set format_style to: " + inputedSN);
                 return;
             case "hci":
-                AppData.putCustomData(AppData.hideCancelItem, inputedSN);
+                BarOption.putCustomData(BarOption.hideCancelItem, inputedSN);
                 showToast("App has set hideCancelItem to: " + inputedSN);
                 return;
             case "hiid":
-                AppData.putCustomData(AppData.HideKitchenBillId, inputedSN);
+                BarOption.putCustomData(BarOption.HideKitchenBillId, inputedSN);
                 showToast("App has set HideKitchenBillId to: " + inputedSN);
                 return;
             case "hina":
-                AppData.putCustomData(AppData.HideKitchenBillName, inputedSN);
+                BarOption.putCustomData(BarOption.HideKitchenBillName, inputedSN);
                 showToast("App has set HideKitchenBillName to: " + inputedSN);
                 return;
             case "kitt":
-                AppData.putCustomData(AppData.kitchentitle, inputedSN);
+                BarOption.putCustomData(BarOption.kitchentitle, inputedSN);
                 showToast("App has switched kitchentitle to: " + inputedSN);
                 return;
             case "l":
-                AppData.putCustomData(AppData.limitation, inputedSN);
+                BarOption.putCustomData(BarOption.limitation, inputedSN);
                 showToast("App has switched limitation to: " + inputedSN);
                 return;
             case "lastchar":
-                AppData.putCustomData(AppData.custTogos, inputedSN);
+                BarOption.putCustomData(BarOption.custTogos, inputedSN);
                 showToast("Please restart app to apply new layout.");
                 return;
             case "layo":
-                AppData.putCustomData(AppData.custChars, inputedSN);
+                BarOption.putCustomData(BarOption.custChars, inputedSN);
                 showToast("App has switched custChars to: " + inputedSN);
                 return;
             case "lbsize":
                 int pos = inputedSN.indexOf('.');
                 if (pos > 3 && inputedSN.length() - pos > 8){
                     NetUtils.sendToCloudPrinter(inputedSN.substring(0, pos), inputedSN.substring(pos + 1));
-                    AppData.putCustomData(AppData.labelsize, inputedSN.substring(0, pos));
+                    BarOption.putCustomData(BarOption.labelsize, inputedSN.substring(0, pos));
                     showToast("App has set label size to: " + inputedSN.substring(0, pos));
                 } else if(inputedSN.indexOf(',') > 0){
-                    AppData.putCustomData(AppData.labelsize, inputedSN);
+                    BarOption.putCustomData(BarOption.labelsize, inputedSN);
                     showToast("App has set label size to: " + inputedSN);
                 } else{
                     showToast("Please use right format like '40,30.123456789' or '40,30'");
                 }
                 return;
             case "m":
-                AppData.putCustomData(AppData.mode, inputedSN);
+                BarOption.putCustomData(BarOption.mode, inputedSN);
                 showToast("App is in switched to mode : " + inputedSN);
                 return;
             case "ml":
-                AppData.putCustomData(AppData.menuNameLength, inputedSN);
+                BarOption.putCustomData(BarOption.menuNameLength, inputedSN);
                 showToast("App has set menuNameLength to: " + inputedSN);
                 return;
             case "pric":
-                AppData.putCustomData(AppData.priceOnkitchenbill, inputedSN);
+                BarOption.putCustomData(BarOption.priceOnkitchenbill, inputedSN);
                 showToast("App has set priceonkitchenbill to: " + inputedSN);
                 return;
             case "r":
-                AppData.putCustomData(AppData.reportPrinter, inputedSN);
+                BarOption.putCustomData(BarOption.reportPrinter, inputedSN);
                 showToast("reportPrinter is set to : " + inputedSN);
                 return;
             case "rf":
-                AppData.putCustomData(AppData.reportFont, inputedSN);
+                BarOption.putCustomData(BarOption.reportFont, inputedSN);
                 showToast("reportFont is set to : " + inputedSN);
                 return;
             case "rw":
-                AppData.putCustomData(AppData.reportWidth, inputedSN);
+                BarOption.putCustomData(BarOption.reportWidth, inputedSN);
                 showToast("reportWidth is set to : " + inputedSN);
                 return;
             case "s":
-                AppData.putCustomData(AppData.email_address_report, inputedSN);
+                BarOption.putCustomData(BarOption.email_address_report, inputedSN);
                 showToast("App has set sendReport to: " + inputedSN);
                 return;
             case "s1":
-                AppData.putCustomData(AppData.sep_str1, inputedSN);
+                BarOption.putCustomData(BarOption.sep_str1, inputedSN);
                 showToast("App has set sep_str1 to: " + inputedSN);
                 return;
             case "s2":
-                AppData.putCustomData(AppData.sep_str2, inputedSN);
+                BarOption.putCustomData(BarOption.sep_str2, inputedSN);
                 showToast("App has set sep_str2 to: " + inputedSN);
                 return;
             case "sh":
-                AppData.putCustomData(AppData.SendButtonHeight, inputedSN);
+                BarOption.putCustomData(BarOption.SendButtonHeight, inputedSN);
                 showToast("App has set SendButtonHeight to: " + inputedSN);
                 return;
             case "sset":
-                AppData.putCustomData(AppData.sendOnlyWhenReset, inputedSN);
+                BarOption.putCustomData(BarOption.sendOnlyWhenReset, inputedSN);
                 showToast("App has set sendOnlyWhenReset to: " + inputedSN);
                 return;
             case "surl":
-                AppData.putCustomData(AppData.server_url_website, inputedSN);
+                BarOption.putCustomData(BarOption.server_url_website, inputedSN);
                 showToast("App has set server_url to: " + inputedSN);
                 return;
             case "sip":
-                AppData.putCustomData(AppData.server_url_pos, inputedSN);
+                BarOption.putCustomData(BarOption.server_url_pos, inputedSN);
                 showToast("App has set serverip to: " + inputedSN);
                 return;
             case "smp":
-                AppData.putCustomData(AppData.ShowMarkPirce, inputedSN);
+                BarOption.putCustomData(BarOption.ShowMarkPirce, inputedSN);
                 showToast("App has set ShowMarkPirce to: " + inputedSN);
                 return;
             case "star":
-                AppData.putCustomData(AppData.startTime, inputedSN);
+                BarOption.putCustomData(BarOption.startTime, inputedSN);
                 showToast("userPassword is set to: " + inputedSN);
                 return;
             case "ts":
-                AppData.putCustomData(AppData.allowNoTableSelected, inputedSN);
+                BarOption.putCustomData(BarOption.allowNoTableSelected, inputedSN);
                 showToast("TableSelectable is set to: " + inputedSN);
                 return;
             case "tpos":
-                AppData.putCustomData(AppData.title_position, inputedSN);
+                BarOption.putCustomData(BarOption.title_position, inputedSN);
                 showToast("title_position is set to: " + inputedSN);
                 return;
             case "up":
-                AppData.putCustomData(AppData.userPassword, inputedSN);
+                BarOption.putCustomData(BarOption.userPassword, inputedSN);
                 showToast("backend password is set to: " + inputedSN);
                 return;
             case "wt":
-                AppData.putCustomData(AppData.waitTime, inputedSN);
+                BarOption.putCustomData(BarOption.waitTime, inputedSN);
                 showToast("waitTime is set to: " + inputedSN);
                 return;
             case "w":
-                AppData.putCustomData(AppData.width, inputedSN);
+                BarOption.putCustomData(BarOption.width, inputedSN);
                 if("16".equals(inputedSN)){
-                    AppData.putCustomData(AppData.font, "29, 33, 34");
+                    BarOption.putCustomData(BarOption.font, "29, 33, 34");
                 }
                 showToast("App has set width to: " + inputedSN);
                 return;
             case "wlp":
-                AppData.putCustomData(AppData.labelPrinters, inputedSN);
+                BarOption.putCustomData(BarOption.labelPrinters, inputedSN);
                 showToast("App has set labelCloudPrinterSN to: " + inputedSN);
                 return;
 
             default:
-                AppData.putCustomData(SettingType, inputedSN);
+                BarOption.putCustomData(SettingType, inputedSN);
                 showToast(SettingType + " is set to " + inputedSN);
                 return;
         }
@@ -655,9 +656,9 @@ public class AppData{
     //to check a value of a specific key-----------------------------------------------------
     private static void displayCusValueOfKey(String inputedSN) {
         inputedSN = inputedSN.substring(1, inputedSN.length() - 1);
-        String answer = AppData.getCustomData(inputedSN);
+        String answer = BarOption.getCustomData(inputedSN);
         if(answer == null || answer.length() == 0) {
-            answer = SharedPreferencesHelper.getCache(NingMengStyle.app.getApplicationContext(), inputedSN).getString(inputedSN);
+            answer = SharedPreferencesHelper.getCache(AikaStyleApplication.instance.getApplicationContext(), inputedSN).getString(inputedSN);
         }
         showToast(inputedSN + " = " + answer);
     }
@@ -671,17 +672,17 @@ public class AppData{
     }
 
     public static boolean getStartFromTableSelection() {
-        return "1".equals(getCustomData(AppData.startFromTableSelection)) || "true".equals(getCustomData(AppData.startFromTableSelection));
+        return "1".equals(getCustomData(BarOption.startFromTableSelection)) || "true".equals(getCustomData(BarOption.startFromTableSelection));
     }
 
     static Float taxRate = null;
     public static Float getTaxRate() {
-        if(AppData.taxRate != null){
-            return AppData.taxRate;
+        if(BarOption.taxRate != null){
+            return BarOption.taxRate;
         }
         taxRate = 1.14975f;
         try{
-            taxRate = Float.valueOf(AppData.getCustomData(AppData.taxrate));
+            taxRate = Float.valueOf(BarOption.getCustomData(BarOption.taxrate));
             if(taxRate < 1){
                 taxRate += 1;
             }
@@ -692,15 +693,15 @@ public class AppData{
     }
 
     public static String getCustomChars() {
-        return getCustomData(AppData.custChars, "ABC*DFH+");
+        return getCustomData(BarOption.custChars, "ABC*DFH+");
     }
 
     public static String getCustomTogos() {
-        return getCustomData(AppData.custTogos, "Doda,Uber,Skip,Fant");
+        return getCustomData(BarOption.custTogos, "Doda,Uber,Skip,Fant");
     }
 
     public static String getDensity() {
-        String density = getCustomData(AppData.DENSITY);
+        String density = getCustomData(BarOption.DENSITY);
         if("".equals(density)){
             density = "4";
         }

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.db.bean.Menu;
+import com.just.print.db.bean.Dish;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -13,7 +13,7 @@ import com.stupid.method.reflect.annotation.XViewByID;
  * Created by qiqi on 2016/11/15.
  */
 
-public class OrderIdentifierViewHolder extends XViewHolder<Menu> {
+public class OrderIdentifierViewHolder extends XViewHolder<Dish> {
     @XViewByID(R.id.odIdCName)
     private TextView odIdCName;
     @XViewByID(R.id.odIdCID)
@@ -30,8 +30,8 @@ public class OrderIdentifierViewHolder extends XViewHolder<Menu> {
     }
 
     @Override
-    public void onResetView(Menu menu, int i) {
-        odIdCID.setText(menu.getID());
-        odIdCName.setText(menu.getName());
+    public void onResetView(Dish menu, int i) {
+        odIdCID.setText(menu.getId().toString());
+        odIdCName.setText(menu.getName1());
     }
 }

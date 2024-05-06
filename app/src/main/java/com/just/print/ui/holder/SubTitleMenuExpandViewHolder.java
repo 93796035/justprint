@@ -8,8 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.db.bean.Menu;
+import com.just.print.app.BarOption;
+import com.just.print.db.bean.Dish;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.stupid.method.adapter.expand.XExpadnViewHolder;
@@ -22,7 +22,7 @@ import java.util.List;
  * Created by Administrator on 2016/11/17.
  */
 
-public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Menu> {
+public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Dish> {
 
     @XViewByID(R.id.code)
     TextView code;
@@ -54,19 +54,19 @@ public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Menu> {
 
     @Override
     public void onClick(View v){
-        button.setTextColor(AppData.getThemColor());
+        button.setTextColor(BarOption.getThemColor());
         super.onClick(v);
     }
     @Override
-    public void onResetView(Menu menu, int i) {
-        code.setText(menu.getID());
-        title.setText(menu.getName());
+    public void onResetView(Dish menu, int i) {
+        code.setText(menu.getId().toString());
+        title.setText(menu.getName1());
         button.setTextColor(Color.rgb(000, 000, 000));
         List<SelectionDetail> selections =  CustomerSelection.getInstance().getSelectedDishes();
         if(selections != null) {
             for (SelectionDetail selectionDetail : selections) {
-                if(selectionDetail.getDish().getID().equals(menu.getID())){
-                    button.setTextColor(AppData.getThemColor());
+                if(selectionDetail.getDish().getId().equals(menu.getId())){
+                    button.setTextColor(BarOption.getThemColor());
                     button.setTypeface(null, Typeface.BOLD);
                 }
             }

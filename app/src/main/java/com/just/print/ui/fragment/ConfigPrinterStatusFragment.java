@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.just.print.R;
-import com.just.print.app.AppData;
-import com.just.print.app.NingMengStyle;
+import com.just.print.app.BarOption;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.expand.DaoExpand;
@@ -44,7 +44,7 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryNotDeletedAll(NingMengStyle.app.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
         markXAdapter.setData(list);
         markXAdapter.notifyDataSetChanged();
     }
@@ -54,10 +54,10 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
 
         Mark mark1 = new Mark();
         mark1.setState(State.ACTIVE);
-        mark1.setName(mark);
-        NingMengStyle.app.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
-        mark1.updateAndUpgrade();
-        AppData.updataeLastModifyTime(null);
+        mark1.setName1(mark);
+        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
+        mark1.update();
+        BarOption.updataeLastModifyTime(null);
         loadMark();
     }
 
@@ -67,12 +67,12 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
         final
         Mark mark = markXAdapter.getItem(i);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Are you sure to delete \"" + mark.getName() + "\"?");
+        builder.setMessage("Are you sure to delete \"" + mark.getName1() + "\"?");
         builder.setTitle("Notice").setNegativeButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                mark.logicDelete();
+                mark.delete();
                 loadMark();
             }
         });

@@ -1,14 +1,14 @@
 package com.just.print.sys.model;
 
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Menu;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectionDetail {
 
-	private Menu dish;
+	private Dish dish;
 	private float dishNum;
 	private String pIP;
 	private List<Mark> markList;//don't know why, but if I initialize it here, it will still be null when getting it....
@@ -24,11 +24,11 @@ public class SelectionDetail {
 		this.markList = markList;
 	}
 
-	public Menu getDish() {
+	public Dish getDish() {
 		return dish;
 	}
 
-	public void setDish(Menu dish) {
+	public void setDish(Dish dish) {
 		this.dish = dish;
 	}
 

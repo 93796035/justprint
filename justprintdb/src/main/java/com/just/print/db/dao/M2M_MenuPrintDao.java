@@ -13,7 +13,7 @@ import de.greenrobot.dao.internal.DaoConfig;
 import de.greenrobot.dao.query.Query;
 import de.greenrobot.dao.query.QueryBuilder;
 
-import com.just.print.db.bean.Menu;
+import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Printer;
 
 import com.just.print.db.bean.M2M_MenuPrint;
@@ -31,16 +31,16 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Pid = new Property(0, Long.class, "pid", false, "PID");
-        public final static Property Mid = new Property(1, String.class, "mid", false, "MID");
-        public final static Property Id = new Property(2, Long.class, "id", true, "_id");
+        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
+        public final static Property PrinterId = new Property(1, Long.class, "printerId", false, "PRINTER_ID");
+        public final static Property DishId = new Property(2, Long.class, "dishId", false, "DISH_ID");
         public final static Property State = new Property(3, Integer.class, "state", false, "STATE");
-        public final static Property Version = new Property(4, Long.class, "version", false, "VERSION");
+        public final static Property Version = new Property(4, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
 
-    private Query<M2M_MenuPrint> menu_M2M_MenuPrintListQuery;
+    private Query<M2M_MenuPrint> dish_M2M_MenuPrintListQuery;
 
     public M2M_MenuPrintDao(DaoConfig config) {
         super(config);
@@ -55,9 +55,9 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'M2_M__MENU_PRINT' (" + //
-                "'PID' INTEGER," + // 0: pid
-                "'MID' TEXT," + // 1: mid
-                "'_id' INTEGER PRIMARY KEY ASC UNIQUE ," + // 2: id
+                "'_id' INTEGER PRIMARY KEY ," + // 0: id
+                "'PRINTER_ID' INTEGER," + // 1: printerId
+                "'DISH_ID' INTEGER," + // 2: dishId
                 "'STATE' INTEGER," + // 3: state
                 "'VERSION' INTEGER);"); // 4: version
     }
@@ -73,19 +73,19 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
     protected void bindValues(SQLiteStatement stmt, M2M_MenuPrint entity) {
         stmt.clearBindings();
  
-        Long pid = entity.getPid();
-        if (pid != null) {
-            stmt.bindLong(1, pid);
-        }
- 
-        String mid = entity.getMid();
-        if (mid != null) {
-            stmt.bindString(2, mid);
-        }
- 
         Long id = entity.getId();
         if (id != null) {
-            stmt.bindLong(3, id);
+            stmt.bindLong(1, id);
+        }
+ 
+        Long printerId = entity.getPrinterId();
+        if (printerId != null) {
+            stmt.bindLong(2, printerId);
+        }
+ 
+        Long dishId = entity.getDishId();
+        if (dishId != null) {
+            stmt.bindLong(3, dishId);
         }
  
         Integer state = entity.getState();
@@ -93,7 +93,7 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
             stmt.bindLong(4, state);
         }
  
-        Long version = entity.getVersion();
+        Integer version = entity.getVersion();
         if (version != null) {
             stmt.bindLong(5, version);
         }
@@ -108,18 +108,18 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
     /** @inheritdoc */
     @Override
     public Long readKey(Cursor cursor, int offset) {
-        return cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2);
+        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
     }    
 
     /** @inheritdoc */
     @Override
     public M2M_MenuPrint readEntity(Cursor cursor, int offset) {
         M2M_MenuPrint entity = new M2M_MenuPrint( //
-            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // pid
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // mid
-            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // id
+            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
+            cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1), // printerId
+            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // dishId
             cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // state
-            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4) // version
+            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4) // version
         );
         return entity;
     }
@@ -127,11 +127,11 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
     /** @inheritdoc */
     @Override
     public void readEntity(Cursor cursor, M2M_MenuPrint entity, int offset) {
-        entity.setPid(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setMid(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
+        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
+        entity.setPrinterId(cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1));
+        entity.setDishId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
         entity.setState(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
-        entity.setVersion(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
+        entity.setVersion(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
      }
     
     /** @inheritdoc */
@@ -157,17 +157,17 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
         return true;
     }
     
-    /** Internal query to resolve the "m2M_MenuPrintList" to-many relationship of Menu. */
-    public List<M2M_MenuPrint> _queryMenu_M2M_MenuPrintList(String mid) {
+    /** Internal query to resolve the "m2M_MenuPrintList" to-many relationship of Dish. */
+    public List<M2M_MenuPrint> _queryDish_M2M_MenuPrintList(Long dishId) {
         synchronized (this) {
-            if (menu_M2M_MenuPrintListQuery == null) {
+            if (dish_M2M_MenuPrintListQuery == null) {
                 QueryBuilder<M2M_MenuPrint> queryBuilder = queryBuilder();
-                queryBuilder.where(Properties.Mid.eq(null));
-                menu_M2M_MenuPrintListQuery = queryBuilder.build();
+                queryBuilder.where(Properties.DishId.eq(null));
+                dish_M2M_MenuPrintListQuery = queryBuilder.build();
             }
         }
-        Query<M2M_MenuPrint> query = menu_M2M_MenuPrintListQuery.forCurrentThread();
-        query.setParameter(0, mid);
+        Query<M2M_MenuPrint> query = dish_M2M_MenuPrintListQuery.forCurrentThread();
+        query.setParameter(0, dishId);
         return query.list();
     }
 
@@ -180,10 +180,10 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
             builder.append(',');
             SqlUtils.appendColumns(builder, "T0", daoSession.getPrinterDao().getAllColumns());
             builder.append(',');
-            SqlUtils.appendColumns(builder, "T1", daoSession.getMenuDao().getAllColumns());
+            SqlUtils.appendColumns(builder, "T1", daoSession.getDishDao().getAllColumns());
             builder.append(" FROM M2_M__MENU_PRINT T");
-            builder.append(" LEFT JOIN PRINTER T0 ON T.'PID'=T0.'_id'");
-            builder.append(" LEFT JOIN MENU T1 ON T.'MID'=T1.'ID'");
+            builder.append(" LEFT JOIN PRINTER T0 ON T.'PRINTER_ID'=T0.'_id'");
+            builder.append(" LEFT JOIN DISH T1 ON T.'DISH_ID'=T1.'_id'");
             builder.append(' ');
             selectDeep = builder.toString();
         }
@@ -198,8 +198,8 @@ public class M2M_MenuPrintDao extends AbstractDao<M2M_MenuPrint, Long> {
         entity.setPrint(print);
         offset += daoSession.getPrinterDao().getAllColumns().length;
 
-        Menu menu = loadCurrentOther(daoSession.getMenuDao(), cursor, offset);
-        entity.setMenu(menu);
+        Dish dish = loadCurrentOther(daoSession.getDishDao(), cursor, offset);
+        entity.setDish(dish);
 
         return entity;    
     }
