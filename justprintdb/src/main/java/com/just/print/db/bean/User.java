@@ -18,11 +18,13 @@ public class User {
     private String firstName;
     private String secondName;
     private String nickName;
+    private Integer lang;
+    private String createTime;
     private Integer role;
     private String noTPS;
     private String noTVQ;
     private String pwd;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -42,16 +44,18 @@ public class User {
         this.id = id;
     }
 
-    public User(Long id, String firstName, String secondName, String nickName, Integer role, String noTPS, String noTVQ, String pwd, Integer state, Integer version) {
+    public User(Long id, String firstName, String secondName, String nickName, Integer lang, String createTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
         this.id = id;
         this.firstName = firstName;
         this.secondName = secondName;
         this.nickName = nickName;
+        this.lang = lang;
+        this.createTime = createTime;
         this.role = role;
         this.noTPS = noTPS;
         this.noTVQ = noTVQ;
         this.pwd = pwd;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -93,6 +97,22 @@ public class User {
         this.nickName = nickName;
     }
 
+    public Integer getLang() {
+        return lang;
+    }
+
+    public void setLang(Integer lang) {
+        this.lang = lang;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
     public Integer getRole() {
         return role;
     }
@@ -125,12 +145,12 @@ public class User {
         this.pwd = pwd;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

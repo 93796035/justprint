@@ -23,7 +23,7 @@ public class DiningTable {
     private Integer width;
     private Integer height;
     private Integer type;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -43,7 +43,7 @@ public class DiningTable {
         this.id = id;
     }
 
-    public DiningTable(Long id, String name, String openTime, Integer dspIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer state, Integer version) {
+    public DiningTable(Long id, String name, String openTime, Integer dspIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer status, Integer version) {
         this.id = id;
         this.name = name;
         this.openTime = openTime;
@@ -53,7 +53,7 @@ public class DiningTable {
         this.width = width;
         this.height = height;
         this.type = type;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -135,12 +135,12 @@ public class DiningTable {
         this.type = type;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

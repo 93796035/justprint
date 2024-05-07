@@ -32,7 +32,7 @@ public class Bill {
     private Integer userId;
     private String comment;
     private Integer invoiceId;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -52,7 +52,7 @@ public class Bill {
         this.id = id;
     }
 
-    public Bill(Long id, String createdTime, String tableName, String customerNumber, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer caseReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer state, Integer version) {
+    public Bill(Long id, String createdTime, String tableName, String customerNumber, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer caseReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer status, Integer version) {
         this.id = id;
         this.createdTime = createdTime;
         this.tableName = tableName;
@@ -71,7 +71,7 @@ public class Bill {
         this.userId = userId;
         this.comment = comment;
         this.invoiceId = invoiceId;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -225,12 +225,12 @@ public class Bill {
         this.invoiceId = invoiceId;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

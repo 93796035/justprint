@@ -19,7 +19,7 @@ public class M2M_MenuPrint {
     private Long id;
     private Long printerId;
     private Long dishId;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -45,11 +45,11 @@ public class M2M_MenuPrint {
         this.id = id;
     }
 
-    public M2M_MenuPrint(Long id, Long printerId, Long dishId, Integer state, Integer version) {
+    public M2M_MenuPrint(Long id, Long printerId, Long dishId, Integer status, Integer version) {
         this.id = id;
         this.printerId = printerId;
         this.dishId = dishId;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -83,12 +83,12 @@ public class M2M_MenuPrint {
         this.dishId = dishId;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

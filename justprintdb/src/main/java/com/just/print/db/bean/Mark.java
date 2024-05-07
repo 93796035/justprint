@@ -19,7 +19,7 @@ public class Mark {
     private String name2;
     private String name3;
     private Integer type;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -48,13 +48,13 @@ public class Mark {
         this.id = id;
     }
 
-    public Mark(Long id, String name1, String name2, String name3, Integer type, Integer state, Integer version) {
+    public Mark(Long id, String name1, String name2, String name3, Integer type, Integer status, Integer version) {
         this.id = id;
         this.name1 = name1;
         this.name2 = name2;
         this.name3 = name3;
         this.type = type;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -104,12 +104,12 @@ public class Mark {
         this.type = type;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {
@@ -151,7 +151,7 @@ public class Mark {
         mark.setName2(name2);
         mark.setName3(name3);
         mark.setId(id);
-        mark.setState(state);
+        mark.setStatus(status);
         mark.setQt(qt);
         mark.setType(type);
         mark.setVersion(version);

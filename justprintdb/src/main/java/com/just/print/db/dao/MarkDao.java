@@ -28,7 +28,7 @@ public class MarkDao extends AbstractDao<Mark, Long> {
         public final static Property Name2 = new Property(2, String.class, "name2", false, "NAME2");
         public final static Property Name3 = new Property(3, String.class, "name3", false, "NAME3");
         public final static Property Type = new Property(4, Integer.class, "type", false, "TYPE");
-        public final static Property State = new Property(5, Integer.class, "state", false, "STATE");
+        public final static Property Status = new Property(5, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(6, Integer.class, "version", false, "VERSION");
     };
 
@@ -53,7 +53,7 @@ public class MarkDao extends AbstractDao<Mark, Long> {
                 "'NAME2' TEXT UNIQUE ," + // 2: name2
                 "'NAME3' TEXT UNIQUE ," + // 3: name3
                 "'TYPE' INTEGER," + // 4: type
-                "'STATE' INTEGER," + // 5: state
+                "'STATUS' INTEGER," + // 5: status
                 "'VERSION' INTEGER);"); // 6: version
     }
 
@@ -93,9 +93,9 @@ public class MarkDao extends AbstractDao<Mark, Long> {
             stmt.bindLong(5, type);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(6, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(6, status);
         }
  
         Integer version = entity.getVersion();
@@ -125,7 +125,7 @@ public class MarkDao extends AbstractDao<Mark, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name2
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // name3
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // type
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // state
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // status
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6) // version
         );
         return entity;
@@ -139,7 +139,7 @@ public class MarkDao extends AbstractDao<Mark, Long> {
         entity.setName2(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setName3(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setType(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setState(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setStatus(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
      }
     

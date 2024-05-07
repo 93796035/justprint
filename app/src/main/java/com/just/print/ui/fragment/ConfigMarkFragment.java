@@ -71,7 +71,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         Collections.sort(list, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
-                return mark.getState() - t1.getState();
+                return mark.getStatus() - t1.getStatus();
             }
         });
         markXAdapter.setData(list);
@@ -94,9 +94,9 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         mark.setName1(markName);
 
         try{
-            mark.setState((int)(Float.valueOf(dspIdx) * 100));
+            mark.setStatus((int)(Float.valueOf(dspIdx) * 100));
         }catch(NumberFormatException e){
-            mark.setState(0);
+            mark.setStatus(0);
         }
 
         try{
@@ -119,7 +119,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
         onEditMark = mark;
 
         fldName.setText(mark.getName1());
-        dspIdx.setText(String.valueOf(((float) mark.getState()) / 100.00));
+        dspIdx.setText(String.valueOf(((float) mark.getStatus()) / 100.00));
         price.setText(String.valueOf(((float) mark.getVersion()) / 100.00));
 
         if (modifyViewSwitch.getDisplayedChild() == 0){
@@ -138,7 +138,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             onEditMark.setName1(fldName.getText().toString());
 
             try{
-                onEditMark.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
+                onEditMark.setStatus((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
             }catch(NumberFormatException e){
                 //do nothing.
             }

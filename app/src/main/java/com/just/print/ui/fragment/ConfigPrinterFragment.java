@@ -102,11 +102,11 @@ public class ConfigPrinterFragment extends BaseFragment implements
         }else if(orderPrint.isChecked() && classPrint.isChecked()){
             type = 3;
         }
-        DbUtil.createPrinter(ip.toString(),
-                name.getText().toString(),
-                checkBox.isChecked() ? 1 : 0,
-                type,//checkid == R.id.orderPrint ? 1 : 0,
-                note.getText().toString());
+//        DbUtil.createPrinter(ip.toString(),
+//                name.getText().toString(),
+//                checkBox.isChecked() ? 1 : 0,
+//                type,//checkid == R.id.orderPrint ? 1 : 0,
+//                note.getText().toString());
 
         name.setText("");
         checkBox.setChecked(false);
@@ -131,21 +131,20 @@ public class ConfigPrinterFragment extends BaseFragment implements
 //                return;
 //            }
             String ip = modifIP.getText().toString().trim();
-            mModifyCache.setPname(modifName.getText().toString());
+            mModifyCache.setName(modifName.getText().toString());
             mModifyCache.setIp(ip);
             mModifyCache.setVersion(mModifyCache.getVersion() + 1);
             if(modifyOrderPrint.isChecked() && !modifyClassPrint.isChecked()){
-                mModifyCache.setType(1);// 1: 顺序打印,
+                mModifyCache.setCategory(1);// 1: 顺序打印,
             }else if(!modifyOrderPrint.isChecked() && modifyClassPrint.isChecked()){
-                mModifyCache.setType(0);//0 :类别打印
+                mModifyCache.setCategory(0);//0 :类别打印
             }else if(!modifyOrderPrint.isChecked() && !modifyClassPrint.isChecked()){
-                mModifyCache.setType(2);// tbd
+                mModifyCache.setCategory(2);// tbd
             }else if(modifyOrderPrint.isChecked() && modifyClassPrint.isChecked()){
-                mModifyCache.setType(3);//按类别排序的全打
+                mModifyCache.setCategory(3);//按类别排序的全打
             }
             //DaoExpand.updateAllPrintTo0(getDaoMaster().newSession().getPrinterDao());
-            mModifyCache.setFirstPrint(modifyCheckBox.isChecked() ? 1 : 0);
-            mModifyCache.setNote(modifyNote.getText().toString());
+            mModifyCache.setStyle(modifyCheckBox.isChecked() ? 1 : 0);
             mModifyCache.update();
             mModifyCache = null;
             if(ip.indexOf(".") == -1){
@@ -168,23 +167,22 @@ public class ConfigPrinterFragment extends BaseFragment implements
                 break;
             case R.id.modify:
                 mModifyCache = printerXAdapter.get(p);
-                modifyCheckBox.setChecked(mModifyCache.getFirstPrint() == null ? false : mModifyCache.getFirstPrint() == 1);
+                modifyCheckBox.setChecked(mModifyCache.getStyle() == null ? false : mModifyCache.getStyle() == 1);
                 modifIP.setText(mModifyCache.getIp());
-                modifName.setText(mModifyCache.getPname());
-                if(mModifyCache.getType() == 0){    //by category
+                modifName.setText(mModifyCache.getName());
+                if(mModifyCache.getCategory() == 0){    //by category
                     modifyOrderPrint.setChecked(false);
                     modifyClassPrint.setChecked(true);
-                }else if(mModifyCache.getType() == 1){                                  //by order time
+                }else if(mModifyCache.getCategory() == 1){                                  //by order time
                     modifyOrderPrint.setChecked(true);
                     modifyClassPrint.setChecked(false);
-                }else if(mModifyCache.getType() == 2){
+                }else if(mModifyCache.getCategory() == 2){
                     modifyOrderPrint.setChecked(false);
                     modifyClassPrint.setChecked(false);
-                }else if(mModifyCache.getType() == 3){
+                }else if(mModifyCache.getCategory() == 3){
                     modifyOrderPrint.setChecked(true);
                     modifyClassPrint.setChecked(true);
                 }
-                modifyNote.setText(mModifyCache.getNote());
 
                 if (modifyViewSwitch.getDisplayedChild() == 0)
                     modifyViewSwitch.setDisplayedChild(1);

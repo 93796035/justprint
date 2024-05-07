@@ -32,9 +32,9 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property SaleRecId = new Property(1, Long.class, "saleRecId", false, "SALE_REC_ID");
-        public final static Property MarkId = new Property(2, Long.class, "markId", false, "MARK_ID");
-        public final static Property State = new Property(3, Integer.class, "state", false, "STATE");
+        public final static Property SaleRecId = new Property(1, Long.class, "saleRecId", false, "saleRecId");
+        public final static Property MarkId = new Property(2, Long.class, "markId", false, "markId");
+        public final static Property Status = new Property(3, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(4, Integer.class, "version", false, "VERSION");
     };
 
@@ -56,9 +56,9 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'M2_M__SALE_RECORD_MARK' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'SALE_REC_ID' INTEGER," + // 1: saleRecId
-                "'MARK_ID' INTEGER," + // 2: markId
-                "'STATE' INTEGER," + // 3: state
+                "'saleRecId' INTEGER," + // 1: saleRecId
+                "'markId' INTEGER," + // 2: markId
+                "'STATUS' INTEGER," + // 3: status
                 "'VERSION' INTEGER);"); // 4: version
     }
 
@@ -88,9 +88,9 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
             stmt.bindLong(3, markId);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(4, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(4, status);
         }
  
         Integer version = entity.getVersion();
@@ -118,7 +118,7 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1), // saleRecId
             cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // markId
-            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // state
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // status
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4) // version
         );
         return entity;
@@ -130,7 +130,7 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setSaleRecId(cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1));
         entity.setMarkId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
-        entity.setState(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
+        entity.setStatus(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
         entity.setVersion(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
      }
     
@@ -182,8 +182,8 @@ public class M2M_SaleRecordMarkDao extends AbstractDao<M2M_SaleRecordMark, Long>
             builder.append(',');
             SqlUtils.appendColumns(builder, "T1", daoSession.getMarkDao().getAllColumns());
             builder.append(" FROM M2_M__SALE_RECORD_MARK T");
-            builder.append(" LEFT JOIN SALE_RECORD T0 ON T.'SALE_REC_ID'=T0.'_id'");
-            builder.append(" LEFT JOIN MARK T1 ON T.'MARK_ID'=T1.'_id'");
+            builder.append(" LEFT JOIN SALE_RECORD T0 ON T.'saleRecId'=T0.'_id'");
+            builder.append(" LEFT JOIN MARK T1 ON T.'markId'=T1.'_id'");
             builder.append(' ');
             selectDeep = builder.toString();
         }

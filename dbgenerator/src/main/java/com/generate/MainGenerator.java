@@ -45,12 +45,14 @@ public class MainGenerator {
         // +---------+-----------+------------+---------+
         Entity user = schema.addEntity("User");
         user.addIdProperty();
-        user.addStringProperty("firstName");
-        user.addStringProperty("secondName");
-        user.addStringProperty("nickName");
+        user.addStringProperty("firstName").columnName("firstName");
+        user.addStringProperty("secondName").columnName("secondName");
+        user.addStringProperty("nickName").columnName("nickName");
+        user.addIntProperty("lang");
+        user.addStringProperty("createTime").columnName("createTime");
         user.addIntProperty("role");// 1 is the biggest
-        user.addStringProperty("noTPS");
-        user.addStringProperty("noTVQ");
+        user.addStringProperty("noTPS").columnName("noTPS");
+        user.addStringProperty("noTVQ").columnName("noTVQ");
         user.addStringProperty("pwd");
 
         //  @table Printer
@@ -60,11 +62,11 @@ public class MainGenerator {
         // +---------+---------+---------+---------+
         Entity printer = schema.addEntity("Printer");
         printer.addIdProperty();
-        printer.addStringProperty("ip").columnName("IP");
-        printer.addStringProperty("pname").columnName("P_NAME");
-        printer.addStringProperty("note").columnName("NOTE");
-        printer.addIntProperty("firstPrint").columnName("STYLE");
-        printer.addIntProperty("type").columnName("CATEGORY");
+        printer.addStringProperty("ip");
+        printer.addStringProperty("name");
+        printer.addIntProperty("style");
+        printer.addIntProperty("category");
+        printer.addIntProperty("langType").columnName("langType");
 
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   price |
@@ -72,10 +74,10 @@ public class MainGenerator {
         Entity dinningTable = schema.addEntity("DiningTable");
         dinningTable.addIdProperty();
         dinningTable.addStringProperty("name");
-        dinningTable.addStringProperty("openTime");
-        dinningTable.addIntProperty("dspIdx");
-        dinningTable.addIntProperty("posX");
-        dinningTable.addIntProperty("posY");
+        dinningTable.addStringProperty("openTime").columnName("openTime");
+        dinningTable.addIntProperty("dspIdx").columnName("dspIdx");
+        dinningTable.addIntProperty("posX").columnName("posX");
+        dinningTable.addIntProperty("posY").columnName("posY");
         dinningTable.addIntProperty("width");
         dinningTable.addIntProperty("height");
         dinningTable.addIntProperty("type");
@@ -90,7 +92,7 @@ public class MainGenerator {
         category.addStringProperty("name1").columnName("NAME1");
         category.addStringProperty("name2").columnName("NAME2");
         category.addStringProperty("name3").columnName("NAME3");
-        category.addIntProperty("displayIdx").columnName("DISPLAY_IDX");
+        category.addIntProperty("displayIdx").columnName("displayIdx");
 
         //  @table Menu
         //  @pk id
@@ -109,12 +111,12 @@ public class MainGenerator {
         dish.addIntProperty("gst");//price
         dish.addIntProperty("qst");//price
         dish.addIntProperty("size");//size
-        dish.addStringProperty("printerIds");
-        dish.addIntProperty("displayIdx");//size
-        dish.addBooleanProperty("pricePomp");//size
-        dish.addBooleanProperty("menuPomp");//size
-        dish.addBooleanProperty("ModifyPomp");//size
-        Property.PropertyBuilder categoryId = dish.addLongProperty("categoryId");
+        dish.addStringProperty("printerIds").columnName("printerIds");
+        dish.addIntProperty("displayIdx").columnName("displayIdx");//size
+        dish.addBooleanProperty("pricePomp").columnName("pricePomp");//size
+        dish.addBooleanProperty("menuPomp").columnName("menuPomp");//size
+        dish.addBooleanProperty("ModifyPomp").columnName("ModifyPomp");//size
+        Property.PropertyBuilder categoryId = dish.addLongProperty("categoryId").columnName("categoryId");
         category.addToMany(dish, categoryId.getProperty());
 
         // +---------+---------+---------+---------+
@@ -123,8 +125,8 @@ public class MainGenerator {
         // printer and dish are multi to multi, add a dish table.
         Entity menuPrint = schema.addEntity("M2M_MenuPrint");
         menuPrint.addIdProperty();
-        Property.PropertyBuilder printerId = menuPrint.addLongProperty("printerId");
-        Property.PropertyBuilder menuId = menuPrint.addLongProperty("dishId");
+        Property.PropertyBuilder printerId = menuPrint.addLongProperty("printerId").columnName("printerId");
+        Property.PropertyBuilder menuId = menuPrint.addLongProperty("dishId").columnName("dishId");
         menuPrint.addToOne(printer, printerId.getProperty(), "print");
         menuPrint.addToOne(dish, menuId.getProperty(), "dish");
         dish.addToMany(menuPrint, menuId.getProperty());
@@ -147,18 +149,18 @@ public class MainGenerator {
         // +---------+-----------+------------+---------+
         Entity saleRecord = schema.addEntity("SaleRecord");
         saleRecord.addIdProperty();
-        saleRecord.addStringProperty("tableName");
-        saleRecord.addStringProperty("customerNumber");
-        saleRecord.addStringProperty("openTime");
+        saleRecord.addStringProperty("tableName").columnName("tableName");
+        saleRecord.addStringProperty("customerNumber").columnName("customerNumber");
+        saleRecord.addStringProperty("openTime").columnName("openTime");
 
-        saleRecord.addIntProperty("productId");
+        saleRecord.addIntProperty("productId").columnName("productId");
         saleRecord.addFloatProperty("amount");
-        saleRecord.addFloatProperty("totalPrice");
+        saleRecord.addFloatProperty("totalPrice").columnName("totalPrice");
         saleRecord.addFloatProperty("discount");
         saleRecord.addStringProperty("modifications");
-        saleRecord.addIntProperty("userId");
-        saleRecord.addIntProperty("billId");
-        saleRecord.addStringProperty("createdTime");
+        saleRecord.addIntProperty("userId").columnName("userId");
+        saleRecord.addIntProperty("billId").columnName("billId");
+        saleRecord.addStringProperty("createdTime").columnName("createdTime");
 
         // +---------+---------+---------+---------+
         // |    id   |   pid   |  mid    |   manem |
@@ -166,8 +168,8 @@ public class MainGenerator {
         // printer and dish are multi to multi, add a dish table.
         Entity saleRecordMark = schema.addEntity("M2M_SaleRecordMark");
         saleRecordMark.addIdProperty();
-        Property.PropertyBuilder saleRecId = saleRecordMark.addLongProperty("saleRecId");
-        Property.PropertyBuilder markId = saleRecordMark.addLongProperty("markId");
+        Property.PropertyBuilder saleRecId = saleRecordMark.addLongProperty("saleRecId").columnName("saleRecId");
+        Property.PropertyBuilder markId = saleRecordMark.addLongProperty("markId").columnName("markId");
         saleRecordMark.addToOne(saleRecord, saleRecId.getProperty(), "saleRecord");
         saleRecordMark.addToOne(mark, markId.getProperty(), "mark");
         dish.addToMany(saleRecordMark, markId.getProperty());
@@ -177,50 +179,50 @@ public class MainGenerator {
         // +---------+---------+---------+---------+
         Entity bill = schema.addEntity("Bill");
         bill.addIdProperty();
-        bill.addStringProperty("createdTime");
-        bill.addStringProperty("tableName");
-        bill.addStringProperty("customerNumber");
-        bill.addStringProperty("openTime");
+        bill.addStringProperty("createdTime").columnName("createdTime");
+        bill.addStringProperty("tableName").columnName("tableName");
+        bill.addStringProperty("customerNumber").columnName("customerNumber");
+        bill.addStringProperty("openTime").columnName("openTime");
         bill.addIntProperty("Total");
         bill.addIntProperty("discount");
-        bill.addIntProperty("serviceFee");
-        bill.addIntProperty("caseReceived");
-        bill.addIntProperty("debitReceived");
-        bill.addIntProperty("visaReceived");
-        bill.addIntProperty("masterReceived");
-        bill.addStringProperty("otherReceived");
+        bill.addIntProperty("serviceFee").columnName("serviceFee");
+        bill.addIntProperty("caseReceived").columnName("caseReceived");
+        bill.addIntProperty("debitReceived").columnName("debitReceived");
+        bill.addIntProperty("visaReceived").columnName("visaReceived");
+        bill.addIntProperty("masterReceived").columnName("masterReceived");
+        bill.addStringProperty("otherReceived").columnName("otherReceived");
         bill.addIntProperty("tip");
         bill.addIntProperty("cashback");
-        bill.addIntProperty("userId");
+        bill.addIntProperty("userId").columnName("userId");
         bill.addStringProperty("comment");
-        bill.addIntProperty("invoiceId");
+        bill.addIntProperty("invoiceId").columnName("invoiceId");
 
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
-        Entity customization = schema.addEntity("Customization");
-        customization.addIdProperty();
-        customization.addStringProperty("key");
-        customization.addStringProperty("value");
-        customization.addStringProperty("type");
+        Entity customizations = schema.addEntity("Customizations");
+        customizations.addIdProperty();
+        customizations.addStringProperty("key");
+        customizations.addStringProperty("value");
+        customizations.addStringProperty("type");
 
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
         Entity websrmBatch = schema.addEntity("WebsrmBatch");
         websrmBatch.addIdProperty();
-        websrmBatch.addStringProperty("jsonToSend");
+        websrmBatch.addStringProperty("jsonToSend").columnName("jsonToSend");
         websrmBatch.addStringProperty("signatransm");
-        websrmBatch.addStringProperty("emprCertifSev");
-        websrmBatch.addStringProperty("strUrlQRCode");
-        websrmBatch.addIntProperty("employeeId");
+        websrmBatch.addStringProperty("emprCertifSev").columnName("emprCertifSev");
+        websrmBatch.addStringProperty("strUrlQRCode").columnName("strUrlQRCode");
+        websrmBatch.addIntProperty("employeeId").columnName("employeeId");
 
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
         Entity device = schema.addEntity("Device");//在线设备
         device.addStringProperty("ip");
-        device.addStringProperty("userName");
+        device.addStringProperty("userName").columnName("userName");
 
         // +---------+---------+---------+---------+
         // |    id   |   pid   |  categoryId    |   manem |
@@ -230,14 +232,14 @@ public class MainGenerator {
         log.setTableName("Logs");
         log.addIdProperty();
         log.addStringProperty("msg");
-        log.addStringProperty("uName");
+        log.addStringProperty("name").columnName("name");
         log.addDateProperty("date");
-        log.addIntProperty("logType");
+        log.addIntProperty("logType").columnName("logType");
 
         //-------------添加,state,version---------------
         for (Entity en : schema.getEntities()) {
-            en.addIntProperty("state").columnName("STATE");// default:0, del:1,
-            en.addIntProperty("version").columnName("VERSION");
+            en.addIntProperty("status");// default:0, del:1,
+            en.addIntProperty("version");
         }
     }
 

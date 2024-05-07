@@ -9,13 +9,13 @@ import com.just.print.ui.fragment.RegisterFragment;
 
 public class RegisterFragmentActivity extends BaseFragmentActivity {
 
-    private Fragment fragment = new RegisterFragment();
+    private Fragment registerFragment = new RegisterFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        beginTransaction().add(R.id.content, fragment, fragment.getClass().getName()).commit();
+        beginTransaction().add(R.id.content, registerFragment, registerFragment.getClass().getName()).commit();
     }
 
 }

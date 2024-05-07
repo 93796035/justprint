@@ -34,7 +34,7 @@ public class DefaultService extends AbsService {
         L.d(tag, "queryShop");
         QueryShopResult result = new QueryShopResult();
 
-        File dbfile = AikaStyleApplication.instance.getDBPath(queryShop.getShopName());
+        File dbfile = AikaStyleApplication.instance.getDBPath();
         if (dbfile.exists()) {
             result.setExists(true);
             result.setFileSize(dbfile.length());

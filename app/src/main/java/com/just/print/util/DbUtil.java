@@ -83,28 +83,6 @@ public class DbUtil extends Thread{
         new DbUtil().run();
     }
 
-    //don't know why this is here----------------------------------------------
-    public static void createPrinter(
-            String ip,
-            String name,
-            int fullPrintMode, //是否全单打印,1 全单打印,0单独打印
-            int checkid,
-            String note) {
-        Printer printer = new Printer();
-        printer.setFirstPrint(fullPrintMode);
-        printer.setPname(name);
-        printer.setIp(ip);
-        printer.setType(checkid);// 1: 顺序打印,0 :类别打印
-        printer.setNote(note);
-        //        if (checkBox.isChecked()) {
-        //            //DaoExpand.updateAllPrintTo0(getDaoMaster().newSession().getPrinterDao());
-        //            printer.setFirstPrint(1);
-        //        }
-        printer.setState(com.just.print.db.expand.State.ACTIVE);
-        AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao().insert(printer);
-        printer.updateAndUpgrade();
-    }
-
     @Override
     public void run() {
         super.run();

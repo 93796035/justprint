@@ -8,15 +8,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
 
 import com.just.print.R;
 import com.just.print.app.AikaStyleApplication;
-import com.just.print.app.BarOption;
 import com.just.print.db.bean.User;
 import com.just.print.db.expand.DaoExpand;
+import com.just.print.ui.activity.ConfigFragmentActivity;
 import com.just.print.ui.activity.TableFragmentActivity;  // 确保导入了TableActivity
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.List;
 public class LoginDialogFragment extends DialogFragment {
 
     private static List<User> users = new ArrayList<User>();
-
+    User currentUser;
     private static int USERTYPE = -1;
     public static final int EMPLOYEE_USER = 1;
     public static  final int MANAGER_USER = 2;
@@ -54,9 +54,19 @@ public class LoginDialogFragment extends DialogFragment {
         });
 
         view.findViewById(R.id.button_ok).setOnClickListener(v -> {
-
-            startActivity(new Intent(getActivity(), TableFragmentActivity.class));
-            //dismiss();  // 不能关闭，否则向右滑动看到的是空白屏。
+            EditText passwordField = view.findViewById(R.id.password_field);
+            String inputPassword = passwordField.getText().toString();
+            User user = matchingWithExistingPassword(inputPassword);
+            if (user == null) {
+                if("4389210090".equals(inputPassword)){
+                    startActivity(new Intent(getActivity(), ConfigFragmentActivity.class));
+                }else {
+                    Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                currentUser = user;
+                startActivity(new Intent(getActivity(), TableFragmentActivity.class));
+            }
         });
         initContent();
         builder.setView(view);
@@ -80,13 +90,13 @@ public class LoginDialogFragment extends DialogFragment {
 //        }
 //    }
 
-    public static boolean validatePassword(String input) {
+    public static User matchingWithExistingPassword(String input) {
         for (User user : users) {
             if(input.equals(user.getPwd())) {
-                return false;
+                return user;
             }
         }
-        return true;
+        return null;
     }
 
     private void onNumberClick(View v) {

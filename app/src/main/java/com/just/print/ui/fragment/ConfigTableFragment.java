@@ -71,9 +71,9 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
         table.setName1(tableName);
 
         try{
-            table.setState((int)(Float.valueOf(dspIdx) * 100)); //table can be ordered by name, so this field can be used for other stuff if needed.
+            table.setStatus((int)(Float.valueOf(dspIdx) * 100)); //table can be ordered by name, so this field can be used for other stuff if needed.
         }catch(NumberFormatException e){
-            table.setState(0);
+            table.setStatus(0);
         }
         table.setVersion(-1);  //negative means it's a table not mark. while we can still give it some nubmer to indicate the bill.
         AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
@@ -90,7 +90,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
         onEditTable = table;
 
         name.setText(table.getName1());
-        dspIdx.setText(String.valueOf(((float) table.getState()) / 100.00));
+        dspIdx.setText(String.valueOf(((float) table.getStatus()) / 100.00));
 
         if (modifyViewSwitch.getDisplayedChild() == 0){
             modifyViewSwitch.setDisplayedChild(1);
@@ -108,7 +108,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
             onEditTable.setName1(name.getText().toString());
 
             try{
-                onEditTable.setState((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
+                onEditTable.setStatus((int)(Float.valueOf(dspIdx.getText().toString()) * 100));
             }catch(NumberFormatException e){
                 //do nothing.
             }

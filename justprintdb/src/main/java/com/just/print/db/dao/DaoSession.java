@@ -19,7 +19,7 @@ import com.just.print.db.bean.Mark;
 import com.just.print.db.bean.SaleRecord;
 import com.just.print.db.bean.M2M_SaleRecordMark;
 import com.just.print.db.bean.Bill;
-import com.just.print.db.bean.Customization;
+import com.just.print.db.bean.Customizations;
 import com.just.print.db.bean.WebsrmBatch;
 import com.just.print.db.bean.Device;
 import com.just.print.db.bean.Log;
@@ -34,7 +34,7 @@ import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.dao.M2M_SaleRecordMarkDao;
 import com.just.print.db.dao.BillDao;
-import com.just.print.db.dao.CustomizationDao;
+import com.just.print.db.dao.CustomizationsDao;
 import com.just.print.db.dao.WebsrmBatchDao;
 import com.just.print.db.dao.DeviceDao;
 import com.just.print.db.dao.LogDao;
@@ -58,7 +58,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig saleRecordDaoConfig;
     private final DaoConfig m2M_SaleRecordMarkDaoConfig;
     private final DaoConfig billDaoConfig;
-    private final DaoConfig customizationDaoConfig;
+    private final DaoConfig customizationsDaoConfig;
     private final DaoConfig websrmBatchDaoConfig;
     private final DaoConfig deviceDaoConfig;
     private final DaoConfig logDaoConfig;
@@ -73,7 +73,7 @@ public class DaoSession extends AbstractDaoSession {
     private final SaleRecordDao saleRecordDao;
     private final M2M_SaleRecordMarkDao m2M_SaleRecordMarkDao;
     private final BillDao billDao;
-    private final CustomizationDao customizationDao;
+    private final CustomizationsDao customizationsDao;
     private final WebsrmBatchDao websrmBatchDao;
     private final DeviceDao deviceDao;
     private final LogDao logDao;
@@ -112,8 +112,8 @@ public class DaoSession extends AbstractDaoSession {
         billDaoConfig = daoConfigMap.get(BillDao.class).clone();
         billDaoConfig.initIdentityScope(type);
 
-        customizationDaoConfig = daoConfigMap.get(CustomizationDao.class).clone();
-        customizationDaoConfig.initIdentityScope(type);
+        customizationsDaoConfig = daoConfigMap.get(CustomizationsDao.class).clone();
+        customizationsDaoConfig.initIdentityScope(type);
 
         websrmBatchDaoConfig = daoConfigMap.get(WebsrmBatchDao.class).clone();
         websrmBatchDaoConfig.initIdentityScope(type);
@@ -134,7 +134,7 @@ public class DaoSession extends AbstractDaoSession {
         saleRecordDao = new SaleRecordDao(saleRecordDaoConfig, this);
         m2M_SaleRecordMarkDao = new M2M_SaleRecordMarkDao(m2M_SaleRecordMarkDaoConfig, this);
         billDao = new BillDao(billDaoConfig, this);
-        customizationDao = new CustomizationDao(customizationDaoConfig, this);
+        customizationsDao = new CustomizationsDao(customizationsDaoConfig, this);
         websrmBatchDao = new WebsrmBatchDao(websrmBatchDaoConfig, this);
         deviceDao = new DeviceDao(deviceDaoConfig, this);
         logDao = new LogDao(logDaoConfig, this);
@@ -149,7 +149,7 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(SaleRecord.class, saleRecordDao);
         registerDao(M2M_SaleRecordMark.class, m2M_SaleRecordMarkDao);
         registerDao(Bill.class, billDao);
-        registerDao(Customization.class, customizationDao);
+        registerDao(Customizations.class, customizationsDao);
         registerDao(WebsrmBatch.class, websrmBatchDao);
         registerDao(Device.class, deviceDao);
         registerDao(Log.class, logDao);
@@ -166,7 +166,7 @@ public class DaoSession extends AbstractDaoSession {
         saleRecordDaoConfig.getIdentityScope().clear();
         m2M_SaleRecordMarkDaoConfig.getIdentityScope().clear();
         billDaoConfig.getIdentityScope().clear();
-        customizationDaoConfig.getIdentityScope().clear();
+        customizationsDaoConfig.getIdentityScope().clear();
         websrmBatchDaoConfig.getIdentityScope().clear();
         deviceDaoConfig.getIdentityScope().clear();
         logDaoConfig.getIdentityScope().clear();
@@ -212,8 +212,8 @@ public class DaoSession extends AbstractDaoSession {
         return billDao;
     }
 
-    public CustomizationDao getCustomizationDao() {
-        return customizationDao;
+    public CustomizationsDao getCustomizationsDao() {
+        return customizationsDao;
     }
 
     public WebsrmBatchDao getWebsrmBatchDao() {

@@ -31,11 +31,11 @@ public class ConfigPrinterViewHolder extends XViewHolder<Printer> {
     public void onResetView(Printer printer, int i) {
         ip.setText(printer.getIp());
 
-        if (printer.getFirstPrint() != null && printer.getFirstPrint() == 1) {
-            name.setText("[主] " + printer.getPname());
+        if (printer.getStyle() != null && printer.getStyle() == 1) {
+            name.setText("[主] " + printer.getName());
 
         } else
-            name.setText(printer.getPname());
+            name.setText(printer.getName());
 
     }
 }

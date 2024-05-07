@@ -431,7 +431,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         Collections.sort(tables, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
-                return mark.getState() - t1.getState();
+                return mark.getStatus() - t1.getStatus();
             }
         });
         tableXAdapter.setData(tables);
@@ -1194,7 +1194,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             boolean inserted = false;
             for (int j = 0; j < sortedMarks.size(); j++) {
-                if (sortedMarks.get(j).getState() > mark.getState()) {
+                if (sortedMarks.get(j).getStatus() > mark.getStatus()) {
                     sortedMarks.add(j, mark);
                     inserted = true;
                     break;

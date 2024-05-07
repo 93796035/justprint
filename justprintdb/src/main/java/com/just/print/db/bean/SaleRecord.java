@@ -26,7 +26,7 @@ public class SaleRecord {
     private Integer userId;
     private Integer billId;
     private String createdTime;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -46,7 +46,7 @@ public class SaleRecord {
         this.id = id;
     }
 
-    public SaleRecord(Long id, String tableName, String customerNumber, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer state, Integer version) {
+    public SaleRecord(Long id, String tableName, String customerNumber, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer status, Integer version) {
         this.id = id;
         this.tableName = tableName;
         this.customerNumber = customerNumber;
@@ -59,7 +59,7 @@ public class SaleRecord {
         this.userId = userId;
         this.billId = billId;
         this.createdTime = createdTime;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -165,12 +165,12 @@ public class SaleRecord {
         this.createdTime = createdTime;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

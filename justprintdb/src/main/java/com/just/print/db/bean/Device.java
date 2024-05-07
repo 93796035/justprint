@@ -16,7 +16,7 @@ public class Device {
 
     private String ip;
     private String userName;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -32,10 +32,10 @@ public class Device {
     public Device() {
     }
 
-    public Device(String ip, String userName, Integer state, Integer version) {
+    public Device(String ip, String userName, Integer status, Integer version) {
         this.ip = ip;
         this.userName = userName;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -61,12 +61,12 @@ public class Device {
         this.userName = userName;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

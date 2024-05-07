@@ -439,7 +439,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         //valid menuId
         Dish menu = menuDao.load(Long.valueOf(mid.getText().toString()));     //to filter out "is adding" and "menucode is ocupied" case.
         //modify case also need to check, in case that id is changed and new id duplicated with ohter menu.
-        if(menu != null && menu.getState() == State.ACTIVE) {
+        if(menu != null && menu.getStatus() == State.OPENNED) {
             if(modifyingMenu == null || !menu.getId().equals(modifyingMenu.getId())){ //creating or it's modifying
                  showToast("This menu name already exist, please choose a different name.");
                  return;
@@ -458,7 +458,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         if(modifyingMenu == null){   //adding case
             menu = new Dish();
             menu.setId(Long.valueOf(mid.getText().toString()));
-            menu.setState(State.ACTIVE);
+            menu.setStatus(State.OPENNED);
             menu.setName1(mname.getText().toString().trim());
             menu.setCategoryId(mCategory.getId());
             menu.setPrice(price);
@@ -467,7 +467,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }else{              //updating....now it's allow duplicate name case..
             menuDao.delete(modifyingMenu);
             modifyingMenu.setId(Long.valueOf(mid.getText().toString()));
-            modifyingMenu.setState(State.ACTIVE);
+            modifyingMenu.setStatus(State.OPENNED);
             modifyingMenu.setName1(mname.getText().toString().trim());
             modifyingMenu.setCategoryId(mCategory.getId());
             modifyingMenu.setPrice(price);
@@ -542,7 +542,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         cat.setName1(cname.getText().toString());
         cat.setDisplayIdx(idx);
 
-        cat.setState(State.ACTIVE);
+        cat.setStatus(State.OPENNED);
         AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
         cat.updateAndUpgrade();
         BarOption.updataeLastModifyTime(null);
@@ -567,7 +567,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         final CharSequence[] items = new CharSequence[data.size()];
         for (int i = 0, s = data.size(); i < s; i++) {
             Printer p = data.get(i);
-            items[i] = p.getPname() + "_" + p.getIp();
+            items[i] = p.getName() + "_" + p.getIp();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Please choose a printer");

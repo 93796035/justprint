@@ -25,10 +25,10 @@ public class LogDao extends AbstractDao<Log, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Msg = new Property(1, String.class, "msg", false, "MSG");
-        public final static Property UName = new Property(2, String.class, "uName", false, "U_NAME");
+        public final static Property Name = new Property(2, String.class, "name", false, "name");
         public final static Property Date = new Property(3, java.util.Date.class, "date", false, "DATE");
-        public final static Property LogType = new Property(4, Integer.class, "logType", false, "LOG_TYPE");
-        public final static Property State = new Property(5, Integer.class, "state", false, "STATE");
+        public final static Property LogType = new Property(4, Integer.class, "logType", false, "logType");
+        public final static Property Status = new Property(5, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(6, Integer.class, "version", false, "VERSION");
     };
 
@@ -50,10 +50,10 @@ public class LogDao extends AbstractDao<Log, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'Logs' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'MSG' TEXT," + // 1: msg
-                "'U_NAME' TEXT," + // 2: uName
+                "'name' TEXT," + // 2: name
                 "'DATE' INTEGER," + // 3: date
-                "'LOG_TYPE' INTEGER," + // 4: logType
-                "'STATE' INTEGER," + // 5: state
+                "'logType' INTEGER," + // 4: logType
+                "'STATUS' INTEGER," + // 5: status
                 "'VERSION' INTEGER);"); // 6: version
     }
 
@@ -78,9 +78,9 @@ public class LogDao extends AbstractDao<Log, Long> {
             stmt.bindString(2, msg);
         }
  
-        String uName = entity.getUName();
-        if (uName != null) {
-            stmt.bindString(3, uName);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(3, name);
         }
  
         java.util.Date date = entity.getDate();
@@ -93,9 +93,9 @@ public class LogDao extends AbstractDao<Log, Long> {
             stmt.bindLong(5, logType);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(6, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(6, status);
         }
  
         Integer version = entity.getVersion();
@@ -122,10 +122,10 @@ public class LogDao extends AbstractDao<Log, Long> {
         Log entity = new Log( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // msg
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // uName
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
             cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)), // date
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // logType
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // state
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // status
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6) // version
         );
         return entity;
@@ -136,10 +136,10 @@ public class LogDao extends AbstractDao<Log, Long> {
     public void readEntity(Cursor cursor, Log entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setMsg(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setUName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setDate(cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)));
         entity.setLogType(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setState(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setStatus(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setVersion(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
      }
     

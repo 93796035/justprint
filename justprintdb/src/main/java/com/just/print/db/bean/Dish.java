@@ -31,7 +31,7 @@ public class Dish {
     private Boolean menuPomp;
     private Boolean ModifyPomp;
     private Long categoryId;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -53,7 +53,7 @@ public class Dish {
         this.id = id;
     }
 
-    public Dish(Long id, String name1, String name2, String name3, Float price, Integer gst, Integer qst, Integer size, String printerIds, Integer displayIdx, Boolean pricePomp, Boolean menuPomp, Boolean ModifyPomp, Long categoryId, Integer state, Integer version) {
+    public Dish(Long id, String name1, String name2, String name3, Float price, Integer gst, Integer qst, Integer size, String printerIds, Integer displayIdx, Boolean pricePomp, Boolean menuPomp, Boolean ModifyPomp, Long categoryId, Integer status, Integer version) {
         this.id = id;
         this.name1 = name1;
         this.name2 = name2;
@@ -68,7 +68,7 @@ public class Dish {
         this.menuPomp = menuPomp;
         this.ModifyPomp = ModifyPomp;
         this.categoryId = categoryId;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -190,12 +190,12 @@ public class Dish {
         this.categoryId = categoryId;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

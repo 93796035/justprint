@@ -34,6 +34,6 @@ public class ConfigAddPrintViewHolder extends XViewHolder<Printer> {
             return;
         }
         ip.setText(printer.getIp());
-        name.setText(printer.getPname());
+        name.setText(printer.getName());
     }
 }

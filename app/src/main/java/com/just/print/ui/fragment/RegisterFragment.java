@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.just.print.R;
+import com.just.print.app.AikaStyleApplication;
 import com.just.print.app.BarOption;
 import com.just.print.app.BaseFragment;
 import com.just.print.net.UDPService;
@@ -52,8 +53,6 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
             findViewById(R.id.storeName).setVisibility(View.VISIBLE);
         }
         if (!StringUtils.isEmpty(shopName)) {
-            //showToast(shopName);
-            BarOption.createShopDB(getContext(), shopName);
             startActivity(new Intent(getContext(), LoginFragmentActivity.class));
             getActivity().finish();
         }
@@ -90,7 +89,6 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
                     public void run() {
                         if (status && result2 != null && result2.isExists()) {
                             BarOption.saveShopName(getContext(), result2.getShopName());
-                            BarOption.createShopDB(getContext(), result2.getShopName());
                             //showToast("店铺存在");
                             startActivity(new Intent(getContext(), OrderFragmentActivity.class));
                             getActivity().finish();
@@ -160,13 +158,6 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         }
 
         BarOption.saveShopName(getContext(), shopName);
-        BarOption.createShopDB(getContext(), shopName);
-
-        DbUtil.createPrinter("192.168.8.10","10",1,1, "");
-        DbUtil.createPrinter("192.168.8.20","20",1,1, "");
-        DbUtil.createPrinter("192.168.8.30","30",1,1, "");
-        DbUtil.createPrinter("192.168.8.40","40",1,1, "");
-
         //initialize the days left and the stated days on cloud.
         NetUtils.activate();
         startActivity(new Intent(getContext(), OrderFragmentActivity.class));

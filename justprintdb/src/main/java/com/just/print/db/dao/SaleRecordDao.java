@@ -24,18 +24,18 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property TableName = new Property(1, String.class, "tableName", false, "TABLE_NAME");
-        public final static Property CustomerNumber = new Property(2, String.class, "customerNumber", false, "CUSTOMER_NUMBER");
-        public final static Property OpenTime = new Property(3, String.class, "openTime", false, "OPEN_TIME");
-        public final static Property ProductId = new Property(4, Integer.class, "productId", false, "PRODUCT_ID");
+        public final static Property TableName = new Property(1, String.class, "tableName", false, "tableName");
+        public final static Property CustomerNumber = new Property(2, String.class, "customerNumber", false, "customerNumber");
+        public final static Property OpenTime = new Property(3, String.class, "openTime", false, "openTime");
+        public final static Property ProductId = new Property(4, Integer.class, "productId", false, "productId");
         public final static Property Amount = new Property(5, Float.class, "amount", false, "AMOUNT");
-        public final static Property TotalPrice = new Property(6, Float.class, "totalPrice", false, "TOTAL_PRICE");
+        public final static Property TotalPrice = new Property(6, Float.class, "totalPrice", false, "totalPrice");
         public final static Property Discount = new Property(7, Float.class, "discount", false, "DISCOUNT");
         public final static Property Modifications = new Property(8, String.class, "modifications", false, "MODIFICATIONS");
-        public final static Property UserId = new Property(9, Integer.class, "userId", false, "USER_ID");
-        public final static Property BillId = new Property(10, Integer.class, "billId", false, "BILL_ID");
-        public final static Property CreatedTime = new Property(11, String.class, "createdTime", false, "CREATED_TIME");
-        public final static Property State = new Property(12, Integer.class, "state", false, "STATE");
+        public final static Property UserId = new Property(9, Integer.class, "userId", false, "userId");
+        public final static Property BillId = new Property(10, Integer.class, "billId", false, "billId");
+        public final static Property CreatedTime = new Property(11, String.class, "createdTime", false, "createdTime");
+        public final static Property Status = new Property(12, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(13, Integer.class, "version", false, "VERSION");
     };
 
@@ -56,18 +56,18 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'SALE_RECORD' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'TABLE_NAME' TEXT," + // 1: tableName
-                "'CUSTOMER_NUMBER' TEXT," + // 2: customerNumber
-                "'OPEN_TIME' TEXT," + // 3: openTime
-                "'PRODUCT_ID' INTEGER," + // 4: productId
+                "'tableName' TEXT," + // 1: tableName
+                "'customerNumber' TEXT," + // 2: customerNumber
+                "'openTime' TEXT," + // 3: openTime
+                "'productId' INTEGER," + // 4: productId
                 "'AMOUNT' REAL," + // 5: amount
-                "'TOTAL_PRICE' REAL," + // 6: totalPrice
+                "'totalPrice' REAL," + // 6: totalPrice
                 "'DISCOUNT' REAL," + // 7: discount
                 "'MODIFICATIONS' TEXT," + // 8: modifications
-                "'USER_ID' INTEGER," + // 9: userId
-                "'BILL_ID' INTEGER," + // 10: billId
-                "'CREATED_TIME' TEXT," + // 11: createdTime
-                "'STATE' INTEGER," + // 12: state
+                "'userId' INTEGER," + // 9: userId
+                "'billId' INTEGER," + // 10: billId
+                "'createdTime' TEXT," + // 11: createdTime
+                "'STATUS' INTEGER," + // 12: status
                 "'VERSION' INTEGER);"); // 13: version
     }
 
@@ -142,9 +142,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
             stmt.bindString(12, createdTime);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(13, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(13, status);
         }
  
         Integer version = entity.getVersion();
@@ -181,7 +181,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
             cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // userId
             cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // billId
             cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // createdTime
-            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // state
+            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // status
             cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13) // version
         );
         return entity;
@@ -202,7 +202,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         entity.setUserId(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
         entity.setBillId(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
         entity.setCreatedTime(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setState(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
+        entity.setStatus(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
         entity.setVersion(cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13));
      }
     

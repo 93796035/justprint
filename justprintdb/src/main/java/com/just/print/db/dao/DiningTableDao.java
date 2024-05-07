@@ -25,14 +25,14 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
-        public final static Property OpenTime = new Property(2, String.class, "openTime", false, "OPEN_TIME");
-        public final static Property DspIdx = new Property(3, Integer.class, "dspIdx", false, "DSP_IDX");
-        public final static Property PosX = new Property(4, Integer.class, "posX", false, "POS_X");
-        public final static Property PosY = new Property(5, Integer.class, "posY", false, "POS_Y");
+        public final static Property OpenTime = new Property(2, String.class, "openTime", false, "openTime");
+        public final static Property DspIdx = new Property(3, Integer.class, "dspIdx", false, "dspIdx");
+        public final static Property PosX = new Property(4, Integer.class, "posX", false, "posX");
+        public final static Property PosY = new Property(5, Integer.class, "posY", false, "posY");
         public final static Property Width = new Property(6, Integer.class, "width", false, "WIDTH");
         public final static Property Height = new Property(7, Integer.class, "height", false, "HEIGHT");
         public final static Property Type = new Property(8, Integer.class, "type", false, "TYPE");
-        public final static Property State = new Property(9, Integer.class, "state", false, "STATE");
+        public final static Property Status = new Property(9, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(10, Integer.class, "version", false, "VERSION");
     };
 
@@ -54,14 +54,14 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'DINING_TABLE' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'NAME' TEXT," + // 1: name
-                "'OPEN_TIME' TEXT," + // 2: openTime
-                "'DSP_IDX' INTEGER," + // 3: dspIdx
-                "'POS_X' INTEGER," + // 4: posX
-                "'POS_Y' INTEGER," + // 5: posY
+                "'openTime' TEXT," + // 2: openTime
+                "'dspIdx' INTEGER," + // 3: dspIdx
+                "'posX' INTEGER," + // 4: posX
+                "'posY' INTEGER," + // 5: posY
                 "'WIDTH' INTEGER," + // 6: width
                 "'HEIGHT' INTEGER," + // 7: height
                 "'TYPE' INTEGER," + // 8: type
-                "'STATE' INTEGER," + // 9: state
+                "'STATUS' INTEGER," + // 9: status
                 "'VERSION' INTEGER);"); // 10: version
     }
 
@@ -121,9 +121,9 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
             stmt.bindLong(9, type);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(10, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(10, status);
         }
  
         Integer version = entity.getVersion();
@@ -157,7 +157,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // width
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // height
             cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8), // type
-            cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // state
+            cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // status
             cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10) // version
         );
         return entity;
@@ -175,7 +175,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
         entity.setWidth(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setHeight(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
         entity.setType(cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8));
-        entity.setState(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
+        entity.setStatus(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
         entity.setVersion(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
      }
     

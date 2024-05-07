@@ -24,12 +24,12 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property JsonToSend = new Property(1, String.class, "jsonToSend", false, "JSON_TO_SEND");
+        public final static Property JsonToSend = new Property(1, String.class, "jsonToSend", false, "jsonToSend");
         public final static Property Signatransm = new Property(2, String.class, "signatransm", false, "SIGNATRANSM");
-        public final static Property EmprCertifSev = new Property(3, String.class, "emprCertifSev", false, "EMPR_CERTIF_SEV");
-        public final static Property StrUrlQRCode = new Property(4, String.class, "strUrlQRCode", false, "STR_URL_QRCODE");
-        public final static Property EmployeeId = new Property(5, Integer.class, "employeeId", false, "EMPLOYEE_ID");
-        public final static Property State = new Property(6, Integer.class, "state", false, "STATE");
+        public final static Property EmprCertifSev = new Property(3, String.class, "emprCertifSev", false, "emprCertifSev");
+        public final static Property StrUrlQRCode = new Property(4, String.class, "strUrlQRCode", false, "strUrlQRCode");
+        public final static Property EmployeeId = new Property(5, Integer.class, "employeeId", false, "employeeId");
+        public final static Property Status = new Property(6, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(7, Integer.class, "version", false, "VERSION");
     };
 
@@ -50,12 +50,12 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'WEBSRM_BATCH' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'JSON_TO_SEND' TEXT," + // 1: jsonToSend
+                "'jsonToSend' TEXT," + // 1: jsonToSend
                 "'SIGNATRANSM' TEXT," + // 2: signatransm
-                "'EMPR_CERTIF_SEV' TEXT," + // 3: emprCertifSev
-                "'STR_URL_QRCODE' TEXT," + // 4: strUrlQRCode
-                "'EMPLOYEE_ID' INTEGER," + // 5: employeeId
-                "'STATE' INTEGER," + // 6: state
+                "'emprCertifSev' TEXT," + // 3: emprCertifSev
+                "'strUrlQRCode' TEXT," + // 4: strUrlQRCode
+                "'employeeId' INTEGER," + // 5: employeeId
+                "'STATUS' INTEGER," + // 6: status
                 "'VERSION' INTEGER);"); // 7: version
     }
 
@@ -100,9 +100,9 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
             stmt.bindLong(6, employeeId);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(7, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(7, status);
         }
  
         Integer version = entity.getVersion();
@@ -133,7 +133,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // emprCertifSev
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // strUrlQRCode
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // employeeId
-            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // state
+            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // status
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7) // version
         );
         return entity;
@@ -148,7 +148,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
         entity.setEmprCertifSev(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setStrUrlQRCode(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setEmployeeId(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
-        entity.setState(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
+        entity.setStatus(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setVersion(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
      }
     

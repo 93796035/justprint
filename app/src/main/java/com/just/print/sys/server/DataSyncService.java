@@ -114,7 +114,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                             for (Mark mark : marks) {
                                 orderContent.append(URLEncoder.encode(mark.getName1(), "UTF-8")).append("\n");
                                 orderContent.append(mark.getQt()).append("\n");     //number
-                                orderContent.append(mark.getState()).append("\n");  //displayIndex
+                                orderContent.append(mark.getStatus()).append("\n");  //displayIndex
                                 orderContent.append(mark.getVersion()).append("\n");//price
                             }
                             json.put("orderContent", orderContent.toString());
@@ -129,8 +129,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         PrinterDao printerDao = AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao();
                         if(jsonStr.length() > 0) {
                             JSONArray jsonObject = new JSONArray(jsonStr);
-                            List<Printer> printers = absorbPrinters(new JSONArray((String)jsonObject.get(0)), printerDao);
-                            List<Mark> marks = absorbMarksAndTables(new JSONArray((String)jsonObject.get(1)), new JSONArray((String)jsonObject.get(2)));
+//                            List<Printer> printers = absorbPrinters(new JSONArray((String)jsonObject.get(0)), printerDao);
+//                            List<Mark> marks = absorbMarksAndTables(new JSONArray((String)jsonObject.get(1)), new JSONArray((String)jsonObject.get(2)));
                             List<String> autoPopUpMenus = absorbDishes(
                                     new JSONArray((String)jsonObject.get(4)),
                                     absorbCategories(new JSONArray((String)jsonObject.get(3))), menuDao);
@@ -241,26 +241,26 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
         }
     }
 
-    private List<Printer> absorbPrinters(JSONArray jsonPrinters, PrinterDao printerDao) throws JSONException {
-        printerDao.deleteAll();
-        List<Printer> printers = new ArrayList<>();
-        if (jsonPrinters.length() > 0) {
-            for (int i = 0; i < jsonPrinters.length(); i++) {
-                JSONObject jo = jsonPrinters.getJSONObject(i);
-                Printer printer = new Printer();
-                printer.setIp(jo.getString("ip"));
-                printer.setPname(jo.getString("pname"));
-                printer.setFirstPrint(jo.getInt("firstPrint"));
-                printer.setType(jo.getInt("type"));
-                printer.setState(jo.getInt("state"));
-                printer.setNote(jo.getString("note"));
-                printer.setState(State.ACTIVE);
-                printer.setId(printerDao.insert(printer));
-                printers.add(printer);
-            }
-        }
-        return printers;
-    }
+//    private List<Printer> absorbPrinters(JSONArray jsonPrinters, PrinterDao printerDao) throws JSONException {
+//        printerDao.deleteAll();
+//        List<Printer> printers = new ArrayList<>();
+//        if (jsonPrinters.length() > 0) {
+//            for (int i = 0; i < jsonPrinters.length(); i++) {
+//                JSONObject jo = jsonPrinters.getJSONObject(i);
+//                Printer printer = new Printer();
+//                printer.setIp(jo.getString("ip"));
+//                printer.setPname(jo.getString("pname"));
+//                printer.setFirstPrint(jo.getInt("firstPrint"));
+//                printer.setType(jo.getInt("type"));
+//                printer.setState(jo.getInt("state"));
+//                printer.setNote(jo.getString("note"));
+//                printer.setState(State.OPENNED);
+//                printer.setId(printerDao.insert(printer));
+//                printers.add(printer);
+//            }
+//        }
+//        return printers;
+//    }
 
     private List<Mark> absorbMarksAndTables(JSONArray jsonMarks, JSONArray jsonTables) throws JSONException {
         MarkDao markDao = AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao();
@@ -272,7 +272,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 Mark mark = new Mark();
                 mark.setName1(jo.getString("name"));
                 mark.setVersion((int)(jo.getDouble("price") * 100));
-                mark.setState(State.ACTIVE);
+                mark.setStatus(State.OPENNED);
                 mark.setId(markDao.insert(mark));
                 marks.add(mark);
             }
@@ -283,7 +283,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 JSONObject jo = jsonTables.getJSONObject(i);
                 Mark table = new Mark();
                 table.setName1(jo.getString("name"));
-                table.setState(jo.getInt("dsp_index"));
+                table.setStatus(jo.getInt("dsp_index"));
                 table.setVersion(-1);
                 table.setId(markDao.insert(table));
             }
@@ -304,7 +304,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 Category category = new Category();
                 category.setName1(jo.getString("name"));
                 category.setDisplayIdx(Integer.valueOf(jo.getString("dspIndex")));
-                category.setState(State.ACTIVE);
+                category.setStatus(State.OPENNED);
                 category.setId(categoryDao.insert(category));
                 categories.add(category);
             }

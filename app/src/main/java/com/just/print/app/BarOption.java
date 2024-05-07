@@ -208,19 +208,6 @@ public class BarOption {
     }
 
     //store name, user name, activate code, time left===============================================
-    private static boolean isMandatoryExist(Context context, String shopName) {
-        String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
-        return shoplist.contains(shopName);
-    }
-
-    public static void createShopDB(Context context, String shopCode) {
-        if (!isMandatoryExist(context, shopCode)) {
-            String shoplist = getShopData(context).getString(KEY_SHOP_LIST, "");
-            getShopData(context).putString(KEY_SHOP_LIST, shoplist + "," + shopCode);
-        }
-        AikaStyleApplication.instance.initDaoMaster(shopCode);
-    }
-
     public static void saveShopName(Context context, String shopName) {
         getShopData(context).putString(KEY_SHOP_NAME, shopName);
     }
@@ -287,7 +274,7 @@ public class BarOption {
     }
 
     public static int getScreenOrientation() {
-        return (getCustomData(BarOption.isScreenHorizontal) == null
+        return (StringUtils.isBlank(getCustomData(BarOption.isScreenHorizontal))
                 ||"1".equals(getCustomData(BarOption.isScreenHorizontal))
                 || "true".equals(getCustomData(BarOption.isScreenHorizontal))) ?
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;

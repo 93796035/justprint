@@ -24,24 +24,24 @@ public class BillDao extends AbstractDao<Bill, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property CreatedTime = new Property(1, String.class, "createdTime", false, "CREATED_TIME");
-        public final static Property TableName = new Property(2, String.class, "tableName", false, "TABLE_NAME");
-        public final static Property CustomerNumber = new Property(3, String.class, "customerNumber", false, "CUSTOMER_NUMBER");
-        public final static Property OpenTime = new Property(4, String.class, "openTime", false, "OPEN_TIME");
+        public final static Property CreatedTime = new Property(1, String.class, "createdTime", false, "createdTime");
+        public final static Property TableName = new Property(2, String.class, "tableName", false, "tableName");
+        public final static Property CustomerNumber = new Property(3, String.class, "customerNumber", false, "customerNumber");
+        public final static Property OpenTime = new Property(4, String.class, "openTime", false, "openTime");
         public final static Property Total = new Property(5, Integer.class, "Total", false, "TOTAL");
         public final static Property Discount = new Property(6, Integer.class, "discount", false, "DISCOUNT");
-        public final static Property ServiceFee = new Property(7, Integer.class, "serviceFee", false, "SERVICE_FEE");
-        public final static Property CaseReceived = new Property(8, Integer.class, "caseReceived", false, "CASE_RECEIVED");
-        public final static Property DebitReceived = new Property(9, Integer.class, "debitReceived", false, "DEBIT_RECEIVED");
-        public final static Property VisaReceived = new Property(10, Integer.class, "visaReceived", false, "VISA_RECEIVED");
-        public final static Property MasterReceived = new Property(11, Integer.class, "masterReceived", false, "MASTER_RECEIVED");
-        public final static Property OtherReceived = new Property(12, String.class, "otherReceived", false, "OTHER_RECEIVED");
+        public final static Property ServiceFee = new Property(7, Integer.class, "serviceFee", false, "serviceFee");
+        public final static Property CaseReceived = new Property(8, Integer.class, "caseReceived", false, "caseReceived");
+        public final static Property DebitReceived = new Property(9, Integer.class, "debitReceived", false, "debitReceived");
+        public final static Property VisaReceived = new Property(10, Integer.class, "visaReceived", false, "visaReceived");
+        public final static Property MasterReceived = new Property(11, Integer.class, "masterReceived", false, "masterReceived");
+        public final static Property OtherReceived = new Property(12, String.class, "otherReceived", false, "otherReceived");
         public final static Property Tip = new Property(13, Integer.class, "tip", false, "TIP");
         public final static Property Cashback = new Property(14, Integer.class, "cashback", false, "CASHBACK");
-        public final static Property UserId = new Property(15, Integer.class, "userId", false, "USER_ID");
+        public final static Property UserId = new Property(15, Integer.class, "userId", false, "userId");
         public final static Property Comment = new Property(16, String.class, "comment", false, "COMMENT");
-        public final static Property InvoiceId = new Property(17, Integer.class, "invoiceId", false, "INVOICE_ID");
-        public final static Property State = new Property(18, Integer.class, "state", false, "STATE");
+        public final static Property InvoiceId = new Property(17, Integer.class, "invoiceId", false, "invoiceId");
+        public final static Property Status = new Property(18, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(19, Integer.class, "version", false, "VERSION");
     };
 
@@ -62,24 +62,24 @@ public class BillDao extends AbstractDao<Bill, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'BILL' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'CREATED_TIME' TEXT," + // 1: createdTime
-                "'TABLE_NAME' TEXT," + // 2: tableName
-                "'CUSTOMER_NUMBER' TEXT," + // 3: customerNumber
-                "'OPEN_TIME' TEXT," + // 4: openTime
+                "'createdTime' TEXT," + // 1: createdTime
+                "'tableName' TEXT," + // 2: tableName
+                "'customerNumber' TEXT," + // 3: customerNumber
+                "'openTime' TEXT," + // 4: openTime
                 "'TOTAL' INTEGER," + // 5: Total
                 "'DISCOUNT' INTEGER," + // 6: discount
-                "'SERVICE_FEE' INTEGER," + // 7: serviceFee
-                "'CASE_RECEIVED' INTEGER," + // 8: caseReceived
-                "'DEBIT_RECEIVED' INTEGER," + // 9: debitReceived
-                "'VISA_RECEIVED' INTEGER," + // 10: visaReceived
-                "'MASTER_RECEIVED' INTEGER," + // 11: masterReceived
-                "'OTHER_RECEIVED' TEXT," + // 12: otherReceived
+                "'serviceFee' INTEGER," + // 7: serviceFee
+                "'caseReceived' INTEGER," + // 8: caseReceived
+                "'debitReceived' INTEGER," + // 9: debitReceived
+                "'visaReceived' INTEGER," + // 10: visaReceived
+                "'masterReceived' INTEGER," + // 11: masterReceived
+                "'otherReceived' TEXT," + // 12: otherReceived
                 "'TIP' INTEGER," + // 13: tip
                 "'CASHBACK' INTEGER," + // 14: cashback
-                "'USER_ID' INTEGER," + // 15: userId
+                "'userId' INTEGER," + // 15: userId
                 "'COMMENT' TEXT," + // 16: comment
-                "'INVOICE_ID' INTEGER," + // 17: invoiceId
-                "'STATE' INTEGER," + // 18: state
+                "'invoiceId' INTEGER," + // 17: invoiceId
+                "'STATUS' INTEGER," + // 18: status
                 "'VERSION' INTEGER);"); // 19: version
     }
 
@@ -184,9 +184,9 @@ public class BillDao extends AbstractDao<Bill, Long> {
             stmt.bindLong(18, invoiceId);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(19, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(19, status);
         }
  
         Integer version = entity.getVersion();
@@ -229,7 +229,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
             cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15), // userId
             cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16), // comment
             cursor.isNull(offset + 17) ? null : cursor.getInt(offset + 17), // invoiceId
-            cursor.isNull(offset + 18) ? null : cursor.getInt(offset + 18), // state
+            cursor.isNull(offset + 18) ? null : cursor.getInt(offset + 18), // status
             cursor.isNull(offset + 19) ? null : cursor.getInt(offset + 19) // version
         );
         return entity;
@@ -256,7 +256,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
         entity.setUserId(cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15));
         entity.setComment(cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16));
         entity.setInvoiceId(cursor.isNull(offset + 17) ? null : cursor.getInt(offset + 17));
-        entity.setState(cursor.isNull(offset + 18) ? null : cursor.getInt(offset + 18));
+        entity.setStatus(cursor.isNull(offset + 18) ? null : cursor.getInt(offset + 18));
         entity.setVersion(cursor.isNull(offset + 19) ? null : cursor.getInt(offset + 19));
      }
     

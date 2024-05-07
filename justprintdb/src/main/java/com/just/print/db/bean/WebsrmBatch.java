@@ -20,7 +20,7 @@ public class WebsrmBatch {
     private String emprCertifSev;
     private String strUrlQRCode;
     private Integer employeeId;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -40,14 +40,14 @@ public class WebsrmBatch {
         this.id = id;
     }
 
-    public WebsrmBatch(Long id, String jsonToSend, String signatransm, String emprCertifSev, String strUrlQRCode, Integer employeeId, Integer state, Integer version) {
+    public WebsrmBatch(Long id, String jsonToSend, String signatransm, String emprCertifSev, String strUrlQRCode, Integer employeeId, Integer status, Integer version) {
         this.id = id;
         this.jsonToSend = jsonToSend;
         this.signatransm = signatransm;
         this.emprCertifSev = emprCertifSev;
         this.strUrlQRCode = strUrlQRCode;
         this.employeeId = employeeId;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -105,12 +105,12 @@ public class WebsrmBatch {
         this.employeeId = employeeId;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

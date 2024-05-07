@@ -21,7 +21,7 @@ public class Category {
     private String name2;
     private String name3;
     private Integer displayIdx;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -42,13 +42,13 @@ public class Category {
         this.id = id;
     }
 
-    public Category(Long id, String name1, String name2, String name3, Integer displayIdx, Integer state, Integer version) {
+    public Category(Long id, String name1, String name2, String name3, Integer displayIdx, Integer status, Integer version) {
         this.id = id;
         this.name1 = name1;
         this.name2 = name2;
         this.name3 = name3;
         this.displayIdx = displayIdx;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -98,12 +98,12 @@ public class Category {
         this.displayIdx = displayIdx;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {
@@ -167,7 +167,7 @@ public class Category {
     }
 
     public void logicDelete() {
-        state = com.just.print.db.expand.State.DELETED;
+        status = com.just.print.db.expand.State.DELETED;
         name1 = "$" + name1;
         updateAndUpgrade();
     }

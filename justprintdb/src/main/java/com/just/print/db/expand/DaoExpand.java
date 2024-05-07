@@ -25,7 +25,7 @@ import de.greenrobot.dao.query.QueryBuilder;
 public final class DaoExpand {
 
     static public <T, K> List<T> queryAllNotDeletedUsers(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(UserDao.Properties.State.lt(State.DELETED)).list();
+        return dao.queryBuilder().where(UserDao.Properties.Status.lt(State.DELETED)).list();
     }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao) {
@@ -41,15 +41,15 @@ public final class DaoExpand {
     }
 
     public static final <T> QueryBuilder<T> addQueryBuilderNotDelete(QueryBuilder<T> builder) {
-        return builder.where(DishDao.Properties.State.notEq(State.DELETED));
+        return builder.where(DishDao.Properties.Status.notEq(State.DELETED));
     }
 
     static public <T, K> QueryBuilder<T> queryAllNotDeleted(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(DishDao.Properties.State.notEq(State.DELETED));
+        return dao.queryBuilder().where(DishDao.Properties.Status.notEq(State.DELETED));
     }
 
     static public List<Dish> queryMenuByCategory(Category category, DishDao dao) {
-        return dao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()), DishDao.Properties.State.notEq(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()), DishDao.Properties.Status.notEq(State.DELETED)).list();
     }
 
     static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {
@@ -69,7 +69,7 @@ public final class DaoExpand {
     }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao, String shop) {
-        return dao.queryBuilder().where(DishDao.Properties.State.notEq(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.Status.notEq(State.DELETED)).list();
     }
 
     static public <T, K> List<T> queryAllTables(AbstractDao<T, K> dao) {
@@ -106,7 +106,7 @@ public final class DaoExpand {
      * 获得主打印机 没有 则返回null
      */
     public static Printer getFirstPrint(PrinterDao printerDao) {
-        List<Printer> list = printerDao.queryBuilder().where(PrinterDao.Properties.FirstPrint.eq(1)).limit(1).list();
+        List<Printer> list = printerDao.queryBuilder().where(PrinterDao.Properties.Style.eq(1)).limit(1).list();
         return list.size() > 0 ? list.get(0) : null;
     }
 

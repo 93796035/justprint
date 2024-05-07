@@ -25,11 +25,11 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Ip = new Property(1, String.class, "ip", false, "IP");
-        public final static Property Pname = new Property(2, String.class, "pname", false, "P_NAME");
-        public final static Property Note = new Property(3, String.class, "note", false, "NOTE");
-        public final static Property FirstPrint = new Property(4, Integer.class, "firstPrint", false, "STYLE");
-        public final static Property Type = new Property(5, Integer.class, "type", false, "CATEGORY");
-        public final static Property State = new Property(6, Integer.class, "state", false, "STATE");
+        public final static Property Name = new Property(2, String.class, "name", false, "NAME");
+        public final static Property Style = new Property(3, Integer.class, "style", false, "STYLE");
+        public final static Property Category = new Property(4, Integer.class, "category", false, "CATEGORY");
+        public final static Property LangType = new Property(5, Integer.class, "langType", false, "langType");
+        public final static Property Status = new Property(6, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(7, Integer.class, "version", false, "VERSION");
     };
 
@@ -51,11 +51,11 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'PRINTER' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'IP' TEXT," + // 1: ip
-                "'P_NAME' TEXT," + // 2: pname
-                "'NOTE' TEXT," + // 3: note
-                "'STYLE' INTEGER," + // 4: firstPrint
-                "'CATEGORY' INTEGER," + // 5: type
-                "'STATE' INTEGER," + // 6: state
+                "'NAME' TEXT," + // 2: name
+                "'STYLE' INTEGER," + // 3: style
+                "'CATEGORY' INTEGER," + // 4: category
+                "'langType' INTEGER," + // 5: langType
+                "'STATUS' INTEGER," + // 6: status
                 "'VERSION' INTEGER);"); // 7: version
     }
 
@@ -80,29 +80,29 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
             stmt.bindString(2, ip);
         }
  
-        String pname = entity.getPname();
-        if (pname != null) {
-            stmt.bindString(3, pname);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(3, name);
         }
  
-        String note = entity.getNote();
-        if (note != null) {
-            stmt.bindString(4, note);
+        Integer style = entity.getStyle();
+        if (style != null) {
+            stmt.bindLong(4, style);
         }
  
-        Integer firstPrint = entity.getFirstPrint();
-        if (firstPrint != null) {
-            stmt.bindLong(5, firstPrint);
+        Integer category = entity.getCategory();
+        if (category != null) {
+            stmt.bindLong(5, category);
         }
  
-        Integer type = entity.getType();
-        if (type != null) {
-            stmt.bindLong(6, type);
+        Integer langType = entity.getLangType();
+        if (langType != null) {
+            stmt.bindLong(6, langType);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(7, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(7, status);
         }
  
         Integer version = entity.getVersion();
@@ -129,11 +129,11 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
         Printer entity = new Printer( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // ip
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // pname
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // note
-            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // firstPrint
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // type
-            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // state
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // style
+            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // category
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // langType
+            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // status
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7) // version
         );
         return entity;
@@ -144,11 +144,11 @@ public class PrinterDao extends AbstractDao<Printer, Long> {
     public void readEntity(Cursor cursor, Printer entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setIp(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setPname(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setNote(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setFirstPrint(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setType(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
-        entity.setState(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
+        entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setStyle(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
+        entity.setCategory(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
+        entity.setLangType(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setStatus(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setVersion(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
      }
     

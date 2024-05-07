@@ -19,7 +19,7 @@ public class M2M_SaleRecordMark {
     private Long id;
     private Long saleRecId;
     private Long markId;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -45,11 +45,11 @@ public class M2M_SaleRecordMark {
         this.id = id;
     }
 
-    public M2M_SaleRecordMark(Long id, Long saleRecId, Long markId, Integer state, Integer version) {
+    public M2M_SaleRecordMark(Long id, Long saleRecId, Long markId, Integer status, Integer version) {
         this.id = id;
         this.saleRecId = saleRecId;
         this.markId = markId;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -83,12 +83,12 @@ public class M2M_SaleRecordMark {
         this.markId = markId;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {

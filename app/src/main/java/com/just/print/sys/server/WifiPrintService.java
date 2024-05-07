@@ -274,7 +274,7 @@ public class WifiPrintService implements Runnable{
             L.d(TAG,"ip:" + key + ", list size:" + dishList.size());
             //just in case the key is an label printer, maybe it's forgot to be added into the printer management panel, so added a null check.
             if(ipPrinterMap.get(key) != null
-                    && !Integer.valueOf(1).equals(ipPrinterMap.get(key).getType())
+                    && !Integer.valueOf(1).equals(ipPrinterMap.get(key).getCategory())
                     && dishList.size() > 0){
                 //order the dishes in this this printer.
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<SelectionDetail>() {
@@ -306,8 +306,8 @@ public class WifiPrintService implements Runnable{
                     L.d("ERROR!", "the dishList are different from ipSelectionsMap.get(printerIP)!!!!");
                 }
                 Printer printer = ipPrinterMap.get(printerIP);
-                if(Integer.valueOf(1).equals(printer.getFirstPrint())){  //全单封装---following each printerip(key), there will be only one formatted string
-                    if(Integer.valueOf(0).equals(printer.getType())){   //if category is set then cut by category.
+                if(Integer.valueOf(1).equals(printer.getStyle())){  //全单封装---following each printerip(key), there will be only one formatted string
+                    if(Integer.valueOf(0).equals(printer.getCategory())){   //if category is set then cut by category.
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();
                         String currentCategory = null;
                         for(SelectionDetail selectionDetail : dishList){
@@ -650,12 +650,8 @@ public class WifiPrintService implements Runnable{
 
                     List<String> contents = ipContentMap.get(curPrintIp);
                     L.d(TAG, "out printing... categorizedContent list size is:" + contents.size());
-                    String note = ipPrinterMap.get(curPrintIp).getNote();
                     try {
-                        int loopTime = Integer.valueOf(note);
-                        for (int i = 0; i < loopTime; i++) {
-                            printContents(contents);
-                        }
+                        printContents(contents);
                     } catch (Exception e) {
                         //note is not a number then do not loop, print only once.
                         printContents(contents);

@@ -16,10 +16,10 @@ public class Log {
 
     private Long id;
     private String msg;
-    private String uName;
+    private String name;
     private java.util.Date date;
     private Integer logType;
-    private Integer state;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -39,13 +39,13 @@ public class Log {
         this.id = id;
     }
 
-    public Log(Long id, String msg, String uName, java.util.Date date, Integer logType, Integer state, Integer version) {
+    public Log(Long id, String msg, String name, java.util.Date date, Integer logType, Integer status, Integer version) {
         this.id = id;
         this.msg = msg;
-        this.uName = uName;
+        this.name = name;
         this.date = date;
         this.logType = logType;
-        this.state = state;
+        this.status = status;
         this.version = version;
     }
 
@@ -71,12 +71,12 @@ public class Log {
         this.msg = msg;
     }
 
-    public String getUName() {
-        return uName;
+    public String getName() {
+        return name;
     }
 
-    public void setUName(String uName) {
-        this.uName = uName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public java.util.Date getDate() {
@@ -95,12 +95,12 @@ public class Log {
         this.logType = logType;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {
@@ -141,7 +141,7 @@ public class Log {
         update();
     }
     public void logicDelete() {
-        state = com.just.print.db.expand.State.DELETED;
+        status = com.just.print.db.expand.State.DELETED;
         updateAndUpgrade();
     }
     // KEEP METHODS END

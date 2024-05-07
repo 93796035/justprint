@@ -244,7 +244,7 @@ public class TableFragment extends BaseFragment implements View.OnClickListener,
         Collections.sort(tables, new Comparator<DiningTable>() {
             @Override
             public int compare(DiningTable mark, DiningTable t1) {
-                return mark.getState() - t1.getState();
+                return mark.getStatus() - t1.getStatus();
             }
         });
         tableXAdapter.setData(tables);
@@ -1007,7 +1007,7 @@ public class TableFragment extends BaseFragment implements View.OnClickListener,
             }
             boolean inserted = false;
             for (int j = 0; j < sortedMarks.size(); j++) {
-                if (sortedMarks.get(j).getState() > mark.getState()) {
+                if (sortedMarks.get(j).getStatus() > mark.getStatus()) {
                     sortedMarks.add(j, mark);
                     inserted = true;
                     break;

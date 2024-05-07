@@ -16,11 +16,11 @@ public class Printer {
 
     private Long id;
     private String ip;
-    private String pname;
-    private String note;
-    private Integer firstPrint;
-    private Integer type;
-    private Integer state;
+    private String name;
+    private Integer style;
+    private Integer category;
+    private Integer langType;
+    private Integer status;
     private Integer version;
 
     /** Used to resolve relations */
@@ -40,14 +40,14 @@ public class Printer {
         this.id = id;
     }
 
-    public Printer(Long id, String ip, String pname, String note, Integer firstPrint, Integer type, Integer state, Integer version) {
+    public Printer(Long id, String ip, String name, Integer style, Integer category, Integer langType, Integer status, Integer version) {
         this.id = id;
         this.ip = ip;
-        this.pname = pname;
-        this.note = note;
-        this.firstPrint = firstPrint;
-        this.type = type;
-        this.state = state;
+        this.name = name;
+        this.style = style;
+        this.category = category;
+        this.langType = langType;
+        this.status = status;
         this.version = version;
     }
 
@@ -73,44 +73,44 @@ public class Printer {
         this.ip = ip;
     }
 
-    public String getPname() {
-        return pname;
+    public String getName() {
+        return name;
     }
 
-    public void setPname(String pname) {
-        this.pname = pname;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getNote() {
-        return note;
+    public Integer getStyle() {
+        return style;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setStyle(Integer style) {
+        this.style = style;
     }
 
-    public Integer getFirstPrint() {
-        return firstPrint;
+    public Integer getCategory() {
+        return category;
     }
 
-    public void setFirstPrint(Integer firstPrint) {
-        this.firstPrint = firstPrint;
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 
-    public Integer getType() {
-        return type;
+    public Integer getLangType() {
+        return langType;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setLangType(Integer langType) {
+        this.langType = langType;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getVersion() {
@@ -152,7 +152,7 @@ public class Printer {
     }
 
     public void logicDelete() {
-        state = com.just.print.db.expand.State.DELETED;
+        status = com.just.print.db.expand.State.DELETED;
         updateAndUpgrade();
     }
 

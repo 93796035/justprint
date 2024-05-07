@@ -34,13 +34,13 @@ public class DishDao extends AbstractDao<Dish, Long> {
         public final static Property Gst = new Property(5, Integer.class, "gst", false, "GST");
         public final static Property Qst = new Property(6, Integer.class, "qst", false, "QST");
         public final static Property Size = new Property(7, Integer.class, "size", false, "SIZE");
-        public final static Property PrinterIds = new Property(8, String.class, "printerIds", false, "PRINTER_IDS");
-        public final static Property DisplayIdx = new Property(9, Integer.class, "displayIdx", false, "DISPLAY_IDX");
-        public final static Property PricePomp = new Property(10, Boolean.class, "pricePomp", false, "PRICE_POMP");
-        public final static Property MenuPomp = new Property(11, Boolean.class, "menuPomp", false, "MENU_POMP");
-        public final static Property ModifyPomp = new Property(12, Boolean.class, "ModifyPomp", false, "MODIFY_POMP");
-        public final static Property CategoryId = new Property(13, Long.class, "categoryId", false, "CATEGORY_ID");
-        public final static Property State = new Property(14, Integer.class, "state", false, "STATE");
+        public final static Property PrinterIds = new Property(8, String.class, "printerIds", false, "printerIds");
+        public final static Property DisplayIdx = new Property(9, Integer.class, "displayIdx", false, "displayIdx");
+        public final static Property PricePomp = new Property(10, Boolean.class, "pricePomp", false, "pricePomp");
+        public final static Property MenuPomp = new Property(11, Boolean.class, "menuPomp", false, "menuPomp");
+        public final static Property ModifyPomp = new Property(12, Boolean.class, "ModifyPomp", false, "ModifyPomp");
+        public final static Property CategoryId = new Property(13, Long.class, "categoryId", false, "categoryId");
+        public final static Property Status = new Property(14, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(15, Integer.class, "version", false, "VERSION");
     };
 
@@ -69,13 +69,13 @@ public class DishDao extends AbstractDao<Dish, Long> {
                 "'GST' INTEGER," + // 5: gst
                 "'QST' INTEGER," + // 6: qst
                 "'SIZE' INTEGER," + // 7: size
-                "'PRINTER_IDS' TEXT," + // 8: printerIds
-                "'DISPLAY_IDX' INTEGER," + // 9: displayIdx
-                "'PRICE_POMP' INTEGER," + // 10: pricePomp
-                "'MENU_POMP' INTEGER," + // 11: menuPomp
-                "'MODIFY_POMP' INTEGER," + // 12: ModifyPomp
-                "'CATEGORY_ID' INTEGER," + // 13: categoryId
-                "'STATE' INTEGER," + // 14: state
+                "'printerIds' TEXT," + // 8: printerIds
+                "'displayIdx' INTEGER," + // 9: displayIdx
+                "'pricePomp' INTEGER," + // 10: pricePomp
+                "'menuPomp' INTEGER," + // 11: menuPomp
+                "'ModifyPomp' INTEGER," + // 12: ModifyPomp
+                "'categoryId' INTEGER," + // 13: categoryId
+                "'STATUS' INTEGER," + // 14: status
                 "'VERSION' INTEGER);"); // 15: version
     }
 
@@ -160,9 +160,9 @@ public class DishDao extends AbstractDao<Dish, Long> {
             stmt.bindLong(14, categoryId);
         }
  
-        Integer state = entity.getState();
-        if (state != null) {
-            stmt.bindLong(15, state);
+        Integer status = entity.getStatus();
+        if (status != null) {
+            stmt.bindLong(15, status);
         }
  
         Integer version = entity.getVersion();
@@ -201,7 +201,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
             cursor.isNull(offset + 11) ? null : cursor.getShort(offset + 11) != 0, // menuPomp
             cursor.isNull(offset + 12) ? null : cursor.getShort(offset + 12) != 0, // ModifyPomp
             cursor.isNull(offset + 13) ? null : cursor.getLong(offset + 13), // categoryId
-            cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14), // state
+            cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14), // status
             cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15) // version
         );
         return entity;
@@ -224,7 +224,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
         entity.setMenuPomp(cursor.isNull(offset + 11) ? null : cursor.getShort(offset + 11) != 0);
         entity.setModifyPomp(cursor.isNull(offset + 12) ? null : cursor.getShort(offset + 12) != 0);
         entity.setCategoryId(cursor.isNull(offset + 13) ? null : cursor.getLong(offset + 13));
-        entity.setState(cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14));
+        entity.setStatus(cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14));
         entity.setVersion(cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15));
      }
     
