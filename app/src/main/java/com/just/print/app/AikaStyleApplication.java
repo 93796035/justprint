@@ -4,9 +4,11 @@ import android.app.Application;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.User;
 import com.just.print.db.dao.DaoMaster;
 import com.just.print.db.dao.DaoSession;
+import com.just.print.db.dao.DiningTableDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.UserDao;
 import com.just.print.ui.fragment.LoginDialogFragment;
@@ -104,7 +106,7 @@ public class AikaStyleApplication extends Application {
         createBillTable(db);// 创建Bill表
         createWEBSRMBatchTable(db);// 创建WEBSRMBatch表
         createOperationLogTable(db);// 创建操作日志表
-        insertInitialData(db); // 添加其他初始化数据
+        insertInitialData(session); // 添加其他初始化数据
     }
     private void insertHardwareData(SQLiteDatabase db) {
         String sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P1', 0, 0, 'mev', 1, 42)";
@@ -155,23 +157,25 @@ public class AikaStyleApplication extends Application {
         db.execSQL(sql);
     }
 
-    private void insertInitialData(SQLiteDatabase db) {
+    private void insertInitialData(DaoSession session) {
+        SQLiteDatabase db = session.getDatabase();
         String sql = "INSERT INTO customizations (key, value) VALUES ('NextOrderId', 0)";
         db.execSQL(sql);
         sql = "INSERT INTO Bill (tableName, total) VALUES ('default', 0)";
         db.execSQL(sql);
         // More initial data as needed...
+        DiningTableDao diningTableDao = session.getDiningTableDao();
+        List<DiningTable> diningTables = new ArrayList<>();
+        //public DiningTable(Long id, String name, String openTime, Integer dspIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer status, Integer version) {
+        diningTables.add(new DiningTable(null, "01", "", 1, 100, 400, 40, 60, 11, 0, 0));
+        diningTables.add(new DiningTable(null, "02", "", 2, 200, 300, 40, 60, 22, 0, 0));
+        diningTables.add(new DiningTable(null, "03", "", 3, 300, 200, 40, 60, 33, 0, 0));
+        diningTables.add(new DiningTable(null, "04", "", 4, 400, 100, 40, 60, 44, 0, 0));
+        diningTableDao.insertInTx(diningTables);
     }
     public File getDBPath() {
         return getDatabasePath("twens");
     }
-
-//    public DaoMaster newDaoMaster(String dbname) {
-//        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this,
-//                getDBPath(dbname).getAbsolutePath(), null);
-//        DaoMaster daomaster = new DaoMaster(helper.getWritableDatabase());
-//        return daomaster;
-//    }
 
     public DaoMaster getDaoMaster() {
         if (daoMaster == null) {

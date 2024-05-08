@@ -17,7 +17,7 @@ import com.just.print.app.AikaStyleApplication;
 import com.just.print.db.bean.User;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.activity.ConfigFragmentActivity;
-import com.just.print.ui.activity.TableFragmentActivity;  // 确保导入了TableActivity
+import com.just.print.ui.activity.DiningTableFragmentActivity;  // 确保导入了TableActivity
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class LoginDialogFragment extends DialogFragment {
                 }
             } else {
                 currentUser = user;
-                startActivity(new Intent(getActivity(), TableFragmentActivity.class));
+                startActivity(new Intent(getActivity(), DiningTableFragmentActivity.class));
             }
         });
         initContent();

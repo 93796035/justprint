@@ -31,7 +31,7 @@
         <activity android:name="com.just.print.ui.activity.ConfigFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.OrderFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.BillFragmentActivity"/>
-        <activity android:name="com.just.print.ui.activity.TableFragmentActivity"/>
+        <activity android:name="com.just.print.ui.activity.DiningTableFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.LoginFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.RegisterFragmentActivity"/>
         <activity android:name="com.just.print.ui.activity.ActivateFragmentActivity" android:label="@string/title_activity_activate"/>
