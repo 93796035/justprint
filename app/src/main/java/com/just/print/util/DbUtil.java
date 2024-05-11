@@ -3,9 +3,8 @@ package com.just.print.util;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Base64;
 
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
-import com.just.print.db.bean.Printer;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 
 import org.json.JSONObject;
 
@@ -32,8 +31,8 @@ public class DbUtil extends Thread{
     final private static String DATABASE_NAME_PREFFIX = "JustPrinter_"; //data/user/0/com.just.print/databases/ ; /data/data/com.whatsapp/databases/msgstore.db
     private static File file = null;
 
-    String license = BarOption.getLicense();
-    String storName = BarOption.getShopName();
+    String license = Options.getLicense();
+    String storName = Options.getShopName();
     boolean isUpload = false;
     /**
      * Call this method from any activity in your app (
@@ -42,7 +41,7 @@ public class DbUtil extends Thread{
      */
     public static void syncDbOntoServer(String license, String storeName, boolean isUpload) {
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
-        file = AikaStyleApplication.instance.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + BarOption.getShopName(AikaStyleApplication.instance.getApplicationContext()));
+        file = AikaPos.instance.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + Options.getShopName(AikaPos.instance.getApplicationContext()));
         if (file.exists()){
             DbUtil util = new DbUtil();
             if(license != null && license.length() > 0){
@@ -55,7 +54,7 @@ public class DbUtil extends Thread{
             util.start();
         }else{
             L.e("DatabaseUtil", "can not find database!", null);
-            ToastUtil.showToast(AikaStyleApplication.instance.getApplicationContext(), "Can not find the menu file.");
+            ToastUtil.showToast(AikaPos.instance.getApplicationContext(), "Can not find the menu file.");
         }
     }
 
@@ -67,14 +66,14 @@ public class DbUtil extends Thread{
         }catch(Exception e){
             L.e("DatabaseUtil", "Exception when encoding content into json: license+shopName:" + license + shopName + " cofigrationStr:" + getConfigurations(), e);
         }
-        BarOption.putCustomData(BarOption.ContentToSend, json.toString());
-        new NetUtils(BarOption.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig"), json.toString()).start();
+        Options.putCustomData(Options.ContentToSend, json.toString());
+        new NetUtils(Options.getSERVER_URL() + (isUpload ? "uploadConfig" : "downloadCofig"), json.toString()).start();
     }
 
     private static String getConfigurations() {
         StringBuilder configurations = new StringBuilder();
-        for(int i = 0; i < BarOption.keysToSync.length; i++) {
-            configurations.append(",").append(BarOption.keysToSync[i]).append(":").append(BarOption.getCustomData(BarOption.keysToSync[i]));
+        for(int i = 0; i < Options.keysToSync.length; i++) {
+            configurations.append(",").append(Options.keysToSync[i]).append(":").append(Options.getCustomData(Options.keysToSync[i]));
         }
         return configurations.substring(1);
     }
@@ -86,12 +85,12 @@ public class DbUtil extends Thread{
     @Override
     public void run() {
         super.run();
-        if(AppUtils.hasInternet(AikaStyleApplication.instance.getApplicationContext())){
+        if(AppUtils.hasInternet(AikaPos.instance.getApplicationContext())){
 
             HttpURLConnection urlConnection = null;
             URL url = null;
             try {
-                StringBuilder sb = new StringBuilder(BarOption.getSERVER_URL());
+                StringBuilder sb = new StringBuilder(Options.getSERVER_URL());
 
                 if(isUpload) {
                     sb.append("uploadDb?filepath=");
@@ -100,7 +99,7 @@ public class DbUtil extends Thread{
                 }
                 sb.append(license + storName);
                 sb.append("&submitDate=");
-                sb.append(isUpload ? BarOption.getLastModifyTime() : "");
+                sb.append(isUpload ? Options.getLastModifyTime() : "");
                 url = new URL(sb.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -154,7 +153,7 @@ public class DbUtil extends Thread{
                         writeDBByte(receivedContent);
                         ToastUtil.showToast("menu in this device has been refreshed successfully.");
                         //clean the bills
-                        AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao().deleteAll();
+                        AikaPos.daoSession.getBillDao().deleteAll();
                     }else{
                         ToastUtil.showToast("Menu is saved onto server successfully.");
                     }
@@ -170,7 +169,7 @@ public class DbUtil extends Thread{
                 urlConnection.disconnect();//使用完关闭TCP连接，释放资源
             }
         }else{
-            ToastUtil.showToast(AikaStyleApplication.instance.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
+            ToastUtil.showToast(AikaPos.instance.getApplicationContext(), "Can not access Internet, please connect to internet then try again.");
         }
     }
 
@@ -200,8 +199,8 @@ public class DbUtil extends Thread{
 
     public static void writeDBByte(byte[] datas) {
 
-        File file = AikaStyleApplication.instance.getApplicationContext().getDatabasePath(
-                DATABASE_NAME_PREFFIX + BarOption.getShopName(AikaStyleApplication.instance.getApplicationContext()));
+        File file = AikaPos.instance.getApplicationContext().getDatabasePath(
+                DATABASE_NAME_PREFFIX + Options.getShopName(AikaPos.instance.getApplicationContext()));
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }

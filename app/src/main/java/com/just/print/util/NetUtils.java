@@ -4,8 +4,8 @@ import static com.just.print.util.ToastUtil.showToast;
 
 import androidx.annotation.NonNull;
 
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,17 +36,17 @@ public class NetUtils extends Thread{
     public static void activate() {
         String accountInfo = getAccountJsonForActivate();
         if(accountInfo != null){
-            BarOption.putCustomData(BarOption.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
-            new NetUtils(BarOption.getSERVER_URL() + "activeJustPrintAccount", accountInfo).start();
+            Options.putCustomData(Options.ContentToSend, accountInfo);//把JSON对象按JSON的编码格式转换为字符串
+            new NetUtils(Options.getSERVER_URL() + "activeJustPrintAccount", accountInfo).start();
         }
     }
 
     public static String getAccountJsonForActivate() {
-        StringBuilder content = new StringBuilder(BarOption.getLicense());
+        StringBuilder content = new StringBuilder(Options.getLicense());
         content.append(",");
-        content.append(BarOption.getShopName());
+        content.append(Options.getShopName());
         content.append("-");
-        content.append(BarOption.getUserName());//如果有需要对特殊和不可见字符进行编码，使用URLEncoder.encode
+        content.append(Options.getUserName());//如果有需要对特殊和不可见字符进行编码，使用URLEncoder.encode
 
         JSONObject json = new JSONObject();//创建json对象
         try {
@@ -67,14 +67,14 @@ public class NetUtils extends Thread{
             try {
                 json.put("content", URLEncoder.encode(content, "UTF-8"));//把数据put进json对象中
                 json.put("filepath", URLEncoder.encode(sn, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
-                String size = BarOption.getCustomData(BarOption.width);
+                String size = Options.getCustomData(Options.width);
                 size = (size == null || size.length() == 0) ? "24" : size;
                 json.put("width", size);
             }catch(Exception e){
                 L.e("DatabaseUtil", "Exception when encoding content into json: filepath:" + sn + " content:" + content, e);
             }
-            BarOption.putCustomData(BarOption.ContentToSend, json.toString());
-            new NetUtils(BarOption.getSERVER_URL() + "cloudPrint", json.toString()).start();
+            Options.putCustomData(Options.ContentToSend, json.toString());
+            new NetUtils(Options.getSERVER_URL() + "cloudPrint", json.toString()).start();
             //is following old comment a real problem? what is “seperate print"??? and now we've already put the copy of the
             //contnet "into" the thread through the constructor.
             //it's ran in an thread, so when is a seperate print, one bill will generate
@@ -86,7 +86,7 @@ public class NetUtils extends Thread{
     @Override
     public void run() {
         super.run();
-        if(contentToSend.length() > 0 && AppUtils.hasInternet(AikaStyleApplication.instance.getApplicationContext())){
+        if(contentToSend.length() > 0 && AppUtils.hasInternet(AikaPos.instance.getApplicationContext())){
             HttpURLConnection urlConnection = null;
             try {
                 urlConnection = prepareConnection(remoteUrlAndPort, "POST");
@@ -95,13 +95,13 @@ public class NetUtils extends Thread{
                 if(urlConnection.getResponseCode()==HttpURLConnection.HTTP_OK){//得到服务端的返回码是否连接成功
 
                     String responseString = NetUtils.readBackFromConnection(urlConnection);
-                    BarOption.putCustomData(BarOption.ContentToSend, null);
+                    Options.putCustomData(Options.ContentToSend, null);
                     long timeLeft = 0;
                     try{
                         timeLeft = Long.valueOf(responseString);    // if returned a number, then it must be  left time---(the activation case)
                         if(timeLeft > 0){//if success
-                            BarOption.putCustomData(BarOption.number,responseString);
-                            BarOption.putCustomData(BarOption.lastsuccess, String.valueOf(new Date().getTime()));
+                            Options.putCustomData(Options.number,responseString);
+                            Options.putCustomData(Options.lastsuccess, String.valueOf(new Date().getTime()));
 
                             showToast("Application is activated successfully!");
                         }else{
@@ -149,7 +149,7 @@ public class NetUtils extends Thread{
             int i = entry.indexOf(":");
             if(i > 0){
                 String value = entry.substring(i + 1);
-                BarOption.putCustomData(entry.substring(0, i), value);
+                Options.putCustomData(entry.substring(0, i), value);
                 if(!"".equals(value)){
                     count++;
                 }

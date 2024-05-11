@@ -10,12 +10,11 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
+import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Printer;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.holder.ConfigPrinterViewHolder;
-import com.just.print.util.DbUtil;
 import com.just.print.util.NetUtils;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;
@@ -68,13 +67,13 @@ public class ConfigPrinterFragment extends BaseFragment implements
     @XClick({R.id.verifyPassword})
     private void onVerifyPassword(View view) {
         String inputContent = this.password.getText().toString().trim();
-        if(!BarOption.getAdminPassword().equals(inputContent)){
+        if(!Options.getAdminPassword().equals(inputContent)){
             showToast("Please input the right password");
             return;
         }
 
         findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
-        findViewById(R.id.storeName).setVisibility(View.VISIBLE);
+        findViewById(R.id.mandatoryCodeArea).setVisibility(View.VISIBLE);
     }
 
     @XClick({R.id.addPrint})
@@ -110,7 +109,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
 
         name.setText("");
         checkBox.setChecked(false);
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         loadPrinter();
     }
 
@@ -148,7 +147,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
             mModifyCache.update();
             mModifyCache = null;
             if(ip.indexOf(".") == -1){
-                NetUtils.sendToCloudPrinter(BarOption.DEFAULT_LABELPRINTER_SIZE,ip);
+                NetUtils.sendToCloudPrinter(Options.DEFAULT_LABELPRINTER_SIZE,ip);
             }
             loadPrinter();
         }

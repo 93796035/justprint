@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
+import com.just.print.app.Options;
 import com.just.print.db.bean.Dish;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
@@ -54,7 +54,7 @@ public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Dish> {
 
     @Override
     public void onClick(View v){
-        button.setTextColor(BarOption.getThemColor());
+        button.setTextColor(Options.getThemColor());
         super.onClick(v);
     }
     @Override
@@ -66,7 +66,7 @@ public class SubTitleMenuExpandViewHolder extends XExpadnViewHolder<Dish> {
         if(selections != null) {
             for (SelectionDetail selectionDetail : selections) {
                 if(selectionDetail.getDish().getId().equals(menu.getId())){
-                    button.setTextColor(BarOption.getThemColor());
+                    button.setTextColor(Options.getThemColor());
                     button.setTypeface(null, Typeface.BOLD);
                 }
             }

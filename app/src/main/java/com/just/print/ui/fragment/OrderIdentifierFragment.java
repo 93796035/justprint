@@ -20,8 +20,8 @@ import android.content.Intent;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.app.EventBus;
 import com.just.print.db.bean.Bill;
@@ -37,7 +37,7 @@ import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.sys.server.WifiPrintService;
 import com.just.print.ui.UC;
-import com.just.print.ui.activity.ConfigFragmentActivity;
+import com.just.print.ui.panel.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
 import com.just.print.ui.holder.OrderCategoryButtonFullWidthViewHolder;
@@ -77,7 +77,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     private List<Mark> marksOfCurDish;
     private String reportContent;
     private XAdapter2<Bill> billsXAdapter;
-    private BillDao billDao = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao();
+    private BillDao billDao = AikaPos.daoSession.getBillDao();
 
     public static OrderIdentifierFragment getInstance(){
         if(instance == null){
@@ -200,8 +200,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     String[] items;// = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F", "H", "S", "U", "+", "togo", "canc"};
 
     public static List<Mark> tables = new ArrayList<Mark>();
-    boolean allowNoTableSelected = "1".equals(BarOption.getCustomData(BarOption.allowNoTableSelected))
-            || "true".equals(BarOption.getCustomData(BarOption.allowNoTableSelected));
+    boolean allowNoTableSelected = "1".equals(Options.getCustomData(Options.allowNoTableSelected))
+            || "true".equals(Options.getCustomData(Options.allowNoTableSelected));
     private String billIdToMregeTo;
     @Override
     public void onCreated(Bundle savedInstanceState) {
@@ -210,14 +210,14 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
         storedMenu = null;        //the model of the menus.
 
-        findViewById(R.id.tableSelectionView).setBackgroundColor(BarOption.getThemColor());
+        findViewById(R.id.tableSelectionView).setBackgroundColor(Options.getThemColor());
         tableXAdapter = new XAdapter2<Mark>(getContext(), TableIdentifierViewHolder.class);
         tableXAdapter.setClickItemListener(this.tableXAdapterClick);
         loadTables();
         tableXAdapter.setData(tables);
         odTableGrid.setAdapter(tableXAdapter);
 
-        if(BarOption.isMode2()) {
+        if(Options.isMode2()) {
             //prepare the categoryNames and items.
             List<Category> categories = OrderCategoryFragment.getCategoryList();
             categoryNames = new String[categories.size()];
@@ -232,19 +232,19 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             findViewById(R.id.odIdCancelBtn1).setVisibility(View.GONE);
             findViewById(R.id.odIdConfigBtn1).setVisibility(View.GONE);
             findViewById(R.id.odIdSndBtn0).setVisibility(View.GONE);
-            odIdCategoryGrid.setBackgroundColor(BarOption.getThemColor());
-            findViewById(R.id.categoryFlowListPane).setBackgroundColor(BarOption.getThemColor());
-            findViewById(R.id.categoryArea).setBackgroundColor(BarOption.getThemColor());
-            findViewById(R.id.billSelectButtonArea).setBackgroundColor(BarOption.getThemColor());
+            odIdCategoryGrid.setBackgroundColor(Options.getThemColor());
+            findViewById(R.id.categoryFlowListPane).setBackgroundColor(Options.getThemColor());
+            findViewById(R.id.categoryArea).setBackgroundColor(Options.getThemColor());
+            findViewById(R.id.billSelectButtonArea).setBackgroundColor(Options.getThemColor());
             odIdCancel2.setOnLongClickListener(this);
             odIdSndBtn2.setOnLongClickListener(this);
 
-            if("flow".equals(BarOption.getCategoryLayoutStyle())){
+            if("flow".equals(Options.getCategoryLayoutStyle())){
                 odIdCategoryGrid.setVisibility(View.GONE);
             }else{
                 categoryFlowList.setVisibility(View.GONE);
             }
-            findViewById(R.id.odIdTools).setBackgroundColor(BarOption.getThemColor());
+            findViewById(R.id.odIdTools).setBackgroundColor(Options.getThemColor());
 
             if(categories.size() > 1) {
                 ((GridView)odIdCategoryGrid).setNumColumns(categories.size());
@@ -259,7 +259,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
 
             //might need more col for menu.
-            String col = BarOption.getCustomData(BarOption.column);
+            String col = Options.getCustomData(Options.column);
             if("".equals(col)){
                 col = "1";
             }
@@ -267,7 +267,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 ((GridView) findViewById(R.id.odMenuGv)).setNumColumns(Integer.valueOf(col));
                 int tableViewColumn = 4;
                 try{
-                    tableViewColumn = Integer.valueOf(BarOption.getCustomData(BarOption.tblcol));
+                    tableViewColumn = Integer.valueOf(Options.getCustomData(Options.tblcol));
                 }catch(Exception e){}
                 ((GridView) findViewById(R.id.odTableGrid)).setNumColumns(tableViewColumn);
             }catch(Exception e){
@@ -282,22 +282,22 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             if(tables.size() > 0) {
                 odIdTable2.setText("T");
             }else{
-                odIdTable2.setText(BarOption.getCustomData(BarOption.billIdx));
+                odIdTable2.setText(Options.getCustomData(Options.billIdx));
             }
 
-            if("1".equals(BarOption.getCustomData(BarOption.clientMode)) || "true".equals(BarOption.getCustomData(BarOption.clientMode))){
+            if("1".equals(Options.getCustomData(Options.clientMode)) || "true".equals(Options.getCustomData(Options.clientMode))){
                 odIdTable2.setVisibility(View.GONE);
                 odIdCancel2.setVisibility(View.GONE);
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
 
-            if("1".equals(BarOption.getCustomData(BarOption.HideTable)) || "true".equals(BarOption.getCustomData(BarOption.HideTable))){
+            if("1".equals(Options.getCustomData(Options.HideTable)) || "true".equals(Options.getCustomData(Options.HideTable))){
                 odIdTable2.setVisibility(View.GONE);
             }
-            if("1".equals(BarOption.getCustomData(BarOption.HideRubber)) || "true".equals(BarOption.getCustomData(BarOption.HideRubber))){
+            if("1".equals(Options.getCustomData(Options.HideRubber)) || "true".equals(Options.getCustomData(Options.HideRubber))){
                 odIdCancel2.setVisibility(View.GONE);
             }
-            if("1".equals(BarOption.getCustomData(BarOption.HideSetting)) || "true".equals(BarOption.getCustomData(BarOption.HideSetting))){
+            if("1".equals(Options.getCustomData(Options.HideSetting)) || "true".equals(Options.getCustomData(Options.HideSetting))){
                 odIdConfigBtn2.setVisibility(View.GONE);
             }
         }else{
@@ -312,13 +312,13 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             ary.add(String.valueOf(0));
 
             //add the custChars, if not defined, then add an s and a u.
-            String custChars = BarOption.getCustomChars();
+            String custChars = Options.getCustomChars();
             for (int i = 0; i < custChars.length(); i++) {
                 ary.add(custChars.substring(i, i + 1));
             }
 
             //the table shortcut including dordash/skip/uber... are difined by custTogos
-            String custTogos = BarOption.getCustomTogos();
+            String custTogos = Options.getCustomTogos();
             String[] lables = custTogos.split(",");
             for (String label : lables) {
                 ary.add(label.trim());
@@ -329,7 +329,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             items = new String[ary.size()];
             items = ary.toArray(items);
             View btnSend = findViewById(R.id.odIdSndBtn0);
-            btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, BarOption.getSendButtonHeight()));
+            btnSend.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Options.getSendButtonHeight()));
         }
 
         categoryXAdapter = new XAdapter2<String>(getActivity(), Arrays.asList(categoryNames), OrderCategoryButtonFullWidthViewHolder.class);
@@ -362,10 +362,10 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdFrLoutMenuList.setAdapter(dishesXAdapter);
 
         //add Marks
-        allMarks = sortMarks(DaoExpand.queryAllMarks(AikaStyleApplication.getMarkDao()));//deleted is used for table name....
+        allMarks = sortMarks(DaoExpand.queryAllMarks(AikaPos.daoSession.getMarkDao()));//deleted is used for table name....
         //add shortcut Marks.
         initShortCutMarks();
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.allowTemporaryLabel)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.allowTemporaryLabel))) {
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.allowTemporaryLabel)) || "true".equalsIgnoreCase(Options.getCustomData(Options.allowTemporaryLabel))) {
             findViewById(R.id.temporaryLabelArea).setVisibility(View.VISIBLE);
         }
 
@@ -374,9 +374,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         markAllXAdapter.setClickItemListener(this);
         markAllXAdapter.setData(allMarks);
         markAllList.setAdapter(markAllXAdapter);
-        markAllList.setNumColumns(BarOption.getMarkNumColumn());
+        markAllList.setNumColumns(Options.getMarkNumColumn());
 
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode))){
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.clientMode)) || "true".equalsIgnoreCase(Options.getCustomData(Options.clientMode))){
             findViewById(R.id.mainDialog).setVisibility(View.GONE);
         }else{
             findViewById(R.id.odInfoCollect).setVisibility(View.GONE);
@@ -386,7 +386,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         billsXAdapter = new XAdapter2<Bill>(getContext(), ConfigBillViewHolder.class);
         billsXAdapter.setClickItemListener(this);
         billListView.setAdapter(billsXAdapter);
-        if(BarOption.getStartFromTableSelection() && tables.size() > 0) {
+        if(Options.getStartFromTableSelection() && tables.size() > 0) {
             menuTableSwitcher.setDisplayedChild(1);
         }
     }
@@ -397,7 +397,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         if (StringUtils.isEmpty(inputContent) || inputContent.length() < 1) {
             showToast("Please input a name:");
         } else {
-            String userPassword = BarOption.getCustomData(BarOption.userPassword);
+            String userPassword = Options.getCustomData(Options.userPassword);
             if(userPassword == null || userPassword.length() == 0){
                 userPassword = "88882288";
             }
@@ -427,7 +427,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     public static void loadTables() {
-        tables = DaoExpand.queryAllTables(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
+        tables = DaoExpand.queryAllTables(AikaPos.daoSession.getMarkDao());
         Collections.sort(tables, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
@@ -451,7 +451,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         //init the existing bills area.
         List<Bill> orders = new ArrayList<>();
         try{
-            String recentNum = BarOption.getCustomData(BarOption.recentBillAmount);
+            String recentNum = Options.getCustomData(Options.recentBillAmount);
             orders = DaoExpand.queryRecentBill(billDao, StringUtils.isBlank(recentNum) ? 20 : Integer.valueOf(recentNum));
         }catch(Exception e){
             L.e("orders", "exception when fetching sale orders", e);
@@ -533,15 +533,15 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                         return;
                     }
                     //so...table selected...update the table status.
-                    String aotoCloseTables = BarOption.getCustomData(BarOption.autoCloseTable);
+                    String aotoCloseTables = Options.getCustomData(Options.autoCloseTable);
                     if(!"".equalsIgnoreCase(aotoCloseTables)
                         && !"all".equalsIgnoreCase(aotoCloseTables)
                         && !aotoCloseTables.contains(curTable)) {
-                        MarkDao markDao = AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao();
+                        MarkDao markDao = AikaPos.daoSession.getMarkDao();
                         List<Mark> tables = markDao.loadAll();
                         for (Mark table : tables) {
                             if (curTable.equals(table.getName1())) {
-                                table.setVersion(Integer.valueOf(BarOption.getCurrentBillIdx()) * -1);
+                                table.setVersion(Integer.valueOf(Options.getCurrentBillIdx()) * -1);
                                 markDao.insertOrReplace(table);
                                 break;
                             }
@@ -549,23 +549,23 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                     }
                 }
                 String orderContent = printCurrentSelection(billIdToMregeTo, false);
-                if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.emailorder)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.emailorder))){
-                    BarOption.notifyCheck(orderContent);
+                if("1".equalsIgnoreCase(Options.getCustomData(Options.emailorder)) || "true".equalsIgnoreCase(Options.getCustomData(Options.emailorder))){
+                    Options.notifyCheck(orderContent);
                 }
                 showToast("ORDER SENT, THANK YOU.");
-                if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode))){
+                if("1".equalsIgnoreCase(Options.getCustomData(Options.clientMode)) || "true".equalsIgnoreCase(Options.getCustomData(Options.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
-                }else if(BarOption.getStartFromTableSelection() && tables.size() > 0){
+                }else if(Options.getStartFromTableSelection() && tables.size() > 0){
                     loadTables();
                     menuTableSwitcher.setDisplayedChild(1);
                 }
                 break;
             case R.id.odIdSndBtn1:
-                if(BarOption.isMode2()){
+                if(Options.isMode2()){
                     findViewById(R.id.topButtons).setVisibility(View.GONE);
                 }
-                String adminPassword = BarOption.getAdminPassword();
+                String adminPassword = Options.getAdminPassword();
                 if(adminPassword.equals(odIdTable1.getText().toString())
                         || adminPassword.equals(odIdInput.getText().toString())){
                     //print report
@@ -576,7 +576,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                             showToast("Unclosed table will not be calculated into report!");
                         }
                     }
-                    List<SaleRecord> orders = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+                    List<SaleRecord> orders = AikaPos.daoSession.getSaleRecordDao().loadAll();
                     for(int i = orders.size() - 1; i >= 0; i--){
                         if(billsNotCount.contains(orders.get(i).getBillId())){
                             orders.remove(i);
@@ -640,11 +640,11 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
 
                 CustomerSelection.getInstance().setTableName(tvTable.getText().toString().substring(UC.TABLE.length()));
                 String orderContent2 = printCurrentSelection(billIdToMregeTo, isCancel);
-                if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.emailorder)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.emailorder))){
-                    BarOption.notifyCheck(orderContent2);
+                if("1".equalsIgnoreCase(Options.getCustomData(Options.emailorder)) || "true".equalsIgnoreCase(Options.getCustomData(Options.emailorder))){
+                    Options.notifyCheck(orderContent2);
                 }
                 showToast("ORDER SENT, THANK YOU.");
-                if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.clientMode))){
+                if("1".equalsIgnoreCase(Options.getCustomData(Options.clientMode)) || "true".equalsIgnoreCase(Options.getCustomData(Options.clientMode))){
                     findViewById(R.id.mainDialog).setVisibility(View.INVISIBLE); //it's better to be run after 10 seconds
                     findViewById(R.id.odInfoCollect).setVisibility(View.VISIBLE);
                 }
@@ -660,7 +660,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             case R.id.OKCloseTable:
                 String tableName = tvTable2.getText().toString().substring(UC.TABLE.length());
                 //update the table status to be -1 means no bill on it, the table closed..
-                MarkDao markDao = AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao();
+                MarkDao markDao = AikaPos.daoSession.getMarkDao();
                 List<Mark> tables = markDao.loadAll();
                 for (Mark table : tables) {
                     if(tableName.equals(table.getName1())){
@@ -695,8 +695,8 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         //check if need to send email
         try{
             int reportIdx = 1;
-            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
-            BarOption.notifyCheck(reportIdx, reportContent, false);
+            reportIdx = Integer.valueOf(Options.getCustomData(Options.reportIdx));
+            Options.notifyCheck(reportIdx, reportContent, false);
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
@@ -707,21 +707,21 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         int reportIdx = 1;
         //check if need to send email
         try{
-            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
+            reportIdx = Integer.valueOf(Options.getCustomData(Options.reportIdx));
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
-        if(!BarOption.notifyCheck(reportIdx, reportContent, true)){
+        if(!Options.notifyCheck(reportIdx, reportContent, true)){
             return;
         }
 
         //when printed succcesfully, clean all records, and update now as the next reportStartDate
-        AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao().deleteAll();
-        AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao().deleteAll();
-        BarOption.putCustomData(BarOption.reportStartDate, String.valueOf(new Date().getTime()));
-        BarOption.putCustomData(BarOption.billIdx, "1");        //reset kitchenbillIndex
+        AikaPos.daoSession.getSaleRecordDao().deleteAll();
+        AikaPos.daoSession.getBillDao().deleteAll();
+        Options.putCustomData(Options.reportStartDate, String.valueOf(new Date().getTime()));
+        Options.putCustomData(Options.billIdx, "1");        //reset kitchenbillIndex
 
-        BarOption.putCustomData(BarOption.reportIdx, String.valueOf(reportIdx + 1));
+        Options.putCustomData(Options.reportIdx, String.valueOf(reportIdx + 1));
 
         findViewById(R.id.alertResetDlg).setVisibility(View.INVISIBLE);
         findViewById(R.id.alertResetDlg).setMinimumHeight(0);
@@ -825,14 +825,14 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             L.d(TAG, String.valueOf(view.getId()) + String.valueOf(i));
             switch (view.getId()) {
                 case R.id.buttonholder: //number buttons.
-                    if (BarOption.isMode2()) {
+                    if (Options.isMode2()) {
                         tmpMenu = SearchMenuFromDB(items[i]);
                         SelectionDetail newSelection = addNewSelection(tmpMenu);
                         if (dishesXAdapter != null) {
                             loadOrderMenu();
                         }
                         //if it's defined to be show up lable(mark) panel
-                        if(BarOption.getForcePopUpList().contains(items[i])) {
+                        if(Options.getForcePopUpList().contains(items[i])) {
                             marksOfCurDish = newSelection.getMarkList();
                             showMarksPanel(newSelection.getDish());
                         }
@@ -846,7 +846,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                             if (printCurrentSelection(billIdToMregeTo, true).length() > 0) {    //arranged to print---didn't met the case that previous print not finished yet.
                                 isCancel = true;
                             }
-                        } else if (i < 10 + BarOption.getCustomChars().length()) {         //following are fixed buttons.
+                        } else if (i < 10 + Options.getCustomChars().length()) {         //following are fixed buttons.
                             appendText(items[i]);
                         } else {
                             odIdTable1.setText(items[i]);
@@ -949,7 +949,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 odIdCategoryGrid.getChildAt(i).setBackground(null);
             }
 
-            odIdCategoryGrid.getChildAt(idx).setBackgroundColor(BarOption.getThemColor());
+            odIdCategoryGrid.getChildAt(idx).setBackgroundColor(Options.getThemColor());
         }
     };
 
@@ -968,7 +968,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
                 categoryFlowList.getChildAt(i).setBackground(null);
             }
 
-            categoryFlowList.getChildAt(idx).setBackgroundColor(BarOption.getThemColor());
+            categoryFlowList.getChildAt(idx).setBackgroundColor(Options.getThemColor());
         }
     };
     @Override
@@ -1027,7 +1027,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private Dish SearchMenuFromDB(String context) {
-        List<Dish> mnlist = DaoExpand.queryFuzzyMenu(AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao(), context);
+        List<Dish> mnlist = DaoExpand.queryFuzzyMenu(AikaPos.daoSession.getDishDao(), context);
         if (mnlist.size() >= 1) {
             Collections.sort(mnlist, new Comparator<Dish>() {
                 @Override
@@ -1071,9 +1071,9 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         String tableName = order.getTableName();
         String openTime = order.getOpenTime().substring(0, order.getOpenTime().length() - 3);
         String subTotalStr = String.format("%.2f", Float.valueOf(order.getTotal()) / 100.0);
-        String totalStr = String.format("%.2f", Float.valueOf(order.getTotal())/100.0 * BarOption.getTaxRate());
+        String totalStr = String.format("%.2f", Float.valueOf(order.getTotal())/100.0 * Options.getTaxRate());
         //        OrderIdentifierFragment.getInstance().dishesXAdapter.setData(order.getSelectedDishes());
-        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao());
+        final List<SaleRecord> data = DaoExpand.querySalesByBill(order.getId().toString(), AikaPos.daoSession.getSaleRecordDao());
 
         XAdapter2<SaleRecord> adapter = new XAdapter2<SaleRecord>(getContext(), ConfigOrderViewHolder.class);
         adapter.setData(data);
@@ -1099,7 +1099,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private void showMarksPanel(Dish menu){   //final onChoiceMarks choiceMarks) {
-        if(BarOption.isMode2()){
+        if(Options.isMode2()){
             findViewById(R.id.topButtons).setVisibility(View.VISIBLE);
         }
         if (marksOfCurDish == null) {
@@ -1114,7 +1114,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
             }
             allMarks = sortMarks(unsortedMarks);
         }else{
-            allMarks = sortMarks(DaoExpand.queryAllMarks(AikaStyleApplication.getMarkDao()));
+            allMarks = sortMarks(DaoExpand.queryAllMarks(AikaPos.daoSession.getMarkDao()));
         }
 
         //if mark is already selected, then remove it from the display list.
@@ -1211,7 +1211,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
     }
 
     private void initShortCutMarks() {
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.HideMark)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.HideMark))) {
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.HideMark)) || "true".equalsIgnoreCase(Options.getCustomData(Options.HideMark))) {
             odIdShortCutMarksGrid.setVisibility(View.GONE);
         }else{
             shortCutMarks = new ArrayList<Mark>(3);
@@ -1240,7 +1240,7 @@ public class OrderIdentifierFragment extends BaseFragment implements View.OnClic
         odIdTable1.setChecked(true);
         loadOrderMenu();
         if(tables.size() == 0) {
-            odIdTable2.setText(BarOption.getCustomData(BarOption.billIdx));
+            odIdTable2.setText(Options.getCustomData(Options.billIdx));
         }else{
             odIdTable2.setText("");
             CustomerSelection.getInstance().setTableName("");

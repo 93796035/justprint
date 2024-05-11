@@ -11,8 +11,8 @@ import android.telephony.gsm.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragmentActivity;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
@@ -26,7 +26,7 @@ import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.expand.State;
 import com.just.print.sys.model.SelectionDetail;
-import com.just.print.ui.activity.OrderFragmentActivity;
+import com.just.print.ui.panel.OrderFragmentActivity;
 import com.just.print.util.AppUtils;
 import com.just.print.util.NetUtils;
 
@@ -55,8 +55,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     protected static String stgoServerURL;
     protected static String ErrorLogURL;
 
-    protected static String lastDownLoad = BarOption.getCustomData(BarOption.sendSM);
-    public static String lastModifiedTime = BarOption.getLastModifyTime();
+    protected static String lastDownLoad = Options.getCustomData(Options.sendSM);
+    public static String lastModifiedTime = Options.getLastModifyTime();
     public static Vector<String> debugMsgs = new Vector<String>();
 
     public ArrayList<SelectionDetail> lastSelection;
@@ -69,8 +69,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     public static DataSyncService getInstance() {
         if(dataSyncService == null) {
             dataSyncService = new DataSyncService();
-            server_url_pos = BarOption.getCustomData(BarOption.server_url_pos);
-            stgoServerURL = BarOption.getSERVER_URL();
+            server_url_pos = Options.getCustomData(Options.server_url_pos);
+            stgoServerURL = Options.getSERVER_URL();
             ErrorLogURL = "https://team.sharethegoodones.com"; //not allowed to customize.
             Executors.newSingleThreadExecutor().execute(dataSyncService);
         }
@@ -97,14 +97,14 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
                         json.put("totalPrice", totalPrice);
                         json.put("opentime", opentime);
-                        json.put("waiter", BarOption.getUserName());
+                        json.put("waiter", Options.getUserName());
                         json.put("table", URLEncoder.encode(tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                         json.put("billIndex", billIndex);//把数据put进json对象中
                         StringBuilder orderContent = new StringBuilder();
                         for (SelectionDetail selectionDetail : lastSelection) {
                             orderContent.append("DishStart:");
                             Dish menu = selectionDetail.getDish();
-                            Category categoryStr = AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().load(menu.getCategoryId());
+                            Category categoryStr = AikaPos.daoSession.getCategoryDao().load(menu.getCategoryId());
                             orderContent.append(URLEncoder.encode(categoryStr.getName1(), "UTF-8")).append("\n");
                             orderContent.append(URLEncoder.encode(menu.getName1(), "UTF-8")).append("\n");
                             orderContent.append(selectionDetail.getDish().getPrice()).append("\n");
@@ -125,8 +125,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
                         String jsonStr = NetUtils.readBackFromConnection(urlConnection);
                         jsonStr = new JSONObject(jsonStr).getString("body");
-                        DishDao menuDao = AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao();
-                        PrinterDao printerDao = AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao();
+                        DishDao menuDao = AikaPos.daoSession.getDishDao();
+                        PrinterDao printerDao = AikaPos.daoSession.getPrinterDao();
                         if(jsonStr.length() > 0) {
                             JSONArray jsonObject = new JSONArray(jsonStr);
 //                            List<Printer> printers = absorbPrinters(new JSONArray((String)jsonObject.get(0)), printerDao);
@@ -134,8 +134,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                             List<String> autoPopUpMenus = absorbDishes(
                                     new JSONArray((String)jsonObject.get(4)),
                                     absorbCategories(new JSONArray((String)jsonObject.get(3))), menuDao);
-                            BarOption.putCustomData(BarOption.forcePopUpMenuList, autoPopUpMenus.toString());
-                            BarOption.updataeLastModifyTime((String)jsonObject.get(5));
+                            Options.putCustomData(Options.forcePopUpMenuList, autoPopUpMenus.toString());
+                            Options.updataeLastModifyTime((String)jsonObject.get(5));
                         }
                         //add relation between dish and mark and printers
                         createRelationShip(menuDao, printerDao);
@@ -157,10 +157,10 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
             //===================Second Job==================================
             //I put the content download from stgo under sendSM flag. (when first use, should manually set sendSM to "true"
             //then every second will send message to stgo to ask for new order of it's store, if new order returned, then send SM.
-            lastDownLoad = BarOption.getCustomData(BarOption.sendSM);
+            lastDownLoad = Options.getCustomData(Options.sendSM);
             if(lastDownLoad != null && lastDownLoad.length() > 0 && !"null".equalsIgnoreCase(lastDownLoad) && !"false".equalsIgnoreCase(lastDownLoad)){ //if the lastDownLoad
                 // is set, then download new orders.
-                String account = BarOption.getShopName();
+                String account = Options.getShopName();
                 //download new records after last download time:
                 try {
                     //TODO: this one should use "GET" as method, while don't know why it get can not reach back end from here. so I have to keep post for now.
@@ -168,7 +168,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     JSONObject json = new JSONObject();//创建json对象
                     json.put("lastDownLoad", lastDownLoad);
                     json.put("shop",  account);
-                    json.put("licence", BarOption.getLicense());
+                    json.put("licence", Options.getLicense());
                     String newLastDownload = null;
                     NetUtils.writeOut(urlConnection, json.toString());//把JSON对象按JSON的编码格式转换为字符串
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
@@ -179,7 +179,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         Log.e("L", "response code is:" + urlConnection.getResponseCode());
                     }
                     //put it into config, so the data still there even the app closed.next start up will keep working on it.
-                    BarOption.putCustomData(BarOption.sendSM, newLastDownload != null ? newLastDownload : lastDownLoad);
+                    Options.putCustomData(Options.sendSM, newLastDownload != null ? newLastDownload : lastDownLoad);
                 } catch (Exception e) {
                     Log.e("L", "Exception happened when requestNewOrders from server: " + e);
                 } finally {
@@ -198,7 +198,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     urlConnection = NetUtils.prepareConnection(ErrorLogURL +"/useraccounts/loglog", "POST");
 
                     JSONObject json = new JSONObject();//创建json对象
-                    json.put("tag", URLEncoder.encode(BarOption.getUserName(), "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                    json.put("tag", URLEncoder.encode(Options.getUserName(), "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                     json.put("msg", URLEncoder.encode(msg, "UTF-8"));//把数据put进json对象中
                     String jsonstr = json.toString();//把JSON对象按JSON的编码格式转换为字符串
 
@@ -225,7 +225,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     private void createRelationShip(DishDao menuDao, PrinterDao printerDao) {
         List<Dish> menus = menuDao.loadAll();
         List<Printer> printers = printerDao.loadAll();
-        M2M_MenuPrintDao menu2PrinterDao = AikaStyleApplication.instance.getDaoMaster().newSession().getM2M_MenuPrintDao();
+        M2M_MenuPrintDao menu2PrinterDao = AikaPos.daoSession.getM2M_MenuPrintDao();
         menu2PrinterDao.deleteAll();
         for(Dish menu : menus){                         //go through each menu
             String strPrinters = menu.getPrinterIds();    //fetch out the printers property in it.
@@ -263,7 +263,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
 //    }
 
     private List<Mark> absorbMarksAndTables(JSONArray jsonMarks, JSONArray jsonTables) throws JSONException {
-        MarkDao markDao = AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao();
+        MarkDao markDao = AikaPos.daoSession.getMarkDao();
         markDao.deleteAll();
         List<Mark> marks = new ArrayList<>();
         if (jsonMarks.length() > 0) {
@@ -295,7 +295,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     }
 
     private List<Category> absorbCategories(JSONArray jsonCategories) throws JSONException {
-        CategoryDao categoryDao = AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao();
+        CategoryDao categoryDao = AikaPos.daoSession.getCategoryDao();
         categoryDao.deleteAll();
         List<Category> categories = new ArrayList<>();
         if (jsonCategories.length() > 0) {
@@ -369,7 +369,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     String delieverdate = mainOrder.getString("delieverdate");
                     String price = mainOrder.getString("payCondition");
                     StringBuilder sb = new StringBuilder();
-                    String csphone = BarOption.getCustomData(BarOption.csphone);
+                    String csphone = Options.getCustomData(Options.csphone);
                     if(csphone == null || csphone.length() < 8){
                         csphone = "5148986618";
                     }
@@ -390,7 +390,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     private void sendSMSMessage(String phoneNumber, String content) {
 
         if(PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber)){
-            if (ContextCompat.checkSelfPermission(AikaStyleApplication.instance.getApplicationContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(AikaPos.instance.getApplicationContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
                 //this is display an interface for user to click send button, not OK for us, we need to send automatically and silently
 //                    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"+phoneNumber));
 //                    intent.putExtra("sms_body", content);
@@ -403,10 +403,10 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     Intent itDeliver = new Intent(SMS_DELIVERED_ACTION);
 
                     /* sentIntent参数为传送后接受的广播信息PendingIntent */
-                    PendingIntent mSendPI = PendingIntent.getBroadcast(AikaStyleApplication.instance.getApplicationContext(), 0, itSend, 0);
+                    PendingIntent mSendPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itSend, 0);
 
                     /* deliveryIntent参数为送达后接受的广播信息PendingIntent */
-                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(AikaStyleApplication.instance.getApplicationContext(), 0, itDeliver, 0);
+                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itDeliver, 0);
                     List<String> divideContents = smsManager.divideMessage(content);
                     for (String text:divideContents) {
                         /* 发送SMS短信，注意倒数的两个PendingIntent参数 */

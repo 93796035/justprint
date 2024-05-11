@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
+import com.just.print.app.Options;
 import com.just.print.db.bean.Mark;
 import com.just.print.sys.model.SelectionDetail;
 import com.stupid.method.adapter.XViewHolder;
@@ -42,8 +42,8 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
         findViewById(R.id.odmnadd).setOnClickListener(this);
         findViewById(R.id.odmnreduce).setOnClickListener(this);
         findViewById(R.id.odMnLoutMarkBtn).setOnClickListener(this);
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.HideMark))
-                ||"true".equalsIgnoreCase(BarOption.getCustomData(BarOption.HideMark))){
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.HideMark))
+                ||"true".equalsIgnoreCase(Options.getCustomData(Options.HideMark))){
             findViewById(R.id.odMnLoutMarkBtn).setVisibility(View.INVISIBLE);
         }
     }
@@ -73,8 +73,8 @@ public class OrderMenuViewHolder extends XViewHolder<SelectionDetail> {
     public void onResetView(SelectionDetail menu, int i) {
         this.menu = menu;
 
-        odMId.setText(BarOption.showID ? menu.getDish().getId().toString() : "");
-        odMName.setText(BarOption.showName ? menu.getDish().getName1() : "");
+        odMId.setText(Options.showID ? menu.getDish().getId().toString() : "");
+        odMName.setText(Options.showName ? menu.getDish().getName1() : "");
 //        L.d(TAG, Integer.toString(menu.getDishNum()));
         odMNNum.setText(Integer.toString((int)menu.getDishNum()));
         odMnLoutMarkTv.setText("");

@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.expand.DaoExpand;
@@ -44,7 +44,7 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryNotDeletedAll(AikaPos.daoSession.getMarkDao());
         markXAdapter.setData(list);
         markXAdapter.notifyDataSetChanged();
     }
@@ -55,9 +55,9 @@ public class ConfigPrinterStatusFragment extends BaseFragment implements OnClick
         Mark mark1 = new Mark();
         mark1.setStatus(State.OPENNED);
         mark1.setName1(mark);
-        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark1);
+        AikaPos.daoSession.getMarkDao().insertOrReplace(mark1);
         mark1.update();
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         loadMark();
     }
 

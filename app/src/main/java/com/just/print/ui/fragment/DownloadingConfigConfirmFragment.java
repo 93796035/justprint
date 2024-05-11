@@ -7,7 +7,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
+import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
@@ -39,14 +39,14 @@ public class DownloadingConfigConfirmFragment extends BaseFragment{
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
 
-        if(!("1".equals(BarOption.getCustomData(BarOption.allowDownloadFromOtherStore)) || "true".equals(BarOption.getCustomData(BarOption.allowDownloadFromOtherStore)))) {
+        if(!("1".equals(Options.getCustomData(Options.allowDownloadFromOtherStore)) || "true".equals(Options.getCustomData(Options.allowDownloadFromOtherStore)))) {
             findViewById(R.id.notice2).setVisibility(View.GONE);
             findViewById(R.id.inputArea).setVisibility(View.GONE);
         }
 
-        store_name.setText(BarOption.getShopName());
+        store_name.setText(Options.getShopName());
         //password.setText(AppData.getLicense());
-        String lastSyncDate = BarOption.getLastModifyTime();
+        String lastSyncDate = Options.getLastModifyTime();
         if(lastSyncDate == null || lastSyncDate.length() == 0){
             lastSyncDate = "1";
         }
@@ -57,7 +57,7 @@ public class DownloadingConfigConfirmFragment extends BaseFragment{
     private void onButtonOK(){
         String license = password.getText().toString();
         if(license.length() < 6){
-            license = BarOption.getLicense();
+            license = Options.getLicense();
             if(license.length() < 6){
                 showToast("Please activate the application first.");
                 return;

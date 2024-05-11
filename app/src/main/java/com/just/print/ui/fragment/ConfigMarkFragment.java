@@ -8,8 +8,8 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.db.dao.M2M_SaleRecordMarkDao;
@@ -67,7 +67,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
     }
 
     private void loadMark() {
-        List<Mark> list = DaoExpand.queryAllNotDeletedMark(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
+        List<Mark> list = DaoExpand.queryAllNotDeletedMark(AikaPos.daoSession.getMarkDao());
         Collections.sort(list, new Comparator<Mark>() {
             @Override
             public int compare(Mark mark, Mark t1) {
@@ -105,9 +105,9 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             mark.setVersion(0);
         }
 
-        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(mark);
+        AikaPos.daoSession.getMarkDao().insertOrReplace(mark);
         mark.update();
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         loadMark();
     }
 
@@ -152,7 +152,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
             onEditMark.update();
             onEditMark = null;
             markXAdapter.notifyDataSetChanged();
-            BarOption.updataeLastModifyTime(null);
+            Options.updataeLastModifyTime(null);
         }
         modifyViewSwitch.setDisplayedChild(0);
     }
@@ -169,7 +169,7 @@ public class ConfigMarkFragment extends BaseFragment implements OnClickItemListe
                 dialog.dismiss();
                 mark.delete();
 
-                M2M_SaleRecordMarkDao targetDao = AikaStyleApplication.instance.getDaoMaster().newSession().getM2M_SaleRecordMarkDao();
+                M2M_SaleRecordMarkDao targetDao = AikaPos.daoSession.getM2M_SaleRecordMarkDao();
 //                targetDao._deleteMenu_M2M_MenuMarkList(mark.getId());
                 loadMark();
 

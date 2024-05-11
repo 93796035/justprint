@@ -8,8 +8,8 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Mark;
 import com.just.print.ui.holder.ConfigTableViewHolder;
@@ -76,9 +76,9 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
             table.setStatus(0);
         }
         table.setVersion(-1);  //negative means it's a table not mark. while we can still give it some nubmer to indicate the bill.
-        AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao().insertOrReplace(table);
+        AikaPos.daoSession.getMarkDao().insertOrReplace(table);
 //        table.updateAndUpgrade();
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         loadTables();
     }
 
@@ -116,7 +116,7 @@ public class ConfigTableFragment extends BaseFragment implements OnClickItemList
             onEditTable.update();
             onEditTable = null;
             tableXAdapter.notifyDataSetChanged();
-            BarOption.updataeLastModifyTime(null);
+            Options.updataeLastModifyTime(null);
         }
         modifyViewSwitch.setDisplayedChild(0);
     }

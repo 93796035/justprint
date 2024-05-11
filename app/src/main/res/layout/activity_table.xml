@@ -4,7 +4,7 @@
     android:id="@+id/activity_table"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.just.print.ui.activity.DiningTableFragmentActivity">
+    tools:context="com.just.print.ui.panel.DiningTableFragmentActivity">
 
     <!-- FrameLayout as a container for Fragment -->
     <FrameLayout

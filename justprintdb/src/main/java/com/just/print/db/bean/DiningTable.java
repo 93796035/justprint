@@ -176,6 +176,11 @@ public class DiningTable {
     }
 
     // KEEP METHODS - put your custom methods here
+    @Override
+    public String toString() {
+        return name; // 返回桌子的名称或其他唯一标识符
+    }
+
     // KEEP METHODS END
 
 }

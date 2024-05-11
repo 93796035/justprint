@@ -12,7 +12,7 @@ import com.gprinter.io.EthernetPort;
 import com.gprinter.io.PortManager;
 import com.gprinter.io.SerialPort;
 import com.gprinter.io.UsbPort;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.AikaPos;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -499,7 +499,7 @@ public class DeviceConnFactoryManager {
         Intent intent = new Intent(ACTION_CONN_STATE);
         intent.putExtra(STATE, state);
         intent.putExtra(DEVICE_ID, id);
-        AikaStyleApplication.instance.getApplicationContext().sendBroadcast(intent);//此处若报空指针错误，需要在清单文件application标签里注册此类，参考demo
+        AikaPos.instance.getApplicationContext().sendBroadcast(intent);//此处若报空指针错误，需要在清单文件application标签里注册此类，参考demo
     }
 
     // 判断是实时状态（10 04 02）还是查询状态（1D 72 01）//

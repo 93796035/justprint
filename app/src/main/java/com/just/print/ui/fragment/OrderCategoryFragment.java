@@ -7,7 +7,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
@@ -157,7 +157,7 @@ public class OrderCategoryFragment extends BaseFragment {
 
     public static List<Category> getCategoryList(){
         if(categoryList == null) {
-            categoryList = DaoExpand.queryAllNotDeleted(AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+            categoryList = DaoExpand.queryAllNotDeleted(AikaPos.daoSession.getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         }
         return categoryList;
     }
@@ -165,7 +165,7 @@ public class OrderCategoryFragment extends BaseFragment {
     public static Map<Category, List<Dish>> getCategorizedContent(){
         if(categorizedContent == null){
             categorizedContent = new LinkedHashMap<>();
-            DishDao dao = AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao();
+            DishDao dao = AikaPos.daoSession.getDishDao();
             for (Category ca : getCategoryList()) {
                 List<Dish> menus = DaoExpand.queryMenuByCategory(ca, dao);
                 Collections.sort(menus, comparator);
@@ -202,7 +202,7 @@ public class OrderCategoryFragment extends BaseFragment {
 
         addMenuCtrl(Dish men) {
             mMenu = men;
-            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao()), MarkViewHolder.class);
+            markAdapter = new XAdapter2<Mark>(getActivity(), DaoExpand.queryNotDeletedAll(AikaPos.daoSession.getMarkDao()), MarkViewHolder.class);
             markAdapter.setClickItemListener(new OnClickItemListener() {
                 @Override
                 public void onClickItem(View view, int i) {

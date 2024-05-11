@@ -4,8 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
@@ -161,7 +161,7 @@ public class WifiPrintService implements Runnable{
         ipContentMap = new HashMap<String,List<String>>();
         ipSelectionsMap = new HashMap<String,List<SelectionDetail>>();
 
-        List<Printer> printerList = DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao());//读取打印机位置
+        List<Printer> printerList = DaoExpand.queryNotDeletedAll(AikaPos.daoSession.getPrinterDao());//读取打印机位置
         for(Printer printer:printerList){
             String ip = printer.getIp();
             ipPrinterMap.put(ip,printer);
@@ -174,7 +174,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private void checkIfThereAreUnLoggedLabelPrinters() {
-        String snOrIpOflabelPrinters = BarOption.getCustomData(BarOption.labelPrinters);
+        String snOrIpOflabelPrinters = Options.getCustomData(Options.labelPrinters);
         if(snOrIpOflabelPrinters.length() > 0) {
             ipOrSNs = snOrIpOflabelPrinters.split(",");
             for (String ipOrSN : ipOrSNs) {
@@ -207,7 +207,7 @@ public class WifiPrintService implements Runnable{
         }
         //Save
         if(billIdx == null){
-            billIdx = BarOption.getCurrentBillIdx();
+            billIdx = Options.getCurrentBillIdx();
             if(isCancel){
                 billIdx = String.valueOf(Integer.valueOf(billIdx)-1); //if shot click on cancel, will use last billIdx by default.
             }
@@ -247,7 +247,7 @@ public class WifiPrintService implements Runnable{
                 }
             }
             if(isTogoTypeOrder(CustomerSelection.getInstance().getTableName())){
-                String snOrIpOflabelPrinters = BarOption.getCustomData(BarOption.labelPrinters);
+                String snOrIpOflabelPrinters = Options.getCustomData(Options.labelPrinters);
                 if(snOrIpOflabelPrinters.length() > 0){
                     String[] ipOrSNs = snOrIpOflabelPrinters.split(",");
                     for (String ipOrSN : ipOrSNs) {
@@ -280,8 +280,8 @@ public class WifiPrintService implements Runnable{
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<SelectionDetail>() {
                     @Override
                     public int compare(SelectionDetail dishesDetailModel, SelectionDetail t1) {
-                        Category c1 = AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().load(dishesDetailModel.getDish().getCategoryId());
-                        Category c2 = AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().load(t1.getDish().getCategoryId());
+                        Category c1 = AikaPos.daoSession.getCategoryDao().load(dishesDetailModel.getDish().getCategoryId());
+                        Category c2 = AikaPos.daoSession.getCategoryDao().load(t1.getDish().getCategoryId());
                         return c1.getDisplayIdx().compareTo(c2.getDisplayIdx());
                     }
                 });
@@ -311,7 +311,7 @@ public class WifiPrintService implements Runnable{
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();
                         String currentCategory = null;
                         for(SelectionDetail selectionDetail : dishList){
-                            Category c1 = AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().load(selectionDetail.getDish().getCategoryId());
+                            Category c1 = AikaPos.daoSession.getCategoryDao().load(selectionDetail.getDish().getCategoryId());
                             if(currentCategory == null){    //if not set yet, then set the first value.
                                 currentCategory = c1.getName1();
                                 tlist.add(selectionDetail);
@@ -366,7 +366,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private String saveBillToDB(Double priceOfBill, String curBillIdx) {
-        BillDao billDao = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao();
+        BillDao billDao = AikaPos.daoSession.getBillDao();
         Bill bill = billDao.load(Long.valueOf(curBillIdx));
         if(bill != null){
             bill.setTotal(bill.getTotal() + (int)(priceOfBill * 100));
@@ -388,27 +388,27 @@ public class WifiPrintService implements Runnable{
 
     //increase the value of AppData.kitchenBillIdxit
     private void increaseKitchenBillIdx() {
-        String curBillIdx = BarOption.getCustomData(BarOption.billIdx);  //and it can also be used to know which order come in first.
+        String curBillIdx = Options.getCustomData(Options.billIdx);  //and it can also be used to know which order come in first.
         if(StringUtils.isBlank(curBillIdx)){
-            BarOption.putCustomData(BarOption.billIdx, "2");   //update the kbi into higer value.
+            Options.putCustomData(Options.billIdx, "2");   //update the kbi into higer value.
         }else {
-            BarOption.putCustomData(BarOption.billIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
+            Options.putCustomData(Options.billIdx, String.valueOf(Integer.valueOf(curBillIdx) + 1));   //update the kbi into higer value.
         }
     }
 
     private static Double saveSaleRecToDB(String curBillIdx, boolean isCancel) {
         Double priceFR = 0.0;
         //save the menu into database.
-        SaleRecordDao saleRecordDao = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao();
+        SaleRecordDao saleRecordDao = AikaPos.daoSession.getSaleRecordDao();
         for(SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()){
             float number = selectionDetail.getDishNum();
             Dish menu = selectionDetail.getDish();
 
             String mName = "";
-            if(BarOption.showID) {
+            if(Options.showID) {
                 mName = menu.getId() + " ";
             }
-            if(BarOption.showName) {
+            if(Options.showName) {
                 mName += menu.getName1();             //dish name
             }
 
@@ -423,7 +423,7 @@ public class WifiPrintService implements Runnable{
             }
 
             //if set as conbine mark price into dish price, mark name into the dish name. do not save sale records for each mark.
-            if("1".equals(BarOption.getCustomData(BarOption.combineMarkPrice)) || "true".equals(BarOption.getCustomData(BarOption.combineMarkPrice))) {
+            if("1".equals(Options.getCustomData(Options.combineMarkPrice)) || "true".equals(Options.getCustomData(Options.combineMarkPrice))) {
                 price += markTotalPrice;
                 //becuase there's no enough column, and modifying table schema will cause version compatibility issue.
                 //so hide mark into name for now. if AppData.conbineMarkPrice not set, dont add this into the name, because there
@@ -446,7 +446,7 @@ public class WifiPrintService implements Runnable{
             priceFR += price;
 
             //while by defalut, mark price is not added into salesrecord, so, generate saleRecord for the marks.
-            if (!("1".equals(BarOption.getCustomData(BarOption.combineMarkPrice)) || "true".equals(BarOption.getCustomData(BarOption.combineMarkPrice)))) {
+            if (!("1".equals(Options.getCustomData(Options.combineMarkPrice)) || "true".equals(Options.getCustomData(Options.combineMarkPrice)))) {
                 for (Mark mark : marks) {
                     Float markPrice = ((float) mark.getVersion()) / 100.0f * mark.getQt();
                     // even no price for this mark, still create saleorder, to show it up in salesorder panel
@@ -478,8 +478,8 @@ public class WifiPrintService implements Runnable{
             return null;
         }
         L.d("ConfigPrintReportFragment","printAndSaveCommand");
-        List<Printer> printers = AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao().loadAll();
-        String printerIP = BarOption.getCustomData(BarOption.reportPrinter);
+        List<Printer> printers = AikaPos.daoSession.getPrinterDao().loadAll();
+        String printerIP = Options.getCustomData(Options.reportPrinter);
         if(printerIP == null || printerIP.length() < 8) {
             printerIP = printers.get(0).getIp();
         }
@@ -512,21 +512,21 @@ public class WifiPrintService implements Runnable{
             combinedSaleRecords.add(entry.getValue());
         }
 
-        String startTime = BarOption.getCustomData(BarOption.reportStartDate);
+        String startTime = Options.getCustomData(Options.reportStartDate);
         if (startTime == null || startTime.length() < 1) {
-            startTime = BarOption.getCustomData(BarOption.lastsuccess);
+            startTime = Options.getCustomData(Options.lastsuccess);
         }
         double[] totalContainer = new double[2];
         String contentFR = formatContentForPrintReport(combinedSaleRecords, startTime, endTime, totalContainer);
-        if("1".equals(BarOption.getCustomData(BarOption.hideCancelItem)) || "true".equals(BarOption.getCustomData(BarOption.hideCancelItem))) {
+        if("1".equals(Options.getCustomData(Options.hideCancelItem)) || "true".equals(Options.getCustomData(Options.hideCancelItem))) {
             int p = contentFR.indexOf(" ITEMS CANCEL:  ");
             contentFR = contentFR.substring(0, p);
             p = contentFR.lastIndexOf('$');
             float f = Float.valueOf(contentFR.substring(p + 1));
-            contentFR = contentFR + " TOTAL:  $" + f * BarOption.getTaxRate()  + "\n\n\n";
+            contentFR = contentFR + " TOTAL:  $" + f * Options.getTaxRate()  + "\n\n\n";
         }
         //if has tableToCal(table is also used to indicate uber/skip.....) set, then need to add one more part----------------------------
-        String tableToCalculate = BarOption.getCustomData(BarOption.tableToCalculate).toLowerCase();
+        String tableToCalculate = Options.getCustomData(Options.tableToCalculate).toLowerCase();
         tableToCalculate.replace("，",",");
         if(tableToCalculate.length() == 0){
             tableToCalculate = "uber,skip,doordash,";
@@ -551,7 +551,7 @@ public class WifiPrintService implements Runnable{
             Set<String> names = new HashSet<>();
             HashMap<String, Integer> billQT = new HashMap();
             HashMap<String, Float> sub = new HashMap<>();
-            List<Bill> bills = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao().loadAll();
+            List<Bill> bills = AikaPos.daoSession.getBillDao().loadAll();
             for(Bill bill : bills) {
                 String tableName = bill.getCustomerNumber().toString();
                 if(!billsNotCount.contains(bill.getId())
@@ -577,7 +577,7 @@ public class WifiPrintService implements Runnable{
                 Float subTotal = sub.get(name);
                 totalContainer[0] -= subTotal;
                 contentFR += generateString(lengthLeft / 3 - subTotal.toString().length(), " ") + subTotal;
-                Float total = subTotal * BarOption.getTaxRate();
+                Float total = subTotal * Options.getTaxRate();
                 total = ((int)(total * 100))/100.0f;
                 totalContainer[1] -= total;
                 contentFR += generateString(lengthLeft / 3 - total.toString().length(), " ") + total;
@@ -689,7 +689,7 @@ public class WifiPrintService implements Runnable{
 
             //did any work or didn't do any work, each round should rest for at least 50.
             int time = 50;
-            String waitTime = BarOption.getCustomData(BarOption.waitTime);
+            String waitTime = Options.getCustomData(Options.waitTime);
             if (waitTime != null && waitTime.trim().length() > 0) {
                 try {
                     time = Integer.valueOf(waitTime);
@@ -768,12 +768,12 @@ public class WifiPrintService implements Runnable{
 
     private void printContents(List<String> contents){
         //get out customized font
-        String font = BarOption.getCustomData(curPrintIp + BarOption.font);
+        String font = Options.getCustomData(curPrintIp + Options.font);
         if (StringUtils.isBlank(font)) {
-            font = BarOption.getCustomData(BarOption.font);
+            font = Options.getCustomData(Options.font);
         }
         if(isPrintingReport(contents)){//TODO: here's a bug, non report was considered as  report!!!!
-            font = BarOption.getCustomData(BarOption.reportFont);
+            font = Options.getCustomData(Options.reportFont);
             if(font == null || font.length() < 6) {
                 font = "27,33,0";
             }
@@ -800,7 +800,7 @@ public class WifiPrintService implements Runnable{
     //if the order is a kind of togo order.
     private boolean isTogoTypeOrder(String content) {
         String content_lowered = content.toLowerCase();
-        String custTogos = BarOption.getCustomTogos().toLowerCase();
+        String custTogos = Options.getCustomTogos().toLowerCase();
         String[] lables = custTogos.split(",");
         for (String label : lables) {
             if(content_lowered.contains(label.trim())){
@@ -816,7 +816,7 @@ public class WifiPrintService implements Runnable{
             L.e("WifiPrintService", "unexpected null printerSN in isCloudLabel parameter!!!!!", null);
             return false;
         }
-        String labelPrinters = BarOption.getCustomData(BarOption.labelPrinters);//get the cloud label printer.
+        String labelPrinters = Options.getCustomData(Options.labelPrinters);//get the cloud label printer.
         return labelPrinters.contains(ipOrSN);
     }
 
@@ -830,7 +830,7 @@ public class WifiPrintService implements Runnable{
     private StringBuilder getReportFirstLineContent() {
         String mobileMark = RegisterFragment.getUserName();
         StringBuilder content = new StringBuilder(mobileMark == null ? "" : mobileMark);
-        String idx = BarOption.getCustomData(BarOption.reportIdx);
+        String idx = Options.getCustomData(Options.reportIdx);
         return content.append(idx == null || idx.length() == 0 ? "1" : idx);
     }
 
@@ -887,22 +887,22 @@ public class WifiPrintService implements Runnable{
 
     private void doBeiYangPrint(String font, String content){
         //get out customized line_height
-        String line_height = BarOption.getCustomData(curPrintIp + BarOption.line_height);
+        String line_height = Options.getCustomData(curPrintIp + Options.line_height);
         if (StringUtils.isBlank(line_height)) {
-            line_height = BarOption.getCustomData(BarOption.line_height);
+            line_height = Options.getCustomData(Options.line_height);
         }
 
-        String font_w = BarOption.getCustomData(curPrintIp + BarOption.font_w);
+        String font_w = Options.getCustomData(curPrintIp + Options.font_w);
         if (StringUtils.isBlank(font_w)) {
-            font_w = BarOption.getCustomData(BarOption.font_w);
+            font_w = Options.getCustomData(Options.font_w);
         }
         if (StringUtils.isBlank(font_w)) {
             font_w = font;
         }
 
-        String font_h = BarOption.getCustomData(curPrintIp + BarOption.font_h);
+        String font_h = Options.getCustomData(curPrintIp + Options.font_h);
         if (StringUtils.isBlank(font_h)) {
-            font_h = BarOption.getCustomData(BarOption.font_h);
+            font_h = Options.getCustomData(Options.font_h);
         }
         if (StringUtils.isBlank(font_h)) {
             font_h = font;
@@ -964,7 +964,7 @@ public class WifiPrintService implements Runnable{
     }
 
     private void doZiJiangPrint(String font, String content){
-        if (!"silent".equals(BarOption.getCustomData(BarOption.mode))) {
+        if (!"silent".equals(Options.getCustomData(Options.mode))) {
             wifiCommunication.sndByte(Command.BEEP);
         }
 
@@ -985,7 +985,7 @@ public class WifiPrintService implements Runnable{
         }
 
         //code can be customzed
-        String tCode = BarOption.getCustomData(BarOption.code);
+        String tCode = Options.getCustomData(Options.code);
         if (tCode != null && tCode.length() > 2) {
             code = tCode;
         }
@@ -997,13 +997,13 @@ public class WifiPrintService implements Runnable{
     }
 
     private String prepareBeiYangPrinterStr(){
-        String beiYangPrinter = BarOption.getCustomData(BarOption.beiYangPrinter);
+        String beiYangPrinter = Options.getCustomData(Options.beiYangPrinter);
         if(beiYangPrinter != null && beiYangPrinter.length() > 7){
             return beiYangPrinter;
         }
 
         beiYangPrinter = "";    //@note: we don't want to return a null back to cause any null pointer.
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.autoSearchBeiYang)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.autoSearchBeiYang))) {
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.autoSearchBeiYang)) || "true".equalsIgnoreCase(Options.getCustomData(Options.autoSearchBeiYang))) {
             for (int i = 0; i < SearchPortMAX; i++) {
                 port_info[i] = new SearchPortInfo();
             }
@@ -1019,20 +1019,20 @@ public class WifiPrintService implements Runnable{
                 }
             }
 
-            BarOption.putCustomData(BarOption.beiYangPrinter, beiYangPrinter);
+            Options.putCustomData(Options.beiYangPrinter, beiYangPrinter);
             L.d(TAG, "beiyang printers : " + beiYangPrinter);
         }
         return beiYangPrinter;
     }
 
     private String prepareWifiLabelPrinterStr(){
-        String wifiLabelPrinter = BarOption.getCustomData(BarOption.labelPrinters);
+        String wifiLabelPrinter = Options.getCustomData(Options.labelPrinters);
         if(wifiLabelPrinter != null && wifiLabelPrinter.length() > 7){
             return wifiLabelPrinter;
         }
 
         wifiLabelPrinter = "192.168.6.122";    //@note: we don't want to return a null back to cause any null pointer.
-        if("1".equalsIgnoreCase(BarOption.getCustomData(BarOption.autoSearchWifiLabel)) || "true".equalsIgnoreCase(BarOption.getCustomData(BarOption.autoSearchWifiLabel))) {
+        if("1".equalsIgnoreCase(Options.getCustomData(Options.autoSearchWifiLabel)) || "true".equalsIgnoreCase(Options.getCustomData(Options.autoSearchWifiLabel))) {
            //TODO： auto check if any of the printers are wifiLabel
 
         }
@@ -1074,7 +1074,7 @@ public class WifiPrintService implements Runnable{
 
         //determin the width of paper.
         width = 42;
-        String reportWidth = BarOption.getCustomData(BarOption.reportWidth);
+        String reportWidth = Options.getCustomData(Options.reportWidth);
         try{
             width = Integer.valueOf(reportWidth);
         }catch(Exception e){
@@ -1093,13 +1093,13 @@ public class WifiPrintService implements Runnable{
         content.append("\n");
         int lastBillNo = 0;
         try {
-            lastBillNo = Integer.valueOf(BarOption.getCustomData(BarOption.billIdx)) - 1;
+            lastBillNo = Integer.valueOf(Options.getCustomData(Options.billIdx)) - 1;
         }catch (Exception e){
-            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + BarOption.getCustomData(BarOption.billIdx), e);
+            L.e("WifiPrintService ", "Exception when getting kitchenBillIdx for report, the last bill was found to be:" + Options.getCustomData(Options.billIdx), e);
         }
         content.append("last bill : #").append(lastBillNo);
         content.append("\n");
-        String sep_str1 = BarOption.getCustomData(BarOption.sep_str1);
+        String sep_str1 = Options.getCustomData(Options.sep_str1);
         if(sep_str1 == null || sep_str1.length() == 0){
             sep_str1 = SEP_STR1;
         }
@@ -1156,7 +1156,7 @@ public class WifiPrintService implements Runnable{
             int lengthOfName = getLengthOfString(name);
             int maxLength = 30;
             try {
-                maxLength = Integer.valueOf(BarOption.getCustomData(BarOption.menuNameLength));
+                maxLength = Integer.valueOf(Options.getCustomData(Options.menuNameLength));
             }catch(Exception e){
             }
             if(lengthOfName >= maxLength){
@@ -1207,7 +1207,7 @@ public class WifiPrintService implements Runnable{
         content.append(" SUBTOTAL CANCEL:  $").append(String.format("%.2f", cancTotal)).append("\n");
         content.append(generateString(width, SEP_STR1)).append("\n");
         totalValueContainer[0] = total + cancTotal;
-        totalValueContainer[1] = totalValueContainer[0] * BarOption.getTaxRate();
+        totalValueContainer[1] = totalValueContainer[0] * Options.getTaxRate();
         content.append(" SUBTOTAL:    $").append(String.format("%.2f", totalValueContainer[0]));
         content.append(" TOTAL:    $").append(String.format("%.2f", totalValueContainer[1]));
             //categorizedContent.append(generateSpaceString(5)).append("* ").append(str.getPrice()).append(" *\n");
@@ -1271,15 +1271,15 @@ public class WifiPrintService implements Runnable{
     }
 
     private void determinTheWidth(String printerIp) {
-        String font = BarOption.getCustomData(printerIp + BarOption.font);
+        String font = Options.getCustomData(printerIp + Options.font);
         if(StringUtils.isBlank(font)) {
-            font = BarOption.getCustomData(BarOption.font);
+            font = Options.getCustomData(Options.font);
         }
 
         if(!StringUtils.isBlank(font)){ //???should we do something when the font is set? like if the font is set to double width, we should make the width smaller...no?
-            String w = BarOption.getCustomData(printerIp + BarOption.width);
+            String w = Options.getCustomData(printerIp + Options.width);
             if(StringUtils.isBlank(w)) {
-                w = BarOption.getCustomData(BarOption.width);
+                w = Options.getCustomData(Options.width);
             }
             try {
                 width = Integer.valueOf(w);
@@ -1287,9 +1287,9 @@ public class WifiPrintService implements Runnable{
                 width = 24;
             }
         }else{
-            String w = BarOption.getCustomData(printerIp + BarOption.width);
+            String w = Options.getCustomData(printerIp + Options.width);
             if(StringUtils.isBlank(w)) {
-                w = BarOption.getCustomData(BarOption.width);
+                w = Options.getCustomData(Options.width);
             }
             try {
                 width = Integer.valueOf(w);
@@ -1310,7 +1310,7 @@ public class WifiPrintService implements Runnable{
 
         StringBuilder content = new StringBuilder();
         //tiltle---could be used for kitchen name, empty lines.......
-        String title = BarOption.getCustomData(BarOption.kitchentitle);
+        String title = Options.getCustomData(Options.kitchentitle);
         if (title.length() > 0) {
             if (title.toLowerCase(Locale.ROOT).endsWith("lines")) {
                 if(!isCloudPrinter) {
@@ -1349,9 +1349,9 @@ public class WifiPrintService implements Runnable{
         //table name and bill index and print time.......................
         String tableName = CustomerSelection.getInstance().getTableName();
         String dateStr = new SimpleDateFormat("HH:mm").format(new Date());
-        String format_style = BarOption.getCustomData(BarOption.format_style, "3");
+        String format_style = Options.getCustomData(Options.format_style, "3");
         if("1".equals(format_style)){
-            String billIdx_Position = BarOption.getCustomData(BarOption.title_position);
+            String billIdx_Position = Options.getCustomData(Options.title_position);
             if ("left".equals(billIdx_Position)) {
                 //add no space.
             } else if ("right".equals(billIdx_Position)) {
@@ -1369,7 +1369,7 @@ public class WifiPrintService implements Runnable{
         }else if("3".equals(format_style)){
             //table name
             if(tableName != null && tableName.length() > 0) {
-                String tablename_position = BarOption.getCustomData(BarOption.title_position);
+                String tablename_position = Options.getCustomData(Options.title_position);
                 if ("left".equals(tablename_position)) {
                     //add nothing
                 } else if ("right".equals(tablename_position)) {
@@ -1384,7 +1384,7 @@ public class WifiPrintService implements Runnable{
                     .append(generateString(width - kitchenBillIdx.length() - dateStr.length(), SEPRATOR))
                     .append(dateStr).append("\n");
         }else{ //format_style is null or 2, goes here.
-            String billIdx_Position = BarOption.getCustomData(BarOption.title_position);
+            String billIdx_Position = Options.getCustomData(Options.title_position);
             if ("left".equals(billIdx_Position)) {
                 //add no space.
             } else if ("right".equals(billIdx_Position)) {
@@ -1399,11 +1399,11 @@ public class WifiPrintService implements Runnable{
         }
         //Seperator
 
-        String sep_str1 = BarOption.getCustomData(BarOption.sep_str1);
+        String sep_str1 = Options.getCustomData(Options.sep_str1);
         if(sep_str1 == null || sep_str1.length() == 0){
             sep_str1 = SEP_STR1;
         }
-        String sep_str2 = BarOption.getCustomData(BarOption.sep_str2);
+        String sep_str2 = Options.getCustomData(Options.sep_str2);
         if(sep_str2 == null || sep_str2.length() == 0){
             sep_str2 = SEP_STR2;
         }
@@ -1419,8 +1419,8 @@ public class WifiPrintService implements Runnable{
                 sb.append(dd.getDishNum()).append("x ");
             }
 
-            String ipSpecifiedHideID = BarOption.getCustomData(printerIp + BarOption.HideKitchenBillId);
-            String ipSpecifiedHideName = BarOption.getCustomData(printerIp + BarOption.HideKitchenBillName);
+            String ipSpecifiedHideID = Options.getCustomData(printerIp + Options.HideKitchenBillId);
+            String ipSpecifiedHideName = Options.getCustomData(printerIp + Options.HideKitchenBillName);
             if(ipSpecifiedHideID.length() > 0){    //if ip specified property is set
                 if(!Boolean.valueOf(ipSpecifiedHideID)) {
                     sb.append(dd.getDish().getId());                //dish id
@@ -1428,12 +1428,12 @@ public class WifiPrintService implements Runnable{
                 }
             }else{  //if ip specified property is not set then go here.
                 if (isCloudPrinter) { //for cloud printer check cloudShowID then check showID
-                    if (!BarOption.cloudHideID) {
+                    if (!Options.cloudHideID) {
                         sb.append(dd.getDish().getId());                //dish id
                         sb.append(generateString(5 - dd.getDish().getId().toString().length(), SEPRATOR));
                     }
                 } else {              //for wifi printer, check showID directly.
-                    if (BarOption.showID) {
+                    if (Options.showID) {
                         sb.append(dd.getDish().getId());                //dish id
                         sb.append(generateString(5 - dd.getDish().getId().toString().length(), SEPRATOR));
                     }
@@ -1446,17 +1446,17 @@ public class WifiPrintService implements Runnable{
                 }
             }else{                                  //otherwise go here.
                 if(isCloudPrinter){     //for cloud printer check cloudShowName then check showName
-                    if(BarOption.cloudHideName != null){
-                        if (BarOption.cloudHideName) {
+                    if(Options.cloudHideName != null){
+                        if (Options.cloudHideName) {
                             sb.append(dd.getDish().getName1());             //dish name
                         }
                     }else{
-                        if (BarOption.showName) {
+                        if (Options.showName) {
                             sb.append(dd.getDish().getName1());             //dish name
                         }
                     }
                 }else{                  //for wifi printer, check showName directly.
-                    if (BarOption.showName) {
+                    if (Options.showName) {
                         sb.append(dd.getDish().getName1());             //dish name
                     }
                 }
@@ -1471,7 +1471,7 @@ public class WifiPrintService implements Runnable{
             }
             content.append(generateString(width, sep_str2)).append("\n");
         }
-        if("1".equals(BarOption.getCustomData(BarOption.priceOnkitchenbill)) || "true".equals(BarOption.getCustomData(BarOption.priceOnkitchenbill))) {
+        if("1".equals(Options.getCustomData(Options.priceOnkitchenbill)) || "true".equals(Options.getCustomData(Options.priceOnkitchenbill))) {
             return content.append(priceOfBill).append("\n").toString();
         }else {
             return content.substring(0, content.length() - (width + 1));

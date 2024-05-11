@@ -6,14 +6,14 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.just.print.R;
-import com.just.print.app.AikaStyleApplication;
-import com.just.print.app.BarOption;
+
+import com.just.print.app.BarFrame;
+import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.net.UDPService;
 import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
-import com.just.print.ui.activity.LoginFragmentActivity;
-import com.just.print.ui.activity.OrderFragmentActivity;
+import com.just.print.ui.panel.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
 import com.just.print.util.DbUtil;
 import com.just.print.util.NetUtils;
@@ -35,30 +35,28 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
 
     @Override
     protected int getLayoutId() {
-        return R.layout.register_fragment;
+        return R.layout.fragment_register;
     }
 
-    @XViewByID(R.id.userName)
+    @XViewByID(R.id.deviceId)
     EditText userName;
 
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
-        registeredName = BarOption.getUserName(getContext());
-        String shopName = BarOption.getShopName(getContext());
+        registeredName = Options.getUserName(getContext());
+        String shopName = Options.getShopName(getContext());
         if (!StringUtils.isEmpty(registeredName)) {
             userName.setText(registeredName);
             userName.setEnabled(false);
-            findViewById(R.id.confirmUserName).setVisibility(View.GONE);
-            findViewById(R.id.storeName).setVisibility(View.VISIBLE);
+            findViewById(R.id.confirmDeviceId).setVisibility(View.GONE);
+            findViewById(R.id.mandatoryCodeArea).setVisibility(View.VISIBLE);
         }
         if (!StringUtils.isEmpty(shopName)) {
-            startActivity(new Intent(getContext(), LoginFragmentActivity.class));
-            getActivity().finish();
+            BarFrame.instance.switchFragment(null);
+            LoginDialogFragment.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
         }
-
     }
-
 
 //    @XClick(R.id.queryShop)
 //    private void queryShop(@XGetValueByView(fromId = R.id.shopName) String shopName) {
@@ -88,7 +86,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
                     @Override
                     public void run() {
                         if (status && result2 != null && result2.isExists()) {
-                            BarOption.saveShopName(getContext(), result2.getShopName());
+                            Options.saveShopName(getContext(), result2.getShopName());
                             //showToast("店铺存在");
                             startActivity(new Intent(getContext(), OrderFragmentActivity.class));
                             getActivity().finish();
@@ -106,7 +104,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         return true;
     }
 
-    @XClick({R.id.confirmUserName})
+    @XClick({R.id.confirmDeviceId})
     private void onConfirmUserName(View view) {
         String userName = this.userName.getText().toString().trim();
         if (StringUtils.isEmpty(userName)) {
@@ -114,26 +112,26 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         } else if("asdfas".equals(userName)) {
             showToast("Please input tablet name");
         } else {
-            findViewById(R.id.storeName).setVisibility(View.VISIBLE);
+            findViewById(R.id.mandatoryCodeArea).setVisibility(View.VISIBLE);
             view.setVisibility(View.GONE);
 
             int p = userName.indexOf("-p:");
             if(p > -1){// means theres parameters
                 String password = userName.substring(p+3).trim();
-                BarOption.putCustomData(BarOption.userPassword, password);
+                Options.putCustomData(Options.userPassword, password);
                 userName = userName.substring(0, p).trim();
             }
             int n = userName.lastIndexOf("\n");
             if(n > -1){// means theres parameters
                 userName = userName.substring(n+1).trim();
             }
-            BarOption.saveUserName(getContext(), userName);
+            Options.saveUserName(getContext(), userName);
             this.userName.setEnabled(false);
         }
     }
 
     @XClick({R.id.createShop})
-    private void createShop(@XGetValueByView(fromId = R.id.shopName) String shopName) {
+    private void createShop(@XGetValueByView(fromId = R.id.mandatoryCode) String shopName) {
         if (shopName == null || shopName.trim().length() == 0) {
             showToast("Please input the name of the store.");
             return;
@@ -142,7 +140,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         int p = shopName.indexOf("-p:");
         if(p > -1){// means theres parameters
             String password = shopName.substring(p+3).trim();
-            BarOption.putCustomData(BarOption.adminPassword, password);
+            Options.putCustomData(Options.adminPassword, password);
             shopName = shopName.substring(0, p).trim();
         }
 
@@ -157,7 +155,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
             }
         }
 
-        BarOption.saveShopName(getContext(), shopName);
+        Options.saveShopName(getContext(), shopName);
         //initialize the days left and the stated days on cloud.
         NetUtils.activate();
         startActivity(new Intent(getContext(), OrderFragmentActivity.class));

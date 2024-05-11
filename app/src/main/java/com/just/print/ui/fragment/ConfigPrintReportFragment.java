@@ -5,8 +5,8 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.Mark;
@@ -58,13 +58,13 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
     @XClick({R.id.verifyPassword})
     private void verifyPassword(@XGetValueByView(fromId = R.id.etMark) String mark) {
         //maybe we should hide the functions into a "more..." button.
-        if(!BarOption.getAdminPassword().equals(mark)){
+        if(!Options.getAdminPassword().equals(mark)){
             showToast("Please input correct password!");
             return;
         }
         findViewById(R.id.confirmPassword).setVisibility(View.INVISIBLE);
 
-        saleRecordDao = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao();
+        saleRecordDao = AikaPos.daoSession.getSaleRecordDao();
         List<SaleRecord> saleRecord = saleRecordDao.loadAll();
         if(saleRecord == null || saleRecord.size() == 0){
             getActivity().finish();
@@ -72,7 +72,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
             return;
         }
 
-        billDao = AikaStyleApplication.instance.getDaoMaster().newSession().getBillDao();
+        billDao = AikaPos.daoSession.getBillDao();
 // comment out in case some boss don't like to see it.       //init the existing bills area.
 //        List<Bill> orders = new ArrayList<>();
 //        try{
@@ -99,12 +99,12 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
         int reportIdx = 1;
         //check if need to send email
         try{
-            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
+            reportIdx = Integer.valueOf(Options.getCustomData(Options.reportIdx));
         }catch(Exception e){
             //It's OK if reportIdx is null
         }
 
-        if(BarOption.notifyCheck(reportIdx, reportContent, false)) {
+        if(Options.notifyCheck(reportIdx, reportContent, false)) {
             getActivity().finish();
         }
     }
@@ -114,19 +114,19 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
         printReport();
         int reportIdx = 1;
         try{
-            reportIdx = Integer.valueOf(BarOption.getCustomData(BarOption.reportIdx));
+            reportIdx = Integer.valueOf(Options.getCustomData(Options.reportIdx));
         }catch(Exception e){
             //report error.
         }
 
-        if(BarOption.notifyCheck(reportIdx, reportContent, true)){
+        if(Options.notifyCheck(reportIdx, reportContent, true)){
             //when printed succcesfully, clean all records, and update now as the next reportStartDate
             saleRecordDao.deleteAll();
             billDao.deleteAll();
-            BarOption.putCustomData(BarOption.reportStartDate, String.valueOf(now));
-            BarOption.putCustomData(BarOption.billIdx, "1");        //reset kitchenbillIndex
+            Options.putCustomData(Options.reportStartDate, String.valueOf(now));
+            Options.putCustomData(Options.billIdx, "1");        //reset kitchenbillIndex
 
-            BarOption.putCustomData(BarOption.reportIdx, String.valueOf(reportIdx + 1));
+            Options.putCustomData(Options.reportIdx, String.valueOf(reportIdx + 1));
             getActivity().finish();
         }
     }
@@ -141,7 +141,7 @@ public class ConfigPrintReportFragment extends BaseFragment {// implements OnCli
                 showToast("Unclosed table will not be calculated into report!");
             }
         }
-        List<SaleRecord> orders = AikaStyleApplication.instance.getDaoMaster().newSession().getSaleRecordDao().loadAll();
+        List<SaleRecord> orders = AikaPos.daoSession.getSaleRecordDao().loadAll();
         for(int i = orders.size() - 1; i >= 0; i--){
             if(billsNotCount.contains(orders.get(i).getBillId())){
                 orders.remove(i);

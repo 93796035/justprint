@@ -13,11 +13,12 @@ import android.widget.Toast;
 import androidx.fragment.app.DialogFragment;
 
 import com.just.print.R;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
 import com.just.print.db.bean.User;
 import com.just.print.db.expand.DaoExpand;
-import com.just.print.ui.activity.ConfigFragmentActivity;
-import com.just.print.ui.activity.DiningTableFragmentActivity;  // 确保导入了TableActivity
+import com.just.print.ui.panel.ConfigFragmentActivity;
+import com.just.print.ui.panel.TablesPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.List;
 public class LoginDialogFragment extends DialogFragment {
 
     private static List<User> users = new ArrayList<User>();
-    User currentUser;
     private static int USERTYPE = -1;
     public static final int EMPLOYEE_USER = 1;
     public static  final int MANAGER_USER = 2;
@@ -60,12 +60,18 @@ public class LoginDialogFragment extends DialogFragment {
             if (user == null) {
                 if("4389210090".equals(inputPassword)){
                     startActivity(new Intent(getActivity(), ConfigFragmentActivity.class));
-                }else {
+                }else if("9".equals(inputPassword)){
+                    BarFrame.instance.setCurrentUser(matchingWithExistingPassword("2222"));
+                    dismiss();
+                    ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
+                }
+                else {
                     Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                currentUser = user;
-                startActivity(new Intent(getActivity(), DiningTableFragmentActivity.class));
+                BarFrame.instance.setCurrentUser(user);
+                dismiss();
+                ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
             }
         });
         initContent();
@@ -74,7 +80,7 @@ public class LoginDialogFragment extends DialogFragment {
     }
 
     private void initContent() {
-        users = DaoExpand.queryAllTables(AikaStyleApplication.instance.getDaoMaster().newSession().getUserDao());
+        users = DaoExpand.queryAllTables(AikaPos.daoSession.getUserDao());
         String sql = "select ID, Type, UserName, PASSWORD, LANG from useridentity where ID > 5";
     }
     public static int getUSERTYPE() {

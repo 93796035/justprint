@@ -1,0 +1,10 @@
+<!-- res/layout/fragment_tables.xml -->
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gridLayoutTables"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="4"
+    android:padding="16dp"
+    android:orientation="horizontal">
+
+</GridLayout>

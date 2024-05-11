@@ -90,7 +90,7 @@ public class BarUtil {
 //    public static void checkUnCompProdInfo() {
 //        String sql = "select * from product where subject = '' and DELETED != true"; // 是否存在上没有名字的产品？
 //        try {
-//            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql);
+//            ResultSet rs = AikaStyle.db.execSQL(sql);
 //            rs.afterLast();
 //            rs.relative(-1);
 //            int tRowCount = rs.getRow();
@@ -133,11 +133,11 @@ public class BarUtil {
 //            ErrorUtil.write(exp);
 //        }
 //    }
-//
-//    public static String formatMoney(double number) {
-//        return formatter.format(number);
-//    }
-//
+
+    public static String formatMoney(double number) {
+        return formatter.format(number);
+    }
+
 //    public static boolean isNumber(int pKeyCode) {
 //        return (pKeyCode >= 48 && pKeyCode <= 58) || (pKeyCode >= 96 && pKeyCode <= 106);
 //    }
@@ -189,7 +189,7 @@ public class BarUtil {
 //            StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
 //                    .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL)
 //                    .append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("' order by contactID");
-//            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+//            ResultSet rs = AikaStyle.db.execSQL(sql.toString());
 //            rs.afterLast();
 //            rs.relative(-1);
 //            int num = rs.getRow();
@@ -436,9 +436,9 @@ public class BarUtil {
 //        return buttons != null && buttons.size() > 0 ? buttons.get(0).getY() : BarFrame.instance.getHeight() - 83;
 //    }
 //
-//    public static boolean empty(String content) {
-//        return content == null || content.trim().length() == 0;
-//    }
+    public static boolean empty(String content) {
+        return content == null || content.trim().length() == 0;
+    }
 //
 //    public static String getMoneyStrOut(String strDisCount) {
 //        int idx = strDisCount.indexOf("-" + BarOption.getMoneySign());
@@ -477,7 +477,7 @@ public class BarUtil {
 //                    .append(modifyName).append("' or lang3 = '")
 //                    .append(modifyName).append("')");
 //            try {
-//                ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+//                ResultSet rs = AikaStyle.db.execSQL(sql.toString());
 //                rs.afterLast();
 //                rs.relative(-1);
 //                if(rs.getRow() > 1) {
@@ -722,37 +722,37 @@ public class BarUtil {
 //        return strings.toString();
 //    }
 //
-//    public static boolean isBetweenSummerTime() {
-//        Calendar calendar = Calendar.getInstance();
-//        int month = calendar.get(Calendar.MONTH); // January is 0, December is 11
-//        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-//        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-//
-//        // Check for March's second Sunday
-//        if (month == Calendar.MARCH) {
-//            if (dayOfWeek == Calendar.SUNDAY && dayOfMonth > 7 && dayOfMonth <= 14) {
-//                return true;
-//            }
-//            if (dayOfMonth > 14) {
-//                return true;
-//            }
-//        }
-//
-//        // Check for months between March and November
-//        if (month > Calendar.MARCH && month < Calendar.NOVEMBER) {
-//            return true;
-//        }
-//
-//        // Check for November's first Sunday
-//        if (month == Calendar.NOVEMBER) {
-//            if (dayOfWeek == Calendar.SUNDAY && dayOfMonth <= 7) {
-//                return false;
-//            }
-//            if (dayOfMonth <= 7) {
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
+    public static boolean isBetweenSummerTime() {
+        Calendar calendar = Calendar.getInstance();
+        int month = calendar.get(Calendar.MONTH); // January is 0, December is 11
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        // Check for March's second Sunday
+        if (month == Calendar.MARCH) {
+            if (dayOfWeek == Calendar.SUNDAY && dayOfMonth > 7 && dayOfMonth <= 14) {
+                return true;
+            }
+            if (dayOfMonth > 14) {
+                return true;
+            }
+        }
+
+        // Check for months between March and November
+        if (month > Calendar.MARCH && month < Calendar.NOVEMBER) {
+            return true;
+        }
+
+        // Check for November's first Sunday
+        if (month == Calendar.NOVEMBER) {
+            if (dayOfWeek == Calendar.SUNDAY && dayOfMonth <= 7) {
+                return false;
+            }
+            if (dayOfMonth <= 7) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

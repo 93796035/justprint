@@ -9,7 +9,7 @@
 
 
     <EditText
-        android:id="@+id/shopName"
+        android:id="@+id/mandatoryCode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Store Name" />
@@ -22,7 +22,7 @@
         android:hint="Employee Account" />
 
     <EditText
-        android:id="@+id/userName"
+        android:id="@+id/deviceId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Name" />

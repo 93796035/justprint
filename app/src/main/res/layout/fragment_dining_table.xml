@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/fragment_tables.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gridLayoutTables"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.just.print.ui.fragment.DiningTableFragment">
-
-    <!-- 这里可以添加其他静态控件 -->
+    android:columnCount="4"
+    android:padding="16dp"
+    android:orientation="horizontal">
 
 </RelativeLayout>

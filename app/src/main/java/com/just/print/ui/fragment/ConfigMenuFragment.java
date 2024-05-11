@@ -11,8 +11,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
-import com.just.print.app.AikaStyleApplication;
+import com.just.print.app.Options;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
@@ -106,7 +106,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         etMenuId.setOnFocusChangeListener(this);
         etMenuName.setOnFocusChangeListener(this);
 
-        menuDao = AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao();
+        menuDao = AikaPos.daoSession.getDishDao();
 
         loadCategory();
         loadMenu();
@@ -114,7 +114,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             curCategoryName.setText(categoryXAdapter.get(0).getName1());
         }
         curCategoryName.setTextColor(Color.WHITE);
-        curCategoryName.setBackgroundColor(BarOption.getThemColor());
+        curCategoryName.setBackgroundColor(Options.getThemColor());
     }
 
     IXOnItemClickListener categoryAdapterClick = new IXOnItemClickListener() {
@@ -198,7 +198,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     });
 
                     //initial autoPopup check box status
-                    originalSelectStatus = BarOption.getForcePopUpList().contains(menuXAdapter.get(i).getId().toString());
+                    originalSelectStatus = Options.getForcePopUpList().contains(menuXAdapter.get(i).getId().toString());
                     showMarkSelection.setChecked(originalSelectStatus);
                     break;
                 case R.id.delMenu:
@@ -303,7 +303,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             if (view == etMenuId){
                 String menuId = etMenuId.getText().toString();
                 int p = menuId.indexOf(".");
-                if(p > 0 && BarOption.isCodeNumberConsidered()){
+                if(p > 0 && Options.isCodeNumberConsidered()){
                     String intPart = menuId.substring(0, p);
                     if(Integer.valueOf(intPart) > 0){
                         etMenuName.setText(menuId.substring(p + 1));
@@ -367,7 +367,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private String getDefaultCode() {
         String defautlCode = "";
-        if(!("1".equals(BarOption.isAddingDefaultCode()) || "true".equals(BarOption.isAddingDefaultCode()))){
+        if(!("1".equals(Options.isAddingDefaultCode()) || "true".equals(Options.isAddingDefaultCode()))){
             return defautlCode;
         }
         int endCode = parseInt(previouseCode);
@@ -431,7 +431,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         }
         //valid printer
         if (addedPrints == null || addedPrints.size() == 0) {
-            if(!BarOption.isMode2()) {    //allow dish without printer in mode 2
+            if(!Options.isMode2()) {    //allow dish without printer in mode 2
                 showToast("Please select printer");
                 return;
             }
@@ -479,7 +479,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 //        menu.updateAndUpgrade();    //is this useful or not?
 
         //add printer link
-        M2M_MenuPrintDao m2mDao = AikaStyleApplication.instance.getDaoMaster().newSession().getM2M_MenuPrintDao();
+        M2M_MenuPrintDao m2mDao = AikaPos.daoSession.getM2M_MenuPrintDao();
         if(modifyingMenu != null) {
             for (M2M_MenuPrint p : modifyingMenu.getM2M_MenuPrintList()) {
                 m2mDao.delete(p);   //remove a record from db.
@@ -495,20 +495,20 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         //process the popup selection
         if(originalSelectStatus != showMarkSelection.isChecked()){
             if(showMarkSelection.isChecked()){
-                BarOption.putCustomData(BarOption.forcePopUpMenuList, BarOption.getForcePopUpList() + ";" + menu.getId());
+                Options.putCustomData(Options.forcePopUpMenuList, Options.getForcePopUpList() + ";" + menu.getId());
             }else{
-                String existingStr = BarOption.getForcePopUpList();
+                String existingStr = Options.getForcePopUpList();
                 int p = existingStr.indexOf(menu.getId().toString());
                 String newValue = existingStr.substring(0, p) + existingStr.substring(p + menu.getId().toString().length());
                 newValue = newValue.replace(";;", ";");
                 if(newValue.startsWith(";")){   //if it's the first, then there will be a ";" left in the position 0.
                     newValue = newValue.substring(1, newValue.length());
                 }
-                BarOption.putCustomData(BarOption.forcePopUpMenuList, newValue);
+                Options.putCustomData(Options.forcePopUpMenuList, newValue);
             }
         }
 
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         modifyingMenu = null;
         findViewById(R.id.menuLayout).setVisibility(View.GONE);
         loadMenu();
@@ -543,9 +543,9 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
         cat.setDisplayIdx(idx);
 
         cat.setStatus(State.OPENNED);
-        AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao().insertOrReplace(cat);
+        AikaPos.daoSession.getCategoryDao().insertOrReplace(cat);
         cat.updateAndUpgrade();
-        BarOption.updataeLastModifyTime(null);
+        Options.updataeLastModifyTime(null);
         loadCategory();
         cname.setText("");
         modifyingCategory = null;
@@ -554,7 +554,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     @XClick({R.id.selectPrint})
     private void selectPrint(final TextView view) {
-        final List<Printer> data = DaoExpand.queryNotDeletedAll(AikaStyleApplication.instance.getDaoMaster().newSession().getPrinterDao());
+        final List<Printer> data = DaoExpand.queryNotDeletedAll(AikaPos.daoSession.getPrinterDao());
         data.removeAll(addedPrints);
         if (data.size() == 0) {
             showToast("Please add printer first");
@@ -584,7 +584,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     @XClick({R.id.selectMark})
     private void selectMark(final TextView view) {
-        List<Mark> data = DaoExpand.queryAllMarks(AikaStyleApplication.instance.getDaoMaster().newSession().getMarkDao());
+        List<Mark> data = DaoExpand.queryAllMarks(AikaPos.daoSession.getMarkDao());
         data.removeAll(addedMarks);
         if (data.size() == 0) {
             showToast("No marks to select");
@@ -597,7 +597,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             items[i] = p.getName1() + "_" + p.getId();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        if("1".equals(BarOption.getCustomData(BarOption.isSingleMark)) || "true".equals(BarOption.getCustomData(BarOption.isSingleMark))){
+        if("1".equals(Options.getCustomData(Options.isSingleMark)) || "true".equals(Options.getCustomData(Options.isSingleMark))){
             builder.setTitle("Please choose a mark");
             builder.setSingleChoiceItems(items, -1, new OnClickListener() {
                 @Override
@@ -632,7 +632,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private void loadCategory() {
 
-        List<Category> list = DaoExpand.queryAllNotDeleted(AikaStyleApplication.instance.getDaoMaster().newSession().getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
+        List<Category> list = DaoExpand.queryAllNotDeleted(AikaPos.daoSession.getCategoryDao()).orderAsc(CategoryDao.Properties.DisplayIdx).list();
         categoryXAdapter.setData(list);
         categoryXAdapter.notifyDataSetChanged();
 
@@ -645,7 +645,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
 
     private void loadMenu() {
         if (mCategory != null) {
-            List<Dish> menuList = DaoExpand.queryMenuByCategory(AikaStyleApplication.instance.getDaoMaster().newSession().getDishDao(), mCategory);
+            List<Dish> menuList = DaoExpand.queryMenuByCategory(AikaPos.daoSession.getDishDao(), mCategory);
             Collections.sort(menuList, OrderCategoryFragment.comparator);
             menuXAdapter.setData(menuList);
             menuXAdapter.notifyDataSetChanged();

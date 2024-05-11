@@ -6,7 +6,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.BarOption;
+import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.ui.holder.ConfigCustViewHolder;
 import com.stupid.method.adapter.OnClickItemListener;
@@ -46,7 +46,7 @@ public class ConfigCustFragment extends BaseFragment implements OnClickItemListe
 
     @XClick({R.id.verifyPassword})
     private void verifyPassword(@XGetValueByView(fromId = R.id.adminPassword) String password) {
-        if(!BarOption.getAdminPassword().equals(password)){
+        if(!Options.getAdminPassword().equals(password)){
             showToast("Please input correct password!");
             return;
         }
@@ -60,15 +60,15 @@ public class ConfigCustFragment extends BaseFragment implements OnClickItemListe
     }
 
     private void loadCustomizes() {
-        List<String> list = Arrays.asList(BarOption.keysToSync);
+        List<String> list = Arrays.asList(Options.keysToSync);
         List<String> model = new ArrayList();
         for (String key : list) {
-            model.add(key + ":" + BarOption.getCustomData(key));
+            model.add(key + ":" + Options.getCustomData(key));
         }
 
-        List<String> list2 = Arrays.asList(BarOption.keysNotToSync);
+        List<String> list2 = Arrays.asList(Options.keysNotToSync);
         for (String key : list2) {
-            model.add(key + ":" + BarOption.getCustomData(key));
+            model.add(key + ":" + Options.getCustomData(key));
         }
 
         custXAdapter.setData(model);
@@ -87,12 +87,12 @@ public class ConfigCustFragment extends BaseFragment implements OnClickItemListe
     @XClick({R.id.updateCust})
     private void confirmChange(){
         if (onEditCust != null) {
-            BarOption.putCustomData(cusName.getText().toString(), cusValue.getText().toString());
+            Options.putCustomData(cusName.getText().toString(), cusValue.getText().toString());
             cusName.setText("");
             cusValue.setText("");
             onEditCust = null;
             custXAdapter.notifyDataSetChanged();
-            BarOption.updataeLastModifyTime(null);
+            Options.updataeLastModifyTime(null);
             loadCustomizes();
         }
     }

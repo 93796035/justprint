@@ -4,12 +4,11 @@
     android:id="@+id/activity_order"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.just.print.ui.activity.LoginFragmentActivity">
+    tools:context="com.just.print.ui.panel.LoginFragmentActivity">
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/actionBar" />
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
