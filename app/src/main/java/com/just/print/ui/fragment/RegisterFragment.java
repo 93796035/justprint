@@ -158,8 +158,9 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         Options.saveShopName(getContext(), shopName);
         //initialize the days left and the stated days on cloud.
         NetUtils.activate();
-        startActivity(new Intent(getContext(), OrderFragmentActivity.class));
-        getActivity().finish();
+
+        BarFrame.instance.switchFragment(null);
+        LoginDialogFragment.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
     }
 
 }

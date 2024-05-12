@@ -116,7 +116,7 @@ public class NetUtils extends Thread{
                     showToast("Please provide valid shop name, user name and license number!");
                 }
             } catch (Exception e) {
-                L.e("TAG", "USERLOGIN_FAILED", e);
+                L.e("TAG", "ACTIVATION_FAILED", e);
                 showToast("USERLOGIN_FAILED");
             }finally{
                 if(urlConnection != null)

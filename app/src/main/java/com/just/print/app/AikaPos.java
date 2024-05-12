@@ -37,7 +37,7 @@ public class AikaPos extends Application {
                 this,
                 getDBPath().getAbsolutePath(),
                 null);
-        db = helper.getWritableDatabase();
+        db = helper.getWritableDatabase();//database file is generated now
         daoSession = new DaoMaster(db).newSession();
         // 检查User表是否存在
         if (isTableExists(db, "USER")) {
