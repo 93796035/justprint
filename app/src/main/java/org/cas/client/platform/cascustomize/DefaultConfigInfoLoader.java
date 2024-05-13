@@ -36,13 +36,13 @@ class DefaultConfigInfoLoader {
      * @param prmHash
      *            所有用户CustOptimized信息通过本方法调入hash中。
      */
-    void loadCustmizedData(Context context, Hashtable prmHash) {
+    void loadCustmizedData(Hashtable prmHash) {
         // 将磁盘中文件中的信息读入字符串tmpFileText。----------------------------------------
         String tmpConfigFilePath = getConfigFilePath();
         // System.out.println("tmpConfigFilePath is : " + tmpConfigFilePath);
         String tmpFileText = "";
         try {
-            FileInputStream fis = context.openFileInput(tmpConfigFilePath);
+            FileInputStream fis = BarFrame.instance.openFileInput(tmpConfigFilePath);
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
             BufferedReader reader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();

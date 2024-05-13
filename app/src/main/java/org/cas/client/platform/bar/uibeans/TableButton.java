@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDialogFragment;
@@ -37,12 +38,17 @@ public class TableButton extends Button {
 
     public TableButton() {
         super(BarFrame.instance);
-        setBackgroundColor(Color.parseColor(BarOption.getBK("Table")));
+        String color = BarOption.getBK("Table");
+        if(color != null) {
+            setBackgroundColor(Color.parseColor(color));
+        }else{
+            setBackgroundColor(Color.GRAY);
+        }
     }
 
     public void open() {
         setStatus(1);
-        int resId = getResources().getIdentifier("T".concat(String.valueOf(type).concat("s")).concat(".png"),
+        int resId = getResources().getIdentifier("t".concat(String.valueOf(type).concat("s")).concat(".png"),
                 "drawable", getContext().getPackageName());
         if (resId != 0) {
             setBackgroundResource(resId);
@@ -80,7 +86,7 @@ public class TableButton extends Button {
     }
 
     //these properties are better to be set together. because they need each other to determine the behavior.
-    public void setTypeStatusAndName(String openTime, String startTime, int type, int status, String tableName) {
+    public RelativeLayout.LayoutParams setTypeStatusAndName(String openTime, String startTime, int type, int status, String tableName) {
         if(status > this.status) {
             this.setStatus(status);
         }else {
@@ -94,14 +100,15 @@ public class TableButton extends Button {
         String formatStart = "<p style = \"margin:0px\"><font style=\"line-height:0.5;\" size=\"";
         String formatEnd = "</font></p>";
 
+        RelativeLayout.LayoutParams params = null;
         //3 type of tables:logo, customized icon, out of box icon
         if(type == DBConsts.LOGO_TYPE) {			//logo button case==========================
             setBackgroundResource(prepareIcon(type, status));
-            setSize(60, 60);
+            params = setSize(60, 60);
         }else if(type > DBConsts.LOGO_TYPE) {		//user customized icon case==========================
             if (status == 0 || BarOption.isCounterMode()) {			//not openned or in counter mode.
                 setText(tableName);
-                setSize(DEFALTSIZE, DEFALTSIZE);
+                params = setSize(DEFALTSIZE, DEFALTSIZE);
                 setTextSize(24);
                 setTypeface(null, Typeface.NORMAL);
                 setAlpha(1.0f);
@@ -132,7 +139,7 @@ public class TableButton extends Button {
 
                 setTextSize(14);
                 setTypeface(null, Typeface.BOLD);
-                setSize(DEFALTSIZE, DEFALTSIZE);
+                params = setSize(DEFALTSIZE, DEFALTSIZE);
                 setAlpha(0.5f);
                 setBackgroundResource(prepareIcon(type, status));
                 setBackgroundColor(dicideColor(minute, status));
@@ -142,17 +149,17 @@ public class TableButton extends Button {
                 type = 0 - type;
 
             if (status == 0) {// || BarOption.isCounterMode()) {		//not opened or in counter mode， make the icon opaque.
-                setText(new StringBuilder("<html><center><font size=\"").append(BarOption.getTableNameFontSize()).append("\">").append(tableName).append("</font><br>").toString());
+                setText(tableName);
                 setTextSize(14);
                 setTypeface(null, Typeface.BOLD);
                 setTextColor(Color.parseColor(BarOption.getTableFontColor()));
 
                 if(BarOption.isCounterMode()) {
-                    setSize(DEFALTSIZE, DEFALTSIZE);
+                    params = setSize(DEFALTSIZE, DEFALTSIZE);
                     setBackgroundResource(prepareIcon(0, status));
                 }else {
                     int p = typeList.indexOf(Math.abs(type));		//which kind of table.
-                    setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
+                    params = setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
                     setBackgroundResource(prepareIcon(type, status));
                 }
                 setAlpha(1.0f);
@@ -189,10 +196,10 @@ public class TableButton extends Button {
                 setTextColor(Color.parseColor(BarOption.getOpenTableFontColor()));
 
                 int p = typeList.indexOf(Math.abs(type));		//which kind of table.
-                setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
+                params = setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
                 if((BarOption.showWaiterOnOpennedTable() || BarOption.showTimeOnOpennedTable() || BarOption.showMoneyOnOpennedTable())
                         && TableDlg.heightAry[p] < DEFALTSIZE) {	//if the height is not enough, make it bigger.
-                    setSize(TableDlg.widthAry[p], DEFALTSIZE);
+                    params = setSize(TableDlg.widthAry[p], DEFALTSIZE);
                 }
                 setAlpha(0.5f);
                 setBackgroundResource(prepareIcon(type, status));
@@ -204,26 +211,29 @@ public class TableButton extends Button {
         if(tableName != null && tableName.length() > 0) {
             char firstLetter = tableName.toUpperCase().charAt(0);
             if(firstLetter >= 'A' && firstLetter <= 'Z'){
-                String path = "T".concat(String.valueOf(firstLetter));
+                String path = "t".concat(String.valueOf(firstLetter));
                 int resId = getResources().getIdentifier(path.concat(".png"),"drawable", getContext().getPackageName());
                 if(resId < 0){
-                    path = "T0";
+                    path = "t0";
                     if(status > 0) {
                         path = path.concat("s");
                     }
                     resId = getResources().getIdentifier(path.concat(".png"),"drawable", getContext().getPackageName());
                 }
                 setBackgroundResource(resId);
-                setSize(DEFALTSIZE, DEFALTSIZE);
+                params = setSize(DEFALTSIZE, DEFALTSIZE);
             }
         }
+        return params;
     }
 
-    private void setSize(int width, int height) {
-        ViewGroup.LayoutParams params = getLayoutParams();
-        params.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width, getResources().getDisplayMetrics());
-        params.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics());
+    private RelativeLayout.LayoutParams setSize(int width, int height) {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width, getResources().getDisplayMetrics()),
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics())
+        );
         setLayoutParams(params);
+        return params;
     }
 
     private int dicideColor(long minute, int status) {
@@ -262,21 +272,21 @@ public class TableButton extends Button {
     private int prepareIcon(int type, int status) {
         StringBuilder path = new StringBuilder();
         if(type > DBConsts.LOGO_TYPE) {	//customized table
-            path.append("T").append(type - DBConsts.LOGO_TYPE);
+            path.append("t").append(type - DBConsts.LOGO_TYPE);
         }else if(type == DBConsts.LOGO_TYPE) {  //logo
-            path.append("T").append("logo");
+            path.append("t").append("logo");
         }else {
-            path.append("T").append(type);
+            path.append("t").append(type);
         }
 
         if(status > 0 && type < DBConsts.LOGO_TYPE) {
             path = path.append("s");
         }
-        path.append(".png");
+//        path.append(".png");
 
         int resId = getResources().getIdentifier(path.toString(),"drawable", getContext().getPackageName());
         if(resId < 0){
-            path = new StringBuilder("T0");
+            path = new StringBuilder("t0");
             if(status > 0 && status < DBConsts.LOGO_TYPE) {
                 path = path.append("s");
             }

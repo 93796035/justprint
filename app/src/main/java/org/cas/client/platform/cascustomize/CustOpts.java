@@ -44,7 +44,6 @@ public abstract class CustOpts {
     public static int BAR_HEIGHT;
     public static int LBL_HEIGHT;
     public static int SEP_HEIGHT;
-    Context context;
     public static CustOpts custOps = new FileCustomOptions();
     public Hashtable userConfigs = new HashtableToString();
     public Hashtable systemConfigs = new HashtableToString();

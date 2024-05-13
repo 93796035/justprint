@@ -2,6 +2,7 @@ package com.just.print.ui.panel;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.just.print.db.expand.DaoExpand;
 import com.stupid.method.adapter.XAdapter2;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
+
+import org.cas.client.platform.bar.uibeans.TableButton;
 
 import java.util.List;
 
@@ -37,17 +40,12 @@ public class TablesPanel extends BaseFragment{
         loadDiningTables();
         View rootView = inflater.inflate(R.layout.fragment_dining_table, container, false);
         for (DiningTable btnTable : BarFrame.diningTables) {
-            Button button = new Button(getActivity());
-            button.setText(btnTable.getName());  // 设置按钮文本，也可以根据table的属性动态设置
-
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                    convertDpToPixel(btnTable.getWidth(), getActivity()),
-                    convertDpToPixel(btnTable.getHeight(), getActivity())
-            );
+            TableButton tableButton = new TableButton();
+            RelativeLayout.LayoutParams params = tableButton.setTypeStatusAndName(btnTable.getOpenTime(), "", btnTable.getType(), btnTable.getStatus(), btnTable.getName());
             params.leftMargin = convertDpToPixel(btnTable.getPosX(), getActivity());
             params.topMargin = convertDpToPixel(btnTable.getPosY(), getActivity());
 
-            ((RelativeLayout) rootView).addView(button, params);
+            ((RelativeLayout) rootView).addView(tableButton, params);
         }
 
         return rootView;

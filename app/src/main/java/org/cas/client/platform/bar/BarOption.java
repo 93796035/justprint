@@ -191,10 +191,11 @@ public class BarOption {
 	}
 	public static String getBK(String key) {
 		String colorStr = (String)CustOpts.custOps.getValue(key);
-		if(colorStr.startsWith("#")){
-			colorStr = "#" + colorStr;
+		if(colorStr == null){
+			return null;
+		}else{
+			return colorStr.startsWith("#") ? colorStr : "#" + colorStr;
 		}
-		return colorStr;
 	}
 
     public static String getBillHeadInfo() {

@@ -29,7 +29,7 @@ class FileCustomOptions extends CustOpts {
      */
     FileCustomOptions() {
         DefaultConfigInfoLoader tmpConfigInfoLoader = new DefaultConfigInfoLoader();
-        tmpConfigInfoLoader.loadCustmizedData(context, userConfigs);
+        tmpConfigInfoLoader.loadCustmizedData(userConfigs);
         tmpConfigInfoLoader.loadSystemData(systemConfigs);
 
         String capsInConfigFile = (String) userConfigs.get(APP_CAPTIONS); // 取出可能经用户改动的Caps。Caption是统一用Path作key的。
@@ -42,33 +42,33 @@ class FileCustomOptions extends CustOpts {
         // 有应用被删除的情况在这里判断，而且s是在导航树上还要再判断。应为导航树上能照顾到Config中信息被手动改乱掉的可能。稳定性会再提高一点。
         // 有应用被增加的情况,则需要额外的工作－－把相应的代码包下的Config信心读到hash中来。
         if (!NamesInSystem.equals(namesInConfigFile)) {
-            Vector<String> tmpOldNameVec = null;
-            Vector<String> tmpOldCapsVec = null;
+            Vector<String> nameVecInConfig = null;
+            Vector<String> capsVecInConfig = null;
             if (namesInConfigFile == null) { // 处理应用名:新建的话赋和原始应用名向量等长的空,---------------
-                tmpOldNameVec = new Vector<String>();
+                nameVecInConfig = new Vector<String>();
                 for (int i = 0, tmpLen = APPNameVecInSystem.size(); i < tmpLen; i++)
-                    tmpOldNameVec.add(CASUtility.EMPTYSTR);
+                    nameVecInConfig.add(CASUtility.EMPTYSTR);
             } else
                 // 改动的话,则解析其中的内容进入向量.
-                tmpOldNameVec = CASUtility.parserStrToVec(namesInConfigFile, CustOpts.BIAS, namesInConfigFile.length());
+                nameVecInConfig = CASUtility.parserStrToVec(namesInConfigFile, CustOpts.BIAS, namesInConfigFile.length());
 
             if (capsInConfigFile == null) { // 处理Caption:新建的话赋和原始Caption向量等长的空,------------
-                tmpOldCapsVec = new Vector<String>();
+                capsVecInConfig = new Vector<String>();
                 for (int i = 0, tmpLen = APPCapsVecInSystem.size(); i < tmpLen; i++)
-                    tmpOldCapsVec.add(CASUtility.EMPTYSTR);
+                    capsVecInConfig.add(CASUtility.EMPTYSTR);
             } else
                 // 改动的话,则解析其中的内容进入向量.
-                tmpOldCapsVec = CASUtility.parserStrToVec(capsInConfigFile, CustOpts.BIAS, capsInConfigFile.length());
+                capsVecInConfig = CASUtility.parserStrToVec(capsInConfigFile, CustOpts.BIAS, capsInConfigFile.length());
 
             // 遍历原始应用名,逐个与config中的进行比较,多删少补,使和原始的一致.@NOTE:少补的时候要注意从对应应用中载入相关数据.
             for (int i = 0, tmpLen = APPNameVecInSystem.size(); i < tmpLen; i++) {
-                final String tmpNameNew = APPNameVecInSystem.get(i); // Config2.ini中的应用名
-                String tmpNameOld = i < tmpOldNameVec.size() ? tmpOldNameVec.get(i) : null;// Config.ini中的应用名
-                if (!tmpNameNew.equals(tmpNameOld)) { // 如果某个元素相同的话，跳过．不同则进入．
-                    if (tmpOldNameVec.indexOf(tmpNameNew) < 0) { // 有新应用增加。增加，int值不需要专门调整。
-                        tmpOldNameVec.insertElementAt(tmpNameNew, i);
-                        tmpOldCapsVec.insertElementAt(APPCapsVecInSystem.get(i), i);
-                        tmpConfigInfoLoader.loadAppData(tmpNameNew, userConfigs); // 吸收其对应的Config中的内容。
+                final String tmpNameInSystem = APPNameVecInSystem.get(i); // Config2.ini中的应用名
+                String tmpNameOld = i < nameVecInConfig.size() ? nameVecInConfig.get(i) : null;// Config.ini中的应用名
+                if (!tmpNameInSystem.equals(tmpNameOld)) { // 如果某个元素相同的话，跳过．不同则进入．
+                    if (nameVecInConfig.indexOf(tmpNameInSystem) < 0) { // 有新应用增加。增加，int值不需要专门调整。
+                        nameVecInConfig.insertElementAt(tmpNameInSystem, i);
+                        capsVecInConfig.insertElementAt(APPCapsVecInSystem.get(i), i);
+//                        tmpConfigInfoLoader.loadAppData(tmpNameInSystem, userConfigs); // 吸收其对应的Config中的内容。
                         //following part need to be done later, because it need to wait for DBconnection to be
                         //initialized first, otherwise db access will cause null pointer.
 //                        SwingUtilities.invokeLater(new Runnable(){
@@ -80,13 +80,13 @@ class FileCustomOptions extends CustOpts {
 //                            }
 //                        });
                     } else if (APPNameVecInSystem.indexOf(tmpNameOld) < 0) { // 如果发现有应用被删除了，就移除，影响到int值的遍历,所以调整。
-                        tmpOldNameVec.remove(i);
-                        tmpOldCapsVec.remove(i);
+                        nameVecInConfig.remove(i);
+                        capsVecInConfig.remove(i);
                         i--;
                     }
                 }
             }
-            APPCapsVecInSystem = tmpOldCapsVec; // APPCapsVec吸收了新增加的Caption，并去掉了已删除的应用。
+            APPCapsVecInSystem = capsVecInConfig; // APPCapsVec吸收了新增加的Caption，并去掉了已删除的应用。
 
             capsInConfigFile = CASUtility.EMPTYSTR; // 得到调整之后的CapString。
             for (int i = 0, tmpLen = APPCapsVecInSystem.size(); i < tmpLen; i++)
