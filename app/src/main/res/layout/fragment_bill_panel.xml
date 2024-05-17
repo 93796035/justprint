@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D8D8D8">
+
+    <!-- 顶部按钮 -->
+    <Button
+        android:id="@+id/billButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bill Button"
+        android:visibility="gone" />
+
+    <!-- 总金额显示区域 -->
+    <TextView
+        android:id="@+id/totalPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/billButton"
+        android:background="@null"
+        android:gravity="right"
+        android:text="Total: $0.00"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- 表格视图，用ListView替代 -->
+    <ListView
+        android:id="@+id/tableListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/totalPrice"
+        android:layout_above="@+id/operationLayout" />
+
+    <!-- 操作按钮容器 -->
+    <LinearLayout
+        android:id="@+id/operationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/moreButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="More" />
+
+        <Button
+            android:id="@+id/lessButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Less" />
+    </LinearLayout>
+
+</RelativeLayout>

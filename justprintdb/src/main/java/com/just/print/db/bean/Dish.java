@@ -1,5 +1,7 @@
 package com.just.print.db.bean;
 
+import android.database.DatabaseUtils;
+
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import de.greenrobot.dao.DaoException;
 import com.just.print.db.dao.DishDao;
 import com.just.print.db.dao.M2M_MenuPrintDao;
 import com.just.print.db.dao.M2M_SaleRecordMarkDao;
+import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.L;
 
 import org.cas.client.platform.bar.BarUtil;
@@ -51,7 +54,6 @@ public class Dish {
     private List<M2M_SaleRecordMark> m2M_SaleRecordMarkList;
 
     // KEEP FIELDS - put your custom fields here
-    private long outputID;
     // KEEP FIELDS END
 
     public Dish() {
@@ -302,7 +304,7 @@ public class Dish {
         return outputID;
     }
 
-    public void setOutputID(long outputID) {
+    public void setOutputID(int outputID) {
         this.outputID = outputID;
     }
 
@@ -312,37 +314,84 @@ public class Dish {
 
     public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {
         // 使用PreparedStatement替代Statement以提高性能和安全性
-        try {
-            StringBuilder sql = new String("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, EMPLOYEEID, TIME, CATEGORY, FOLDERID) VALUES ('")
-                .append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()); // SUBJECT
-            pstmt.setString(2, billIndex); // CONTACTID
-            pstmt.setInt(3, dish.getId()); // PRODUCTID
-            pstmt.setInt(4, dish.getNum()); // AMOUNT
-            pstmt.setFloat(5, dish.getTotalPrice() * splitRate); // TOLTALPRICE
-            pstmt.setFloat(6, dish.getDiscount() * splitRate); // DISCOUNT
-            pstmt.setString(7, dish.getModification()); // CONTENT
-            pstmt.setInt(8, LoginDlg.USERID); // EMPLOYEEID
-            pstmt.setString(9, BarFrame.instance.valOpenTime.getText()); // TIME
-            pstmt.setString(10, createdTime != null ? createdTime : dish.getOrderedTime()); // CATEGORY
-            pstmt.setInt(11, dish.getBillID()); // FOLDERID
 
-            int affectedRows = pstmt.executeUpdate(); // 执行插入操作
-            if (affectedRows == 0) {
-                throw new SQLException("Creating user failed, no rows affected.");
-            }
+        StringBuilder sql = new StringBuilder("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, EMPLOYEEID, TIME, CATEGORY, FOLDERID) VALUES (")
+           .append("'").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("',") // SUBJECT
+           .append("'").append(billIndex).append("',") // CONTACTID
+           .append(dish.getId()).append(",") // PRODUCTID
+           .append(dish.getNum()).append(",") // AMOUNT
+           .append(dish.getPrice() * splitRate).append(",") // TOLTALPRICE
+           .append(dish.getDiscount() * splitRate).append("',") // DISCOUNT
+           .append("'").append(dish.getModification()).append("',") // CONTENT
+           .append(LoginDlg.USERID).append(",") // EMPLOYEEID
+           .append("'").append(BarFrame.instance.valOpenTime.getText()).append("',") // TIME
+           .append("'").append(createdTime != null ? createdTime : dish.getOrderedTime()).append("',")// CATEGORY
+           .append(dish.getBillID()); // FOLDERID
+        AikaPos.db.execSQL(sql.toString()); // 执行插入操作
+        return (int)DatabaseUtils.longForQuery(AikaPos.db, "SELECT last_insert_rowid()", null);
+    }
 
-            // 检索由于执行此 Statement 对象而创建的所有自动生成的键
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // 获取并返回生成的键
-                } else {
-                    throw new SQLException("Creating user failed, no ID obtained.");
-                }
-            }
-        } catch (Exception exp) {
-            ErrorUtil.write(exp);
-            return -1;
-        }
+
+    //none saving fields-----------------------------------------
+    private int num = 1;
+    private float discount;
+    private int outputID = -1;
+    private String modification;
+    private String customerIndex;
+    private String orderedTime;
+    private int billID;
+    private int totalPrice;	//TOLTALPRICE = " + (dish.getPrice() - dish.getDiscount()) * splitRate
+    private Integer ruleMark;
+    public String getModification() {
+        return modification;
+    }
+
+    public void setModification(String modification) {
+        this.modification = modification;
+    }
+
+    public float getDiscount() {
+        return discount;
+    }
+    public void setDiscount(float discount){
+        this.discount = discount;
+    }
+
+    public int getNum() {
+        return num;
+    }
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    private String getOrderedTime() {
+        return orderedTime;
+    }
+    public void setOrderedTime(String time){
+        this.orderedTime = time;
+    }
+
+    public int getBillID() {
+        return billID;
+    }
+
+    public void setBillID(int billID) {
+        this.billID = billID;
+    }
+
+    public int getTotalPrice() {
+        return totalPrice;
+    }
+    public void setTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Integer getRuleMark() {
+        return ruleMark;
+    }
+
+    public void setRuleMark(Integer ruleMark) {
+        this.ruleMark = ruleMark;
     }
     // KEEP METHODS END
 

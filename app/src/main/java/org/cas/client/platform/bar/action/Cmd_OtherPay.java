@@ -1,0 +1,110 @@
+package org.cas.client.platform.bar.action;
+
+import java.awt.event.ActionEvent;
+import java.sql.ResultSet;
+import java.util.Date;
+
+import javax.swing.JButton;
+
+import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.PayDlg;
+import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.pannel.BarFrame;
+import org.cas.client.platform.bar.pannel.BillPanel;
+import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.uibeans.ISButton;
+import org.cas.client.platform.bar.uibeans.SamActionListener;
+import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
+import org.cas.client.platform.casutil.ErrorUtil;
+import org.cas.client.platform.pimmodel.PIMDBModel;
+
+public class Cmd_OtherPay implements SamActionListener {
+
+	private static Cmd_OtherPay instance;
+	private Cmd_OtherPay() {}
+	public static Cmd_OtherPay getInstance() {
+		if(instance == null)
+			instance = new Cmd_OtherPay();
+		return instance;
+	}
+	
+	private ISButton sourceBtn;
+	
+	public ISButton getSourceBtn() {
+		return sourceBtn;
+	}
+	@Override
+	public void setSourceBtn(ISButton sourceBtn) {
+		this.sourceBtn = sourceBtn;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(!BarUtil.routineCheckBeforePrintingReceipt()) {
+			return;
+		}
+
+    	BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
+    	
+		
+		if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
+			billPanel.expireAndReGenerateBill(null);
+		}
+		//if it's processing a closed bill, then
+    	if(billPanel.getStatus() >= DBConsts.COMPLETED) {
+     		//send a refund to mev secretly.
+    		PrintService.printRefund(billPanel, - Math.round(billPanel.totalOnBill), BarFrame.instance.getCurBillIndex(), true);
+    	}
+    	
+		int billId = billPanel.getBillID();
+		int oldTotal = 0;
+		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
+    	try {
+    		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
+            rs.next();
+            oldTotal = rs.getInt("total");
+    	}catch(Exception exp) {
+    		ErrorUtil.write(exp);
+    	}
+    	
+		int billOldStatus = PayDlg.getBillStatus(billId);
+    	boolean needToBePrinted = billOldStatus != DBConsts.BILL_PRINTED || !BarOption.isSavePrintInvoiceWhenBilled();
+    	
+		//do the exact button same style updating, but set the cash column with the total and set the other column with the pay mothod(Uber ski).
+		try {
+   			//NOTE: should consider might been paid with card, so the new received should be the left not the total..
+			//we need to update the createTime with current time, because the opentime could be a time before last batch, this bill was not calculatd into that batch, because it
+			//not finished yet, might add more dish...so the bill must modify the createTime to be calculated into next batch.
+			String paidTime = BarUtil.df.format(new Date());
+   	    	StringBuilder sql = new StringBuilder("update bill set cashReceived = ").append(oldTotal)
+   		   	    	.append(", DEBITRECEIVED = 0, VISARECEIVED = 0, MASTERRECEIVED = 0")
+   	    		.append(", createTime = '").append(paidTime)
+	   	    	.append("', otherReceived = '").append(((JButton)e.getSource()).getText())
+	   	    	.append("', status = ").append(DBConsts.COMPLETED)
+	   	    	.append(", employeeid = ").append(LoginDlg.USERID)
+	   	    	.append(" where id = ").append(billId);
+			PIMDBModel.getStatement().executeUpdate(sql.toString());
+			//update the status of relevant outputs.
+			sql = new StringBuilder("update output set deleted = ").append(DBConsts.COMPLETED)
+					.append(" where time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
+					.append(" and SUBJECT = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
+					.append(" and contactid = ").append(BarFrame.instance.getCurBillIndex());
+			if(billPanel.getStatus() >= DBConsts.COMPLETED) {
+				sql.append(" and deleted = ").append(DBConsts.COMPLETED);
+			}else {
+				sql.append(" and ( deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
+			}
+			PIMDBModel.getStatement().executeUpdate(sql.toString());
+   		}catch(Exception exp) {
+			ErrorUtil.write(exp);
+		}
+		
+    	PrintService.printReceipt(billPanel, false, true, needToBePrinted);
+    	
+    	BarFrame.instance.actionAfterBillClosed();
+	}
+
+}

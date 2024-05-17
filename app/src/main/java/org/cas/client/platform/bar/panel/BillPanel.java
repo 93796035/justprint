@@ -1,15 +1,24 @@
 package org.cas.client.platform.bar.panel;
 
 import android.database.Cursor;
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
+import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Dish;
+import com.just.print.ui.adapter.MyAdapter;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 import com.just.print.util.L;
+import com.stupid.method.reflect.annotation.XViewByID;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -51,6 +60,7 @@ import org.cas.client.platform.bar.DBUtil;
 import org.cas.client.platform.bar.action.Cmd_ChangePrice;
 import org.cas.client.platform.bar.action.Cmd_DiscItem;
 import org.cas.client.platform.bar.action.Cmd_SplitItem;
+import org.cas.client.platform.bar.action.SamActionListener;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.dialog.RefundItemDlg;
 import org.cas.client.platform.bar.dialog.modifyDish.AddModificationDlg;
@@ -83,7 +93,9 @@ import org.cas.client.platform.pimview.pimtable.TextAreaPIMTableCellRenderer;
 import org.cas.client.resource.international.DlgConst;
 import org.cas.client.resource.international.PaneConsts;
 
-public class BillPanel extends JPanel implements ActionListener, ComponentListener, PIMTableRenderAgent, ListSelectionListener, MouseMotionListener, MouseListener, SamActionListener{
+public class BillPanel extends BaseFragment
+		implements View.OnClickListener, View.OnTouchListener, SamActionListener //, ComponentListener, PIMTableRenderAgent, ListSelectionListener
+{
 
 	public static final String DISCBILL = "#DISCBILL";
 	public static final String SERVICEFEE = "#SERVICEFEE";
@@ -132,7 +144,16 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
 		this.billButton = billButton;
 		initComponent();
 	}
-	
+
+	@Override
+	protected int getLayoutId() {
+		return R.layout.fragment_bill_panel;
+	}
+
+	@Override
+	public void onCreated(Bundle savedInstanceState) {
+
+	}
 	//find the new (not saved) items, then send then to kitchen, save then to db. send to server...
 	public boolean unsavedItemsCheck() {
 		//if there's any new bill, send it to kitchen first, and this also made the output generated.
@@ -259,21 +280,19 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
                     .append(" and DISCOUNT = ").append(dish.getDiscount())
                     .append(" and EMPLOYEEID = ").append(LoginDlg.USERID)
                 	.append(" and CATEGORY = '").append(currentTime).append("'");
-                ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-                rs.beforeFirst();
-                while (rs.next()) {
-                	dish.setOutputID(rs.getInt("id"));
-                	dish.setOrderedTime(rs.getString("time"));
+                Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+                while (rs.moveToNext()) {
+                	dish.setOutputID(DBUtil.getCursorInt(rs, "id"));
+                	dish.setOrderedTime(DBUtil.getCursorString(rs, "time"));
                 }
-                
-                rs.close();
 		    }
 		}catch(Exception exp) {
-			JOptionPane.showMessageDialog(this, DlgConst.FORMATERROR);
-		    exp.printStackTrace();
+			JOptionPane.showMessageDialog(BarFrame.instance, FORMATERROR);
+		    L.e("BillPanel", "Exception when sendingDishes to DB", exp);
 		}
 	}
-	
+	String FORMATERROR = "Invalid input format found, please correct and try again.";
+
 	private void sendDishesToServer(List<Dish> dishes) {
 		if(dishes == null || dishes.size() == 0) {
 			return;
@@ -309,10 +328,9 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
 	}
 	
     @Override
-	public void actionPerformed(ActionEvent e) {
-        Object o = e.getSource();
+	public void onClick(View o) {
 		if(o instanceof ArrowButton) {
-    		int selectedRow =  table.getSelectedRow();
+    		int selectedRow =  table.getSelectedItemPosition();
     		Dish dish = getOrderedDishAry().get(selectedRow);
 	        if(o == btnMore) {
 				if(dish.getOutputID() >= 0) {	//already saved
@@ -354,8 +372,10 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
         		billButton.setSelected(!billButton.isSelected());
         		return;
         	}
-    		BarFrame.instance.setCurBillIdx(((JToggleButton)o).getText());
+    		BarFrame.instance.setCurBillIdx(((FunctionToggleButton)o).getText());
             BarFrame.instance.switchMode(2);//no need to set open time? THE OPEN TIME of every bill are same?
+		}else{
+
 		}
 		
 	}
@@ -363,8 +383,7 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
 	private boolean adjustOnlyUI(int selectedRow, Dish dish) {
 		if(getOrderedDishAry().get(selectedRow).getNum() == 1) {
 			if("true".equals(CustOpts.custOps.getValue("noticeForLastOne"))) {
-				if (JOptionPane.showConfirmDialog(this, BarFrame.consts.COMFIRMDELETEACTION2(), DlgConst.DlgTitle,
-						JOptionPane.YES_NO_OPTION) != 0) {
+				if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION2(), "WARNING!")) {
 					table.setSelectedRow(-1);
 					return true;
 				}
@@ -590,98 +609,88 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
 	}
 
 	@Override
-	//this method is used for deleting an item in the billPanel by a drag action.
-	public void mouseReleased(MouseEvent e) {
-		stepCounter = 0;
-		if(isDragging == true) {
-			isDragging = false;
-			ListSelectionModel selectionModel = ((PIMTable)e.getSource()).getSelectionModel();
-			int selectedRow = selectionModel.getMinSelectionIndex();
-			if(selectedRow < 0 || selectedRow >= getOrderedDishAry().size()) 
-				return;
-			
-			if(salesPanel != null && !BarFrame.numberPanelDlg.isVisible()) {	//if qty button not seleted.
-				if(getOrderedDishAry().get(selectedRow).getOutputID() >= 0) {
-					if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), DlgConst.DlgTitle,
-		                    JOptionPane.YES_NO_OPTION) != 0) {// 确定删除吗？
-						table.setSelectedRow(-1);
-						return;
-					}
-				}
-
-	        	if(!notTooLateToChangeStatus()) {	//check if it's bill printed, if yes, need to reopen a bill.
-            		return;
-            	}
-
-				Dish dish = getOrderedDishAry().get(selectedRow);
-				removeFromSelection(selectedRow);
-				if(dish.getOutputID() > -1) {	//if already saved, then check if there's a refTo information in comment, if yes, means this output belongs to a printed bill. should be put into void.
-		    		dish.changeOutputStatusInDB(comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the output is just saved and send to
-		    	} 																												//kitchen, not appeared in previous bill, then just change it to deleted.
-		    	//update array second.
-			}
-		}
-	}
-	
-	@Override
-	public void mousePressed(MouseEvent e) {}
-	@Override
-	public void mouseExited(MouseEvent e) {}
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-	
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if(e.getSource() == scrContent.getViewport()) {
-			if(billListPanel != null) {
-				if(status >= DBConsts.COMPLETED) {	//if the bill is closed, then ignore.
-					return;
-				}
-				if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
-					billButton.setSelected(!billButton.isSelected());
-					return;
-				}
-				//if not in split item mode (split item button not pressed.)
-				if(billListPanel.getCurBillPanel() == null) {
-					billListPanel.getSelectedBillPannels().add(this);
-					billButton.setSelected(!billButton.isSelected());
-					return;
-				}
-	 			if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != this) {	//this there's already an item ready for move.
-					billListPanel.moveDishToBill(this);
-					BarFrame.instance.curDish = null;
-				}else {	//no current item ready for split, then just select the. 
-					billButton.setSelected(!billButton.isSelected());
-					if(billButton.isSelected()) {
-						BarFrame.instance.setCurBillIdx(billButton.getText());
-						BarFrame.instance.setCurBillID(getBillID());
-					}else {
-						BillPanel activePanel = billListPanel.getCurBillPanel();
-						if(activePanel != null) {
-							BarFrame.instance.setCurBillIdx(activePanel.billButton.getText());
-							BarFrame.instance.setCurBillID(activePanel.getBillID());
-						}else {
-							BarFrame.instance.setCurBillIdx("");
-							BarFrame.instance.setCurBillID(0);
+	public boolean onTouch(View v, MotionEvent event) {
+		switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				// 用户开始触摸
+				if(v == scrContent.getViewport()) {
+					if(billListPanel != null) {
+						if(status >= DBConsts.COMPLETED) {	//if the bill is closed, then ignore.
+							return;
+						}
+						if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
+							billButton.setSelected(!billButton.isSelected());
+							return;
+						}
+						//if not in split item mode (split item button not pressed.)
+						if(billListPanel.getCurBillPanel() == null) {
+							billListPanel.getSelectedBillPannels().add(this);
+							billButton.setSelected(!billButton.isSelected());
+							return;
+						}
+						if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != this) {	//this there's already an item ready for move.
+							billListPanel.moveDishToBill(this);
+							BarFrame.instance.curDish = null;
+						}else {	//no current item ready for split, then just select the.
+							billButton.setSelected(!billButton.isSelected());
+							if(billButton.isSelected()) {
+								BarFrame.instance.setCurBillIdx(billButton.getText());
+								BarFrame.instance.setCurBillID(getBillID());
+							}else {
+								BillPanel activePanel = billListPanel.getCurBillPanel();
+								if(activePanel != null) {
+									BarFrame.instance.setCurBillIdx(activePanel.billButton.getText());
+									BarFrame.instance.setCurBillID(activePanel.getBillID());
+								}else {
+									BarFrame.instance.setCurBillIdx("");
+									BarFrame.instance.setCurBillID(0);
+								}
+							}
 						}
 					}
 				}
-			}
-		}
-	}
+				break;
+			case MotionEvent.ACTION_UP:
+				stepCounter = 0;
+				if(isDragging == true) {
+					isDragging = false;
+					ListSelectionModel selectionModel = ((PIMTable)e.getSource()).getSelectionModel();
+					int selectedRow = selectionModel.getMinSelectionIndex();
+					if(selectedRow < 0 || selectedRow >= getOrderedDishAry().size())
+						return;
 
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		stepCounter++;
-		if(stepCounter > minStepCounter ) {
-			stepCounter = 0;
-			isDragging = true;
+					if(salesPanel != null && !BarFrame.numberPanelDlg.isVisible()) {	//if qty button not seleted.
+						if(getOrderedDishAry().get(selectedRow).getOutputID() >= 0) {
+							if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), DlgConst.DlgTitle,
+									JOptionPane.YES_NO_OPTION) != 0) {// 确定删除吗？
+								table.setSelectedRow(-1);
+								return;
+							}
+						}
+
+						if(!notTooLateToChangeStatus()) {	//check if it's bill printed, if yes, need to reopen a bill.
+							return;
+						}
+
+						Dish dish = getOrderedDishAry().get(selectedRow);
+						removeFromSelection(selectedRow);
+						if(dish.getOutputID() > -1) {	//if already saved, then check if there's a refTo information in comment, if yes, means this output belongs to a printed bill. should be put into void.
+							dish.changeOutputStatusInDB(comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the output is just saved and send to
+						} 																												//kitchen, not appeared in previous bill, then just change it to deleted.
+						//update array second.
+					}
+				}
+				break;
+			case MotionEvent.ACTION_MOVE:
+				stepCounter++;
+				if(stepCounter > minStepCounter ) {
+					stepCounter = 0;
+					isDragging = true;
+				}
+				break;
 		}
+		return true; // 返回true表示事件已被处理
 	}
-	
-	@Override
-	public void mouseMoved(MouseEvent e) {}
-	
     //add dish into the billPanel, tiggered by "+"button or the bubttons on menuPanel. \
 	//moving items between bill doesn't go here.
     void addContentToList(Dish dish) {
@@ -969,8 +978,11 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
     		int tColCount = table.getColumnCount();
-    		Object[][] tValues = new Object[0][tColCount];
-    		table.setDataVector(tValues, header);
+    		Object[] tValues = new Object[0][tColCount];
+			List list = new ArrayList();
+			list.add(tValues);
+			myAdapter = new MyAdapter(BarFrame.instance, list);
+    		table.setAdapter(myAdapter);;
     		updateTotalArea(skipSavingToDB);
     		resetColWidth();
     		if(BarFrame.secondScreen != null) {
@@ -1507,9 +1519,6 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
     }
     
     private void initComponent() {
-    	removeAll();
-        table = new PIMTable();// 显示字段的表格,设置模型
-        scrContent = new PIMScrollPane(table);
         lblDiscount = new TextView();
         lblServiceFee = new TextView();
         lblSubTotle = new TextView(BarFrame.consts.Subtotal());
@@ -1620,10 +1629,10 @@ public class BillPanel extends JPanel implements ActionListener, ComponentListen
     	zippedStr = zippedStr.replace(":", "");
     	return zippedStr;
     }
-    
-	public PIMTable table;
-	public PIMScrollPane scrContent;
 
+	@XViewByID(R.id.tableListView)
+	public ListView table;
+	public MyAdapter myAdapter;
     public TextView lblSubTotle;
     public TextView lblTPS;
     public TextView lblTVQ;
