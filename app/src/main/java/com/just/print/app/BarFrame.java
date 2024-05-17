@@ -1,10 +1,14 @@
 package com.just.print.app;
 
+import android.app.AlertDialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -15,8 +19,13 @@ import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.User;
 import com.just.print.ui.fragment.ActivateFragment;
+import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.fragment.RegisterFragment;
 import com.just.print.ui.panel.BillListPanel;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.ui.panel.TablesPanel;
+import com.just.print.util.AppUtils;
+import com.just.print.util.JOptionPane;
 import com.just.print.util.L;
 import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
@@ -26,15 +35,47 @@ import com.stupid.method.reflect.annotation.XViewByID;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.action.Cmd_CheckInOut;
+import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.dialog.DiscountDlg;
+import org.cas.client.platform.bar.dialog.NumberPanelDlg;
+import org.cas.client.platform.bar.dialog.PayDlg;
+import org.cas.client.platform.bar.dialog.statistics.CheckInOutListDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst;
+import org.cas.client.platform.bar.i18n.BarDlgConst0;
+import org.cas.client.platform.bar.i18n.BarDlgConst1;
+import org.cas.client.platform.bar.i18n.BarDlgConst2;
+import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.net.BackGroundTimerThread;
+import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.bar.panel.CustomerFrame;
+import org.cas.client.platform.bar.panel.MenuPanel;
+import org.cas.client.platform.bar.web_srm.MevUtils;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
+import org.cas.client.platform.cascustomize.CustOpts;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class BarFrame extends BaseFragmentActivity {
 
@@ -45,8 +86,6 @@ public class BarFrame extends BaseFragmentActivity {
 
 //    public static CustomerFrame customerFrame;
     private static User currentUser;
-    public static List<DiningTable> diningTables;
-
     public Dish curDish;
     public int curPanelIdx;
     //curBillID is currently only used for displaying a expired bill, which is to say, when showingExpiredBill is set to true;
@@ -54,24 +93,23 @@ public class BarFrame extends BaseFragmentActivity {
 
     private boolean isShowingAnExpiredBill;
 
+    public static MenuPanel menuPanel;
 //    private DefaultComboBoxModel<String> tableNames = new DefaultComboBoxModel<String>(new String[] {""});//there's an empty item for tableMode, when no table selected.
     public boolean ignoreLogin;
-//    public static NumberPanelDlg numberPanelDlg;
-//    public static DiscountDlg discountDlg;
-//    public static PayDlg payDlg;
-//    public static CustomerFrame customerFrame;
+    public static NumberPanelDlg numberPanelDlg;
+    public static DiscountDlg discountDlg;
+    public static PayDlg payDlg;
+    public static CustomerFrame customerFrame;
 //    public static GraphicsDevice secondScreen;
 
-    private static Timer inactivityTimer;
+    private boolean isActive;
 
-    @XViewByID(R.id.cmbCurTable)
-    public Spinner cmbCurTable;
-    @XViewByID(R.id.valOperator)
-    public TextView valOperator;
-    @XViewByID(R.id.valCurBillIdx)
-    public TextView valCurBillIdx;
-    @XViewByID(R.id.valOpenTime)
-    public TextView valOpenTime;
+    String oldTable;
+    public boolean ignoreItemChange;	//to temperally make the comboBox deaf to the value changes.
+
+    public BaseFragment[] panels = new BaseFragment[4];
+
+    private static final int AUTO_LOGOUT_TIME = 5 * 60 * 1000;  // 5分钟无活动自动登出
 
     public static User getCurrentUser() {
         return currentUser;
@@ -120,11 +158,336 @@ public class BarFrame extends BaseFragmentActivity {
             ToastUtil.showToast("Application expired! Please re-activate it!");
             switchFragment(new ActivateFragment());
         }
+
+        //==========================================================
+        menuPanel = new MenuPanel();	//have to be after initModel, before new BarFrame().
+        switch (CustOpts.custOps.getUserLang()){//before login, the system language is the last change of userLanguage, (depends on who logged in last time.
+            case 0:
+                consts = new BarDlgConst0();
+                break;
+            case 1:
+                consts = new BarDlgConst1();
+                break;
+            case 2:
+                consts = new BarDlgConst2();
+                break;
+            default:
+                consts = new BarDlgConst1();
+        }
+
+        CmdBtnsManagerDlg.initButtons();
+
+        numberPanelDlg = new NumberPanelDlg();
+        discountDlg = new DiscountDlg();
+        payDlg = new PayDlg();
+
+        //activation check
+        String returnStr = validateActivation(null);
+        if(!"OK".equals(returnStr)) { 	// if not valid, might because of expired, then give clean the bill head,
+            if(!"OK".equals(validateActivation(returnStr))) {	// give another valid with passcode (first time with null).
+                System.exit(0);
+            }
+        }
+
+        //single user or not, display login dialog or mainInterface.
+        if(BarOption.isSingleUser()) {
+            singleUserLoginProcess();
+        }else {
+            instance.setVisible(true);
+        }
+
+        //counter mode or not
+        if(BarOption.isCounterMode()) {
+//            instance.setCurBillIdx("1");
+//
+//            instance.valOpenTime.setText(BarUtil.df.format(new Date()));
+//            instance.lblOpenTime.setVisibility(View.GONE);
+//            instance.valOpenTime.setVisibility(View.GONE);
+//
+//            ((SalesPanel)instance.panels[2]).billPanel.setBillID(instance.getCurBillID());
+//            instance.switchMode(0);	//inside it will check, if it's counter mode, will automatically open Sales mode.
+//
+//            //BarFrame.instance.switchToOtherBill();
+//            //following code was copied from switchToOtherBill, modified some where like:  && !tablesPanel.btnTables.get(i).getText().equals(tableName))
+//            //just to a different one and rmoved the status check like isCountermode(), cause here is already counter mode.
+//            String tableName = (String)BarFrame.instance.cmbCurTable.getSelectedItem();
+//            if(!instance.isTheOnlyBillInTable(null, null, instance.curBillID)) {	//if there's other bill in this table, then view other bills.
+//                instance.switchMode(1);
+//            }else {
+//                //the differentce with actionAfterBillClosed is lack of this line.//closeATable(null, null);	//when closing a table with check the "DeleteTableWhenClosing" flag, and this flag should has been set when set to Countermode.
+//                TablesPanel tablesPanel = (TablesPanel)instance.panels[0];
+//                //tablesPanel.initContent();
+//                //if there's other unclosed table?..maybe can get from tablesPanel instead of query from db?
+//                boolean foundUnclosedTable = false;
+//                int i = 0;
+//                for (; i < tablesPanel.btnTables.size(); i++) {
+//                    if(tablesPanel.btnTables.get(i).getStatus() > 0 && !tablesPanel.btnTables.get(i).getText().equals(tableName)) {
+//                        foundUnclosedTable = true;
+//                        break;
+//                    }
+//                }
+//
+//                if(foundUnclosedTable) {
+//                    ActionEvent evt = new ActionEvent(tablesPanel.btnTables.get(i), 0, null);
+//                    tablesPanel.actionPerformed(evt);
+//                }else {			//if no, create a new table wich next billIdx(will be table id)
+//                    int billIdx = BarOption.popKitchenBillIdx();
+//                    CreateNewOrderAction.makeSureTableExistsAndOpened(String.valueOf(billIdx), BarUtil.df.format(new Date()));
+//                    TableButton tableToggleButton = new TableButton();
+//                    tableToggleButton.setText(String.valueOf(billIdx));
+//                    tableToggleButton.setTableName(String.valueOf(billIdx));
+//                    ActionEvent evt = new ActionEvent(tableToggleButton, 0, null);
+//                    tablesPanel.actionPerformed(evt);
+//                }
+//            }
+        }else {
+            instance.switchMode(0);	//while instance is still null if don't put it in the later.
+        }
+
+        //this thread will start a request thread every 10 seconds to fetch new order from server..
+        //also will trigger a refresh of tableivew for the waiting time.
+        new BackGroundTimerThread().start();
+
+        findViewById(R.id.BarFrame).invalidate();
+
+        //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
+        //different Appareil ID, so they know the data is from which machine.
+        if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
+                && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+            existingIdApprlCheck();
+            MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
+        }
+        //this line is kind of slow, and because the frame is no decoration by default, so
+        //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
+//        SwingUtilities.invokeLater(new Runnable() {
+//			@Override
+//			public void run() {
+//		        //TDOO:print an empty report, hope this can make the opendrawer command work.
+//				//isn't this move can also make sure the mev connected printer work?
+//				ArrayList<String> formattedString = new ArrayList<String>();
+//				for(int i = 0; i < 15; i++) {
+//					formattedString.add("");
+//				}
+//		    	PrintService.printTemporaryReport( BarFrame.menuPanel.getPrinters()[0].getIp(), formattedString);
+//			}
+//		});
     }
 
-    public void populateSpinnerWithTables() {
+    private static void existingIdApprlCheck() {
+        if(BarOption.getBillingNumber() == null
+                || BarOption.getBillingNumber().length() < 5){
+            JOptionPane.showInputDialog("Numéro de facturation", "Veuillez saisir votre numéro de facturation:", new JOptionPane.InputDialogListener() {
+                @Override
+                public void onInputReceived(String input) {
+                    BarOption.setBillingNumber(input);
+                }
+                @Override
+                public void onInputCanceled() {
+                    Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        //No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
+        //it's already checked, and only when it's true, can reach to this method.
+        if (JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", consts.Code())) {
+            JOptionPane.showInputDialog("identifiant d'appareil", "<html>Veuillez inscrirer votre identifiant d'appareil<br> avant d'effectuer une requête:</html>", new JOptionPane.InputDialogListener() {
+                @Override
+                public void onInputReceived(String input) {
+                    BarOption.setCertifiedDeviceId(input);
+                }
+                @Override
+                public void onInputCanceled() {
+                    Toast.makeText(AikaPos.instance.getApplicationContext(), "certificate request canceled! Please input \"identifiant d\'appareil\" to let the software ready to work.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            //if the input idApprl not valid, will endup not saved, when getting this configration will get "0000-0000-0000" .
+            if(BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+                JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
+                existingIdApprlCheck();
+            }
+        }
+    }
+
+    private String validateActivation(String activateCode) {
+        if(BarOption.getBillHeadInfo() == null || BarOption.getBillHeadInfo().trim().length() == 0 ) { //if store info not found, means first time use.
+            if(activateCode == null) {
+                JOptionPane.showInputDialog("Enter Code", "Please input your activation code:", new JOptionPane.InputDialogListener() {
+                    @Override
+                    public void onInputReceived(String input) {
+                        validateActivation(input);
+                    }
+                    @Override
+                    public void onInputCanceled() {
+                        Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            if("asdfas".equals(activateCode)) {
+                BarOption.setBillHeadInfo("AikaPos");
+                return "OK";
+            }else {
+                authenticate(activateCode);
+                return "OK";
+            }
+        }else {	//already started
+            L.d("bill info is:", BarOption.getBillHeadInfo());
+            long timeLeft = checkDaysleft();
+            if(timeLeft > 0) {
+                if (timeLeft < 3024000000l) {   //3024000000L == 35days
+                    JOptionPane.showMessageDialog(null, "Application is about to expire! Please re-activate it!");
+                }
+                //check certificate time
+                MevUtils.checkCertificateDate();
+                return "OK";
+            }else {
+                BarOption.setBillHeadInfo(null);
+                CustOpts.custOps.saveData();//save to hd.
+                return activateCode;	//because the activateCode is null, so this will cause a dialog for inputting activate code,
+                //but after inputting code, will not have chance to come in again and do the authenticate. so I think should do system.exit()
+            }
+        }
+    }
+
+    private void authenticate(String inputedSN) {
+        if (inputedSN == null || inputedSN.length() != 6) {
+            JOptionPane.showMessageDialog(null, "Please input correct license code");
+            return;
+        }
+        BarOption.setLicense(inputedSN);
+
+        activateAccount();
+    }
+
+    private void activateAccount() {
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://216.137.179.176/activeAccount";
+        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+        String jsonString = prepareLicenceJSONString();  // Implement this method to prepare your JSON payload
+
+        RequestBody body = RequestBody.create(jsonString, JSON);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                runOnUiThread(() -> {
+                    // Handle failure in activation
+                    showErrorDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
+                });
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseString = response.body().string();
+                    runOnUiThread(() -> processActivationResponse(responseString));
+                } else {
+                    runOnUiThread(() -> {
+                        showErrorDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
+                    });
+                }
+            }
+        });
+    }
+
+    private void processActivationResponse(String response) {
+        int p = response.indexOf("_");
+        if (p == -1) {
+            showErrorDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
+            return;
+        }
+
+        // Process the response as in your existing code
+        String timeLeft = response.substring(0, p);
+        long time = "none".equals(timeLeft) ? 100L * 365 * 24 * 3600 * 1000 : Long.parseLong(timeLeft) * 24 * 3600 * 1000;
+        if (time > 0) {
+            // Set various options based on the parsed response
+            setStatusMes("Application is activated successfully!");
+        } else {
+            showErrorDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
+        }
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    public static void setStatusMes(String pMes) {
+        lblStatus.setText(pMes);
+    }
+
+    public static HttpURLConnection prepareConnection(String urlString, String method) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(method);
+        connection.setDoOutput(true); // 对于POST请求必须设置为true
+        connection.setConnectTimeout(15000); // 设置连接超时
+        connection.setReadTimeout(15000); // 设置读取超时
+        return connection;
+    }
+
+    public static void writeOut(HttpURLConnection connection, String content) throws IOException {
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = content.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+    }
+
+    public static String readBackFromConnection(HttpURLConnection connection) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line.trim());
+            }
+            return response.toString();
+        }
+    }
+
+    //---------------automatic logout every 5 minutes----------------
+    private Handler inactivityHandler = new Handler();
+    private Runnable inactivityRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isActivityVisible()) {
+                Cmd_CheckInOut.getInstance().onClick(null);
+            }
+        }
+    };
+    public void resetInactivityTimer() {
+        inactivityHandler.removeCallbacks(inactivityRunnable);
+        inactivityHandler.postDelayed(inactivityRunnable, BarOption.getAutoLogoutTime() * 60000); // 假设getAutoLogoutTime()返回的是分钟
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActive = true;  // 当活动在前台时设置为true
+        resetInactivityTimer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isActive = false;
+        inactivityHandler.removeCallbacks(inactivityRunnable);
+    }
+    //=======================================
+    public boolean isActivityVisible() {
+        return isActive;
+    }
+
+
+    public void populateSpinnerWithTables(List<DiningTable> diningTables) {
         // 假设 diningTables 已经被初始化并且包含数据
-        ArrayAdapter<DiningTable> adapter = new ArrayAdapter<>(this,
+        adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, diningTables);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         cmbCurTable.setAdapter(adapter);
@@ -245,9 +608,9 @@ public class BarFrame extends BaseFragmentActivity {
             sql = new StringBuilder("Select id from bill where opentime = '").append(openTime)
                     .append("' and tableID = '").append(tableName)
                     .append("' and BillIndex = '").append(newBillIdx).append("'");
-            Cursor cursor = AikaPos.db.rawQuery(sql.toString(), null);
-            if (cursor != null && cursor.moveToFirst()) {
-                return DBUtil.getCursorInt(cursor, "id");
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            if (rs != null && rs.moveToFirst()) {
+                return DBUtil.getCursorInt(rs, "id");
             }
         }catch(Exception exp) {
             L.e("createABill", "exception when creating a bill: " + sql, exp);
@@ -266,6 +629,120 @@ public class BarFrame extends BaseFragmentActivity {
         return jsonstr;
     }
 
+    public void userCheckOut() {
+        //try clean webmev batch.
+        MevUtils.flushBatchWithCurTransaction();
+
+        if(BarOption.isSingleUser()) {
+//            CheckInOutListDlg.updateCheckInRecord();
+//            Window[] windows = Window.getWindows();
+//            for (Window window : windows) {
+//                if (window.isVisible() && window instanceof JDialog) {
+//                    window.setVisible(false);
+//                }
+//            }
+//            instance.setVisible(false);
+//            singleUserLoginProcess();
+//            BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
+        }else {	//for multi user case, when sign out button clicked, if user inputted right pw, then do the signout.
+            BarFrame.instance.switchFragment(null);
+            LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+            if (LoginDlg.PASSED == true) {
+                CheckInOutListDlg.updateCheckInRecord();
+                //@note: lowdown a little the level, to enable the admin do sales work.
+                if (LoginDlg.getUSERTYPE() >= LoginDlg.ADMIN_STATUS) {
+                    LoginDlg.setUSERTYPE(LoginDlg.USER_STATUS);
+                }
+                BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
+            }else {	//if closed the dialog without inputting the right pw, then system exit.
+                CustOpts.custOps.saveData();
+                BarFrame.instance.finish();
+            }
+        }
+    }
+
+    public int switchMode(int index) {
+//        if(curPanelIdx == 3) {	//if it's switching from setting panel, then ask to do a login.
+//            if(ignoreLogin == false) {
+//                if(BarOption.isSingleUser()) {
+//                    instance.setVisible(false);
+//                    new LoginDlg(this).setVisible(true);
+//                    if(!LoginDlg.PASSED) {
+//                        CASControl.ctrl.exitSystem();
+//                    }
+//                    instance.setVisible(true);
+//                    valOperator.setText(LoginDlg.USERNAME);
+//                }
+//            }else {
+//                ignoreLogin = false;
+//            }
+//        }
+//        curDish = null;
+//        setStatusMes("");
+//        if (index == 3) {		//setting
+//            if (!superAdminAuthentication())
+//                return -1;
+//            //shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
+//        }else if(LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
+//            index = 3;
+//        }else if(index == 2) {	//sale
+//            initSalesPanel();
+//        }else if(index == 1) {	//bill
+//            ((BillListPanel)panels[1]).initContent();
+//        }else if(index == 0) {	//table
+//            resetStatus();
+//            ((TablesPanel)panels[0]).initContent();
+//        }
+//
+//        for (JComponent panel : panels) {
+//            panel.setVisible(false);
+//        }
+//
+//        reLayout();	//recalculate the panel size---because if it's counter mode, need to display tablespane and salesPane together,
+//        //and when back to tablespane, it also need to relayout, otherwise, will display blank.
+//        panels[index].setVisible(true);
+//
+//        if(BarOption.isCounterMode()) {
+//            if(index == 1 || index == 2) {
+//                panels[0].setVisible(true);// this line not necessary, because in layout, will decide if panels[0] visible or not base on there's multi table or not.
+//                String tableName = String.valueOf(cmbCurTable.getSelectedItem());
+//                ((TablesPanel)panels[0]).initContent();// might be switched from temperal table mode.(in counter mode, user can switch to table mode, to select a preset table)
+//                ignoreItemChange = true;
+//                BarFrame.instance.cmbCurTable.getModel().setSelectedItem(tableName);	//? why use .getModel() instead of directly cmbCurTable.setSelectedItem(tableName)?
+//                TableButton tableButton = ((TablesPanel)BarFrame.instance.panels[0]).getTableButtonByName(tableName);
+//                if(tableButton != null) {
+//                    BarFrame.instance.valOpenTime.setText(tableButton.getOpenTime());
+//                }
+//            }
+//        }
+//
+//        curPanelIdx = index;
+//        if(index > 1) {	//salespanel and setting pannel need menu panel on it.
+//            //it's x, y might have been changed if user clicked menu command on tablePenal
+//            BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
+//            int xMenuArea = billPanel.getX() + billPanel.getWidth() + CustOpts.HOR_GAP / 2;
+//            menuPanel.setLocation(xMenuArea, billPanel.getY());
+//
+//            menuPanel.reInitCategoryAndMenuBtns();
+//            menuPanel.reLayout();
+//            panels[index].add(menuPanel);
+//        }
+//
+//        panels[index].requestFocus();
+
+        return 0;
+    }
+
+    public static void singleUserLoginProcess() {
+//        BarFrame.instance.switchFragment(null);
+//        LoginDialogFragment.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
+//        if (LoginDlg.PASSED == true) { // 如果用户选择了确定按钮。
+//            instance.setVisible(true);
+//            checkSignIn();
+//        }else {	//the case that user clicked X button.
+//            Cas
+//        }
+    }
     public String getCurBillIndex() {
         String curBillIndex = valCurBillIdx.getText().toString();
         if(curBillIndex == null || curBillIndex.trim().length() == 0 || "0".equals(curBillIndex))
@@ -288,5 +765,154 @@ public class BarFrame extends BaseFragmentActivity {
     public void setCurBillID(int curBillID) {
         this.curBillID = curBillID;
     }
+    //what should we do? add new bill, switch back to table view? bill list view? or switch to another table? open a new table?
 
+    public void actionAfterBillClosed() {
+        if(BarOption.getDefaultTableName().equals(BarFrame.instance.cmbCurTable.getSelectedItem().toString())) {
+            //this is for a special case, don't know if will be needed, if is't on Default table, will add a new bill in current table.
+            //the bill will not has it's own open time, while will have close time, anyway, don't think it's good for restaurent, but might fit the deparnuer.
+            valOpenTime.setText(BarUtil.df.format(new Date()));
+            addNewBillInCurTable();
+        }else {
+            if(isTableEmpty(null, null)) {
+                closeTableAndBillInDB(null, null);	//when closing a table with check the "DeleteTableWhenClosing" flag, and this flag should has been set when set to Countermode.
+                TablesPanel tablesPanel = (TablesPanel)panels[0];
+                tablesPanel.initContent();
+//                if(BarOption.isCounterMode()) {
+//                    tablesPanel.switchToOtherTable();
+//                }else {
+                    switchMode(0);
+//                }
+
+            } else {	//if there's other bill in this table, then view other bills.
+                switchMode(1);
+            }
+        }
+    }
+
+    public void closeTableAndBillInDB(String tableName, String openTime) {
+        //all the bill should already completed when table closed except those was generated while has no output on it.
+        //this is the designed time to clean those bills.
+        StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
+                .append(" WHERE tableID = '").append(tableName)
+                .append("' and OPENTIME = '").append(openTime)
+                .append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
+        try {
+            AikaPos.db.execSQL(sql.toString());
+            if(BarOption.isDeleteTableWhenClose()) {
+                sql = new StringBuilder("delete from dining_Table WHERE name = '").append(tableName).append("'");
+            }else {
+                sql = new StringBuilder("update dining_Table set status = ").append(DBConsts.ORIGINAL)
+                        .append(", opentime = '' WHERE name = '").append(tableName).append("'");
+            }
+            AikaPos.db.execSQL(sql.toString());
+        }catch(Exception exp) {
+            L.e("change table", "exception when recover table:" + sql, exp);
+        }
+    }
+
+    //add new bill with a new billID and billIdx.
+    public void addNewBillInCurTable() {
+        String tableName = instance.cmbCurTable.getSelectedItem().toString();
+        String openTime = instance.valOpenTime.getText().toString();
+        SalesPanel salesPanel = (SalesPanel)panels[2];
+        BillPanel billPanel = salesPanel.billPanel;
+
+        int newBillIdx = BillListPanel.getANewBillIdx(null, null);
+
+        int billId = createAnEmptyBill(tableName, openTime, newBillIdx, 0);
+        billPanel.setBillID(billId);
+
+        setCurBillIdx(String.valueOf(newBillIdx));
+        switchMode(2);
+    }
+
+    // @NOTE in first solution, we don't check the bills here, because it's OK there could be bills (an empty bill, or none-closed bills
+    //generated during the splitting bill), while the bad thing is that before the table closed, there's bill displaying in the check
+    //order list, which is not big problem but might cause the confusion of the store owner.....
+    //Then, I thought about a new sulution--when combining all or move item, should check the left output numbers of the bill, if no left, then put it to dumpt.
+    //while the bad thing of this solution is that, when uncombinning will have trouble, because it need to find the unclosed billPanes, if those bill closed,
+    //then the billPanel will not be found, then the button will not display unCombine, and even we do uncombine, we will need to change the status back.
+    //So, finally, I think it's better to let the unclosed bills display in check list box, anyway, they are not closed yet, they are waiting for uncombine.
+    private boolean isTableEmpty(String tableName, String openTime){
+        //validate parameters
+        tableName = BarUtil.empty(tableName) ? cmbCurTable.getSelectedItem().toString() : tableName;
+        openTime = BarUtil.empty(openTime) ? valOpenTime.getText().toString() : openTime;
+
+        try {
+            StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(tableName)
+                    .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL)
+                    .append(") and time = '").append(openTime).append("'");
+
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            return rs.getCount() == 0;
+        } catch (Exception exp) {
+            L.e("BarFrame", " exception when checking if isTableEmpty", exp);
+        }
+        return false ;
+    }
+
+    public String getCurTable() {
+        return (String)cmbCurTable.getSelectedItem();
+    }
+
+    /**
+     * used when single user login, or when multiuser adding table or open table.
+     * if already has record, then ignore, if not have record yet. then add one.
+     */
+    public static void checkSignIn() {
+        //first make sure the name is displayed on BarFrame heder area.
+        instance.valOperator.setText(LoginDlg.USERNAME);
+
+        String time = BarUtil.df.format(new Date());
+        int p = time.indexOf(" ");
+        time = time.substring(0, p + 1) + BarOption.getStartTime();
+
+        String sql = "Select * from evaluation where EMPLOYEEID = " + LoginDlg.USERID + " and startTime > '" + time
+                + "' and endTime is null";
+
+        try {
+            Cursor rs =  AikaPos.db.rawQuery(sql, null);
+            rs.moveToNext();
+            if(DBUtil.getCursorInt(rs, "id") > -1);	//if not throwning exception (means there is a record), then do nothing.
+            return;
+        }catch(Exception exp) {			//otherwise(if no record yet), generate a record.
+            sql = "INSERT INTO evaluation(startTime, EMPLOYEEID, subject) VALUES ('" + BarUtil.df.format(new Date())
+                    + "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME +"')";
+            try {
+                AikaPos.db.execSQL(sql);
+            }catch(Exception exp2) {
+                L.e("BarFrame ", "exception when insert into evaluation:" + sql, exp2);
+            }
+        }
+    }
+
+    @XViewByID(R.id.cmbCurTable)
+    public Spinner cmbCurTable;
+    public ArrayAdapter<DiningTable> adapter;
+    @XViewByID(R.id.valOperator)
+    public TextView valOperator;
+
+    @XViewByID(R.id.lblCurBillIdx)
+    public static TextView lblCurBillIdx;
+    @XViewByID(R.id.valCurBillIdx)
+    public TextView valCurBillIdx;
+
+    @XViewByID(R.id.lblOpenTime)
+    public TextView lblOpenTime;
+
+    @XViewByID(R.id.valOpenTime)
+    public TextView valOpenTime;
+
+    @XViewByID(R.id.lblStatus)
+    public static TextView lblStatus;
+
+    public void hideBillIdx(boolean b) {
+        lblCurBillIdx.setVisibility(b ? View.GONE : View.VISIBLE);
+        valCurBillIdx.setVisibility(b ? View.GONE : View.VISIBLE);
+    }
+
+    public Spinner getCmbCurTable() {
+        return cmbCurTable;
+    }
 }

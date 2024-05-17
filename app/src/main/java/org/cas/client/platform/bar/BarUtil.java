@@ -1,6 +1,18 @@
 package org.cas.client.platform.bar;
 
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+import com.just.print.R;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.PicturePane;
+
 import org.cas.client.platform.bar.i18n.BarDlgConst;
+import org.cas.client.platform.bar.uibeans.FunctionButton;
+import org.cas.client.platform.bar.uibeans.ISButton;
+import org.cas.client.platform.bar.uibeans.MoreButton;
+import org.cas.client.platform.cascustomize.CustOpts;
 //import org.cas.client.platform.bar.model.DBConsts;
 //import org.cas.client.platform.bar.model.DBUtil;
 //import org.cas.client.platform.bar.model.Dish;
@@ -365,25 +377,25 @@ public class BarUtil {
 //        dishes.add(dish);
 //        return dishes;
 //    }
-//
-//    public static void addFunctionButtons(PicturePane panel, ArrayList<JComponent> buttons) {
-//        int max = buttons.size();
-//        if(max > panel.MAX_CMDBTN_QT) {
-//            MoreButton btnMore = new MoreButton(BarFrame.consts.MORE());
-//            boolean moreBtnAdded = buttons.get(panel.MAX_CMDBTN_QT - 1) instanceof MoreButton;
-//            for(int i =  moreBtnAdded? panel.MAX_CMDBTN_QT : panel.MAX_CMDBTN_QT - 1; i < buttons.size(); i++) {
-//                btnMore.addButton(buttons.get(i));
-//            }
-//            if(!moreBtnAdded) {
-//                buttons.add(panel.MAX_CMDBTN_QT - 1, btnMore);
-//            }
-//            max = panel.MAX_CMDBTN_QT;
-//        }
-//
+
+    public static void addFunctionButtons(PicturePane panel, ArrayList<ISButton> buttons) {
+        int max = buttons.size();
+        if(max > panel.MAX_CMDBTN_QT) {
+            MoreButton btnMore = new MoreButton(BarFrame.consts.MORE());
+            boolean moreBtnAdded = buttons.get(panel.MAX_CMDBTN_QT - 1) instanceof MoreButton;
+            for(int i =  moreBtnAdded? panel.MAX_CMDBTN_QT : panel.MAX_CMDBTN_QT - 1; i < buttons.size(); i++) {
+                btnMore.addButton(buttons.get(i));
+            }
+            if(!moreBtnAdded) {
+                buttons.add(panel.MAX_CMDBTN_QT - 1, btnMore);
+            }
+            max = panel.MAX_CMDBTN_QT;
+        }
+
 //        for(int i = 0; i < max ; i++) {
-//            panel.add((Component)buttons.get(i));
+//            panel.add((ISButton)buttons.get(i));
 //        }
-//    }
+    }
 //    public static int hideCommandButtons(PicturePane panel, ArrayList<JComponent> buttons) {
 //        if(buttons == null)
 //            return -1;
@@ -396,46 +408,86 @@ public class BarUtil {
 //        return buttons != null && buttons.size() > 0 ? buttons.get(0).getY() : BarFrame.instance.getHeight() - 83;
 //    }
 //
-//    public static int layoutCommandButtons(PicturePane panel, ArrayList<JComponent> buttons) {
-//        if(buttons == null)
-//            return -1;
-//
-//        int panelWidth = panel.getWidth();
-//        int panelHeight = panel.getHeight();
-//
-//        // command buttons--------------
-//        int butonQT = buttons.size();
-//
-//        int row;
-//        int col;
-//        if(butonQT <= 0) {
-//            row = 0;
-//            col = 0;
-//        }else if(butonQT <= 10) {
-//            row = 1;
-//            col = butonQT;
-//        }else {
-//            row = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
-//            if(butonQT >= panel.MAX_CMDBTN_QT){
-//                col = 10;
-//            }else{
-//                col = butonQT%2 + butonQT/2;
-//            }
-//        }
-//        int gap = CustOpts.HOR_GAP / 2;
-//        int v_gap = CustOpts.VER_GAP / 2;
-//        int tBtnWidht = col == 0? 100 : (panelWidth - gap * (col + 1)) / (col);
-//        int tBtnHeight = (BarFrame.instance.getHeight() - 80) / 10;
-//
-//        int max = butonQT > panel.MAX_CMDBTN_QT ? panel.MAX_CMDBTN_QT : butonQT;
+    public static int layoutCommandButtons(PicturePane panel, ArrayList<ISButton> buttons) {
+        if(buttons == null)
+            return -1;
+
+        int panelWidth = panel.getContext().getResources().getDisplayMetrics().widthPixels;
+        int panelHeight = panel.getContext().getResources().getDisplayMetrics().heightPixels;
+
+        // command buttons--------------
+        int butonQT = buttons.size();
+
+        int row;
+        int col;
+        if(butonQT <= 0) {
+            row = 0;
+            col = 0;
+        }else if(butonQT <= 10) {
+            row = 1;
+            col = butonQT;
+        }else {
+            row = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
+            if(butonQT >= panel.MAX_CMDBTN_QT){
+                col = 10;
+            }else{
+                col = butonQT%2 + butonQT/2;
+            }
+        }
+        int gap = CustOpts.HOR_GAP / 2;
+        int v_gap = CustOpts.VER_GAP / 2;
+        int tBtnWidht = col == 0? 100 : (panelWidth - gap * (col + 1)) / (col);
+        int tBtnHeight = (panelHeight - 80) / 10;
+
+        int max = butonQT > panel.MAX_CMDBTN_QT ? panel.MAX_CMDBTN_QT : butonQT;
 //        for(int i = 0; i < max; i++) {
 //            buttons.get(i).setBounds(gap + tBtnWidht * (i < col ? i : i - col) + gap * (i < col ? i : i - col),
 //                    panelHeight - tBtnHeight * (i < col && max > col ? 2 : 1) - v_gap * (i < col && max > col ? 2 : 1),
 //                    tBtnWidht, tBtnHeight);
 //        }
-//        return buttons != null && buttons.size() > 0 ? buttons.get(0).getY() : BarFrame.instance.getHeight() - 83;
-//    }
+//        return buttons != null && buttons.size() > 0 ? (int)(buttons.get(0).getY()) : panelHeight - 83;
+        return panelHeight - 83;
+    }
+//    public int layoutCommandButtons(PicturePane panel, ArrayList<Button> buttons) {
+//        if (buttons == null || buttons.size() == 0)
+//            return -1;
 //
+//        int panelWidth = panel.getWidth();
+//
+//        // Determine rows and columns
+//        int buttonCount = buttons.size();
+//        int rows, cols;
+//        if(buttonCount <= 0) {
+//            rows = 0;
+//            cols = 0;
+//        }if (buttonCount <= 10) {
+//            rows = 1;
+//            cols = buttonCount;
+//        } else {
+//            rows = 2;
+//            cols = Math.min(10, buttonCount);
+//            rows = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
+//            if(buttonCount >= panel.MAX_CMDBTN_QT){
+//                cols = 10;
+//            }else{
+//                cols = butonQT%2 + butonQT/2;
+//            }
+//        }
+//
+//        int buttonWidth = panelWidth / cols;
+//        int buttonHeight = BarFrame.instance.getResources().getDimensionPixelSize(R.dimen.button_height); // define in dimens.xml
+//
+//        panel.removeAllViews();
+//        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(buttonWidth, buttonHeight);
+//        params.setMargins(5, 5, 5, 5); // margins in pixels
+//
+//        for (int i = 0; i < buttonCount; i++) {
+//            Button button = buttons.get(i);
+//            button.setLayoutParams(params);
+//            panel.addView(button);
+//        }
+//    }
+
     public static boolean empty(String content) {
         return content == null || content.trim().length() == 0;
     }

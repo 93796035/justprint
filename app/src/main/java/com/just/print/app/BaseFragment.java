@@ -21,7 +21,7 @@ abstract public class BaseFragment extends Fragment {
         return getActivity().getBaseContext();
     }
 
-    View mRoot;
+    protected View mRoot;
 
     EventBus eventBus;
 

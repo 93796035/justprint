@@ -42,9 +42,9 @@ public class BillListPanel extends BaseFragment {
             //number not duplicated with existing one.
             sql.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(" and status >= 0)");
             sql.append(" order by id");//if order by billIndex, then "9" will be the last one. so should order by id
-            Cursor cursor = AikaPos.db.rawQuery(sql.toString(), null);
-            if (cursor != null && cursor.moveToFirst()) {
-                num = DBUtil.getCursorInt(cursor, "billIndex");
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            if (rs != null && rs.moveToFirst()) {
+                num = DBUtil.getCursorInt(rs, "billIndex");
             }
         } catch (Exception exp) {
             L.d("BillListPane.getANewBillNumber", "found no bill on an already opened table.");

@@ -9,6 +9,7 @@ import com.just.print.util.L;
 import java.util.Date;
 
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.panel.BillPanel;
 //import org.cas.client.platform.bar.pannel.BillPanel;
 //import org.cas.client.platform.bar.print.PrintService;
 //import org.cas.client.platform.casutil.ErrorUtil;
@@ -27,7 +28,37 @@ public class DBUtil {
 			L.e("openATable", "exception when openning a table: " + sql, exp);
 		}
 	}
-
+	//update all current output and bill with target table name, opentime and with the new billIdx?
+	//@Note: why people merge table??? maybe they are friends met in restaurant, they shouldn't share same bill number for sure,
+	//because they might AA when pay the bill.
+	public static void moveBillToAnotherTable(String newTableName, int newBillIdx, int billID, String openTime) {
+		moveOutputToTable(billID, newTableName, newBillIdx, openTime);
+		moveBillToTable(billID, newTableName, newBillIdx, openTime);
+	}
+	//@NOTE didn't use current table as filter condition. because it have been changed.
+	public static void moveOutputToTable(int billID, String newTable, int newBillIdx, String openTime) {
+		StringBuilder sql = new StringBuilder("update output set SUBJECT = '").append(newTable)
+				.append("', CONTACTID = ").append(newBillIdx)
+				.append(", time = '").append(openTime)
+				.append("' where category = ").append(billID);
+		try {
+			AikaPos.db.execSQL(sql.toString());
+		}catch(Exception exp) {
+			L.e("change table", "exception when changing table:" + sql, exp);
+		}
+	}
+	private static void moveBillToTable(int billID, String newTable, int billIdx, String openTime) {
+		StringBuilder sql;
+		sql = new StringBuilder("update bill set tableID = '").append(newTable)
+				.append("', BillIndex = '").append(billIdx)
+				.append("' , opentime = '").append(openTime)
+				.append("' where id = ").append(billID);
+		try {
+			AikaPos.db.execSQL(sql.toString());
+		}catch(Exception exp) {
+			L.e("change table", "exception when changing table for bill list:" + sql, exp);
+		}
+	}
 	public static boolean isThereItemAddOrRemoved(int billId, boolean isPreviousBill) {
 		//fetch out the "3 elements". and two format of created time
 
@@ -147,29 +178,48 @@ public class DBUtil {
 			L.e("DBUtil", "exception when running sql:" + sb.toString(), e);
 		}
 	}
-	
-	//
-//	public static void updatePriceAndCreateTimeInBillRecord(BillPanel billPanel, int status, String createTime) {
-//		StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText()) * 100))
-//				.append(", discount = ").append(Math.round(billPanel.discount))
-//				.append(", serviceFee = ").append(billPanel.serviceFee)
-//				.append(", comment = ' ").append(billPanel.getComment()).append("'");
-//		if(status != 0) {
-//			sql.append(", status = ").append(status);
-//		}
-//		if(createTime != null) {
-//			sql.append(", createTime = '").append(createTime).append("'");
-//		}
-//		sql.append(" where id = ").append(billPanel.getBillID());
-//
-//		try {
-//			AikaStyle.db.execSQL(sql.toString());
-//		} catch (Exception e) {
-//			L.e("DBUtil", "Excepioint in updateing bill info:" + sql, e);
-//		}
-//
-//	}
-//
+	public static void closeTableAndBillInDB(String tableName, String openTime) {
+		//all the bill should already completed when table closed except those was generated while has no output on it.
+		//this is the designed time to clean those bills.
+		StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
+				.append(" WHERE tableID = '").append(tableName)
+				.append("' and OPENTIME = '").append(openTime)
+				.append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
+		try {
+			AikaPos.db.execSQL(sql.toString());
+			if(BarOption.isDeleteTableWhenClose()) {
+				sql = new StringBuilder("delete from dining_Table WHERE name = '").append(tableName).append("'");
+			}else {
+				sql = new StringBuilder("update dining_Table set status = ").append(DBConsts.ORIGINAL)
+						.append(", opentime = '' WHERE name = '").append(tableName).append("'");
+			}
+			AikaPos.db.execSQL(sql.toString());
+		}catch(Exception exp) {
+			L.e("change table", "exception when recover table:" + sql, exp);
+		}
+	}
+
+	public static void updatePriceAndCreateTimeInBillRecord(BillPanel billPanel, int status, String createTime) {
+		StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText().toString()) * 100))
+				.append(", discount = ").append(Math.round(billPanel.discount))
+				.append(", serviceFee = ").append(billPanel.serviceFee)
+				.append(", comment = ' ").append(billPanel.getComment()).append("'");
+		if(status != 0) {
+			sql.append(", status = ").append(status);
+		}
+		if(createTime != null) {
+			sql.append(", createTime = '").append(createTime).append("'");
+		}
+		sql.append(" where id = ").append(billPanel.getBillID());
+
+		try {
+			AikaPos.db.execSQL(sql.toString());
+		} catch (Exception e) {
+			L.e("DBUtil", "Excepioint in updateing bill info:" + sql, e);
+		}
+
+	}
+
 //	public static void upateBillInfoIntoDB(BillPanel billPanel) {
 //		//update the total price of the target bill,
 //		//---because when add dish into the billPane, adding discount, splitting bill....all will cause the total price of the bill change.

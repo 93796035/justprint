@@ -186,7 +186,7 @@ public class MainGenerator {
         bill.addIntProperty("Total");
         bill.addIntProperty("discount");
         bill.addIntProperty("serviceFee").columnName("serviceFee");
-        bill.addIntProperty("caseReceived").columnName("caseReceived");
+        bill.addIntProperty("cashReceived").columnName("cashReceived");
         bill.addIntProperty("debitReceived").columnName("debitReceived");
         bill.addIntProperty("visaReceived").columnName("visaReceived");
         bill.addIntProperty("masterReceived").columnName("masterReceived");

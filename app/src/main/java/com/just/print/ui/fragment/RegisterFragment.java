@@ -54,7 +54,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         }
         if (!StringUtils.isEmpty(shopName)) {
             BarFrame.instance.switchFragment(null);
-            LoginDialogFragment.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
+            LoginDlg.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
         }
     }
 
@@ -160,7 +160,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
         NetUtils.activate();
 
         BarFrame.instance.switchFragment(null);
-        LoginDialogFragment.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
+        LoginDlg.getInstance().show(getActivity().getSupportFragmentManager(), "login_dialog");
     }
 
 }

@@ -31,7 +31,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
         public final static Property Total = new Property(5, Integer.class, "Total", false, "TOTAL");
         public final static Property Discount = new Property(6, Integer.class, "discount", false, "DISCOUNT");
         public final static Property ServiceFee = new Property(7, Integer.class, "serviceFee", false, "serviceFee");
-        public final static Property CaseReceived = new Property(8, Integer.class, "caseReceived", false, "caseReceived");
+        public final static Property CashReceived = new Property(8, Integer.class, "cashReceived", false, "cashReceived");
         public final static Property DebitReceived = new Property(9, Integer.class, "debitReceived", false, "debitReceived");
         public final static Property VisaReceived = new Property(10, Integer.class, "visaReceived", false, "visaReceived");
         public final static Property MasterReceived = new Property(11, Integer.class, "masterReceived", false, "masterReceived");
@@ -69,7 +69,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
                 "'TOTAL' INTEGER," + // 5: Total
                 "'DISCOUNT' INTEGER," + // 6: discount
                 "'serviceFee' INTEGER," + // 7: serviceFee
-                "'caseReceived' INTEGER," + // 8: caseReceived
+                "'cashReceived' INTEGER," + // 8: cashReceived
                 "'debitReceived' INTEGER," + // 9: debitReceived
                 "'visaReceived' INTEGER," + // 10: visaReceived
                 "'masterReceived' INTEGER," + // 11: masterReceived
@@ -134,9 +134,9 @@ public class BillDao extends AbstractDao<Bill, Long> {
             stmt.bindLong(8, serviceFee);
         }
  
-        Integer caseReceived = entity.getCaseReceived();
-        if (caseReceived != null) {
-            stmt.bindLong(9, caseReceived);
+        Integer cashReceived = entity.getCashReceived();
+        if (cashReceived != null) {
+            stmt.bindLong(9, cashReceived);
         }
  
         Integer debitReceived = entity.getDebitReceived();
@@ -219,7 +219,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // Total
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // discount
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // serviceFee
-            cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8), // caseReceived
+            cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8), // cashReceived
             cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // debitReceived
             cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // visaReceived
             cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11), // masterReceived
@@ -246,7 +246,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
         entity.setTotal(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setDiscount(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setServiceFee(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
-        entity.setCaseReceived(cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8));
+        entity.setCashReceived(cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8));
         entity.setDebitReceived(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
         entity.setVisaReceived(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
         entity.setMasterReceived(cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11));

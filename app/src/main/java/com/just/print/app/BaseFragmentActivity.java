@@ -22,8 +22,8 @@ public class BaseFragmentActivity extends FragmentActivity implements EventBus {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(Options.getScreenOrientation());
     }
-    public void showToast(String text) {
-        ToastUtil.showToast(this, text);
+    public static void showToast(String text) {
+        ToastUtil.showToast(BarFrame.instance.getBaseContext(), text);
     }
     public FragmentTransaction beginTransaction() {
         return getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);

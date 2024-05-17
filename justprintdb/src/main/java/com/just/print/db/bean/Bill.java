@@ -22,7 +22,7 @@ public class Bill {
     private Integer Total;
     private Integer discount;
     private Integer serviceFee;
-    private Integer caseReceived;
+    private Integer cashReceived;
     private Integer debitReceived;
     private Integer visaReceived;
     private Integer masterReceived;
@@ -52,7 +52,7 @@ public class Bill {
         this.id = id;
     }
 
-    public Bill(Long id, String createdTime, String tableName, String customerNumber, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer caseReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer status, Integer version) {
+    public Bill(Long id, String createdTime, String tableName, String customerNumber, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer cashReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer status, Integer version) {
         this.id = id;
         this.createdTime = createdTime;
         this.tableName = tableName;
@@ -61,7 +61,7 @@ public class Bill {
         this.Total = Total;
         this.discount = discount;
         this.serviceFee = serviceFee;
-        this.caseReceived = caseReceived;
+        this.cashReceived = cashReceived;
         this.debitReceived = debitReceived;
         this.visaReceived = visaReceived;
         this.masterReceived = masterReceived;
@@ -145,12 +145,12 @@ public class Bill {
         this.serviceFee = serviceFee;
     }
 
-    public Integer getCaseReceived() {
-        return caseReceived;
+    public Integer getCashReceived() {
+        return cashReceived;
     }
 
-    public void setCaseReceived(Integer caseReceived) {
-        this.caseReceived = caseReceived;
+    public void setCashReceived(Integer cashReceived) {
+        this.cashReceived = cashReceived;
     }
 
     public Integer getDebitReceived() {

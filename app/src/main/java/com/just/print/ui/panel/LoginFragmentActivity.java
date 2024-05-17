@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import com.just.print.R;
 import com.just.print.app.BaseFragmentActivity;
-import com.just.print.ui.fragment.LoginDialogFragment;
+import com.just.print.ui.fragment.LoginDlg;
 
 public class LoginFragmentActivity extends BaseFragmentActivity {
 
@@ -14,7 +14,7 @@ public class LoginFragmentActivity extends BaseFragmentActivity {
         setContentView(R.layout.activity_login);
 
         if (savedInstanceState == null) { // 确保在初次创建时添加 Fragment
-            LoginDialogFragment.getInstance().show(getSupportFragmentManager(), "login_dialog");
+            LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
         }
     }
 }

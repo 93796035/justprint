@@ -1,0 +1,107 @@
+<!-- res/layout/fragment_tables.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gridLayoutTables"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:padding="0dp">
+
+    <!-- 其他内容 -->
+
+    <!-- 底部按钮条 -->
+    <LinearLayout
+        android:id="@+id/buttonBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ADD"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+        <Button
+            android:id="@+id/btnBillingHistory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="BILLING HISTORY"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2"  />
+
+        <Button
+            android:id="@+id/btnOpenDrawer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="OPEN DRAWER"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+
+        <Button
+            android:id="@+id/btnChangeTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="CHANGE TABLE"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SETTINGS"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+
+        <Button
+            android:id="@+id/btnReport"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="REPORT"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+
+        <Button
+            android:id="@+id/btnMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MENU"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+
+        <Button
+            android:id="@+id/btnSignOut"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SIGN OUT"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:singleLine="false"
+            android:lines="2" />
+    </LinearLayout>
+</RelativeLayout>
+

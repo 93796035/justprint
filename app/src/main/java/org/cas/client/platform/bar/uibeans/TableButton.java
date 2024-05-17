@@ -1,15 +1,12 @@
 package org.cas.client.platform.bar.uibeans;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.TypedValue;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.just.print.app.BarFrame;
-import com.just.print.ui.fragment.LoginDialogFragment;
 import com.just.print.util.L;
 
 import org.cas.client.platform.bar.BarOption;

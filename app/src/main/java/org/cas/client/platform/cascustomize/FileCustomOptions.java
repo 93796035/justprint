@@ -2231,7 +2231,7 @@ class FileCustomOptions extends CustOpts {
     @Override
     public int getUserLang() {
         Object tObj = userConfigs.get(CustOptsConsts.USERNAME);
-        return tObj != null ? Integer.valueOf((String) tObj) : 0;
+        return tObj != null ? Integer.valueOf((String) tObj) : 1;
     }
 
     @Override

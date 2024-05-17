@@ -644,7 +644,7 @@ public class BarOption {
     		}catch(Exception e) {
     		}
     	}
-    	return superPassword == null ? "5145583266" : superPassword;
+    	return superPassword == null ? "4389210090" : superPassword;
     }
     public static void setSuperPassword(String superPassword){
     	CustOpts.custOps.setKeyAndValue("superPassword", TaoEncrypt.encryptPassword(superPassword));

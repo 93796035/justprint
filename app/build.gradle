@@ -7,7 +7,7 @@ android {
     compileSdkVersion 33
     defaultConfig {
         applicationId "com.just.print"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
@@ -41,6 +41,13 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.5.1'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+// 添加Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs 依赖
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
+// 添加iText 7 Core 依赖
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+
 }
 tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDebug') {
