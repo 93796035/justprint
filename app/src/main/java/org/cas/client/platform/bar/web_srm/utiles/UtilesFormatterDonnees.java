@@ -1,6 +1,6 @@
 package org.cas.client.platform.bar.web_srm.utiles;
 
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarUtil;
 

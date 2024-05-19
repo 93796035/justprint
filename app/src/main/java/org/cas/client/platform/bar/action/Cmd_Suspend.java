@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.util.Date;
 
@@ -8,7 +10,7 @@ import javax.swing.JOptionPane;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -40,7 +42,7 @@ public class Cmd_Suspend implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
@@ -59,7 +61,7 @@ public class Cmd_Suspend implements SamActionListener {
 			billPanel.expireAndReGenerateBill(null);
 		}
 		//update bill 
-    	DBUtil.updatePriceAndCreateTimeInBillRecord(salesPanel.billPanel, DBConsts.SUSPENDED, BarUtil.df.format(new Date()));
+    	DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(salesPanel.billPanel, DBConsts.SUSPENDED, BarUtil.df.format(new Date()));
     	//update outputs
         try {
         	String tableID = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();

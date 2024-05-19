@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
 
+import org.cas.client.platform.casutil.L;
 import org.json.JSONException;
 import org.json.JSONObject;
 

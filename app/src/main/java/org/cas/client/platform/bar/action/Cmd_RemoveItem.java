@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.pannel.BarFrame;
@@ -29,7 +31,7 @@ public class Cmd_RemoveItem implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;

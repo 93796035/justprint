@@ -9,7 +9,7 @@ import com.just.print.R;
 import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.dao.SaleRecordDao;
-import com.just.print.util.DbUtil;
+import com.just.print.util.DBUtil.getCursorString(rs,;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -57,7 +57,7 @@ public class SynchronizeDBFragment extends BaseFragment{
             showToast("Please activate the application first.");
             return;
         }
-        DbUtil.syncDbOntoServer(code, store_name.getText().toString(),  false);
+        DBUtil.getCursorString(rs,.syncDbOntoServer(code, store_name.getText().toString(),  false);
         getActivity().finish();
     }
 

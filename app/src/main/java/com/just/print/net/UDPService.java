@@ -14,7 +14,7 @@ import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.AbsRequest;
 import com.just.print.sys.model.AbsResult;
 import com.just.print.util.AppUtils;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;

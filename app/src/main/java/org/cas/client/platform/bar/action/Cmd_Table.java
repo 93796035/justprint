@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.dialog.TabbleSettingDlg;
@@ -27,7 +29,7 @@ public class Cmd_Table implements SamActionListener {
 		this.sourceBtn = sourceBtn;
 	}
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		new TabbleSettingDlg(BarFrame.instance).setVisible(true);
 	}
 }

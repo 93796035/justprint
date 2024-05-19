@@ -47,6 +47,9 @@ public class MyAdapter extends ArrayAdapter<String[]> {
         notifyDataSetChanged(); // 通知ListView更新界面
     }
 
+    public String getValueAt(int position, int column) {
+        return mData.get(position)[column];
+    }
     static class ViewHolder {
         TextView textView;
     }

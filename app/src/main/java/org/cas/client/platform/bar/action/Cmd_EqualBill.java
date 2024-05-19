@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
@@ -38,7 +40,7 @@ public class Cmd_EqualBill implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		FunctionToggleButton o = (FunctionToggleButton)e.getSource();
 		//splite bill eually
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];

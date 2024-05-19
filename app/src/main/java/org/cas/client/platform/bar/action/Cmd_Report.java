@@ -1,5 +1,13 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
+import android.view.View;
+
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.util.JOptionPane;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 
@@ -7,6 +15,7 @@ import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.dialog.statistics.ReportDlg;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.uibeans.SamActionListener;
@@ -34,7 +43,7 @@ public class Cmd_Report implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		if(!BarOption.isSingleUser()) {
 			LoginDlg loginDlg = new LoginDlg(BarFrame.instance);
 			loginDlg.noRefresh = true;
@@ -47,7 +56,7 @@ public class Cmd_Report implements SamActionListener {
 			if(BarOption.isNeedLoginBeforeReport()) {
 				LoginDlg loginDlg = new LoginDlg(BarFrame.instance);
 				loginDlg.noRefresh = true;
-				loginDlg.setVisible(true);
+				loginDlg.show();setVisible(true);
 	            if (LoginDlg.PASSED != true) {
 	            	return;
 	            }
@@ -55,14 +64,12 @@ public class Cmd_Report implements SamActionListener {
     			if(LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
     				StringBuilder sql = new StringBuilder("select * from systeminfo order by id desc limit 1");
     				try {//get the relevant print Time base on batchID and the previous batchID
-    					ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-    		            rs.next();
-    		            String endTime = rs.getString("version");
+    					Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+    		            rs.moveToNext();
+    		            String endTime = DBUtil.getCursorString(rs,"version");
     		            sql = new StringBuilder("select * from Bill where opentime > '").append(endTime).append("'");
-    		            rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-    		            rs.afterLast();
-    		            rs.relative(-1);
-    		            int tmpPos = rs.getRow();
+    		            rs = AikaPos.db.rawQuery(sql.toString(), null);
+    		            int tmpPos = rs.getCount();
     		            if(tmpPos > 0) {
     		            	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.CloseBatchFirst());
     		            	return;

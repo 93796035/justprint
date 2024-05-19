@@ -1,5 +1,7 @@
  package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class Cmd_VoidOrder implements SamActionListener {
 	
 	@Override
 	// void order include saved ones
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
     	
 		//show up ReasonDialog, for user to select a reason for void.
 		ReasonDlg reasonDlg = new ReasonDlg(false);
@@ -62,7 +64,7 @@ public class Cmd_VoidOrder implements SamActionListener {
 					.append("' or (subject = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
 					.append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 					.append(" and contactID = ").append(clientIdx).append(")"); 	//in future version, might need to check the deleted property.
-			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			rs.last();
 
 		    if(rs.getRow() == 0) {			//if didn't find any saved output, means either empty, or all new.

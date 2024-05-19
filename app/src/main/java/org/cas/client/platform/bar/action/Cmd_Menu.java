@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -34,7 +36,7 @@ public class Cmd_Menu implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		JDialog dialog = new JDialog(BarFrame.instance, true);
 		JPanel jpanel = new JPanel();
 		jpanel.setPreferredSize(new Dimension(5, 10));

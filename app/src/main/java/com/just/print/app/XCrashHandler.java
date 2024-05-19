@@ -21,7 +21,7 @@ import android.os.Environment;
 import android.os.Looper;
 
 import com.alibaba.fastjson.JSONObject;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 @SuppressLint("SimpleDateFormat")
 public class XCrashHandler implements UncaughtExceptionHandler {

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.print.Command;

@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.dialog.PayMethodDlg;
@@ -30,7 +32,7 @@ public class Cmd_PrintOneInVoice implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		Object o = e.getSource();
 		new PayMethodDlg((BillListPanel)BarFrame.instance.panels[1]).show((FunctionButton)o);
 	}

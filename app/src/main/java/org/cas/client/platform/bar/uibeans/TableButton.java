@@ -7,11 +7,11 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.just.print.app.BarFrame;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.dialog.TableDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 
@@ -55,7 +55,7 @@ public class TableButton extends Button {
         setOpenTime(openTime);
         setWaiterName(BarFrame.instance.getCurrentUser().getNickName());
 
-        DBUtil.updateTableStatusInDB(getTableName(), openTime);
+        DBUtil.getCursorString(rs,.updateTableStatusInDB(getTableName(), openTime);
         int billId = BarFrame.instance.createAnEmptyBill(getTableName(), openTime, 0, 0);
         BarFrame.instance.setCurBillID(billId);
 

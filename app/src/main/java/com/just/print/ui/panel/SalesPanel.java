@@ -1,23 +1,18 @@
 package com.just.print.ui.panel;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Dish;
-import com.just.print.db.expand.DaoExpand;
 import com.stupid.method.reflect.StupidReflect;
 
-import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
@@ -74,7 +69,7 @@ public class SalesPanel extends PicturePane{
         billPanel.updateTotalArea(false);
 
         billPanel.unsavedItemsCheck();
-        DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);
+        DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);
     }
 
     //Todo: Maybe it's safe to delete this method, because I think no need to touch ouputs.
@@ -84,7 +79,7 @@ public class SalesPanel extends PicturePane{
 //				.append(" where deleted = ").append(DBConsts.voided)
 //				.append(" and category = ").append(billPanel.billID);
 //		try {
-//			PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+//			AikaPos.db.rawQuery(sql.toString(), null);
 //		}catch(Exception exp) {
 //			L.e("SalesPane", "Exception happenned when converting output's status to 0", exp);
 //		}

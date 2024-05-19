@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/tfdDspIndexCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Display Index" />
+
+    <EditText
+        android:id="@+id/tfdCategoryName1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category Name 1" />
+
+    <EditText
+        android:id="@+id/tfdCategoryName2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category Name 2" />
+
+    <EditText
+        android:id="@+id/tfdCategoryName3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category Name 3" />
+
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OK" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel" />
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete" />
+</LinearLayout>

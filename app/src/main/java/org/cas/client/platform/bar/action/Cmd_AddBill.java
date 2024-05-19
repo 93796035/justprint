@@ -1,12 +1,14 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.util.Date;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
@@ -37,13 +39,13 @@ public class Cmd_AddBill implements  SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		TablesPanel tablesPanel = (TablesPanel)BarFrame.instance.panels[0];
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		//save unsaved output
     	billPanel.unsavedItemsCheck();
-    	DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
+    	DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
     	if(BarOption.isCounterMode()){
     		//create a new table(which is considered as bill in counter mode).
     		int billIdx = BarOption.popKitchenBillIdx();

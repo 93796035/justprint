@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
@@ -40,7 +42,7 @@ public class Cmd_OpenDrawer implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		if(BarFrame.menuPanel.getPrinters().length == 0) {
 			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AddPrinterFirst());

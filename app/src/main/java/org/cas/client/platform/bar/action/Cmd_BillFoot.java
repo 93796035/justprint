@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.BarOption;
@@ -29,7 +31,7 @@ public class Cmd_BillFoot implements  SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		new BillFootDlg(BarFrame.instance, BarOption.getBillFootInfo()).setVisible(true);
 	}
 }

@@ -1,21 +1,17 @@
 package org.cas.client.platform.cascustomize;
 
-import android.content.Context;
-import android.os.FileUtils;
 import android.util.Log;
 
 import com.just.print.app.BarFrame;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.casutil.TaoEncrypt;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Hashtable;
 
 class DefaultConfigInfoLoader {

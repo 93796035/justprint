@@ -1,45 +1,49 @@
 package org.cas.client.platform.bar.print;
 
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.view.View;
+
+import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Bill;
+import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Printer;
+import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.i18n.BarDlgConst;
-import org.cas.client.platform.bar.model.*;
+import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.NetUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.bar.web_srm.Transaction;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesQRCode;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.CASUtility;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
 
-import javax.imageio.ImageIO;
-import javax.print.DocFlavor;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 //If the ip of a printer is "LPT1", then will actually user com interface to drive the printer.
@@ -85,182 +89,7 @@ public class PrintService{
     	flushIpContent();
         reInitIpSelectionMap();
 	}
-	//=======================================formatting========================================================
-	public static String formatBillContentFor3rdPart(String printerIP, List<String> contentsInBuilding, Content contentFrom3rdPart) {
-		
-		ArrayList<Dish> saleRecords = contentFrom3rdPart.getDishes();
-        String tableIdx = contentFrom3rdPart.getTable(); 
-		String billId = contentFrom3rdPart.getInvoice();
-		String startTimeStr = contentFrom3rdPart.getTime(); 
-		String waiterName = contentFrom3rdPart.getWaiter();
-		String refTo = contentFrom3rdPart.getRefTo();
-		
-		int tWidth = BarUtil.getPreferedWidth();
-		
-	    pushBillHeadInfo(contentsInBuilding, tWidth, billId, tableIdx, billId, null);        //as a plugin, we don't save or generate order# ID.
-	    																				//if there's customer index info, it should be inside table already.like T4-1,T4-2
-	    pushWaiterAndTime(contentsInBuilding, tWidth, startTimeStr, waiterName);
-        
-	    //use an empty billPanel instance to prepare the content into it for calculating the total
-	    BillPanel billPanel = new BillPanel(null);
-		billPanel.setOrderedDishAry(saleRecords);
-		billPanel.updateTotalArea(true);
-		
-	    String content = getServiceDetailContent(saleRecords, printerIP, billPanel, tWidth)//, refTo)
-	    		.append(getContentOfTotalPart(billPanel)).toString();
-    	
-	    int pEnd = content.lastIndexOf("\n");
-	    int pStart = content.substring(0, pEnd).lastIndexOf("\n");//ignore the "\n" at the end
-	    String lastRow = content.substring(pStart, pEnd);
-	    
-	    contentsInBuilding.add(content.substring(0, pStart + 1));
-	    contentsInBuilding.add("BigFont");	    //push bigger font. while it will not work for mev.
-	    contentsInBuilding.add(lastRow);
-	    contentsInBuilding.add("NormalFont");     //push normal font
-        //push end message
-	    if(refTo.length() > 0) {
-	    	if(!refTo.toLowerCase().contains(PrintUtil.REF_TO)) {
-	    		refTo = PrintUtil.REF_TO + refTo;
-	    	}
-	    	if(!refTo.contains(PrintUtil.DATE_REF)) {
-	    		int pComma = refTo.indexOf(",");
-	    		refTo = refTo.substring(0, pComma).trim() + PrintUtil.DATE_REF + refTo.substring(pComma + 1).trim();
-	    	}
-	    	int pComma = refTo.indexOf(",");	//if there's still comma, means there's the third part, which is the mtAvTaxRef(it's not mandatory).
-	    	if(pComma > 0) {
-	    		refTo = refTo.substring(0, pComma).trim() + PrintUtil.OLD_SUBTOTAL + refTo.substring(pComma).trim();
-	    	}
-	    	contentsInBuilding.add("\n" + refTo);	//has comment means bill printed(will be co-considered when saving paper flag is set) or invoice was reopened,
-        }else {
-            pushEndMessage(contentsInBuilding, FACTURE_ORIGINAL);
-        }
-        
-        //push cut
-        contentsInBuilding.add("\n\n\n\n\n");
-        contentsInBuilding.add(PrintUtil.CUT);
-        
-		return billPanel.valTotlePrice.getText();
-	}
-	
-	// if the comment part contains RE_PRINTED_INTERNAL_USE or RE_PRINTED, then it's not a normal receipt, it's reprinted receipt for customer or for inner use.
-	public static String formatReceiptContentFor3rdPart(String printerIP, List<String> strAryFR, Content contentFrom3rdPart) {
-		
-		ArrayList<Dish> saleRecords = contentFrom3rdPart.getDishes();
-        String tableIdx = contentFrom3rdPart.getTable(); 
-		String billId = contentFrom3rdPart.getInvoice();
-		String startTimeStr = contentFrom3rdPart.getTime(); 
-		String waiterName = contentFrom3rdPart.getWaiter();
-		String refTo = contentFrom3rdPart.getRefTo();	
-		if(!refTo.contains(PrintUtil.REF_TO)
-				&& refTo.contains(ValuePossible.RE_PRINTED_INTERNAL_USE)
-				&& refTo.contains(ValuePossible.RE_PRINTED)) {
-			refTo = PrintUtil.REF_TO + refTo;		
-		}
-		
-    	int tWidth = BarUtil.getPreferedWidth();
-    	
-	    pushBillHeadInfo(strAryFR, tWidth, billId, tableIdx, billId, null);
-	    
-	    pushWaiterAndTime(strAryFR, tWidth, startTimeStr, waiterName);
 
-	    //use an empty billPanel instance to prepare the content into it for calculating the total
-	    BillPanel billPanel = new BillPanel(null);
-		billPanel.setOrderedDishAry(saleRecords);
-		billPanel.updateTotalArea(true);
-	    String content = getServiceDetailContent(saleRecords, printerIP, billPanel, tWidth)
-	    		.append(getContentOfTotalPart(billPanel)).toString();
-		
-	    int pEnd = content.lastIndexOf("\n");
-	    int pStart = content.substring(0, pEnd).lastIndexOf("\n");//ignore the "\n" at the end
-	    String lastRow = content.substring(pStart, pEnd);
-	    
-	    strAryFR.add(content.substring(0, pStart + 1));
-        strAryFR.add("BigFont");	    //push bigger font. while it will not work for mev.
-        strAryFR.add(lastRow);
-        strAryFR.add("NormalFont");     //push normal font
-        
-        //payInfo
-        strAryFR.add( "\n" + contentFrom3rdPart.getPay());
-        
-        if(refTo.length() > 0) {
-        	strAryFR.add( "\n" + refTo); //if 3rd part didn't put info in comment, then will be an empty line here.
-		}else {
-			pushEndMessage(strAryFR, PAYMENT_REÇU);	//only original bill print will display foot message.
-		}
-        strAryFR.add("\n\n\n\n\n");
-        strAryFR.add(PrintUtil.CUT);
-        
-        return billPanel.valTotlePrice.getText();
-	}
-	
-	public static String formatRefundContentFor3rdPart(String printerIP, List<String> contents, Content contentFrom3rdPart) {
-		
-		ArrayList<Dish> saleRecords = contentFrom3rdPart.getDishes();
-        String tableIdx = contentFrom3rdPart.getTable(); 
-		String billId = contentFrom3rdPart.getInvoice();
-		String startTimeStr = contentFrom3rdPart.getTime(); 
-		String waiterName = contentFrom3rdPart.getWaiter();
-		String comment = contentFrom3rdPart.getRefTo();
-		String[] pay = contentFrom3rdPart.getPay().split(":");
-		
-    	int tWidth = BarUtil.getPreferedWidth();
-
-	    pushBillHeadInfo(contents, tWidth, billId, tableIdx, billId, null);
-	    
-	    pushWaiterAndTime(contents, tWidth, startTimeStr, waiterName);
-	  
-	    //use an empty billPanel instance to prepare the content into it for calculating the total
-	    BillPanel billPanel = new BillPanel(null);
-		billPanel.setOrderedDishAry(saleRecords);
-		billPanel.updateTotalArea(true);
-	    String content = getServiceDetailContent(saleRecords, printerIP, billPanel, tWidth)
-	    		.append(getContentOfTotalPart(billPanel)).toString();
-	    
-	    int pEnd = content.lastIndexOf("\n");
-	    int pStart = content.substring(0, pEnd).lastIndexOf("\n");//ignore the "\n" at the end
-	    String lastRow = content.substring(pStart, pEnd);
-
-	    contents.add(content.substring(0, pStart + 1));
-		
-        pushRefundAndNewTotal(billPanel, contents, (int)(Float.valueOf(pay[1]) * -100), pay[0], tWidth);
-        
-        contents.add(PrintUtil.REF_TO + comment);
-        contents.add("\n##REFUND##\n\n");//put this line just to make the size of content increase 1 to match the length of rerund case.
-        contents.add("\n\n\n\n\n");
-        contents.add(PrintUtil.CUT);
-        
-        return billPanel.valTotlePrice.getText();
-	}
-	
-	public static String formatVoidContentFor3rdPart(String printerIP, List<String> contents, Content contentFrom3rdPart) {
-		
-		ArrayList<Dish> saleRecords = contentFrom3rdPart.getDishes();
-        String tableIdx = contentFrom3rdPart.getTable(); 
-		String billId = contentFrom3rdPart.getInvoice();
-		String startTimeStr = contentFrom3rdPart.getTime(); 
-		String waiterName = contentFrom3rdPart.getWaiter();
-		String comment = contentFrom3rdPart.getRefTo();
-		
-    	int tWidth = BarUtil.getPreferedWidth();
-    	
-	    pushBillHeadInfo(contents, tWidth, billId, tableIdx, billId, null);
-	    
-	    pushWaiterAndTime(contents, tWidth, startTimeStr, waiterName);
-	    
-	    //use an empty billPanel instance to prepare the content into it for calculating the total
-	    BillPanel billPanel = new BillPanel(null);
-		billPanel.setOrderedDishAry(saleRecords);
-		billPanel.updateTotalArea(true);
-	    contents.add(getServiceDetailContent(billPanel.getOrderedDishAry(), printerIP, billPanel, tWidth).toString());
-	    
-        pushVoidedTotal(billPanel, contents, tWidth);
-
-        contents.add(PrintUtil.REF_TO + comment);
-        contents.add("\n\n\n\n\ncut");
-                
-        return billPanel.valTotlePrice.getText();
-	}
-	
 	//=======================================printing=======================================================
 	private static String replaceMoney(String comment, String subTotalStr) {
 		//clean the subTotal string. incase it't like "subtotal:0.00"
@@ -369,7 +198,7 @@ public class PrintService{
     	}
         pushBillHeadInfo(contentList, tWidth, fomatBillId(billId), tableIdx, orderNo, null);
         
-	    pushWaiterAndTime(contentList, tWidth, BarFrame.instance.valOpenTime.getText(), LoginDlg.USERNAME);
+	    pushWaiterAndTime(contentList, tWidth, BarFrame.instance.valOpenTime.getText().toString(), LoginDlg.USERNAME);
         
         float totalSubTotal = 0.0f;
         float totalTPS = 0.0f;
@@ -551,26 +380,26 @@ public class PrintService{
             String key = (String)entry.getKey();
             List<Dish> dishList = (List<Dish>) entry.getValue();
 
-            if(ipPrinterMap.get(key).getType() == 0 && dishList.size() > 0){
+            if(ipPrinterMap.get(key).getCategory() == 0 && dishList.size() > 0){
                 //订单排序
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<Dish>() {
                     @Override
                     public int compare(Dish dish1, Dish dish2) {
-                        String c1 = dish1.getCATEGORY();
-                        String c2 = dish2.getCATEGORY();
+                        long c1 = dish1.getCategoryId();
+                        long c2 = dish2.getCategoryId();
                         int dspIdx = 0;
                         for(int i = 0; i < allCategory.length; i++) {
-                        	if(c1.equals(allCategory[i].getLanguage(CustOpts.custOps.getUserLang()))){
+                        	if(c1 == allCategory[i].getId()){
                         		dspIdx = i;
                         		break;
                         	}
                         }
                         for(int i = 0; i < allCategory.length; i++) {
-                        	if(c2.equals(allCategory[i].getLanguage(CustOpts.custOps.getUserLang()))){
+                        	if(c2 == allCategory[i].getId()){
                         		return dspIdx - i;
                         	}
                         }
-                        return c1.compareTo(c2);
+                        return (int)(c1 - c2);
                     }
                 });
             }
@@ -590,7 +419,7 @@ public class PrintService{
         			ipContentMap.get(printerIP).add("Command.BEEP");
         		}
         		ipContentMap.get(printerIP).add("BigFont");
-                if(ipPrinterMap.get(printerIP).getFirstPrint() == 1){  //全单封装
+                if(ipPrinterMap.get(printerIP).getStyle() == 1){  //全单封装
                     ipContentMap.get(printerIP).add(
                     		formatContentForOrder(dishList, printerIP, curTable, curBill, waiterName, isCancelled)
                     		+ "\n\n\n\n\n");
@@ -678,7 +507,7 @@ public class PrintService{
          			//or if didn't print well, add to error list, because employee never want to fix the printer...they always call boss.
          			JOptionPane.showMessageDialog(BarFrame.instance, entry.getKey() + BarFrame.consts.PrinterSettingError());
          			PrintUtil.errorPrinterList.add(entry.getKey());
-         			BarFrame.instance.btnRetryPrinter.setVisible(true);
+         			BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);
                     errorsAmount ++;
              	}
         	}
@@ -720,7 +549,7 @@ public class PrintService{
 	//=====================================simple serial port print========================================
 	static String doSerialFilePrint(List<String> pSndMsg) {
 		//check if mev device and printer has been installed?
-		PrintUtil.checkPrinter(DocFlavor.INPUT_STREAM.AUTOSENSE, new HashPrintRequestAttributeSet());
+		PrintUtil.checkPrinter();
 
     	//check the msg type and do a clean to remove unnecessary lines like empty line and cut..(e.g. if it's a bill/check(6 item inside)  or a receipt/invoice (7 item inside)
 		String transType = PrintService.getOutTransType(pSndMsg);	//we've added special content when prparing the content, in method:
@@ -738,7 +567,7 @@ public class PrintService{
 	//this method is currently works for creating bill. 
     private static String doMevPrint(String printerName, List<String> pSndMsg) {
     	//check if mev device and printer has been installed?
-    	PrintUtil.checkPrinter(DocFlavor.INPUT_STREAM.AUTOSENSE, new HashPrintRequestAttributeSet());
+    	PrintUtil.checkPrinter();
 
     	//check the msg type and do a clean to remove unnecessary lines like empty line and cut..(e.g. if it's a bill/check(6 item inside)  or a receipt/invoice (7 item inside)
     	//@NOTE: we know the message type(bill, receipt, rp, db base on the sndMsg's length.
@@ -779,19 +608,19 @@ public class PrintService{
     			strFR = PrintUtil.doWebSocketPrint(
 						printerName.trim(),
 						mainContent,
-    					responseStrs == null ? null : (BufferedImage)responseStrs.get(0),
+    					responseStrs == null ? null : (Bitmap) responseStrs.get(0),
     					responseStrs == null ? null : responseStrs.get(1).toString());
     			//in case user want to always print duplicated temporal bill automatically
     			if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-    				PrintUtil.doWebSocketPrint(printerName.trim(), mainContent, (BufferedImage)responseStrs.get(0), responseStrs.get(1).toString());
+    				PrintUtil.doWebSocketPrint(printerName.trim(), mainContent, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
     			}
 			} else {									//cloud printer
 				strFR = printMevFormattedContent(mainContent,
-						responseStrs == null ? null : (BufferedImage)responseStrs.get(0),
+						responseStrs == null ? null : (Bitmap)responseStrs.get(0),
 						responseStrs == null ? null : responseStrs.get(1).toString());
 				//in case user want to always print duplicated temporal bill automatically
 				if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-					printMevFormattedContent(mainContent, (BufferedImage)responseStrs.get(0), responseStrs.get(1).toString());
+					printMevFormattedContent(mainContent, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
 				}
 			}
     		return strFR;
@@ -927,19 +756,19 @@ public class PrintService{
 	}
 
 	//if qrcodeImg is null, means it's internal used reprint or there's exception when sending request to server.
-	private static String printMevFormattedContent(String contentToWriteToFile, BufferedImage qrcodeImg, String contentToWirteToFile2) {
+	private static String printMevFormattedContent(String contentToWriteToFile, Bitmap qrcodeImg, String contentToWirteToFile2) {
 
 		//print the text part content and qrcode content out.
 		String key = PrintUtil.combinedPrint(contentToWriteToFile, qrcodeImg, contentToWirteToFile2);
 				//PrintUtil.printThroughOSdriver(PrintUtil.getMevCommandFilePath(path1, null), false) && PrintUtil.combinedPrint(null, qrcodeImg, path2);
 				//PrintUtil.combinedPrintToPDF(path1, qrcodeImg, path2);
 				//PrintUtil.printThroughOSdriver(path1, qrcodeImg, path2, CustOpts.custOps.getDeleteOriginalTransaction());
-		
+
 		if(key == null) {
 			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.PrinterError());
 		}
-		
-		return key; //note:returning only the key part of the the whole file path. 
+
+		return key; //note:returning only the key part of the the whole file path.
 	}
 	
 	private static String getOutTransType(List<String> sndMsg) {
@@ -995,12 +824,12 @@ public class PrintService{
 	    
 	    return result;
 	}
-	
-    private static byte[] convertImageToByteArray(BufferedImage image, String format) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, format, byteArrayOutputStream);
-        return byteArrayOutputStream.toByteArray();
-    }
+
+	public static byte[] convertImageToByteArray(Bitmap image, Bitmap.CompressFormat format) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		image.compress(format, 100, byteArrayOutputStream);
+		return byteArrayOutputStream.toByteArray();
+	}
     
 	//the contents for printers could be composed by :1/Command.BEEP 2/BigFont 3/NormalFont 4/cut 5/content.
 	//while when sending to mev device, the sndMsg could only be content. and length will always be 1.
@@ -1247,7 +1076,7 @@ public class PrintService{
     	}
 	    pushBillHeadInfo(strAryFR, tWidth, fomatBillId(billId), tableIdx, orderNo, customerIndex);
 	    
-	    pushWaiterAndTime(strAryFR, tWidth, BarFrame.instance.valOpenTime.getText(), LoginDlg.USERNAME);
+	    pushWaiterAndTime(strAryFR, tWidth, BarFrame.instance.valOpenTime.getText().toString(), LoginDlg.USERNAME);
 	    
 	    billPanel.lblTPS.setText(":0.00");
 	    billPanel.lblTVQ.setText(":0.00");
@@ -1275,7 +1104,7 @@ public class PrintService{
     	}
 	    pushBillHeadInfo(strAryFR, tWidth, fomatBillId(billId), tableIdx, orderNo, customerIndex);
 	    
-	    pushWaiterAndTime(strAryFR, tWidth, BarFrame.instance.valOpenTime.getText(), LoginDlg.USERNAME);
+	    pushWaiterAndTime(strAryFR, tWidth, BarFrame.instance.valOpenTime.getText().toString(), LoginDlg.USERNAME);
 	    
 	    strAryFR.add(getServiceDetailContent(billPanel.getRemovedDishAry(), curPrintIp, billPanel, tWidth).toString());
 	    String payMethodInfo = getOutPayInfo(billPanel, tWidth, false);
@@ -1345,7 +1174,7 @@ public class PrintService{
   		  		
   		for (Bill bill : list) {
   			BillPanel bp = new BillPanel(null);
-    		bp.initContent(null, bill.getBillIndex(), bill.getTableID(), bill.getOpenTime(), true);
+    		bp.initContent(null, bill.getCustomerNumber(), bill.getTableName(), bill.getOpenTime(), true);
     		for (Dish dish : bp.getOrderedDishAry()) {
     			String dishName = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
     			int num = dish.getNum();
@@ -1354,26 +1183,24 @@ public class PrintService{
     			}
 				if(dishQTMap.containsKey(dishName)) {
 					dishQTMap.put(dishName, dishQTMap.get(dishName) + num);
-					dishTotalMap.put(dishName, dishTotalMap.get(dishName) + num * dish.getPrice());
+					dishTotalMap.put(dishName, dishTotalMap.get(dishName) + (int)(num * dish.getPrice() * 100));
 				}else {
 					dishQTMap.put(dishName, num);
-					dishTotalMap.put(dishName, num * dish.getPrice());
+					dishTotalMap.put(dishName, (int)(num * dish.getPrice() * 100));
 				}
 				
-				StringBuilder sql = new StringBuilder("select category from product where deleted != true and CODE = ?");
+				StringBuilder sql = new StringBuilder("select category from product where deleted != true and CODE = 0");
 
 		        try {
-		        	PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());
-		            pstmt.setString(1, dish.getLanguage(0));
-		            ResultSet rs = pstmt.executeQuery();
-		            if(rs.next()) {
-		            	String category = NetUtil.trimContentFromHTML(rs.getString("category"));
+		            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+		            if(rs.moveToNext()) {
+		            	String category = NetUtil.trimContentFromHTML(DBUtil.getCursorString(rs,"category"));
 		            	if(categoryQTMap.containsKey(category)) {
 		            		categoryQTMap.put(category, categoryQTMap.get(category) + num);
-		            		categoryTotalMap.put(category, categoryTotalMap.get(category) + num * dish.getPrice());
+		            		categoryTotalMap.put(category, (int)(categoryTotalMap.get(category) + num * dish.getPrice()) * 100);
 						}else {
 							categoryQTMap.put(category, num);
-							categoryTotalMap.put(category, num * dish.getPrice());
+							categoryTotalMap.put(category, (int)(num * dish.getPrice() * 100));
 						}
 		            }
 		        }catch(Exception e) {
@@ -1460,23 +1287,20 @@ public class PrintService{
         
         float totalSales = 0.0f;
         try {
-            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-            rs.afterLast();
-            rs.relative(-1);
-            rs.beforeFirst();
-            while (rs.next()) {
-            	String tableID = rs.getString("tableID");
-            	String orderId = String.valueOf(rs.getInt("id"));
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            while (rs.moveToNext()) {
+            	String tableID = DBUtil.getCursorString(rs,"tableID");
+            	String orderId = String.valueOf(DBUtil.getCursorString(rs, "id"));
             	content.append(orderId).append(BarUtil.generateString(12 - orderId.length() - (tableID == null ? 4 : tableID.length()), " ")).append(tableID);
-            	float total = Float.valueOf((float) (rs.getInt("total") / 100.0));
+            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
             	totalSales += total;
             	String totalStr = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - totalStr.length(), " ")).append(totalStr).append("    ");
-//            	content.append(rs.getString("OpenTime"));
+//            	content.append(DBUtil.getCursorString(rs,"OpenTime"));
             	content.append("\n");
             }
             rs.close();// 关闭
-        } catch (SQLException e) {
+        } catch (Exception e) {
             ErrorUtil.write(e);
         }
         
@@ -1577,7 +1401,7 @@ public class PrintService{
     	Float fSubTotal = Float.valueOf(subtotal / 100f);
     	String strSubTotal = BarUtil.formatMoney(fSubTotal);
         if(fSubTotal > 0) {	//if it's not refund case, then should use the text on billPane directly, because the number on billPane included the service fee and discount of bill.
-        	String[] strs = billPanel.lblSubTotle.getText().split(":");
+        	String[] strs = billPanel.lblSubTotle.getText().toString().split(":");
             strSubTotal = strs[1].trim();
             fSubTotal = Float.valueOf(strSubTotal);
         }
@@ -1585,7 +1409,7 @@ public class PrintService{
         String strTPS = "";
         String[] strs = null;
         if(fSubTotal > 0) { // not refund mode
-	        strs = billPanel.lblTPS.getText().split(":");
+	        strs = billPanel.lblTPS.getText().toString().split(":");
 	        strTPS = strs[1].trim();
 		} else {	//for refund mode, calculate only the tax for ruturn items (no calculating discount and service fees for now) 
 			strTPS = BarUtil.formatMoney(fSubTotal * BarOption.getGST() / 100f);
@@ -1593,7 +1417,7 @@ public class PrintService{
         
         String strTVQ = "";
         if(fSubTotal > 0) { // not refund mode
-	        strs = billPanel.lblTVQ.getText().split(":");
+	        strs = billPanel.lblTVQ.getText().toString().split(":");
 	        strTVQ = strs[1].trim();
         } else {
         	strTVQ = BarUtil.formatMoney(fSubTotal * BarOption.getQST() / 100f);
@@ -1601,7 +1425,7 @@ public class PrintService{
         
         Float fServiceFee = 0.0f;
         
-        String strServiceFee = billPanel.lblServiceFee.getText();
+        String strServiceFee = billPanel.lblServiceFee.getText().toString();
 		if(strServiceFee.length() > 0) {
         	strs = strServiceFee.split(":");
         	strServiceFee = strs[1].trim();
@@ -1609,7 +1433,7 @@ public class PrintService{
         }
 
         Float fDiscount = 0.0f;
-        String strDiscount = billPanel.lblDiscount.getText();
+        String strDiscount = billPanel.lblDiscount.getText().toString();
 		if(strDiscount.length() > 0) {
         	strs = strDiscount.split(":");
         	strDiscount = strs[1].trim().substring(1);
@@ -1692,7 +1516,7 @@ public class PrintService{
 			StringBuilder content, String subTotal, String serviceFee, String discount) {
         
 		content.append(BarUtil.getSeperatorLine(0)).append("\n\n");
-        int langIndex = ipPrinterMap.get(curPrintIp).getType();
+        int langIndex = ipPrinterMap.get(curPrintIp).getLangType();
         for(Dish d:dishList){
             StringBuilder sb = new StringBuilder();
             
@@ -1778,7 +1602,7 @@ public class PrintService{
 
 	private static StringBuilder getContentOfTotalPart(BillPanel billPanel) {
         
-        String strTotal = billPanel.valTotlePrice.getText();
+        String strTotal = billPanel.valTotlePrice.getText().toString();
         //push total
 		StringBuilder content = new StringBuilder("Total").append(" : ")//.append(BarUtil.generateString(tWidth - strTotal.length() - Total.length() - 3 - 1, " "))
 			.append(strTotal).append("\n");
@@ -1819,7 +1643,7 @@ public class PrintService{
 		//push bigger font. while it will not work for mev.
         strAryFR.add("BigFont");
         //push NEW total
-        String strTotal = billPanel.valTotlePrice.getText();
+        String strTotal = billPanel.valTotlePrice.getText().toString();
         String newTotal = BarUtil.formatMoney(Float.valueOf(strTotal) + Float.valueOf(refundStr));
         content = new StringBuilder("Total : ").append(newTotal).append("\n");
         strAryFR.add(content.toString());
@@ -1834,12 +1658,12 @@ public class PrintService{
 		
     	StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
     	try {
-    		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
-            rs.next();
-            float total = (float) (rs.getInt("total") / 100.0);
+    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
+            rs.moveToNext();
+            float total = (float) (DBUtil.getCursorInt(rs,"total") / 100.0);
 
-            String otherReceived = rs.getString("otherReceived");
-            int cashReceived = rs.getInt("cashReceived");
+            String otherReceived = DBUtil.getCursorString(rs,"otherReceived");
+            int cashReceived = DBUtil.getCursorInt(rs,"cashReceived");
             String str = BarUtil.formatMoney(cashReceived/100f);
             
             boolean isPaidFromOther = otherReceived != null && !otherReceived.toLowerCase().equals("null") && otherReceived.length() > 0;
@@ -1855,21 +1679,21 @@ public class PrintService{
     			.append(BarUtil.generateString(width - 9 - str.length(), " "))
     			.append(str).append("\n");
     		}
-            int debitReceived = rs.getInt("debitReceived");
+            int debitReceived = DBUtil.getCursorInt(rs,"debitReceived");
             if(debitReceived > 0) {
                 str = BarUtil.formatMoney(debitReceived/100f);
     			content.append("DEBIT").append(" : ")
     			.append(BarUtil.generateString(width - 8 - str.length(), " "))
     			.append(str).append("\n");
     		}
-            int visaReceived = rs.getInt("visaReceived");
+            int visaReceived = DBUtil.getCursorInt(rs,"visaReceived");
             if(visaReceived > 0) {
                 str = BarUtil.formatMoney(visaReceived/100f);
     			content.append("VISA").append(" : ")
     			.append(BarUtil.generateString(width - 7 - str.length(), " "))
     			.append(str).append("\n");
     		}
-            int masterReceived = rs.getInt("masterReceived");
+            int masterReceived = DBUtil.getCursorInt(rs,"masterReceived");
         	if(masterReceived > 0) {
                 str = BarUtil.formatMoney(masterReceived/100f);
     			content.append("MASTER").append(" : ")
@@ -1919,6 +1743,7 @@ public class PrintService{
     	
 		return content.toString();
 	}
+
 	//end message is comment + foot info
 	private static void pushEndMessage(List<String> strAryFR, String invoiceType) {
 		BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel; 
@@ -1955,7 +1780,7 @@ public class PrintService{
   		
   		for (Bill bill : list) {
   			BillPanel bp = new BillPanel(null);
-    		bp.initContent(null, bill.getBillIndex(), bill.getTableID(), bill.getOpenTime(), true);
+    		bp.initContent(null, bill.getCustomerNumber(), bill.getTableName(), bill.getOpenTime(), true);
     		
     		subTotal += bp.subTotal;		//the sub total included the refund ones. why when it's refund, the subtotal here is 0,is it correct?
     		GST += bp.totalGst;
@@ -2059,7 +1884,7 @@ public class PrintService{
 		HashMap<String, ReportDto> otherPayMethodMap = new HashMap<String, ReportDto>();
 		for (Bill bill : list) {
 
-			String waiterName = bill.getEmployeeName();
+			String waiterName = bill.getUserId().toString();
 			int[] achivement = waiterSalesData.get(waiterName);
 			if(achivement == null) {
 				achivement = new int[6];	//why 6?--[0]count[1]Sale[2]Tip[3][4][5]
@@ -2325,7 +2150,7 @@ public class PrintService{
 		int totalQT = 0;
 		int totalSale = 0;
 		for (Bill bill : list) {
-  			String tableId = bill.getTableID();
+  			String tableId = bill.getTableName();
   			if(tableId == null) {
   				L.e("Found bill with no tableID", "found a bill with no tableID", null);
   				continue;
@@ -2334,7 +2159,7 @@ public class PrintService{
   			if('1' <= firstCharacter && firstCharacter <= '9' || firstCharacter == 'T') { //normal table
 	  			Float totalPrice = serviceTypeMap.get('I');
 	  			if(totalPrice == null) {
-	  				serviceTypeMap.put((Character)'I', bill.getTotal());
+	  				serviceTypeMap.put((Character)'I', bill.getTotal() / 100.0f);
 	  			}else {
 	  				serviceTypeMap.put((Character)'I', totalPrice + bill.getTotal());
 	  			}
@@ -2359,7 +2184,7 @@ public class PrintService{
   			}else {
 	  			Float totalPrice = serviceTypeMap.get(firstCharacter);
 	  			if(totalPrice == null) {
-	  				serviceTypeMap.put(firstCharacter, bill.getTotal());
+	  				serviceTypeMap.put(firstCharacter, bill.getTotal()/100.0f);
 	  			}else {
 	  				serviceTypeMap.put(firstCharacter, totalPrice + bill.getTotal());
 	  			}
@@ -2477,34 +2302,30 @@ public class PrintService{
         }
         
         try {
-            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-            ResultSetMetaData rd = rs.getMetaData(); // 得到结果集相关信息
-            rs.afterLast();
-            rs.relative(-1);
-            rs.beforeFirst();
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             double totalSales = 0f;
-            while (rs.next()) {
-                Integer billId = rs.getInt("ID");
+            while (rs.moveToNext()) {
+                Integer billId = DBUtil.getCursorInt(rs,"ID");
                 content.append(billId);
                 
-                String time = rs.getString("opentime");
+                String time = DBUtil.getCursorString(rs,"opentime");
                 content.append(BarUtil.generateString(6 - billId.toString().length(), " ")).append(time.substring(5, 16));	//remove the year to make it shorter.
                 
-                String table = rs.getString("tableId");
+                String table = DBUtil.getCursorString(rs,"tableId");
                 content.append(BarUtil.generateString(4 - table.length(), " ")).append(table);
         		
-                Integer seatIdx = rs.getInt("billIndex");
+                Integer seatIdx = DBUtil.getCursorInt(rs,"billIndex");
                 content.append(BarUtil.generateString(3 - seatIdx.toString().length(), " ")).append(seatIdx);
                 
-                double f = rs.getInt("total") / 100.0;
+                double f = DBUtil.getCursorInt(rs,"total") / 100.0;
                 String money = BarUtil.formatMoney(f);
                 content.append(BarUtil.generateString(8 - money.length(), " ")).append(money);
                 totalSales += f;
 
-                Integer employeeId = rs.getInt("employeeId");
+                Integer employeeId = DBUtil.getCursorInt(rs,"employeeId");
                 content.append("  ").append(employeeId);
                 
-                String comment = rs.getString("comment");
+                String comment = DBUtil.getCursorString(rs,"comment");
                 int p = comment.indexOf(REASON_MARK);
                 if(p >= 0) {
                 	comment = comment.substring(p + REASON_MARK.length()).trim();
@@ -2549,23 +2370,19 @@ public class PrintService{
         }
         
         try {
-            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-            ResultSetMetaData rd = rs.getMetaData(); // 得到结果集相关信息
-            rs.afterLast();
-            rs.relative(-1);
-            rs.beforeFirst();
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             float totalSales = 0f;
-            while (rs.next()) {
-            	String billId = rs.getString("Output.id");
+            while (rs.moveToNext()) {
+            	String billId = DBUtil.getCursorString(rs,"Output.id");
                 content.append(billId);	//remove the year to make it shorter.
                 
-                String time = rs.getString("Output.time");
+                String time = DBUtil.getCursorString(rs,"Output.time");
                 content.append(BarUtil.generateString(6 - billId.toString().length(), " ")).append(time.substring(5, 16));	//remove the year to make it shorter.
                 
-                String table = rs.getString("Output.subject");
+                String table = DBUtil.getCursorString(rs,"Output.subject");
                 content.append(BarUtil.generateString(4 - table.length(), " ")).append(table);
         		
-                String product = rs.getString("product.mnemonic");
+                String product = DBUtil.getCursorString(rs,"product.mnemonic");
                 if(product.length() > 12) {
                 	product = product.substring(0, 10) + "..";
                 }else {
@@ -2573,11 +2390,11 @@ public class PrintService{
                 }
                 content.append("  ").append(product);
                 
-                int i = rs.getInt("Output.amount");
+                int i = DBUtil.getCursorInt(rs,"Output.amount");
                 String displayableNum = Dish.getDisplayableNum(i).toString();
                 content.append(BarUtil.generateString(3 - displayableNum.length(), " ")).append(displayableNum);
                 
-                float f = Float.valueOf((float) (rs.getInt("Output.toltalPrice") / 100.0));
+                float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"Output.toltalPrice") / 100.0));
                 String money = BarUtil.formatMoney(f);
                 content.append(BarUtil.generateString(width - 38 - money.length(), " ")).append(money).append("\n");
                 totalSales += f;
@@ -2618,24 +2435,21 @@ public class PrintService{
 
         float totalSales = 0.0f;
         try {
-            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-            rs.afterLast();
-            rs.relative(-1);
-            rs.beforeFirst();
-            while (rs.next()) {
-            	String id = String.valueOf(rs.getInt("id"));
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            while (rs.moveToNext()) {
+            	String id = String.valueOf(DBUtil.getCursorInt(rs,"id"));
             	content.append(id);
-            	String tableID = rs.getString("tableID");
+            	String tableID = DBUtil.getCursorString(rs,"tableID");
             	content.append(BarUtil.generateString(12 - id.length() - tableID.length(), " ")).append(tableID);
-            	float total = Float.valueOf((float) (rs.getInt("total") / 100.0));
+            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
             	totalSales += total;
             	String formattedTotal = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - formattedTotal.length(), " ")).append(formattedTotal);
-//            	content.append("    ").append(rs.getString("OpenTime"));
+//            	content.append("    ").append(DBUtil.getCursorString(rs,"OpenTime"));
             	content.append("\n");
             }
             rs.close();// 关闭
-        } catch (SQLException e) {
+        } catch (Exception e) {
             ErrorUtil.write(e);
         }
         
@@ -2698,9 +2512,9 @@ public class PrintService{
 	private static String getOrderNoOfBill(String billId) {
 		StringBuilder sql = new StringBuilder("select * from bill where id = ").append(billId);
 		try {
-			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-            rs.next();
-            int invoiceid = rs.getInt("invoiceid");
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            rs.moveToNext();
+            int invoiceid = DBUtil.getCursorInt(rs,"invoiceid");
             if(invoiceid > 0) {
             	return String.valueOf(invoiceid);
             }
@@ -2713,7 +2527,7 @@ public class PrintService{
 	private static void updateOrderNoOnBillId(String nextIdx, String billId) {
 		StringBuilder sql = new StringBuilder("update bill set invoiceId = ").append(nextIdx).append(" where id = ").append(billId);
 		try {
-			PIMDBModel.getStatement().executeUpdate(sql.toString());
+			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {
 			L.e("PrintService ", "unexpected error when updating the invoiceId of bill. billId = " + billId + "!" , exp);
 		}
@@ -2728,7 +2542,7 @@ public class PrintService{
         }
         
         int tWidth = BarUtil.getPreferedWidth();
-        Integer w = ipPrinterMap.get(curPrintIp).getState();
+        Integer w = ipPrinterMap.get(curPrintIp).getStatus();
         if(w != null) {
         	tWidth = w.intValue();
         }
@@ -2770,7 +2584,7 @@ public class PrintService{
         }
 
         content.append(BarUtil.generateString(tWidth, sep_str1)).append("\n\n");
-        int langIndex = ipPrinterMap.get(curPrintIp).getType();
+        int langIndex = ipPrinterMap.get(curPrintIp).getLangType();
         for(Dish d:list){
             StringBuilder sb = new StringBuilder();
             if(BarOption.isDisDishIDInKitchen()) {
@@ -2834,15 +2648,10 @@ public class PrintService{
     	sql.append(langIdx + 1).append(", lang1 from modification where (lang1 = ? or lang2 = ? or lang3 = ? or lang4 = ?)");
     	sql.append(" and status = ").append(DBConsts.ORIGINAL);
         try {
-        	PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());
         	str = str.trim();
-            pstmt.setString(1, str);
-            pstmt.setString(2, str);
-            pstmt.setString(3, str);
-            pstmt.setString(4, str);
-            ResultSet rs = pstmt.executeQuery();
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{str, str, str, str});
             
-            if (rs.next()) {
+            if (rs.moveToNext()) {
             	String val = rs.getString(1);
             	return  val== null || val.length() == 0 ? str : val;
             }

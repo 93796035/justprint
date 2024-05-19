@@ -1,7 +1,7 @@
 package com.just.print.app;
 
 
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import java.util.HashMap;
 import java.util.Map;

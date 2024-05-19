@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.fragment.RegisterFragment;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.just.print.util.NetUtils;
 import com.just.print.util.SharedPreferencesHelper;
 import com.just.print.util.StringUtils;

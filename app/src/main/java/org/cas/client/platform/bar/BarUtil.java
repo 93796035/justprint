@@ -1,20 +1,19 @@
 package org.cas.client.platform.bar;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.database.Cursor;
 
-import com.just.print.R;
+import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.PicturePane;
 
-import org.cas.client.platform.bar.i18n.BarDlgConst;
-import org.cas.client.platform.bar.uibeans.FunctionButton;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.casutil.L;
+
 import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.uibeans.MoreButton;
 import org.cas.client.platform.cascustomize.CustOpts;
 //import org.cas.client.platform.bar.model.DBConsts;
-//import org.cas.client.platform.bar.model.DBUtil;
+//import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 //import org.cas.client.platform.bar.model.Dish;
 //import org.cas.client.platform.bar.pannel.BarFrame;
 //import org.cas.client.platform.bar.pannel.BillPanel;
@@ -30,18 +29,10 @@ import org.cas.client.platform.cascustomize.CustOpts;
 //import org.cas.client.resource.international.DlgConst;
 //
 //import java.awt.Component;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,17 +111,17 @@ public class BarUtil {
 //
 //                rs.beforeFirst();
 //                int tIdx = 0;
-//                while (rs.next()) {
-//                    tIDAry[tIdx] = rs.getInt("ID");
-//                    tCodeAry[tIdx] = rs.getString("Code");
-//                    tPriceAry[tIdx] = rs.getInt("Price");
-//                    tMnemonicAry[tIdx] = rs.getString("Mnemonic");
-//                    tSubjectAry[tIdx] = rs.getString("Subject");
-//                    tStoreAry[tIdx] = rs.getInt("Store");
-//                    tUnitAry[tIdx] = rs.getString("Unit");
-//                    tCategoryAry[tIdx] = rs.getString("Category");
-//                    tCostAry[tIdx] = rs.getInt("Cost");
-//                    tContentAry[tIdx] = rs.getString("Content");
+//                while (rs.moveToNext()) {
+//                    tIDAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"ID");
+//                    tCodeAry[tIdx] = DBUtil.getCursorString(rs,"Code");
+//                    tPriceAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Price");
+//                    tMnemonicAry[tIdx] = DBUtil.getCursorString(rs,"Mnemonic");
+//                    tSubjectAry[tIdx] = DBUtil.getCursorString(rs,"Subject");
+//                    tStoreAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Store");
+//                    tUnitAry[tIdx] = DBUtil.getCursorString(rs,"Unit");
+//                    tCategoryAry[tIdx] = DBUtil.getCursorString(rs,"Category");
+//                    tCostAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Cost");
+//                    tContentAry[tIdx] = DBUtil.getCursorString(rs,"Content");
 //                    tIdx++;
 //                }
 ////                for (int i = 0; i < tRowCount; i++) {
@@ -165,37 +156,37 @@ public class BarUtil {
 //        return tProdCodeLen;
 //    }
 //
-//    public static int getPreferedWidth() {
-//        int tWidth = 46;
-//        try {
-//            tWidth = Integer.valueOf((String)CustOpts.custOps.getValue( "width"));
-//        }catch(Exception e){
-//            //do nothing, if no with property set, width will keep default value.
-//        }
-//        return tWidth;
-//    }
-//
-//
-//    public static String generateString(int length, String character){
-//        StringBuilder sb = new StringBuilder("");
-//        for (int i = 0; i < length; i++){
-//            sb.append(character);
-//        }
-//        return sb.toString();
-//    }
-//
-//    public static int getLengthOfString(String content){
-//        int length = content.length();
-//        int realWidth = length;
-//        for(int i = 0; i < length; i++) {
-//            char c = content.charAt(i);
-//            if(c >=19968 && c <= 171941) {
-//                realWidth++;
-//            }
-//        }
-//        return realWidth;
-//    }
-//
+    public static int getPreferedWidth() {
+        int tWidth = 46;
+        try {
+            tWidth = Integer.valueOf((String)CustOpts.custOps.getValue( "width"));
+        }catch(Exception e){
+            //do nothing, if no with property set, width will keep default value.
+        }
+        return tWidth;
+    }
+
+
+    public static String generateString(int length, String character){
+        StringBuilder sb = new StringBuilder("");
+        for (int i = 0; i < length; i++){
+            sb.append(character);
+        }
+        return sb.toString();
+    }
+
+    public static int getLengthOfString(String content){
+        int length = content.length();
+        int realWidth = length;
+        for(int i = 0; i < length; i++) {
+            char c = content.charAt(i);
+            if(c >=19968 && c <= 171941) {
+                realWidth++;
+            }
+        }
+        return realWidth;
+    }
+
 //    public static boolean isMoreThanOneBill() {
 //        try {
 //            StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
@@ -226,36 +217,36 @@ public class BarUtil {
 ////		}
 ////	}
 //
-//    //remove html tags e.g.<html><center>BILL<br>FOOT INFO</center></html>
-//    public static String getPlainTextOut(String string) {
-//        int p = string.indexOf("<html>");
-//        if(p >= 0) {
-//            string = string.substring(p + 6);
-//            p = string.indexOf("</html>");
-//            if(p >= 0) {
-//                string = string.substring(0, p);
-//            }
-//            p = string.indexOf("<center>");
-//            if(p >= 0) {
-//                string = string.substring(p + 8);
-//            }
-//            p = string.indexOf("</center>");
-//            if(p >= 0) {
-//                string = string.substring(0, p);
-//            }
-//            p = string.indexOf("<br>");
-//            if(p > 0) {
-//                string = string.substring(0, p) + " " + string.substring(p + 4);
-//            }
-//            p = string.indexOf("<br>");
-//            if(p > 0) {
-//                string = string.substring(0, p);
-//            }
-//        }
-//        return string;
-//    }
-//
-//
+    //remove html tags e.g.<html><center>BILL<br>FOOT INFO</center></html>
+    public static String getPlainTextOut(String string) {
+        int p = string.indexOf("<html>");
+        if(p >= 0) {
+            string = string.substring(p + 6);
+            p = string.indexOf("</html>");
+            if(p >= 0) {
+                string = string.substring(0, p);
+            }
+            p = string.indexOf("<center>");
+            if(p >= 0) {
+                string = string.substring(p + 8);
+            }
+            p = string.indexOf("</center>");
+            if(p >= 0) {
+                string = string.substring(0, p);
+            }
+            p = string.indexOf("<br>");
+            if(p > 0) {
+                string = string.substring(0, p) + " " + string.substring(p + 4);
+            }
+            p = string.indexOf("<br>");
+            if(p > 0) {
+                string = string.substring(0, p);
+            }
+        }
+        return string;
+    }
+
+
 ////	private static String centRound(String priceStr) {
 ////		Float price = Float.parseFloat(priceStr);
 ////		int cent = Math.round(price * 100);
@@ -270,78 +261,78 @@ public class BarUtil {
 ////    	return BarUtil.formatMoney((cent/ 10 * 10 + lastNum) / 100.0);
 ////    }
 //
-//    public static String canadianPennyRound(String substring) {
-//        Float price = 0.00f;
-//        try{
-//            price = Float.parseFloat(substring.trim());
-//        }catch(Exception exp) {
-//            L.e("BarUtil", "Wrong format found", exp);
-//        }
-//        int cent = Math.round(price * 100);
-//        boolean isNegtive = cent < 0;
-//        if(isNegtive) {
-//            cent *= -1;
-//        }
-//        int lastNum = cent % 10;
-//        if(lastNum < 3) {
-//            cent = cent - lastNum;
-//        }else if(lastNum > 7) {
-//            cent = cent - lastNum + 10;
-//        }else {
-//            cent = cent - lastNum + 5;
-//        }
-//
-//        if(isNegtive) {
-//            cent *= -1;
-//        }
-//        return BarUtil.formatMoney(cent/100f);
-//    }
-//
-//    public static String getSeperatorLine(int index) {
-//        if(sepLines == null) {
-//            sepLines = new String[2];
-//            int tWidth = BarUtil.getPreferedWidth();
-//            String sep_str1 = (String)CustOpts.custOps.getValue("sep_str1");
-//            if(sep_str1 == null || sep_str1.length() == 0){
-//                sep_str1 = SEP_STR1;
-//            }
-//            sepLines[0] = BarUtil.generateString(tWidth, sep_str1);
-//
-//            String sep_str2 = (String)CustOpts.custOps.getValue("sep_str2");
-//            if(sep_str2 == null || sep_str2.length() == 0){
-//                sep_str2 = SEP_STR2;
-//            }
-//
-//            sepLines[1] = BarUtil.generateString(tWidth, sep_str2);
-//        }
-//        if(index > sepLines.length) {
-//            L.e("PrintService", "Unexpect index when getting item from sepLines with Index: " + index
-//                    + "the width of sepLines is " + sepLines.length, null);
-//        }
-//        return sepLines[index];
-//    }
-//
-//    public static String getSeperatorLine(int index, int tWidth) {
-//        if(index == 0) {
-//            String sep_str1 = (String)CustOpts.custOps.getValue("sep_str1");
-//            if(sep_str1 == null || sep_str1.length() == 0){
-//                sep_str1 = SEP_STR1;
-//            }
-//            return BarUtil.generateString(tWidth, sep_str1);
-//        } else if(index == 1) {
-//            String sep_str2 = (String)CustOpts.custOps.getValue("sep_str2");
-//            if(sep_str2 == null || sep_str2.length() == 0){
-//                sep_str2 = SEP_STR2;
-//            }
-//
-//            return BarUtil.generateString(tWidth, sep_str2);
-//        } else {
-//            L.e("PrintService", "Unexpect index when getting item from sepLines with Index: " + index
-//                    + "the width of sepLines is " + sepLines.length, null);
-//            return "";
-//        }
-//    }
-//
+    public static String canadianPennyRound(String substring) {
+        Float price = 0.00f;
+        try{
+            price = Float.parseFloat(substring.trim());
+        }catch(Exception exp) {
+            L.e("BarUtil", "Wrong format found", exp);
+        }
+        int cent = Math.round(price * 100);
+        boolean isNegtive = cent < 0;
+        if(isNegtive) {
+            cent *= -1;
+        }
+        int lastNum = cent % 10;
+        if(lastNum < 3) {
+            cent = cent - lastNum;
+        }else if(lastNum > 7) {
+            cent = cent - lastNum + 10;
+        }else {
+            cent = cent - lastNum + 5;
+        }
+
+        if(isNegtive) {
+            cent *= -1;
+        }
+        return BarUtil.formatMoney(cent/100f);
+    }
+
+    public static String getSeperatorLine(int index) {
+        if(sepLines == null) {
+            sepLines = new String[2];
+            int tWidth = BarUtil.getPreferedWidth();
+            String sep_str1 = (String)CustOpts.custOps.getValue("sep_str1");
+            if(sep_str1 == null || sep_str1.length() == 0){
+                sep_str1 = SEP_STR1;
+            }
+            sepLines[0] = BarUtil.generateString(tWidth, sep_str1);
+
+            String sep_str2 = (String)CustOpts.custOps.getValue("sep_str2");
+            if(sep_str2 == null || sep_str2.length() == 0){
+                sep_str2 = SEP_STR2;
+            }
+
+            sepLines[1] = BarUtil.generateString(tWidth, sep_str2);
+        }
+        if(index > sepLines.length) {
+            L.e("PrintService", "Unexpect index when getting item from sepLines with Index: " + index
+                    + "the width of sepLines is " + sepLines.length, null);
+        }
+        return sepLines[index];
+    }
+
+    public static String getSeperatorLine(int index, int tWidth) {
+        if(index == 0) {
+            String sep_str1 = (String)CustOpts.custOps.getValue("sep_str1");
+            if(sep_str1 == null || sep_str1.length() == 0){
+                sep_str1 = SEP_STR1;
+            }
+            return BarUtil.generateString(tWidth, sep_str1);
+        } else if(index == 1) {
+            String sep_str2 = (String)CustOpts.custOps.getValue("sep_str2");
+            if(sep_str2 == null || sep_str2.length() == 0){
+                sep_str2 = SEP_STR2;
+            }
+
+            return BarUtil.generateString(tWidth, sep_str2);
+        } else {
+            L.e("PrintService", "Unexpect index when getting item from sepLines with Index: " + index
+                    + "the width of sepLines is " + sepLines.length, null);
+            return "";
+        }
+    }
+
 //    public static void cleanDB() {
 //        try {
 //            Statement smt = PIMDBModel.getStatement();
@@ -538,10 +529,10 @@ public class BarUtil {
 //                    L.e("BarUtil", " Found no labels matching lang1 = " + langs[0] + ". if this label has price property, will affect the total price of this dish!", null);
 //                }
 //                rs.beforeFirst();
-//                rs.next();
-//                String lang6 = rs.getString("lang6");
+//                rs.moveToNext();
+//                String lang6 = DBUtil.getCursorString(rs,"lang6");
 //                if(lang6 != null && lang6.length() > 0) {
-//                    pirce += Float.parseFloat(rs.getString("lang6"));
+//                    pirce += Float.parseFloat(DBUtil.getCursorString(rs,"lang6"));
 //                }
 //            }catch(Exception e) {
 //                L.e("AddModificationDlg", " Exception when searching price of modificaiton " + sql, null);
@@ -568,46 +559,47 @@ public class BarUtil {
 //        }
 //        return sb.toString();
 //    }
-//    public static String addHTMLTAG(String text){
-//        if(text != null && !text.toLowerCase().trim().startsWith("<html>")) { //not null, and not start with
-//            int p = text.indexOf("_");
-//            if(p > 0) {
-//                StringBuilder text2 = new StringBuilder("<html><center>").append("");
-//                text2.append(text.substring(0, p));
-//                text2.append("<br>");
-//                text2.append(text.substring(p + 1));
-//                text2.append("</center></html>");
-//                return text2.toString();
-//            }
-//        }
-//        return text;
-//    }
-//    public static String removeHTMLTAG(String text) {
-//        int p = text.indexOf("<html>");
-//        if(p >= 0) {
-//            text = text.substring(0,p) + text.substring(p + 6);
-//            p = text.indexOf("</html>");
-//            if(p >= 0) {
-//                text = text.substring(0, p);
-//            }
-//        }
-//
-//        p = text.indexOf("<center>");
-//        if(p >= 0) {
-//            text = text.substring(0,p) + text.substring(p + 8);
-//            p = text.indexOf("</center>");
-//            if(p >= 0) {
-//                text = text.substring(0, p);
-//            }
-//        }
-//
-//        p = text.indexOf("<br>");
-//        if(p >= 0) {
-//            text = text.substring(0,p) + "_" + text.substring(p + 4);
-//        }
-//        return text;
-//    }
-//
+    public static String addHTMLTAG(String text){
+        if(text != null && !text.toLowerCase().trim().startsWith("<html>")) { //not null, and not start with
+            int p = text.indexOf("_");
+            if(p > 0) {
+                StringBuilder text2 = new StringBuilder("<html><center>").append("");
+                text2.append(text.substring(0, p));
+                text2.append("<br>");
+                text2.append(text.substring(p + 1));
+                text2.append("</center></html>");
+                return text2.toString();
+            }
+        }
+        return text;
+    }
+
+    public static String removeHTMLTAG(String text) {
+        int p = text.indexOf("<html>");
+        if(p >= 0) {
+            text = text.substring(0,p) + text.substring(p + 6);
+            p = text.indexOf("</html>");
+            if(p >= 0) {
+                text = text.substring(0, p);
+            }
+        }
+
+        p = text.indexOf("<center>");
+        if(p >= 0) {
+            text = text.substring(0,p) + text.substring(p + 8);
+            p = text.indexOf("</center>");
+            if(p >= 0) {
+                text = text.substring(0, p);
+            }
+        }
+
+        p = text.indexOf("<br>");
+        if(p >= 0) {
+            text = text.substring(0,p) + "_" + text.substring(p + 4);
+        }
+        return text;
+    }
+
 //    public static Date getNextDate(Date date){
 //        long addTime = 1;		//以1为乘以的基数
 //        addTime *= 1;			//1天以后，如果是30天以后则这里是30
@@ -629,9 +621,9 @@ public class BarUtil {
 //            pstmt.setString(2, aValue);
 //            pstmt.setString(3, aValue);
 //            ResultSet rs = pstmt.executeQuery();
-//            if(rs.next()) {//check if the properties are all same, if not, update local to make sure local are same with server.
+//            if(rs.moveToNext()) {//check if the properties are all same, if not, update local to make sure local are same with server.
 //                //TODO: consider later  String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
-//                return rs.getString(customerFrameLang == 0 ? "code" : (customerFrameLang == 1 ? "mnemonic" : "subject"));
+//                return DBUtil.getCursorString(rs,customerFrameLang == 0 ? "code" : (customerFrameLang == 1 ? "mnemonic" : "subject"));
 //            }else {
 //                L.e("BarUtil ", "WTH, Can not find such a category!" + sql, null);
 //                return aValue;
@@ -641,52 +633,50 @@ public class BarUtil {
 //        }
 //        return aValue;
 //    }
-//
-//    public static String changeToLangForModify(String aValue, int customerFrameLang) {
-//        if(aValue == null || aValue.trim().length() < 1) {
-//            return "";
-//        }
-//        //remove the discount----------------------
-//        String discount = "";
-//        int p = aValue.indexOf("-" + BarOption.getMoneySign());
-//        if(p > -1) {
-//            discount += aValue.substring(p);
-//            aValue = aValue.substring(0,p).trim();
-//        }
-//        StringBuilder finalLabel = new StringBuilder();
-//        String[] labels = aValue.trim().split("\n");
-//        for(int i = 0; i < labels.length; i++) {
-//            int pSpace = labels[i].trim().lastIndexOf(" x");
-//            String num = "";
-//            if(pSpace > 0) {
-//                num = labels[i].substring(pSpace).trim();
-//                labels[i] = labels[i].trim().substring(0, pSpace).trim();
-//            }
-//
-//            StringBuilder sql = new StringBuilder("select * from modification where lang1 = ? or lang2 = ? or lang3 = ?");
-//
-//            try {
-//                PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());
-//                pstmt.setString(1, BarUtil.addHTMLTAG(labels[i]));
-//                pstmt.setString(2, BarUtil.addHTMLTAG(labels[i]));
-//                pstmt.setString(3, BarUtil.addHTMLTAG(labels[i]));
-//                ResultSet rs = pstmt.executeQuery();
-//                if(rs.next()) {//check if the properties are all same, if not, update local to make sure local are same with server.
-//                    //TODO: consider later  String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
-//                    labels[i] =  rs.getString("lang" + (customerFrameLang + 1));
-//                }else {
-//                    L.e("BarUtil ", "WTH, Can not find such a category!" + sql, null);
-//                    labels[i] = aValue;
-//                }
-//            } catch (SQLException e) {
-//                labels[i] = aValue;
-//            }
-//            finalLabel.append(labels[i]).append(" ").append(num).append("\n");
-//        }
-//        finalLabel.append(discount);
-//        return finalLabel.toString();
-//    }
-//
+
+    public static String changeToLangForModify(String aValue, int customerFrameLang) {
+        if(aValue == null || aValue.trim().length() < 1) {
+            return "";
+        }
+        //remove the discount----------------------
+        String discount = "";
+        int p = aValue.indexOf("-" + BarOption.getMoneySign());
+        if(p > -1) {
+            discount += aValue.substring(p);
+            aValue = aValue.substring(0,p).trim();
+        }
+        StringBuilder finalLabel = new StringBuilder();
+        String[] labels = aValue.trim().split("\n");
+        for(int i = 0; i < labels.length; i++) {
+            int pSpace = labels[i].trim().lastIndexOf(" x");
+            String num = "";
+            if(pSpace > 0) {
+                num = labels[i].substring(pSpace).trim();
+                labels[i] = labels[i].trim().substring(0, pSpace).trim();
+            }
+            String name = BarUtil.addHTMLTAG(labels[i]);
+            StringBuilder sql = new StringBuilder("select * from modification where name1 = ")
+                    .append("'").append(name).append("' or name2 = ")
+                    .append("'").append(name).append("' or name3 = ")
+                    .append("'").append(name).append("'");
+            try {
+                Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+                if(rs.moveToNext()) {//check if the properties are all same, if not, update local to make sure local are same with server.
+                    //TODO: consider later  String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
+                    labels[i] =  DBUtil.getCursorString(rs, "lang" + (customerFrameLang + 1));
+                }else {
+                    L.e("BarUtil ", "WTH, Can not find such a category!" + sql, null);
+                    labels[i] = aValue;
+                }
+            } catch (Exception e) {
+                labels[i] = aValue;
+            }
+            finalLabel.append(labels[i]).append(" ").append(num).append("\n");
+        }
+        finalLabel.append(discount);
+        return finalLabel.toString();
+    }
+
 //    //currently called from cmd_pay and cmd_paymethod
 //    public static boolean routineCheckBeforePrintingReceipt() {
 //        SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
@@ -712,7 +702,7 @@ public class BarUtil {
 //            //which was generated when opening table (the creatTime is same as open time)
 //            String comment = billPanel.getComment();
 //            boolean hasModificationInPrice = comment.contains(BillPanel.SERVICEFEE) || comment.contains(BillPanel.DISCBILL);
-//            boolean hasItemAddedOrRemoved = DBUtil.isThereItemAddOrRemoved(billPanel.getBillID(), true);
+//            boolean hasItemAddedOrRemoved = DBUtil.getCursorString(rs,.isThereItemAddOrRemoved(billPanel.getBillID(), true);
 //            if(hasItemAddedOrRemoved || hasModificationInPrice) {
 //                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
 //                    billPanel.expireAndReGenerateBill(null);
@@ -720,60 +710,60 @@ public class BarUtil {
 //                // if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
 //                //the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
 //                //not confuse about the outputs（ which was actually generated before first time print) should belongs to which bill.
-//                DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
+//                DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
 //                //have to call this, because need to report mev there's a change. but inside, may not print bill out on printer.
 //                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
 //                    billPanel.setComment(billPanel.getComment() + PrintService.TRANSACTION_ONLY);
 //                    PrintService.printTemporaryBill(billPanel, billPanel.getOrderedDishAry(), true);
-//                    DBUtil.cleanTemporalInfoInComment(billPanel, comment);
+//                    DBUtil.getCursorString(rs,.cleanTemporalInfoInComment(billPanel, comment);
 //                }
 //            }
 //        }
 //        return true;
 //    }
-//
-//    public static String splitStringToThreshold(String text, int targetLength) {
-//        StringBuilder strings = new StringBuilder();
-//        int length = 0;
-//        List<Character> chars = new ArrayList<Character>();
-//        for (char c : text.toCharArray()) {
-//            if(c == '\n') {
-//                strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
-//                strings.append("\n");
-//                chars = new ArrayList<Character>();
-//                length = 0;
-//                continue;
-//            } else if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-//                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
-//                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-//                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-//                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS) {
-//                length += 2;
-//            } else {
-//                length += 1;
-//            }
-//
-//            if(length > targetLength) {
-//                strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
-//                strings.append("\n");
-//                chars = new ArrayList<Character>();
-//                chars.add(c);
-//                length = 2;
-//            }else {
-//                chars.add(c);
-//                if(length == targetLength) {
-//                    strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
-//                    strings.append("\n");
-//                    chars = new ArrayList<Character>();
-//                    length = 0;
-//                }
-//            }
-//        }
-//        strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
-//        strings.append("\n");
-//        return strings.toString();
-//    }
-//
+
+    public static String splitStringToThreshold(String text, int targetLength) {
+        StringBuilder strings = new StringBuilder();
+        int length = 0;
+        List<Character> chars = new ArrayList<Character>();
+        for (char c : text.toCharArray()) {
+            if(c == '\n') {
+                strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
+                strings.append("\n");
+                chars = new ArrayList<Character>();
+                length = 0;
+                continue;
+            } else if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
+                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS) {
+                length += 2;
+            } else {
+                length += 1;
+            }
+
+            if(length > targetLength) {
+                strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
+                strings.append("\n");
+                chars = new ArrayList<Character>();
+                chars.add(c);
+                length = 2;
+            }else {
+                chars.add(c);
+                if(length == targetLength) {
+                    strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
+                    strings.append("\n");
+                    chars = new ArrayList<Character>();
+                    length = 0;
+                }
+            }
+        }
+        strings.append(chars.stream().map(String::valueOf).collect(Collectors.joining()));
+        strings.append("\n");
+        return strings.toString();
+    }
+
     public static boolean isBetweenSummerTime() {
         Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH); // January is 0, December is 11

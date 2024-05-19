@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 
@@ -10,7 +12,7 @@ import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.dialog.ChangeDlg;
 import org.cas.client.platform.bar.dialog.RefundItemDlg;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -44,7 +46,7 @@ public class Cmd_Refund implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
@@ -124,7 +126,7 @@ public class Cmd_Refund implements SamActionListener {
         billPanel.expireAndReGenerateBill(null);
     		    		
 		//update the new bill's status in db to be the refund amount, (if we support multi-time refund, next time refund will base on this number).
-		DBUtil.updateBill(billPanel.getBillID(), "status", refundedLifeTime);
+		DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "status", refundedLifeTime);
 		
 		//prepare infomation for customer (bill)
 		PrintService.printRefund(billPanel, - Math.round(toRefundThisTime * 100), BarFrame.instance.getCurBillIndex(), false);
@@ -147,8 +149,8 @@ public class Cmd_Refund implements SamActionListener {
  		StringBuilder sb = new StringBuilder("select * from bill where id = " + newBillID);
  		try {
  			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
- 		    rs.next();
- 		 	int cashChange = rs.getInt("cashReceived");
+ 		    rs.moveToNext();
+ 		 	int cashChange = DBUtil.getCursorString(rs,.getCursorInt(rs,"cashReceived");
  			if(refundAmount < -1 && cashChange > 0 ) {
  				Cmd_OpenDrawer.getInstance().actionPerformed(null);
  			    if(cashChange > 0 - refundAmount) {

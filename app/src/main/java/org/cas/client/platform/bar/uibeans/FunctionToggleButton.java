@@ -1,15 +1,13 @@
 package org.cas.client.platform.bar.uibeans;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.TextPaint;
-import android.view.View;
 import android.widget.ToggleButton;
 
 import com.just.print.app.BarFrame;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.action.SamActionListener;
 

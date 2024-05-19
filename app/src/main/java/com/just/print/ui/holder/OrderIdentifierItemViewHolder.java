@@ -4,7 +4,7 @@ import android.content.Context;
 import android.widget.Button;
 
 import com.just.print.R;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.stupid.method.adapter.XViewHolder;
 
 /**

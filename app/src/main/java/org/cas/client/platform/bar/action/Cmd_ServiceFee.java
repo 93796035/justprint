@@ -1,11 +1,13 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -34,7 +36,7 @@ public class Cmd_ServiceFee implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.ServiceFee());
  		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.ServiceFeeNotice());
 		BarFrame.numberPanelDlg.setBtnSource(null);
@@ -60,7 +62,7 @@ public class Cmd_ServiceFee implements SamActionListener {
      				: Math.round(Float.valueOf(curContent) * 100);
 
 			String newComment = billPanel.getComment() + BillPanel.SERVICEFEE + billPanel.serviceFee + "@";
-	     	DBUtil.updateBill(billPanel.getBillID(), "comment", newComment);
+	     	DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", newComment);
 	     	billPanel.setComment(newComment);
      		billPanel.updateTotalArea(true);
      		

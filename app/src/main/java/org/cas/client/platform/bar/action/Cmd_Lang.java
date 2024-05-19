@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
@@ -37,7 +39,7 @@ public class Cmd_Lang implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		String o = ((FunctionButton)e.getSource()).getText();
  		if(o.equals("EN")) {
  			CustOpts.custOps.setUserLang(0);

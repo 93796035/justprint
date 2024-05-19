@@ -47,7 +47,7 @@ import com.just.print.ui.holder.OrderIdentifierMarkViewHolder;
 import com.just.print.ui.holder.OrderMenuViewHolder;
 import com.just.print.ui.holder.TableIdentifierViewHolder;
 import com.just.print.ui.holder.OrderCategoryButtonNatureWidthViewHolder;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.IXOnItemClickListener;
 import com.stupid.method.adapter.OnClickItemListener;

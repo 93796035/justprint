@@ -1,11 +1,13 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -34,7 +36,7 @@ public class Cmd_DiscBill implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
@@ -72,7 +74,7 @@ public class Cmd_DiscBill implements SamActionListener {
 			
 			billPanel.discount = discount > originalSubtotal  ? originalSubtotal : discount;
 			String newComment = billPanel.getComment() + BillPanel.DISCBILL + Math.round(billPanel.discount) + "@";
-			DBUtil.updateBill(billPanel.getBillID(), "comment", newComment);
+			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", newComment);
 			billPanel.setComment(newComment);
 			billPanel.updateTotalArea(true);
 			

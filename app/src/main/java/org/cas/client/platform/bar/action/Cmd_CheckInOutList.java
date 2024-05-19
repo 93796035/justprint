@@ -1,5 +1,9 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
+import com.just.print.app.BarFrame;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.dialog.statistics.CheckInOutListDlg;
@@ -28,7 +32,7 @@ public class Cmd_CheckInOutList implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		new CheckInOutListDlg(BarFrame.instance).setVisible(true);
 	}
 }

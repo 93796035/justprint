@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class Cmd_CombineAll implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		this.sourceBtn = (FunctionButton)e.getSource();
 		//@note should consider the time, incase there's some bill not paid before, while was calculated into current client.
 
@@ -60,10 +62,10 @@ public class Cmd_CombineAll implements SamActionListener {
 					.append(" and opentime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 					.append(" and (status is null or status < ").append(DBConsts.COMPLETED).append(")");
 			try {
-				ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 	            rs.beforeFirst();
-	            while (rs.next()) {
-	                idxMap.put(rs.getInt("id"), rs.getInt("billIndex"));
+	            while (rs.moveToNext()) {
+	                idxMap.put(DBUtil.getCursorString(rs,.getCursorInt(rs,"id"), DBUtil.getCursorString(rs,.getCursorInt(rs,"billIndex"));
 	            }
 			}catch(Exception exp) {
 				L.e("BillListPanel", "exception when change output back to original bill" + sql, exp);

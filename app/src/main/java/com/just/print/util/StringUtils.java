@@ -1,6 +1,8 @@
 package com.just.print.util;
 
 
+import org.cas.client.platform.casutil.L;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;

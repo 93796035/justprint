@@ -4,33 +4,65 @@
     android:layout_height="match_parent"
     android:background="#D8D8D8">
 
-    <!-- 顶部按钮 -->
-    <Button
-        android:id="@+id/billButton"
+    <!-- 表头布局 -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Bill Button"
-        android:visibility="gone" />
+        android:orientation="horizontal"
+        android:background="#EEE">
+        <TextView
+            android:id="@+id/headerQty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="QTY"
+            android:gravity="center" />
 
-    <!-- 总金额显示区域 -->
-    <TextView
-        android:id="@+id/totalPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/billButton"
-        android:background="@null"
-        android:gravity="right"
-        android:text="Total: $0.00"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/headerName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Name"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/headerModify"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text=""
+            android:gravity="center" />
 
-    <!-- 表格视图，用ListView替代 -->
+        <TextView
+            android:id="@+id/headerPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Price"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- ListView -->
     <ListView
         android:id="@+id/tableListView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_below="@id/totalPrice"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/headerLayout"
         android:layout_above="@+id/operationLayout" />
+
+    <!-- 总金额显示区域 -->
+    <TextView
+        android:id="@+id/valTotlePrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@null"
+        android:text="34.50"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="#4CAF50"
+        android:gravity="center_horizontal" />
 
     <!-- 操作按钮容器 -->
     <LinearLayout
@@ -39,21 +71,78 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:gravity="center">
-
-        <Button
-            android:id="@+id/moreButton"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="More" />
+        android:gravity="center_horizontal"
+        android:padding="16dp">
 
         <Button
             android:id="@+id/lessButton"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/circle_red"
+            android:text="-"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:layout_marginEnd="16dp"/>
+
+        <Button
+            android:id="@+id/moreButton"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/circle_green"
+            android:text="+"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <!-- 底部费用详细 -->
+    <LinearLayout
+        android:id="@+id/footerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/operationLayout"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+        <TextView
+            android:id="@+id/lblDiscount"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Less" />
+            android:text="Sub: $30.00"
+            android:textSize="18sp"
+            android:textColor="#000000" />
+        <TextView
+            android:id="@+id/lblServiceFee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sub: $30.00"
+            android:textSize="18sp"
+            android:textColor="#000000" />
+        <TextView
+            android:id="@+id/lblSubTotle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sub: $30.00"
+            android:textSize="18sp"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/lblTPS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TPS: $1.50"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:layout_marginLeft="10dp" />
+
+        <TextView
+            android:id="@+id/lblTVQ"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TVQ: $2.99"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:layout_marginLeft="10dp" />
     </LinearLayout>
 
 </RelativeLayout>

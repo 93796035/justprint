@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.view.View;
 
 import com.just.print.app.BarFrame;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.dialog.MoreButtonsDlg;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class MoreButton extends FunctionButton implements ISButton, View.OnClickListener {
 	
 	public MoreButton(String title) {
-		super(BarFrame.instance, title);
+		super(title);
 		setText(title);
 		String bg = BarOption.getBK("Function");
     	if(bg == null) {

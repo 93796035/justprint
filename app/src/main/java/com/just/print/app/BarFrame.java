@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,9 +25,10 @@ import com.just.print.ui.fragment.RegisterFragment;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.ui.panel.TablesPanel;
-import com.just.print.util.AppUtils;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
+
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.casutil.L;
 import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
 import com.stupid.method.reflect.StupidReflect;
@@ -34,7 +36,7 @@ import com.stupid.method.reflect.annotation.XViewByID;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.action.Cmd_CheckInOut;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.dialog.DiscountDlg;
@@ -67,7 +69,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -904,6 +905,12 @@ public class BarFrame extends BaseFragmentActivity {
     @XViewByID(R.id.valOpenTime)
     public TextView valOpenTime;
 
+    @XViewByID(R.id.btnRetryPrinter)
+    public Button btnRetryPrinter;
+
+    @XViewByID(R.id.btnFlushMevBatch)
+    public Button btnFlushMevBatch;
+
     @XViewByID(R.id.lblStatus)
     public static TextView lblStatus;
 
@@ -914,5 +921,12 @@ public class BarFrame extends BaseFragmentActivity {
 
     public Spinner getCmbCurTable() {
         return cmbCurTable;
+    }
+
+    public boolean isShowingAnExpiredBill() {
+        return isShowingAnExpiredBill;
+    }
+    public void setShowingAnExpiredBill(boolean isShowingAnExpiredBill) {
+        this.isShowingAnExpiredBill = isShowingAnExpiredBill;
     }
 }

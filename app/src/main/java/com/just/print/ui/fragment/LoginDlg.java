@@ -2,7 +2,6 @@ package com.just.print.ui.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,14 +19,13 @@ import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.User;
 import com.just.print.db.expand.DaoExpand;
-import com.just.print.ui.panel.ConfigFragmentActivity;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.dialog.statistics.ReportDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst0;
@@ -107,7 +105,7 @@ public class LoginDlg extends DialogFragment {
 //            String[] tSuperKey = new String[tmpPos];
 //            tmpPos = 0;
 //            while (rs.moveToNext()) {
-//                tSuperKey[tmpPos] = DBUtil.getCursorString(rs,"type");
+//                tSuperKey[tmpPos] = DBUtil.getCursorString(rs,.getCursorString(rs,"type");
 //                tmpPos++;
 //            }
 //            rs.close();// 关闭
@@ -186,7 +184,7 @@ public class LoginDlg extends DialogFragment {
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sqlBuilder.toString(), null);
                     if(rs.moveToNext()) {
-                        lastPrintTime = DBUtil.getCursorString(rs, "ANNIVERSARY");
+                        lastPrintTime = DBUtil.getCursorString(rs,.getCursorString(rs, "ANNIVERSARY");
                         if(lastPrintTime != null && lastPrintTime.length() > 10) {
                             if(lastPrintTime.indexOf(".") > 0) {
                                 lastPrintTime = lastPrintTime.substring(0, lastPrintTime.indexOf(".") );
@@ -207,10 +205,10 @@ public class LoginDlg extends DialogFragment {
                         //if didn't found any batch, means never print yet, set current batchIdx to 1
                         while(rs.moveToNext()) {
                             if(LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
-                                curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "id") + 1);
+                                curBatchIdx = String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "id") + 1);
                                 break;
                             }else {	// if it's super admin, then no need to show "next" batch number.
-                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs,"id"))).concat(",");
+                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs,"id"))).concat(",");
                             }
                         }
                     }catch(Exception exp) {

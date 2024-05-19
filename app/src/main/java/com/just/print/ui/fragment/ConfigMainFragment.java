@@ -23,7 +23,7 @@ import com.just.print.ui.UC;
 import com.just.print.ui.panel.ConfigFragmentActivity;
 import com.just.print.ui.holder.ConfigBillViewHolder;
 import com.just.print.ui.holder.ConfigOrderViewHolder;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.just.print.util.StringUtils;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;

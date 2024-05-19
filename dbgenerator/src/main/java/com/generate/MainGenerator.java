@@ -197,7 +197,7 @@ public class MainGenerator {
         bill.addStringProperty("comment");
         bill.addIntProperty("invoiceId").columnName("invoiceId");
 
-        // +---------+-----------+------------+---------+
+        // +---------+-----------+Customizations+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
         Entity customizations = schema.addEntity("Customizations");
@@ -206,7 +206,21 @@ public class MainGenerator {
         customizations.addStringProperty("value");
         customizations.addStringProperty("type");
 
+
+        // +---------+-----------+Customizations+---------+
+        // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
+        Entity customizedRule = schema.addEntity("CustomizedRule");
+        customizedRule.addIdProperty();
+        customizedRule.addStringProperty("rulename");
+        customizedRule.addStringProperty("content");
+        customizedRule.addIntProperty("action");
+        customizedRule.addIntProperty("dispIdx");
+        customizedRule.addStringProperty("ext1");
+        customizedRule.addStringProperty("ext2");
+        customizedRule.addStringProperty("ext3");
+
+        // +---------+--------WebsrmBatch---+------------+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
         Entity websrmBatch = schema.addEntity("WebsrmBatch");
@@ -218,7 +232,7 @@ public class MainGenerator {
         websrmBatch.addIntProperty("employeeId").columnName("employeeId");
 
         // +---------+-----------+------------+---------+
-        // |    id   |   mname   |  number    |   price |
+        // |    id   |   mname   |  number    |   Device |
         // +---------+-----------+------------+---------+
         Entity device = schema.addEntity("Device");//在线设备
         device.addStringProperty("ip");

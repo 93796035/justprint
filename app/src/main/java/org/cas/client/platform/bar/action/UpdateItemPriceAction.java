@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -24,7 +26,7 @@ public class UpdateItemPriceAction implements ActionListener{
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		if(btn.isSelected()) {
 
 			SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];

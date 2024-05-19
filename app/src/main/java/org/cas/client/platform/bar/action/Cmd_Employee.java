@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.dialog.statistics.EmployeeListDlg;
@@ -28,7 +30,7 @@ public class Cmd_Employee implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		new EmployeeListDlg(BarFrame.instance).setVisible(true);
 	}
 }

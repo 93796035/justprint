@@ -2,7 +2,7 @@ package org.cas.client.platform.bar.net;
 
 import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Dish;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.json.JSONException;

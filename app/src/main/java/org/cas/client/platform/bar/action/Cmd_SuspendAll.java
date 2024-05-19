@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.model.DBConsts;
@@ -31,7 +33,7 @@ public class Cmd_SuspendAll implements  SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
 		

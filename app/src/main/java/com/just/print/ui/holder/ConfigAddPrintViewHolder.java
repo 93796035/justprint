@@ -5,7 +5,7 @@ import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.db.bean.Printer;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.stupid.method.adapter.XViewHolder;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;

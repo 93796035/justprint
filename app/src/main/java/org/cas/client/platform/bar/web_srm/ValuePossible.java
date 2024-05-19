@@ -1,5 +1,10 @@
 package org.cas.client.platform.bar.web_srm;
 
+import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.print.PrintUtil;
+
+import java.util.List;
+
 public interface ValuePossible {
 	
     public static final String RFER = "RFER";
@@ -156,42 +161,42 @@ public interface ValuePossible {
         String TOUS = "Tous";
     }
 
-//    public static String getModeImpr(String string) {
-//		if(string.contains(RE_PRINTED)) {
-//			return ModImpr.RPR;
-//		}else if(string.contains(RE_PRINTED_INTERNAL_USE)) {
-//			return ModImpr.DUP;
-//		}else if(string.contains(VOID)) {
-//			return ModImpr.ANN;
-//		}else if(string.contains(NOT_PAID)) {
-//			return ModImpr.PSP; 	//Failure to pay ("PSP") – the customer left without paying the bill.
-//		}else if(string.contains(PrintService.PAYMENT_FAIL)) {
-//			return ModImpr.ANN;
-//		}
-//		return ModImpr.FAC;
-//	}
+    public static String getModeImpr(String string) {
+		if(string.contains(RE_PRINTED)) {
+			return ModImpr.RPR;
+		}else if(string.contains(RE_PRINTED_INTERNAL_USE)) {
+			return ModImpr.DUP;
+		}else if(string.contains(VOID)) {
+			return ModImpr.ANN;
+		}else if(string.contains(NOT_PAID)) {
+			return ModImpr.PSP; 	//Failure to pay ("PSP") – the customer left without paying the bill.
+		}else if(string.contains(PrintService.PAYMENT_FAIL)) {
+			return ModImpr.ANN;
+		}
+		return ModImpr.FAC;
+	}
 
-//	public static String getModPai(List<String> sndMsg) {
-//		if(sndMsg.get(3).startsWith(REFUND)){	//if it's refund.
-//			int p = sndMsg.get(3).indexOf(METHOD);
-//			if(p > 0) {
-//				return getMatchedPaytrans(sndMsg.get(3).substring(p + METHOD.length()).trim().split("\n"));
-//			}
-//		}else {
-//			String tText = sndMsg.get(4).trim(); // find out the payment.
-//			if(tText.contains(VOID)) {
-//				return ModPai.AUC;
-//			}
-//			if(!tText.contains(PrintUtil.REF_TO)) { //the element at this position might be a ref(including old moneys) not for sure a paid methods.
-//				int p = tText.indexOf("\n\n");		//so if this line does not contain "#ref to:", then it's receipt.
-//				if(p > 0) {
-//					tText = tText.substring(0, p);
-//				}
-//				return getMatchedPaytrans(tText.split("\n"));
-//			}
-//		}
-//		return ModPai.SOB;		//for bill, not receipt, give SOB.
-//	}
+	public static String getModPai(List<String> sndMsg) {
+		if(sndMsg.get(3).startsWith(REFUND)){	//if it's refund.
+			int p = sndMsg.get(3).indexOf(METHOD);
+			if(p > 0) {
+				return getMatchedPaytrans(sndMsg.get(3).substring(p + METHOD.length()).trim().split("\n"));
+			}
+		}else {
+			String tText = sndMsg.get(4).trim(); // find out the payment.
+			if(tText.contains(VOID)) {
+				return ModPai.AUC;
+			}
+			if(!tText.contains(PrintUtil.REF_TO)) { //the element at this position might be a ref(including old moneys) not for sure a paid methods.
+				int p = tText.indexOf("\n\n");		//so if this line does not contain "#ref to:", then it's receipt.
+				if(p > 0) {
+					tText = tText.substring(0, p);
+				}
+				return getMatchedPaytrans(tText.split("\n"));
+			}
+		}
+		return ModPai.SOB;		//for bill, not receipt, give SOB.
+	}
 
 	public static String getMatchedPaytrans(String[] lines) {
 		String paiementTrans = ModPai.SOB;

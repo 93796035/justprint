@@ -22,7 +22,7 @@ import com.just.print.ui.fragment.OrderCategoryFragment;
 import com.just.print.ui.fragment.OrderIdentifierFragment;
 import com.just.print.util.AppUtils;
 import com.just.print.util.Command;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;
 import com.just.print.printer.jiabo.DeviceConnFactoryManager;

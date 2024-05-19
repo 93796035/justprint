@@ -19,6 +19,7 @@ import com.just.print.db.dao.SaleRecordDao;
 import com.just.print.db.dao.M2M_SaleRecordMarkDao;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.CustomizationsDao;
+import com.just.print.db.dao.CustomizedRuleDao;
 import com.just.print.db.dao.WebsrmBatchDao;
 import com.just.print.db.dao.DeviceDao;
 import com.just.print.db.dao.LogDao;
@@ -43,6 +44,7 @@ public class DaoMaster extends AbstractDaoMaster {
         M2M_SaleRecordMarkDao.createTable(db, ifNotExists);
         BillDao.createTable(db, ifNotExists);
         CustomizationsDao.createTable(db, ifNotExists);
+        CustomizedRuleDao.createTable(db, ifNotExists);
         WebsrmBatchDao.createTable(db, ifNotExists);
         DeviceDao.createTable(db, ifNotExists);
         LogDao.createTable(db, ifNotExists);
@@ -61,6 +63,7 @@ public class DaoMaster extends AbstractDaoMaster {
         M2M_SaleRecordMarkDao.dropTable(db, ifExists);
         BillDao.dropTable(db, ifExists);
         CustomizationsDao.dropTable(db, ifExists);
+        CustomizedRuleDao.dropTable(db, ifExists);
         WebsrmBatchDao.dropTable(db, ifExists);
         DeviceDao.dropTable(db, ifExists);
         LogDao.dropTable(db, ifExists);
@@ -106,6 +109,7 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(M2M_SaleRecordMarkDao.class);
         registerDaoClass(BillDao.class);
         registerDaoClass(CustomizationsDao.class);
+        registerDaoClass(CustomizedRuleDao.class);
         registerDaoClass(WebsrmBatchDao.class);
         registerDaoClass(DeviceDao.class);
         registerDaoClass(LogDao.class);

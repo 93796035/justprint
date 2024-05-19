@@ -13,17 +13,15 @@ import android.widget.RelativeLayout;
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.app.BaseFragment;
-import com.just.print.db.bean.DiningTable;
 import com.just.print.db.expand.DaoExpand;
 
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
 
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.action.Cmd_CancelAll;
 import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 import org.cas.client.platform.bar.model.DBConsts;
@@ -106,25 +104,25 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             while (rs.moveToNext()) {
                 TableButton tableToggleButton = new TableButton();
 
-                int id = DBUtil.getCursorInt(rs, "ID");
-                int type = DBUtil.getCursorInt(rs, "type");
+                int id = DBUtil.getCursorString(rs,.getCursorInt(rs, "ID");
+                int type = DBUtil.getCursorString(rs,.getCursorInt(rs, "type");
 
                 //check if it's already created and added into tableAry.
                 //because a table contains split bills, then there will be more than one records, and the total should counts the total on all the bills.
                 if(tableIds.contains(id)) {
-                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs, "name"));
-                    tableToggleButton.setTotal(tableToggleButton.getTotal() + DBUtil.getCursorInt(rs, "total"));
+                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs,.getCursorString(rs, "name"));
+                    tableToggleButton.setTotal(tableToggleButton.getTotal() + DBUtil.getCursorString(rs,.getCursorInt(rs, "total"));
 
                     tableToggleButton.setTypeStatusAndName(
-                            DBUtil.getCursorString(rs, "openTime"),
-                            DBUtil.getCursorString(rs, "createTime"),
+                            DBUtil.getCursorString(rs,.getCursorString(rs, "openTime"),
+                            DBUtil.getCursorString(rs,.getCursorString(rs, "createTime"),
                             type,
-                            DBUtil.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
-                            DBUtil.getCursorString(rs, "Name"));
+                            DBUtil.getCursorString(rs,.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorString(rs,.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
+                            DBUtil.getCursorString(rs,.getCursorString(rs, "Name"));
                     //THIS ROUND STOP HERE!!!!!!!!
                     continue;
                 }else {
-                    tableToggleButton.setTotal(DBUtil.getCursorInt(rs, "total"));
+                    tableToggleButton.setTotal(DBUtil.getCursorString(rs,.getCursorInt(rs, "total"));
                 }
 
                 //check if it's the logo table.
@@ -138,22 +136,22 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 tableIds.add(id);
                 tableToggleButton.setId(id);				//ID
 
-                tableToggleButton.setStatus(DBUtil.getCursorInt(rs, "s1"));
-                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs, "nname"));
+                tableToggleButton.setStatus(DBUtil.getCursorString(rs,.getCursorInt(rs, "s1"));
+                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs,.getCursorString(rs, "nname"));
 
                 //for table mode, setTypeStatusAndName should go after setting bounds, because depends on the status, it might change the size.
                 RelativeLayout.LayoutParams params = tableToggleButton.setTypeStatusAndName(
-                        DBUtil.getCursorString(rs, "openTime"),
-                        DBUtil.getCursorString(rs, "createTime"),
+                        DBUtil.getCursorString(rs,.getCursorString(rs, "openTime"),
+                        DBUtil.getCursorString(rs,.getCursorString(rs, "createTime"),
                         type,
-                        DBUtil.getCursorInt(rs, "s2"),
-                        DBUtil.getCursorString(rs, "Name"));
+                        DBUtil.getCursorString(rs,.getCursorInt(rs, "s2"),
+                        DBUtil.getCursorString(rs,.getCursorString(rs, "Name"));
 
                 //location
-                int x = DBUtil.getCursorInt(rs, "posX");
-                int y = DBUtil.getCursorInt(rs, "posY");
-                int w = DBUtil.getCursorInt(rs, "width");
-                int h = DBUtil.getCursorInt(rs, "height");
+                int x = DBUtil.getCursorString(rs,.getCursorInt(rs, "posX");
+                int y = DBUtil.getCursorString(rs,.getCursorInt(rs, "posY");
+                int w = DBUtil.getCursorString(rs,.getCursorInt(rs, "width");
+                int h = DBUtil.getCursorString(rs,.getCursorInt(rs, "height");
 //                if(BarOption.isCounterMode()) {
 //                    if(tableToggleButton.getStatus() == 0){
 //                        x = -100;
@@ -196,7 +194,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 ((RelativeLayout)mRoot).addView(tableToggleButton, params);
 
                 //dsp_Index is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
-                if(DBUtil.getCursorInt(rs, "dsp_Index") < 0) {
+                if(DBUtil.getCursorString(rs,.getCursorInt(rs, "dsp_Index") < 0) {
                     tableToggleButton.setOnTouchListener(this);
 //                    tableToggleButton.addMouseMotionListener(this);
                 }
@@ -325,8 +323,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     BarFrame.instance.switchMode(2);
                 } else { // if it's not empty
                     if(num == 1 && CustOpts.custOps.getValue("FrobiddenQuickEnter") == null) {	// display the only bill
-                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs, "customerNumber"));
-                        BarFrame.instance.setCurBillID(DBUtil.getCursorInt(rs, "id"));
+                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs,.getCursorString(rs, "customerNumber"));
+                        BarFrame.instance.setCurBillID(DBUtil.getCursorString(rs,.getCursorInt(rs, "id"));
                         BarFrame.instance.hideBillIdx(true);
                         BarFrame.instance.switchMode(2);
                     }else { //or switch to the bill panel to show all the bills.

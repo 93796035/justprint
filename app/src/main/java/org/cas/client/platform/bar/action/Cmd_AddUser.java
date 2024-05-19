@@ -1,5 +1,9 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
+import com.just.print.app.BarFrame;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.pannel.BarFrame;
@@ -27,7 +31,7 @@ public class Cmd_AddUser implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		BarFrame.instance.addNewBillInCurTable();
 	}
 }

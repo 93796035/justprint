@@ -101,7 +101,7 @@ public class ConfigPrinterFragment extends BaseFragment implements
         }else if(orderPrint.isChecked() && classPrint.isChecked()){
             type = 3;
         }
-//        DbUtil.createPrinter(ip.toString(),
+//        DBUtil.getCursorString(rs,.createPrinter(ip.toString(),
 //                name.getText().toString(),
 //                checkBox.isChecked() ? 1 : 0,
 //                type,//checkid == R.id.orderPrint ? 1 : 0,

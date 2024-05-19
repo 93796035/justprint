@@ -1,32 +1,18 @@
 package org.cas.client.platform.casutil;
 
-import android.util.Log;
-
-import com.just.print.util.L;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import org.cas.client.platform.cascustomize.CustOpts;
 
 /**
  * 集中存放属于功能的方法。采用静态方法。 其中的方法与其它类的耦合性应最小。
@@ -734,24 +720,24 @@ public class CASUtility {
 //                .toString();
 //    }
 //
-//    /* 取得PIM默认保存数据的路径 @return 默认路径 */
-//    public static String getPIMDirPath() {
-//        String tmpDataDirectoryStr =
-//                new StringBuilder("c:\\AikaPos")//System.getProperty("user.home"))
-//                .append(System.getProperty("file.separator"))
-//                .append(".Storm070111")
-//                .append(System.getProperty("file.separator")).toString();
-//        // 至此构造出PIM在系统目录下的路径字符串。
-//        File tmpDir = new File(tmpDataDirectoryStr);
-//        if (!tmpDir.exists()) {
-//            if (!tmpDir.mkdirs()) {
-//                ErrorUtil.write("create Pim directory failed！");
-//                System.exit(0);
-//            }
-//        }
-//        return tmpDataDirectoryStr;
-//    }
-//
+    /* 取得PIM默认保存数据的路径 @return 默认路径 */
+    public static String getPIMDirPath() {
+        String tmpDataDirectoryStr =
+                new StringBuilder("c:\\AikaPos")//System.getProperty("user.home"))
+                .append(System.getProperty("file.separator"))
+                .append(".Storm070111")
+                .append(System.getProperty("file.separator")).toString();
+        // 至此构造出PIM在系统目录下的路径字符串。
+        File tmpDir = new File(tmpDataDirectoryStr);
+        if (!tmpDir.exists()) {
+            if (!tmpDir.mkdirs()) {
+                ErrorUtil.write("create Pim directory failed！");
+                System.exit(0);
+            }
+        }
+        return tmpDataDirectoryStr;
+    }
+
 //    /**
 //     * 取得保存邮件的路径
 //     *
@@ -1578,8 +1564,8 @@ public class CASUtility {
 //            ResultSet rs = stmt.executeQuery(sql);
 //            rs.beforeFirst();
 //            int i = 0;
-//            while (rs.next()) {
-//                sysValue[i] = rs.getString("VERSION");
+//            while (rs.moveToNext()) {
+//                sysValue[i] = DBUtil.getCursorString(rs,"VERSION");
 //                i++;
 //            }
 //            rs.close();// 关闭
@@ -1667,8 +1653,8 @@ public class CASUtility {
 //            sql = "select type from useridentity where id = 2";
 //            ResultSet rs = stmt.executeQuery(sql);
 //            rs.beforeFirst();
-//            while (rs.next())
-//                tAmount = rs.getInt("Type");
+//            while (rs.moveToNext())
+//                tAmount = DBUtil.getCursorString(rs,.getCursorInt(rs,"Type");
 //            rs.close();
 //
 //            // 拿当前日期和上次计数启动的启动日期相比,如果不同,则增加一次启动次数到数据库和Config文件中.

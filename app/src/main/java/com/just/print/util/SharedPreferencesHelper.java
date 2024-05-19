@@ -9,6 +9,8 @@ import android.util.Base64;
 
 import com.alibaba.fastjson.JSON;
 
+import org.cas.client.platform.casutil.L;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

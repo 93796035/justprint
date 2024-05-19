@@ -1,5 +1,9 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
+import com.just.print.app.BarFrame;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -34,7 +38,7 @@ public class Cmd_SplitItem implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		this.sourceBtn = (FunctionToggleButton)e.getSource();
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
 		
@@ -68,8 +72,8 @@ public class Cmd_SplitItem implements SamActionListener {
 				//and eventually, if the bill id is not 0, will calculate the service fee and discount into Total.
 				if(billPanel.getBillID() == 0) {
 					int id = BarFrame.instance.createAnEmptyBill(
-							BarFrame.instance.getCmbCurTable().getSelectedItem().toString(), 
-							BarFrame.instance.valOpenTime.getText(), 
+							BarFrame.instance.getCmbCurTable().getSelectedItem().toString(),
+							BarFrame.instance.valOpenTime.getText().toString(),
 							billIndex, 1);
 					billPanel.setBillID(id);
 				}

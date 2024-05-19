@@ -1,7 +1,5 @@
 package org.cas.client.platform.cascustomize;
 
-import com.just.print.util.L;
-
 import org.cas.client.platform.casutil.CASUtility;
 import org.cas.client.platform.casutil.PIMPool;
 

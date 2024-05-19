@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.util.Date;
@@ -37,7 +39,7 @@ public class Cmd_GiftCard implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		
 		FunctionButton o = (FunctionButton)e.getSource();
 		
@@ -48,7 +50,7 @@ public class Cmd_GiftCard implements SamActionListener {
 		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 2 and name = '").append(giftCardNumber)
 				.append("' and (status is null or status = 0)");
 		try {
-			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			rs.afterLast();
             rs.relative(-1);
             int tmpPos = rs.getRow();
@@ -59,11 +61,11 @@ public class Cmd_GiftCard implements SamActionListener {
             	//get out every field of first matching record.
             	rs.beforeFirst();
                 tmpPos = 0;
-                rs.next();
-                int id = rs.getInt("id");
-                int category = rs.getInt("style");
-                String productCode = rs.getString("IP");
-                int value = rs.getInt("langType");
+                rs.moveToNext();
+                int id = DBUtil.getCursorString(rs,.getCursorInt(rs,"id");
+                int category = DBUtil.getCursorString(rs,.getCursorInt(rs,"style");
+                String productCode = DBUtil.getCursorString(rs,"IP");
+                int value = DBUtil.getCursorString(rs,.getCursorInt(rs,"langType");
                 if(value <=0) {
                     JOptionPane.showMessageDialog(null, BarFrame.consts.InvalidCoupon());
                     return;

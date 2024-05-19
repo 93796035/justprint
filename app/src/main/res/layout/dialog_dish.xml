@@ -1,0 +1,235 @@
+<!-- res/layout/dialog_dish.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/sptName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/tfdLanguage1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Language 1" />
+
+        <EditText
+            android:id="@+id/tfdLanguage2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Language 2" />
+
+        <EditText
+            android:id="@+id/tfdLanguage3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Language 3" />
+
+        <TextView
+            android:id="@+id/sptPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/tfdPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Price" />
+
+        <CheckBox
+            android:id="@+id/cbxGST"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GST" />
+
+        <CheckBox
+            android:id="@+id/cbxQST"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="QST" />
+
+        <TextView
+            android:id="@+id/sptSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Size"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgSizes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RadioButton
+                android:id="@+id/rdbSize1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 1" />
+            <RadioButton
+                android:id="@+id/rdbSize2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 2" />
+            <RadioButton
+                android:id="@+id/rdbSize3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 3" />
+            <RadioButton
+                android:id="@+id/rdbSize4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 4" />
+            <RadioButton
+                android:id="@+id/rdbSize5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 5" />
+            <RadioButton
+                android:id="@+id/rdbSize6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size 6" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/sptPrinter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <CheckBox
+            android:id="@+id/cbxPrinter1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 1" />
+        <CheckBox
+            android:id="@+id/cbxPrinter2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 2" />
+        <CheckBox
+            android:id="@+id/cbxPrinter3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 3" />
+        <CheckBox
+            android:id="@+id/cbxPrinter4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 4" />
+        <CheckBox
+            android:id="@+id/cbxPrinter5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 5" />
+        <CheckBox
+            android:id="@+id/cbxPrinter6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Printer 6" />
+
+        <TextView
+            android:id="@+id/sptOther"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Other"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <CheckBox
+            android:id="@+id/cbxPricePomp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price Pomp" />
+        <CheckBox
+            android:id="@+id/cbxMenuPomp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Menu Pomp" />
+        <CheckBox
+            android:id="@+id/cbxModifyPomp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Modify Pomp" />
+
+        <TextView
+            android:id="@+id/lblCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="18sp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/cmbCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/lblDspIndex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Display Index"
+            android:textSize="18sp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/tfdDspIndex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Index" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="16dp">
+            <Button
+                android:id="@+id/btnOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OK" />
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel" />
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

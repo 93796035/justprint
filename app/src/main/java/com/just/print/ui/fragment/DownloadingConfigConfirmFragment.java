@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.just.print.R;
 import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
-import com.just.print.util.DbUtil;
+import com.just.print.util.DBUtil.getCursorString(rs,;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XViewByID;
@@ -63,7 +63,7 @@ public class DownloadingConfigConfirmFragment extends BaseFragment{
                 return;
             }
         }
-        DbUtil.syncConfigOntoServer(license, store_name.getText().toString(),false);
+        DBUtil.getCursorString(rs,.syncConfigOntoServer(license, store_name.getText().toString(),false);
         getActivity().finish();
     }
 

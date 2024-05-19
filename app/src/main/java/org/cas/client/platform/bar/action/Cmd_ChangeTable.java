@@ -7,9 +7,10 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
 
-import org.cas.client.platform.bar.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.casutil.L;
+
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.uibeans.TableButton;

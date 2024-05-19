@@ -15,7 +15,7 @@ import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
 import com.just.print.ui.panel.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
-import com.just.print.util.DbUtil;
+import com.just.print.util.DBUtil.getCursorString(rs,;
 import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;
 import com.stupid.method.reflect.StupidReflect;
@@ -80,7 +80,7 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
                 if (status && result2 != null && result2.isExists()) {
 
                     byte[] datas = Base64Util.decode(result2.getFileBase64());
-                    DbUtil.writeDBByte(datas);
+                    DBUtil.getCursorString(rs,.writeDBByte(datas);
                 }
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

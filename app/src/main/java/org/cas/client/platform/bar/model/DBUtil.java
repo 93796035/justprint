@@ -1,10 +1,13 @@
-package org.cas.client.platform.bar;
+package org.cas.client.platform.bar.model;
 
 import android.database.Cursor;
 import android.util.Log;
 
 import com.just.print.app.AikaPos;
-import com.just.print.util.L;
+
+import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.casutil.L;
 
 import java.util.Date;
 
@@ -283,6 +286,16 @@ public class DBUtil {
 		} else {
 			Log.e("DatabaseError", "Column '" + columnName + "' not found in the result set.");
 			return -1;  // 返回一个明显的无效值，调用者可以检查这个值
+		}
+	}
+
+	public static Long getCursorLong(Cursor cursor, String columnName) {
+		int columnIndex = cursor.getColumnIndex(columnName);
+		if (columnIndex != -1) {
+			return cursor.getLong(columnIndex);
+		} else {
+			Log.e("DatabaseError", "Column '" + columnName + "' not found in the result set.");
+			return -1l;  // 返回一个明显的无效值，调用者可以检查这个值
 		}
 	}
 }

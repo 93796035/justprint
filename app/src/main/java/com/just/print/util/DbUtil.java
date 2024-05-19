@@ -6,6 +6,7 @@ import android.util.Base64;
 import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
 
+import org.cas.client.platform.casutil.L;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -26,7 +27,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.Date;
 
-public class DbUtil extends Thread{
+public class DBUtil.getCursorString(rs, extends Thread{
 
     final private static String DATABASE_NAME_PREFFIX = "JustPrinter_"; //data/user/0/com.just.print/databases/ ; /data/data/com.whatsapp/databases/msgstore.db
     private static File file = null;
@@ -43,7 +44,7 @@ public class DbUtil extends Thread{
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
         file = AikaPos.instance.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + Options.getShopName(AikaPos.instance.getApplicationContext()));
         if (file.exists()){
-            DbUtil util = new DbUtil();
+            DBUtil.getCursorString(rs, util = new DBUtil.getCursorString(rs,();
             if(license != null && license.length() > 0){
                 util.license = license;
             }
@@ -79,7 +80,7 @@ public class DbUtil extends Thread{
     }
 
     public static void main(String args[]){
-        new DbUtil().run();
+        new DBUtil.getCursorString(rs,().run();
     }
 
     @Override

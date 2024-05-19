@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 
@@ -38,7 +40,7 @@ public class Cmd_Return implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
@@ -97,7 +99,7 @@ public class Cmd_Return implements SamActionListener {
 					.append("' or (subject = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
 					.append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 					.append(" and contactID = ").append(curBill).append(")"); 	//in future version, might need to check the deleted property.
-			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			rs.afterLast();
 		    rs.relative(-1);
 		    

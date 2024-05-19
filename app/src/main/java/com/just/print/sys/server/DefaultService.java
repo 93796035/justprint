@@ -6,7 +6,7 @@ import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopRequest;
 import com.just.print.sys.model.QueryShopResult;
 import com.just.print.util.Base64Util;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 
 import java.io.File;
 import java.io.FileInputStream;

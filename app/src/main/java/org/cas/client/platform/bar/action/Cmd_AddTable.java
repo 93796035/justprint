@@ -1,5 +1,11 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
+import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.ui.panel.TablesPanel;
+
 import java.awt.event.ActionEvent;
 
 import org.cas.client.platform.bar.BarOption;
@@ -31,9 +37,9 @@ public class Cmd_AddTable implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		
-		TablesPanel tablesPanel = (TablesPanel)BarFrame.instance.panels[0];
+		TablesPanel tablesPanel = (TablesPanel) BarFrame.instance.panels[0];
 		
 		if(!BarOption.isSingleUser()) {
 			LoginDlg loginDlg = new LoginDlg(BarFrame.instance);

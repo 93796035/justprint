@@ -9,11 +9,13 @@ import android.widget.Toast;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 
+import org.cas.client.platform.bar.panel.BillPanel;
+
 public class JOptionPane {
     public static final int YES_NO_OPTION = 0;
 
-    public static void showMessageDialog(BarFrame instance, String atLeastTwoTableShouldBeSelected) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(instance); // 使用当前Activity的上下文创建Builder
+    public static void showMessageDialog(String atLeastTwoTableShouldBeSelected) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance); // 使用当前Activity的上下文创建Builder
         builder.setTitle("Notice"); // 设置对话框标题
         builder.setMessage(BarFrame.consts.AtLeastTwoTableShouldBeSelected()); // 设置对话框显示的消息
 
@@ -29,8 +31,12 @@ public class JOptionPane {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    public static boolean showConfirmDialog(BarFrame instance, String content, String title){
-        AlertDialog.Builder builder = new AlertDialog.Builder(instance);
+    public static void showMessageDialog(Object o,  String atLeastTwoTableShouldBeSelected) {
+        showMessageDialog(atLeastTwoTableShouldBeSelected);
+    }
+
+    public static boolean showConfirmDialog(Object instance, String content, String title){
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
         builder.setTitle(title);
         builder.setMessage(content);  // 假设你已经有适合安卓的方式来获取这个消息
 

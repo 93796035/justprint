@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.util.Date;
 
@@ -31,7 +33,7 @@ public class Cmd_CheckOrder implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		
     	String endNow = BarUtil.df.format(new Date());
 		int p = endNow.indexOf(" ");

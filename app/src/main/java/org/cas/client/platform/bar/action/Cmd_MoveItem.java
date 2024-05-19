@@ -1,5 +1,9 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
+import com.just.print.app.BarFrame;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 
@@ -39,7 +43,7 @@ public class Cmd_MoveItem implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		this.sourceBtn = (FunctionToggleButton)e.getSource();
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
 		
@@ -90,10 +94,10 @@ public class Cmd_MoveItem implements SamActionListener {
 				.append(" and opentime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(")");
 				try {
-					ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-		        	if(rs.next()) {
-		        		billId = rs.getInt("id");
-		        		int status = rs.getInt("status");
+					Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+		        	if(rs.moveToNext()) {
+		        		billId = DBUtil.getCursorString(rs,.getCursorInt(rs,"id");
+		        		int status = DBUtil.getCursorString(rs,.getCursorInt(rs,"status");
 		        		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
 //	        				if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConvertClosedBillBack(), BarFrame.consts.Operator(),
 //	        			            JOptionPane.YES_NO_OPTION) != 0) {// are you sure to convert the voided bill back？
@@ -104,7 +108,7 @@ public class Cmd_MoveItem implements SamActionListener {
 		        		}
 		        	}else {
 		        		billId = BarFrame.instance.createAnEmptyBill(BarFrame.instance.getCmbCurTable().getSelectedItem().toString(),
-								BarFrame.instance.valOpenTime.getText(), targetBillIdx, 1);
+								BarFrame.instance.valOpenTime.getText().toString(), targetBillIdx, 1);
 		        	}
 		        	
 		        	if(origianlBillstatus >= DBConsts.BILL_PRINTED || origianlBillstatus < DBConsts.ORIGINAL) {	//@NOTE: use the old one, new one might be changed when regenerate.

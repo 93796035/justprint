@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
@@ -36,7 +38,7 @@ public class Cmd_ChangePrice implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 		this.sourceBtn = (FunctionToggleButton)e.getSource();
 		
 		if(BarFrame.instance.curDish == null) {//check if there's an item selected.

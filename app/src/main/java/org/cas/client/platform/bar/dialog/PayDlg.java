@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.dialog;
 
+import android.view.View;
+
 import androidx.fragment.app.DialogFragment;
 
 import java.awt.Color;
@@ -27,7 +29,7 @@ import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.action.Cmd_OpenDrawer;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -164,19 +166,19 @@ public class PayDlg extends DialogFragment
 		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
     	try {
     		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
-            rs.next();
+            rs.moveToNext();
         	
         	//save old values
-            oldTotal = rs.getInt("total");
-        	oldCashReceived =rs.getInt("cashReceived");
-        	oldDebitReceived = rs.getInt("debitReceived");
-        	oldVisaReceived = rs.getInt("visaReceived");
-        	oldMasterReceived = rs.getInt("masterReceived");
-        	oldOtherReceived = rs.getString("otherReceived");
+            oldTotal = DBUtil.getCursorString(rs,.getCursorInt(rs,"total");
+        	oldCashReceived =DBUtil.getCursorString(rs,.getCursorInt(rs,"cashReceived");
+        	oldDebitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"debitReceived");
+        	oldVisaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"visaReceived");
+        	oldMasterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"masterReceived");
+        	oldOtherReceived = DBUtil.getCursorString(rs,"otherReceived");
         	
-        	oldCashback = rs.getInt("cashback"); //cash back is negative in db. so use "+" instead of "-"
-        	oldTip = rs.getInt("tip");
-        	oldStatus = rs.getInt("status");
+        	oldCashback = DBUtil.getCursorString(rs,.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
+        	oldTip = DBUtil.getCursorString(rs,.getCursorInt(rs,"tip");
+        	oldStatus = DBUtil.getCursorString(rs,.getCursorInt(rs,"status");
         	//cashReceived
         	onSrcCashReceived = oldCashReceived + oldCashback;
         	if(oldStatus < DBConsts.ORIGINAL) {
@@ -377,7 +379,7 @@ public class PayDlg extends DialogFragment
      *            动作事件
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
     	
         inputedContent = tfdNewReceived.getText();
         SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
@@ -566,7 +568,7 @@ public class PayDlg extends DialogFragment
 		}else {
 			billPanel.setComment(comment + PrintService.LATEST_PAY + " : " + inputedContent + "\n");
 		}
-		DBUtil.updateBill(billPanel.getBillID(), "comment", billPanel.getComment());
+		DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", billPanel.getComment());
 	}
 
 	private void showChangeDlg(BillPanel billPanel, int left) {
@@ -575,10 +577,10 @@ public class PayDlg extends DialogFragment
 		//if the last pay was with cash, then might need cash back (no change, paid with a "50" bill)
 		if(getTitle().equals(BarFrame.consts.EnterCashPayment())){
 			changeDlg.setTitle(BarFrame.consts.Change());
-			DBUtil.updateBill(billPanel.getBillID(), "cashback", oldCashback + left);
+			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "cashback", oldCashback + left);
 		}else {
 			changeDlg.setTitle(BarFrame.consts.Tip());
-			DBUtil.updateBill(billPanel.getBillID(), "TIP", oldTip - left);	//otherwise, treated as tip. the tip in DB are positive, because it means we earned money.
+			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "TIP", oldTip - left);	//otherwise, treated as tip. the tip in DB are positive, because it means we earned money.
 		}
 		
 		changeDlg.setVisible(true);		//note: is't a non-modal dialog.
@@ -588,8 +590,8 @@ public class PayDlg extends DialogFragment
 		StringBuilder sb = new StringBuilder("select * from bill where id = ").append(billId);
 		try {
 			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
-			if(rs.next()) {
-				return rs.getInt("status");
+			if(rs.moveToNext()) {
+				return DBUtil.getCursorString(rs,.getCursorInt(rs,"status");
 			}
 		}catch(Exception e) {
 			ErrorUtil.write(e);

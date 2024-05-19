@@ -4,7 +4,9 @@ import androidx.fragment.app.DialogFragment;
 
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.PicturePane;
-import com.just.print.util.L;
+
+import org.cas.client.platform.bar.action.Cmd_CombineAll;
+import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
@@ -18,7 +20,6 @@ import org.cas.client.platform.bar.action.Cmd_CheckInOut;
 import org.cas.client.platform.bar.action.Cmd_CheckInOutList;
 import org.cas.client.platform.bar.action.Cmd_CheckOrder;
 import org.cas.client.platform.bar.action.Cmd_Color;
-import org.cas.client.platform.bar.action.Cmd_CombineAll;
 import org.cas.client.platform.bar.action.Cmd_DiscBill;
 import org.cas.client.platform.bar.action.Cmd_DiscItem;
 import org.cas.client.platform.bar.action.Cmd_DiscountCoupon;
@@ -194,7 +195,7 @@ public class CmdBtnsManagerDlg extends DialogFragment
 	}
 
 //	@Override
-//	public void actionPerformed(ActionEvent e) {
+//	public void onClick(View v) {
 //		Object o = e.getSource();
 //		int[] ids = originalList.getSelectedIndices();
 //

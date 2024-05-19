@@ -14,7 +14,7 @@ import com.just.print.app.EventBus;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.sys.server.CustomerSelection;
 import com.just.print.ui.holder.OrderMenuViewHolder;
-import com.just.print.util.L;
+import org.cas.client.platform.casutil.L;
 import com.stupid.method.adapter.IXDataListener;
 import com.stupid.method.adapter.OnClickItemListener;
 import com.stupid.method.adapter.XAdapter2;

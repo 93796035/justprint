@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.util.Date;
@@ -41,7 +43,7 @@ public class Cmd_OtherPay implements SamActionListener {
 	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void onClick(View v) {
 
 		if(!BarUtil.routineCheckBeforePrintingReceipt()) {
 			return;
@@ -64,8 +66,8 @@ public class Cmd_OtherPay implements SamActionListener {
 		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
     	try {
     		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
-            rs.next();
-            oldTotal = rs.getInt("total");
+            rs.moveToNext();
+            oldTotal = DBUtil.getCursorString(rs,.getCursorInt(rs,"total");
     	}catch(Exception exp) {
     		ErrorUtil.write(exp);
     	}

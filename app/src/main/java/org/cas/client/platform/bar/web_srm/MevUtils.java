@@ -48,8 +48,15 @@ package org.cas.client.platform.bar.web_srm;
 //import java.util.concurrent.*;
 
 import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
+
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.print.PrintUtil;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
+import org.cas.client.platform.casutil.L;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -66,7 +73,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.web_srm.utiles.KeyStoreUtils;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesJSON;
 import org.cas.client.platform.cascustomize.CustOpts;
@@ -90,9 +96,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class MevUtils {
 	
@@ -107,7 +111,6 @@ public class MevUtils {
 	public static final String KEYSTORE_TYPE = "PKCS12";
 	public static final String KEYSTORE_FILE = "c:/AikaPos/jre/lib/jckconfig";
 	public static final String KEYSTORE_KEY = "Eric";
-	private static Object BarUtil;
 
 	private static ECPrivateKey privateKey;
 
@@ -379,310 +382,310 @@ public class MevUtils {
  		}
  	}
 
-//    //======================================= Transaction request =========================================
-//	public static void buildTransaction(final List<String> sndMsg, final String transType, final Transaction transac) throws Exception{
+    //======================================= Transaction request =========================================
+	public static void buildTransaction(final List<String> sndMsg, final String transType, final Transaction transac) throws Exception{
+
+        //=========================header info=================================
+        transac.sectActi.Abrvt = ValuePossible.Abrvt.RBC;	 // Abbreviation of the business's sector of activity (RBC - Restaurants, bars and food trucks)
+        transac.sectActi.TypServ = getServiceType(sndMsg); // Service typeLVR is what service?
+
+        transac.FormImpr = ValuePossible.S_RFER.equals(transType) || (sndMsg.size() == 6 && sndMsg.get(5).endsWith(PrintService.PAYMENT_FAIL)) ?
+        		ValuePossible.Acti.NON : ValuePossible.FormImpr.PAP;		 // Document print option (Paper)
+        transac.RelaCommer = ValuePossible.RelaCommer.B2C;	 // Business relationship
+        transac.CommerceElectronique = "N"; 					 // E-commerce? No
+
+        //Print mode for the document, for print bill, the transType should be "FAC"
+        //printing closing receipt, also use this method, then it could be also one of following:
+        //•ANN: Annulation  (cancellation) •RPR: Reproduction •DUP: Duplicata •PSP: Parti sans payer •SOB: Sans objet (n/a)FAC: bill or any other document not included in this list)
+        transac.ModImpr = ValuePossible.getModeImpr(sndMsg.get(sndMsg.size() - 1));		//print purpos: currently support RPR, DUP, ANN, PSP or FAC
+        transac.Utc = BarOption.getUTC();	//"-05:00A", in summer time will be "-05:00N"
+        transac.ModTrans = BarOption.isTrainingMode()? ValuePossible.ModTrans.FOR : ValuePossible.ModTrans.OPE; // Transaction mode (Operation)
+        transac.DatTrans = BarUtil.sdf.format(new Date());
+
+        // "Previous signature" of the first transaction
+        transac.signa.Preced = "========================================================================================";
+        String[] addressParts = sndMsg.get(0).split("\n");
+        String address = addressParts[1].trim();
+
+        //info of store owner
+        transac.docAdr.DocNoCiviq = address.substring(0, address.indexOf(" "));	// Street number "3800";
+        transac.docAdr.DocCodePostal = addressParts[2].trim();					// Postal Code
+        transac.NomUtil = LoginDlg.USERNAME;	 		// The name of the user who produced the customer's bill(not matter)
+        transac.NomMandt = BarOption.getShopName();		// Name of the mandatory who operates the business	(not matter)
+        transac.NoTPS = BarOption.getGSTAccount();		// Mandatary’s GST and QST registration number (not the user's ones)
+        transac.NoTVQ = BarOption.getQSTAccount();
+        transac.EmprCertifSEV = KeyStoreUtils.GetCertificateThumbprint( BarOption.getCertificateSerialNumberSRS() );	// Thumb print of the certificate containing the
+        												//public key linked to the private key used to produce the current transaction signature
+        //info of aikapos
+        transac.IdPartn = BarOption.getPartnerId();		//aikapos's partner id.
+        transac.IdSev = BarOption.getIdSignedToAikaPos();        	//aikapos's idSev
+        transac.IdVersi = BarOption.getIdVersi();		//aikapos's IdVersi
+        transac.CodCertif = BarOption.getCertificationPassedCode();	//aikaPos's code certificate
+        transac.Versi = BarOption.getCertifiedVersion();			//aikapos's version
+        transac.VersiParn = BarOption.getParentVersion();	//aikapos's parent version which passed the certificate (if the getVersi is not the one)
+
+        //info of bill
+        transac.TypTrans = ValuePossible.TypTrans.ADDI.equals(transType) ? ValuePossible.TypTrans.ADDI : ValuePossible.TypTrans.RFER;	//the parameter(transType) can be BILL/RFER/V_RFER/R_RFER/S_RFER
+        transac.ModPai = ValuePossible.getModPai(sndMsg); 	// Method of payment used for the bill (Cash) @note: seems for bill(addi) this field and be set with anything? it will be just ignored by webmev?
+        transac.NoTrans = buildBillID(sndMsg.get(0));	// Number identifying the transaction ("100001");
+        // Table number("====0") and Number of customers
+        addressParts[addressParts.length - 1] = addressParts[addressParts.length - 1].trim();
+        transac.sectActi.NoTabl = addressParts[addressParts.length - 1].substring(0, addressParts[addressParts.length - 1].indexOf(" "));
+        int p = transac.sectActi.NoTabl.indexOf("-");
+        if(p > 0) {
+        	try {
+				transac.sectActi.NoTabl = UtilesFormatterDonnees.formatterNoTabl(transac.sectActi.NoTabl.substring(0, p));
+			} catch (Exception e) {
+				L.e("MevUtils", "Unexpected exception when formatting table name:" + transac.sectActi.NoTabl, e);
+			}
+        	transac.sectActi.NbClint = addressParts[addressParts.length - 1].substring(p + 1);
+        	p = transac.sectActi.NbClint.indexOf(PrintService.INVOICE);
+        	if(p > 0) {
+        		try {
+					transac.sectActi.NbClint = UtilesFormatterDonnees.formatterNbClint(transac.sectActi.NbClint.substring(0, p).trim());
+				} catch (Exception e) {
+					L.e("MevUtils", "Unexpected exception when formatting customerIdx.", e);
+				}
+        	}
+        }else {
+            transac.sectActi.NbClint = "001";
+        }
+
+        // Field identifying one or more customer addresses
+//        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.LVR, "2535", "Boul. Laurier", "Québec", "G1V5C6" ) );
+//        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.FAC, "3800", "rue Marly", "Québec", "G1X4A5" ) );
+
+
+        //============================dish part================================
+        // Supplies of the transaction
+        transac.lstItems = new ArrayList<TransactionItem>( );
+        String dishContent = sndMsg.get(2).trim();
+        String sep2 = BarUtil.getSeperatorLine(0);
+        p = dishContent.indexOf(sep2);
+		String subtotals = dishContent.substring(p + sep2.length()).trim();
+		p = subtotals.indexOf(PrintService.SOUSTOTAL);
+		dishContent = subtotals.substring(0, p);
+
+		String[] dishes = dishContent.split("\n\n");
+		for(int i = 0; i < dishes.length; i++) {
+			String[] dishAndModify = dishes[i].split("\n");
+			//get out the info of dish, the qt info will be used to calculate each modify.
+			p = getTimesOperatorPosition(dishAndModify[0]);
+			if(p < 1) {		//added this check because I met once there's two subtotal, might because some previous step process wrong?
+				continue;
+			}
+
+			String descr_dish = dishAndModify[0].substring(0, p);
+			String pricePart = dishAndModify[0].substring(p + 1);
+			if(pricePart.endsWith("P") || pricePart.endsWith("F")) {
+				pricePart = pricePart.substring(0, pricePart.lastIndexOf(" ")).trim();
+			}
+			p = pricePart.lastIndexOf(" ");
+			float dishItemTotalPrice = Float.valueOf(pricePart.substring(p + 1).trim());
+			p = descr_dish.lastIndexOf(" ");
+			int Qte_dish = Integer.valueOf(descr_dish.substring(p + 1));
+			descr_dish = descr_dish.substring(0, p).trim();
+			//build info of each modify.
+			List<TransactionPrecisionItem> lstPrecisionsItem = new ArrayList<TransactionPrecisionItem>( );
+			float modifyTotal = 0.0f;
+			float prix = 0.0f;
+	        for(int m = 1; m < dishAndModify.length; m++) {
+				p = dishAndModify[m].trim().lastIndexOf("=");
+				float totalPrice = Float.valueOf(dishAndModify[m].substring(p + 1));
+				String modifyAndQT = dishAndModify[m].substring(0, p);
+				p = modifyAndQT.lastIndexOf(" ");
+				String descr_modify = modifyAndQT.substring(0, p);
+				int qt_modify = Integer.valueOf(modifyAndQT.substring(p +2));
+
+				prix = totalPrice * Qte_dish;
+				modifyTotal += prix;
+
+				// Details for a supply of the transaction
+		        lstPrecisionsItem.add(new TransactionPrecisionItem(
+		        	UtilesFormatterDonnees.formatterQte((double)qt_modify * Qte_dish), //Qte e.g."+00001.00",
+		        	descr_modify, 		//"Descr"
+		        	UtilesFormatterDonnees.formatterMontant(totalPrice / qt_modify),	//"Unitr", "+000000001.00",
+		        	UtilesFormatterDonnees.formatterMontant(prix),  // "Prix","+000000099.00"
+		        	ValuePossible.Tax.FP, // "Tax",
+		        	prix > 0 ? ValuePossible.Acti.RES : ValuePossible.Acti.SOB));   //"Acti"     //RBC
+			}
+
+	        prix = dishItemTotalPrice + modifyTotal;
+	        transac.lstItems.add(new TransactionItem(
+	        	UtilesFormatterDonnees.formatterQte((double)Qte_dish), //   "Qte", "+00001.00",
+	        	descr_dish,   											//    "Descr",  "Poutine"
+	        	UtilesFormatterDonnees.formatterMontant(prix / Qte_dish), //"Unitr", "+000000000.00"
+	        	UtilesFormatterDonnees.formatterMontant(prix),			//"Prix", "+000000979.00"
+	        	ValuePossible.Tax.FP, 								// "Tax",
+	        	ValuePossible.Acti.RES,								//"Acti",
+	        	lstPrecisionsItem ) ); 									// Add all the items to the transaction
+		}
+
+        //===============================amount part=============================
+		//first， it service exists, add the service fee as an item of transac.lstItems.
+		p = subtotals.indexOf(PrintService.SERVICE_FEE);
+		if(p > -1) {
+			String strServiceFee = subtotals.substring(p + PrintService.SERVICE_FEE.length() + 2, subtotals.indexOf("\n", p)).trim();
+			String formattedServiceFee = UtilesFormatterDonnees.formatterMontant(strServiceFee);
+			transac.lstItems.add(new TransactionItem(
+					"+00001.00", //   "Qte", "+00001.00",
+		        	"Service fee",   											//    "Descr",  "Poutine"
+		        	formattedServiceFee, 	//"Unitr" is same with "Prix" because the qty of service fee is always 1
+		        	formattedServiceFee,		//"Prix", "+000000979.00"
+		        	ValuePossible.Tax.FP, 								// "Tax", SERVICE_FF should also applied both taxes?
+		        	ValuePossible.Acti.RES));								//"Acti",
+		}
+		//according to document, if change pay method, need to secretly send a transaction to mev, with all number nagative.
+		int s_rfer = ValuePossible.S_RFER.equals(transType) ? -1 : 1;
+
+        //then, check if there's discount.
+        float discount = 0.0f;
+        p = subtotals.lastIndexOf(PrintService.ANNULATION);
+        if(p > -1) {
+	        String strDiscount = subtotals.substring(p + PrintService.ANNULATION.length() + 2, subtotals.indexOf("\n", p)).trim();
+	        discount = -1 * Float.valueOf(strDiscount);	//adjusted amount is  applied to the after-tax.can be a coupon,gift card, a
+			transac.Ajus = UtilesFormatterDonnees.formatterMontant(s_rfer * discount);//"+000000000.00";	//discount, rounding of the  after-tax amount, etc.
+        }else {
+        	transac.Ajus = "+000000000.00";
+        }
+        // numbers before tax
+		p = subtotals.lastIndexOf(PrintService.SOUSTOTAL);
+		String subTotal = subtotals.substring(p + PrintService.SOUSTOTAL.length() + 2, subtotals.indexOf("\n", p)).trim();
+		p = subtotals.lastIndexOf(PrintService.TPS);
+		String TPS = subtotals.substring(p + PrintService.TPS.length() + 2, subtotals.indexOf("\n", p)).trim();
+		p = subtotals.lastIndexOf(PrintService.TVQ);
+		String TPQ =  subtotals.substring(p + PrintService.TVQ.length() + 2).trim();
+
+        transac.AvantTax = UtilesFormatterDonnees.formatterMontant(s_rfer * (Float.valueOf(subTotal) + discount));//"+000000500.00";
+        transac.TPS = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPS));//"+000000025.00";
+        transac.TVQ = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPQ));//"+000000050.00";
+
+        //total number after tax
+        float afterTaxAmount = Float.valueOf(subTotal) + discount + Float.valueOf(TPS) + Float.valueOf(TPQ);
+        transac.ApresTax = UtilesFormatterDonnees.formatterMontant(s_rfer * afterTaxAmount);//"+000000575.00";
+
+        //===============================payment part===============================
+        //transac.Ajus =  //this field is cause by can be a coupon, a gift card, a discount, rounding of the  after-tax amount, etc.
+        //The amount due after adjusting the after tax amount. The value must be the sum of the apresTax and ajus fields
+		transac.MTDU = UtilesFormatterDonnees.formatterMontant(s_rfer * (afterTaxAmount - discount));
+
+		//get the currently totally paid amount from all kind of payment of this time.
+        Float currentlyPaid = 0.0f;
+        String[] currentPays = PrintService.getCurrentPays(sndMsg, transType);
+        for (String string : currentPays) {
+        	p = string.indexOf(":");
+        	if(p > 0) {
+        		currentlyPaid += Float.valueOf(string.substring(p + 1).trim());
+        	}
+		}
+        //get the latest paid amount from comment  TODO: there's a mistake when fetching comm.
+        float latestPay = 0.0f;
+        String comment = PrintService.getCommentFromSndMsg(sndMsg);
+        p = comment.indexOf(PrintService.LATEST_PAY);
+        if(p > -1) {
+        	String paid = comment.substring(p + PrintService.LATEST_PAY.length() + 2, sndMsg.get(5).indexOf("\n", p)).trim();
+        	latestPay = Float.valueOf(paid);
+        }
+        //get total due
+      	float due = afterTaxAmount - currentlyPaid;
+
+      	//the paied amount of this time / the total paiment of previouse / the current due / the tip.
+      	//following 3 value shouldn't set, because we didn't selected relevant options yet
+//		transac.VersActu = UtilesFormatterDonnees.formatterMontant(s_rfer * latestPay); //getCurrentPayAmount(subtotals);//"+000000000.00";	//must correspond to the current instalment,
+//		transac.VersAnt = UtilesFormatterDonnees.formatterMontant(s_rfer * (currentlyPaid - latestPay)); //"+000000000.00";	//must correspond to the sum of all previous instalments
+//		transac.Solde = UtilesFormatterDonnees.formatterMontant(s_rfer * (due < 0 ? 0.0f : due));		//"+000000000.00";	//must correspond to the balance to be paid.
+		transac.Pourb = UtilesFormatterDonnees.formatterMontant(s_rfer * (due > 0 ? 0.0f : - due));	//"+000000000.00";	//The amount of the tip.
+        transac.NoDossFO = BarOption.getBillingNumber();	//"ER0001";
+
+        // Concatenation of data for digital signature calculation
+        String strConcateneePourSignature = transac.NoTrans
+            + transac.DatTrans
+            + transac.TPS
+            + transac.TVQ
+            + transac.ApresTax
+            + transac.NoTPS
+            + transac.NoTVQ
+            + transac.ModImpr
+            + transac.ModTrans
+            + transac.signa.Preced;
+        // Calculation of the current transaction signature
+        transac.signa.Actu = Base64.getEncoder().encodeToString(UtilesECDSA.getSignedText(strConcateneePourSignature));// Current transaction digital signature
+        transac.signa.DatActu = transac.DatTrans;		//not affect certificate result of bill, but affect receipt.
+
+        transac.lsttransactionReferences = new ArrayList<TransactionReference>();
+        String[] comments = sndMsg.get(sndMsg.size() - 1).trim().split("\n"); //should always not null, right?
+        if(comments.length >= 3 || (comments.length > 0 && comments[0].contains(PrintService.PAYMENT_FAIL.trim()))) {
+        	try {
+		        String noTrans = PrintService.fomatBillId(comments[0].substring(comments[0].indexOf(PrintUtil.REF_TO) + PrintUtil.REF_TO.length()));
+		        String datTrans = comments[1].substring(comments[1].indexOf(PrintUtil.DATE_REF) + PrintUtil.DATE_REF.length());
+		        String avantTax = comments[2].substring(comments[2].indexOf(PrintUtil.OLD_SUBTOTAL) + PrintUtil.OLD_SUBTOTAL.length());
+		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
+		        transac.lsttransactionReferences.add(transactionReference);
+        	}catch(Exception e) {
+        		//There's a case which the comments.length is 3 but doesn't contains the right content, including paying directly without printing temporal bill.
+        		String noTrans = PrintService.fomatBillId(transac.NoTrans);
+		        String datTrans = transac.DatTrans;
+		        String avantTax = transac.AvantTax;
+		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
+		        transac.lsttransactionReferences.add(transactionReference);
+        	}
+        }
+    }
+
+	public static String getServiceType(List<String> sndMsg) {
+		String serviceType = BarOption.isCounterMode() ? ValuePossible.TypServ.CMP : ValuePossible.TypServ.TBL;
+		String[] lines = sndMsg.get(0).split("\n");
+		String line = lines[lines.length - 1].trim();
+		if(!line.startsWith("#")) {
+			L.e("MevUtils", "Didn't found # at the beginning of last line of bill header!", null);
+		}
+		if(BarOption.getPlatformCharacters().contains(line.substring(1,2))) {
+			serviceType = ValuePossible.TypServ.LVT;
+		}
+		return serviceType;
+	}
+
+	private static int getTimesOperatorPosition(String string) {
+		int p = -1;
+		while(true) {
+			p = string.indexOf("x", p + 1);
+			if(p == -1) {
+				return p;
+			}else if(p < 2) {
+				continue;
+			}else {
+				char price1 = string.charAt(p + 1);
+				if(Character.isDigit(string.charAt(p - 1)) &&  //after the x, it could be a negative number
+						(Character.isDigit(price1) || (Character.isDigit(string.charAt(p + 2)) && (price1 == '-')))) {
+					return p;
+				}else {
+					continue;
+				}
+			}
+		}
+	}
 //
-//        //=========================header info=================================
-//        transac.sectActi.Abrvt = ValuePossible.Abrvt.RBC;	 // Abbreviation of the business's sector of activity (RBC - Restaurants, bars and food trucks)
-//        transac.sectActi.TypServ = getServiceType(sndMsg); // Service typeLVR is what service?
-//
-//        transac.FormImpr = ValuePossible.S_RFER.equals(transType) || (sndMsg.size() == 6 && sndMsg.get(5).endsWith(PrintService.PAYMENT_FAIL)) ?
-//        		Acti.NON : ValuePossible.FormImpr.PAP;		 // Document print option (Paper)
-//        transac.RelaCommer = ValuePossible.RelaCommer.B2C;	 // Business relationship
-//        transac.CommerceElectronique = "N"; 					 // E-commerce? No
-//
-//        //Print mode for the document, for print bill, the transType should be "FAC"
-//        //printing closing receipt, also use this method, then it could be also one of following:
-//        //•ANN: Annulation  (cancellation) •RPR: Reproduction •DUP: Duplicata •PSP: Parti sans payer •SOB: Sans objet (n/a)FAC: bill or any other document not included in this list)
-//        transac.ModImpr = ValuePossible.getModeImpr(sndMsg.get(sndMsg.size() - 1));		//print purpos: currently support RPR, DUP, ANN, PSP or FAC
-//        transac.Utc = BarOption.getUTC();	//"-05:00A", in summer time will be "-05:00N"
-//        transac.ModTrans = BarOption.isTrainingMode()? ValuePossible.ModTrans.FOR : ValuePossible.ModTrans.OPE; // Transaction mode (Operation)
-//        transac.DatTrans = BarUtil.sdf.format(new Date());
-//
-//        // "Previous signature" of the first transaction
-//        transac.signa.Preced = "========================================================================================";
-//        String[] addressParts = sndMsg.get(0).split("\n");
-//        String address = addressParts[1].trim();
-//
-//        //info of store owner
-//        transac.docAdr.DocNoCiviq = address.substring(0, address.indexOf(" "));	// Street number "3800";
-//        transac.docAdr.DocCodePostal = addressParts[2].trim();					// Postal Code
-//        transac.NomUtil = LoginDlg.USERNAME;	 		// The name of the user who produced the customer's bill(not matter)
-//        transac.NomMandt = BarOption.getShopName();		// Name of the mandatory who operates the business	(not matter)
-//        transac.NoTPS = BarOption.getGSTAccount();		// Mandatary’s GST and QST registration number (not the user's ones)
-//        transac.NoTVQ = BarOption.getQSTAccount();
-//        transac.EmprCertifSEV = KeyStoreUtils.GetCertificateThumbprint( BarOption.getCertificateSerialNumberSRS() );	// Thumb print of the certificate containing the
-//        												//public key linked to the private key used to produce the current transaction signature
-//        //info of aikapos
-//        transac.IdPartn = BarOption.getPartnerId();		//aikapos's partner id.
-//        transac.IdSev = BarOption.getIdSignedToAikaPos();        	//aikapos's idSev
-//        transac.IdVersi = BarOption.getIdVersi();		//aikapos's IdVersi
-//        transac.CodCertif = BarOption.getCertificationPassedCode();	//aikaPos's code certificate
-//        transac.Versi = BarOption.getCertifiedVersion();			//aikapos's version
-//        transac.VersiParn = BarOption.getParentVersion();	//aikapos's parent version which passed the certificate (if the getVersi is not the one)
-//
-//        //info of bill
-//        transac.TypTrans = ValuePossible.TypTrans.ADDI.equals(transType) ? ValuePossible.TypTrans.ADDI : ValuePossible.TypTrans.RFER;	//the parameter(transType) can be BILL/RFER/V_RFER/R_RFER/S_RFER
-//        transac.ModPai = ValuePossible.getModPai(sndMsg); 	// Method of payment used for the bill (Cash) @note: seems for bill(addi) this field and be set with anything? it will be just ignored by webmev?
-//        transac.NoTrans = buildBillID(sndMsg.get(0));	// Number identifying the transaction ("100001");
-//        // Table number("====0") and Number of customers
-//        addressParts[addressParts.length - 1] = addressParts[addressParts.length - 1].trim();
-//        transac.sectActi.NoTabl = addressParts[addressParts.length - 1].substring(0, addressParts[addressParts.length - 1].indexOf(" "));
-//        int p = transac.sectActi.NoTabl.indexOf("-");
-//        if(p > 0) {
-//        	try {
-//				transac.sectActi.NoTabl = UtilesFormatterDonnees.formatterNoTabl(transac.sectActi.NoTabl.substring(0, p));
-//			} catch (Exception e) {
-//				L.e("MevUtils", "Unexpected exception when formatting table name:" + transac.sectActi.NoTabl, e);
-//			}
-//        	transac.sectActi.NbClint = addressParts[addressParts.length - 1].substring(p + 1);
-//        	p = transac.sectActi.NbClint.indexOf(PrintService.INVOICE);
-//        	if(p > 0) {
-//        		try {
-//					transac.sectActi.NbClint = UtilesFormatterDonnees.formatterNbClint(transac.sectActi.NbClint.substring(0, p).trim());
-//				} catch (Exception e) {
-//					L.e("MevUtils", "Unexpected exception when formatting customerIdx.", e);
-//				}
-//        	}
-//        }else {
-//            transac.sectActi.NbClint = "001";
-//        }
-//
-//        // Field identifying one or more customer addresses
-////        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.LVR, "2535", "Boul. Laurier", "Québec", "G1V5C6" ) );
-////        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.FAC, "3800", "rue Marly", "Québec", "G1X4A5" ) );
-//
-//
-//        //============================dish part================================
-//        // Supplies of the transaction
-//        transac.lstItems = new ArrayList<TransactionItem>( );
-//        String dishContent = sndMsg.get(2).trim();
-//        String sep2 = BarUtil.getSeperatorLine(0);
-//        p = dishContent.indexOf(sep2);
-//		String subtotals = dishContent.substring(p + sep2.length()).trim();
-//		p = subtotals.indexOf(PrintService.SOUSTOTAL);
-//		dishContent = subtotals.substring(0, p);
-//
-//		String[] dishes = dishContent.split("\n\n");
-//		for(int i = 0; i < dishes.length; i++) {
-//			String[] dishAndModify = dishes[i].split("\n");
-//			//get out the info of dish, the qt info will be used to calculate each modify.
-//			p = getTimesOperatorPosition(dishAndModify[0]);
-//			if(p < 1) {		//added this check because I met once there's two subtotal, might because some previous step process wrong?
-//				continue;
-//			}
-//
-//			String descr_dish = dishAndModify[0].substring(0, p);
-//			String pricePart = dishAndModify[0].substring(p + 1);
-//			if(pricePart.endsWith("P") || pricePart.endsWith("F")) {
-//				pricePart = pricePart.substring(0, pricePart.lastIndexOf(" ")).trim();
-//			}
-//			p = pricePart.lastIndexOf(" ");
-//			float dishItemTotalPrice = Float.valueOf(pricePart.substring(p + 1).trim());
-//			p = descr_dish.lastIndexOf(" ");
-//			int Qte_dish = Integer.valueOf(descr_dish.substring(p + 1));
-//			descr_dish = descr_dish.substring(0, p).trim();
-//			//build info of each modify.
-//			List<TransactionPrecisionItem> lstPrecisionsItem = new ArrayList<TransactionPrecisionItem>( );
-//			float modifyTotal = 0.0f;
-//			float prix = 0.0f;
-//	        for(int m = 1; m < dishAndModify.length; m++) {
-//				p = dishAndModify[m].trim().lastIndexOf("=");
-//				float totalPrice = Float.valueOf(dishAndModify[m].substring(p + 1));
-//				String modifyAndQT = dishAndModify[m].substring(0, p);
-//				p = modifyAndQT.lastIndexOf(" ");
-//				String descr_modify = modifyAndQT.substring(0, p);
-//				int qt_modify = Integer.valueOf(modifyAndQT.substring(p +2));
-//
-//				prix = totalPrice * Qte_dish;
-//				modifyTotal += prix;
-//
-//				// Details for a supply of the transaction
-//		        lstPrecisionsItem.add(new TransactionPrecisionItem(
-//		        	UtilesFormatterDonnees.formatterQte((double)qt_modify * Qte_dish), //Qte e.g."+00001.00",
-//		        	descr_modify, 		//"Descr"
-//		        	UtilesFormatterDonnees.formatterMontant(totalPrice / qt_modify),	//"Unitr", "+000000001.00",
-//		        	UtilesFormatterDonnees.formatterMontant(prix),  // "Prix","+000000099.00"
-//		        	ValuePossible.Tax.FP, // "Tax",
-//		        	prix > 0 ? Acti.RES : Acti.SOB));   //"Acti"     //RBC
-//			}
-//
-//	        prix = dishItemTotalPrice + modifyTotal;
-//	        transac.lstItems.add(new TransactionItem(
-//	        	UtilesFormatterDonnees.formatterQte((double)Qte_dish), //   "Qte", "+00001.00",
-//	        	descr_dish,   											//    "Descr",  "Poutine"
-//	        	UtilesFormatterDonnees.formatterMontant(prix / Qte_dish), //"Unitr", "+000000000.00"
-//	        	UtilesFormatterDonnees.formatterMontant(prix),			//"Prix", "+000000979.00"
-//	        	ValuePossible.Tax.FP, 								// "Tax",
-//	        	Acti.RES,								//"Acti",
-//	        	lstPrecisionsItem ) ); 									// Add all the items to the transaction
-//		}
-//
-//        //===============================amount part=============================
-//		//first， it service exists, add the service fee as an item of transac.lstItems.
-//		p = subtotals.indexOf(PrintService.SERVICE_FEE);
-//		if(p > -1) {
-//			String strServiceFee = subtotals.substring(p + PrintService.SERVICE_FEE.length() + 2, subtotals.indexOf("\n", p)).trim();
-//			String formattedServiceFee = UtilesFormatterDonnees.formatterMontant(strServiceFee);
-//			transac.lstItems.add(new TransactionItem(
-//					"+00001.00", //   "Qte", "+00001.00",
-//		        	"Service fee",   											//    "Descr",  "Poutine"
-//		        	formattedServiceFee, 	//"Unitr" is same with "Prix" because the qty of service fee is always 1
-//		        	formattedServiceFee,		//"Prix", "+000000979.00"
-//		        	ValuePossible.Tax.FP, 								// "Tax", SERVICE_FF should also applied both taxes?
-//		        	Acti.RES));								//"Acti",
-//		}
-//		//according to document, if change pay method, need to secretly send a transaction to mev, with all number nagative.
-//		int s_rfer = ValuePossible.S_RFER.equals(transType) ? -1 : 1;
-//
-//        //then, check if there's discount.
-//        float discount = 0.0f;
-//        p = subtotals.lastIndexOf(PrintService.ANNULATION);
-//        if(p > -1) {
-//	        String strDiscount = subtotals.substring(p + PrintService.ANNULATION.length() + 2, subtotals.indexOf("\n", p)).trim();
-//	        discount = -1 * Float.valueOf(strDiscount);	//adjusted amount is  applied to the after-tax.can be a coupon,gift card, a
-//			transac.Ajus = UtilesFormatterDonnees.formatterMontant(s_rfer * discount);//"+000000000.00";	//discount, rounding of the  after-tax amount, etc.
-//        }else {
-//        	transac.Ajus = "+000000000.00";
-//        }
-//        // numbers before tax
-//		p = subtotals.lastIndexOf(PrintService.SOUSTOTAL);
-//		String subTotal = subtotals.substring(p + PrintService.SOUSTOTAL.length() + 2, subtotals.indexOf("\n", p)).trim();
-//		p = subtotals.lastIndexOf(PrintService.TPS);
-//		String TPS = subtotals.substring(p + PrintService.TPS.length() + 2, subtotals.indexOf("\n", p)).trim();
-//		p = subtotals.lastIndexOf(PrintService.TVQ);
-//		String TPQ =  subtotals.substring(p + PrintService.TVQ.length() + 2).trim();
-//
-//        transac.AvantTax = UtilesFormatterDonnees.formatterMontant(s_rfer * (Float.valueOf(subTotal) + discount));//"+000000500.00";
-//        transac.TPS = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPS));//"+000000025.00";
-//        transac.TVQ = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPQ));//"+000000050.00";
-//
-//        //total number after tax
-//        float afterTaxAmount = Float.valueOf(subTotal) + discount + Float.valueOf(TPS) + Float.valueOf(TPQ);
-//        transac.ApresTax = UtilesFormatterDonnees.formatterMontant(s_rfer * afterTaxAmount);//"+000000575.00";
-//
-//        //===============================payment part===============================
-//        //transac.Ajus =  //this field is cause by can be a coupon, a gift card, a discount, rounding of the  after-tax amount, etc.
-//        //The amount due after adjusting the after tax amount. The value must be the sum of the apresTax and ajus fields
-//		transac.MTDU = UtilesFormatterDonnees.formatterMontant(s_rfer * (afterTaxAmount - discount));
-//
-//		//get the currently totally paid amount from all kind of payment of this time.
-//        Float currentlyPaid = 0.0f;
-//        String[] currentPays = PrintService.getCurrentPays(sndMsg, transType);
-//        for (String string : currentPays) {
-//        	p = string.indexOf(":");
-//        	if(p > 0) {
-//        		currentlyPaid += Float.valueOf(string.substring(p + 1).trim());
-//        	}
-//		}
-//        //get the latest paid amount from comment  TODO: there's a mistake when fetching comm.
-//        float latestPay = 0.0f;
-//        String comment = PrintService.getCommentFromSndMsg(sndMsg);
-//        p = comment.indexOf(PrintService.LATEST_PAY);
-//        if(p > -1) {
-//        	String paid = comment.substring(p + PrintService.LATEST_PAY.length() + 2, sndMsg.get(5).indexOf("\n", p)).trim();
-//        	latestPay = Float.valueOf(paid);
-//        }
-//        //get total due
-//      	float due = afterTaxAmount - currentlyPaid;
-//
-//      	//the paied amount of this time / the total paiment of previouse / the current due / the tip.
-//      	//following 3 value shouldn't set, because we didn't selected relevant options yet
-////		transac.VersActu = UtilesFormatterDonnees.formatterMontant(s_rfer * latestPay); //getCurrentPayAmount(subtotals);//"+000000000.00";	//must correspond to the current instalment,
-////		transac.VersAnt = UtilesFormatterDonnees.formatterMontant(s_rfer * (currentlyPaid - latestPay)); //"+000000000.00";	//must correspond to the sum of all previous instalments
-////		transac.Solde = UtilesFormatterDonnees.formatterMontant(s_rfer * (due < 0 ? 0.0f : due));		//"+000000000.00";	//must correspond to the balance to be paid.
-//		transac.Pourb = UtilesFormatterDonnees.formatterMontant(s_rfer * (due > 0 ? 0.0f : - due));	//"+000000000.00";	//The amount of the tip.
-//        transac.NoDossFO = BarOption.getBillingNumber();	//"ER0001";
-//
-//        // Concatenation of data for digital signature calculation
-//        String strConcateneePourSignature = transac.NoTrans
-//            + transac.DatTrans
-//            + transac.TPS
-//            + transac.TVQ
-//            + transac.ApresTax
-//            + transac.NoTPS
-//            + transac.NoTVQ
-//            + transac.ModImpr
-//            + transac.ModTrans
-//            + transac.signa.Preced;
-//        // Calculation of the current transaction signature
-//        transac.signa.Actu = Base64.getEncoder().encodeToString(UtilesECDSA.getSignedText(strConcateneePourSignature));// Current transaction digital signature
-//        transac.signa.DatActu = transac.DatTrans;		//not affect certificate result of bill, but affect receipt.
-//
-//        transac.lsttransactionReferences = new ArrayList<TransactionReference>();
-//        String[] comments = sndMsg.get(sndMsg.size() - 1).trim().split("\n"); //should always not null, right?
-//        if(comments.length >= 3 || (comments.length > 0 && comments[0].contains(PrintService.PAYMENT_FAIL.trim()))) {
-//        	try {
-//		        String noTrans = PrintService.fomatBillId(comments[0].substring(comments[0].indexOf(PrintUtil.REF_TO) + PrintUtil.REF_TO.length()));
-//		        String datTrans = comments[1].substring(comments[1].indexOf(PrintUtil.DATE_REF) + PrintUtil.DATE_REF.length());
-//		        String avantTax = comments[2].substring(comments[2].indexOf(PrintUtil.OLD_SUBTOTAL) + PrintUtil.OLD_SUBTOTAL.length());
-//		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
-//		        transac.lsttransactionReferences.add(transactionReference);
-//        	}catch(Exception e) {
-//        		//There's a case which the comments.length is 3 but doesn't contains the right content, including paying directly without printing temporal bill.
-//        		String noTrans = PrintService.fomatBillId(transac.NoTrans);
-//		        String datTrans = transac.DatTrans;
-//		        String avantTax = transac.AvantTax;
-//		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
-//		        transac.lsttransactionReferences.add(transactionReference);
-//        	}
-//        }
-//    }
-//
-//	public static String getServiceType(List<String> sndMsg) {
-//		String serviceType = BarOption.isCounterMode() ? ValuePossible.TypServ.CMP : ValuePossible.TypServ.TBL;
-//		String[] lines = sndMsg.get(0).split("\n");
-//		String line = lines[lines.length - 1].trim();
-//		if(!line.startsWith("#")) {
-//			L.e("MevUtils", "Didn't found # at the beginning of last line of bill header!", null);
-//		}
-//		if(BarOption.getPlatformCharacters().contains(line.substring(1,2))) {
-//			serviceType = ValuePossible.TypServ.LVT;
-//		}
-//		return serviceType;
-//	}
-//
-//	private static int getTimesOperatorPosition(String string) {
-//		int p = -1;
-//		while(true) {
-//			p = string.indexOf("x", p + 1);
-//			if(p == -1) {
-//				return p;
-//			}else if(p < 2) {
-//				continue;
-//			}else {
-//				char price1 = string.charAt(p + 1);
-//				if(Character.isDigit(string.charAt(p - 1)) &&  //after the x, it could be a negative number
-//						(Character.isDigit(price1) || (Character.isDigit(string.charAt(p + 2)) && (price1 == '-')))) {
-//					return p;
-//				}else {
-//					continue;
-//				}
-//			}
-//		}
-//	}
-//
-//	//Figure out the bill Number
-//    private static String buildBillID(String content) {
-//		String tBillNumberStartStr = BarOption.getBillNumberStartStr();
-//
-//		int tStartPos = content.lastIndexOf(tBillNumberStartStr);
-//		if(tStartPos >= 0) {
-//			String tBillID = content.substring(tStartPos + tBillNumberStartStr.length(), content.indexOf("\n", tStartPos)); //billID
-//			return tBillID;
-//		} else {
-//			L.e("Printer Serice", "unexpected content found when building BillID:"+content, null);
-//			return null;
-//		}
-//    }
-//
-//    public static String getCompleteJSONStr(Transaction transActu) {
-//    	 String completeJSONStr = TRANS_ACTU
-//    			+ transActu.GetJson()
-//    			+ "}}}";
-//    	return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",}", "}");
-//	}
-//
+	//Figure out the bill Number
+    private static String buildBillID(String content) {
+		String tBillNumberStartStr = BarOption.getBillNumberStartStr();
+
+		int tStartPos = content.lastIndexOf(tBillNumberStartStr);
+		if(tStartPos >= 0) {
+			String tBillID = content.substring(tStartPos + tBillNumberStartStr.length(), content.indexOf("\n", tStartPos)); //billID
+			return tBillID;
+		} else {
+			L.e("Printer Serice", "unexpected content found when building BillID:"+content, null);
+			return null;
+		}
+    }
+
+    public static String getCompleteJSONStr(Transaction transActu) {
+    	 String completeJSONStr = TRANS_ACTU
+    			+ transActu.GetJson()
+    			+ "}}}";
+    	return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",}", "}");
+	}
+
     //Send the json document containing the transactions to the WEB-SRM
     //inside will consider if there's records in the batch.
     //it will be called when print bill, system exit, or user pressed specific button.
@@ -696,15 +699,15 @@ public class MevUtils {
 //    	List<String[]> values = new ArrayList<>();
 //    	StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH");
 //    	try {
-//			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-//			while (rs.next()) {
+//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+//			while (rs.moveToNext()) {
 //				String[] record = new String[6];
-//				record[0] = rs.getString("ID");
-//				record[1] = rs.getString("JSONTOSEND");
-//				record[2] = rs.getString("SIGNATRANSM");
-//				record[3] = rs.getString("EMPRCERTIFSEV");
-//				record[4] = rs.getString("STRURLQRCODE");
-//				record[5] = rs.getString("EMPLOYEEID");
+//				record[0] = DBUtil.getCursorString(rs,"ID");
+//				record[1] = DBUtil.getCursorString(rs,"JSONTOSEND");
+//				record[2] = DBUtil.getCursorString(rs,"SIGNATRANSM");
+//				record[3] = DBUtil.getCursorString(rs,"EMPRCERTIFSEV");
+//				record[4] = DBUtil.getCursorString(rs,"STRURLQRCODE");
+//				record[5] = DBUtil.getCursorString(rs,"EMPLOYEEID");
 //				values.add(record);
 //			}
 //		}catch(Exception exp) {
@@ -908,8 +911,8 @@ public class MevUtils {
 //		int billID = Integer.valueOf(noTrans.substring(2).split("-")[0]);//noTrans is like 10000...001, remove the first two letters should be safe to get the id.
 //		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where id = ").append(billID);
 //		try {
-//			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-//			if (!rs.next()) {
+//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+//			if (!rs.moveToNext()) {
 //				jsonToSend = jsonToSend.substring(TRANS_ACTU.length());
 //				int pTransLot = jsonToSend.indexOf(TRANS_LOT_INDICATOR);
 //				if(pTransLot > 0) {
@@ -1130,8 +1133,8 @@ public class MevUtils {
 //	public static boolean isBillIdAlreayInMevBatch(int billID) {
 //		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where id = ").append(billID);
 //		try {
-//			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-//			return rs.next();
+//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+//			return rs.moveToNext();
 //		}catch(Exception exp) {
 //			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
 //		}

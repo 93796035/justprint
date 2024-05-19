@@ -1,10 +1,50 @@
-<!-- res/layout/fragment_tables.xml -->
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/gridLayoutTables"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:columnCount="4"
-    android:padding="16dp"
-    android:orientation="horizontal">
+    android:layout_height="match_parent">
 
-</GridLayout>
+    <!-- Arrow Buttons and Separator -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btnLeft"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="<<"
+            android:enabled="false" />
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
+        <Button
+            android:id="@+id/btnRight"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text=">>"
+            android:enabled="false" />
+    </LinearLayout>
+
+    <!-- Bill Panels Grid -->
+    <GridLayout
+        android:id="@+id/gridBillPanels"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnCount="4"
+        android:rowCount="1"
+        android:padding="8dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp">
+        <!-- Bill panels will be dynamically added here -->
+    </GridLayout>
+</LinearLayout>

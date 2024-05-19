@@ -1,37 +1,44 @@
 package org.cas.client.platform.bar.panel;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.app.BaseFragment;
+import com.just.print.db.bean.CustomizedRule;
 import com.just.print.db.bean.Dish;
 import com.just.print.ui.adapter.MyAdapter;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.L;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.action.Cmd_SplitItem;
+import org.cas.client.platform.bar.action.SamActionListener;
+import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.i18n.BarDlgConst;
+import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.net.DataSyncService;
+import org.cas.client.platform.bar.net.NetUtil;
+import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.print.PrintUtil;
+import org.cas.client.platform.bar.uibeans.ArrowButton;
+import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
+import org.cas.client.platform.bar.uibeans.ISButton;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
+import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.L;
+
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -40,58 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.swing.ImageIcon;
-import javax.swing.TextView;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JToggleButton;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.DBUtil;
-import org.cas.client.platform.bar.action.Cmd_ChangePrice;
-import org.cas.client.platform.bar.action.Cmd_DiscItem;
-import org.cas.client.platform.bar.action.Cmd_SplitItem;
-import org.cas.client.platform.bar.action.SamActionListener;
-import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
-import org.cas.client.platform.bar.dialog.RefundItemDlg;
-import org.cas.client.platform.bar.dialog.modifyDish.AddModificationDlg;
-import org.cas.client.platform.bar.i18n.BarDlgConst;
-import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.model.Dish;
-import org.cas.client.platform.bar.model.Rule;
-import org.cas.client.platform.bar.net.DataSyncService;
-import org.cas.client.platform.bar.net.NetUtil;
-import org.cas.client.platform.bar.print.PrintService;
-import org.cas.client.platform.bar.print.PrintUtil;
-import org.cas.client.platform.bar.uibeans.ArrowButton;
-import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
-import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.bar.web_srm.ValuePossible;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
-import org.cas.client.platform.cascustomize.CustOpts;
-import org.cas.client.platform.casutil.ErrorUtil;
-import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.casutil.PIMPool;
-import org.cas.client.platform.pimmodel.PIMDBModel;
-import org.cas.client.platform.pimview.pimscrollpane.PIMScrollPane;
-import org.cas.client.platform.pimview.pimtable.DefaultPIMTableCellRenderer;
-import org.cas.client.platform.pimview.pimtable.PIMTable;
-import org.cas.client.platform.pimview.pimtable.PIMTableColumn;
-import org.cas.client.platform.pimview.pimtable.PIMTableRenderAgent;
-import org.cas.client.platform.pimview.pimtable.TextAreaPIMTableCellRenderer;
-import org.cas.client.resource.international.DlgConst;
-import org.cas.client.resource.international.PaneConsts;
 
 public class BillPanel extends BaseFragment
 		implements View.OnClickListener, View.OnTouchListener, SamActionListener //, ComponentListener, PIMTableRenderAgent, ListSelectionListener
@@ -177,7 +132,7 @@ public class BillPanel extends BaseFragment
 	//if there's new dish added.... update the total value field of bill record.
 	//and make sure new added dish will be updated with new information.
 	public void billPricesUpdateToDB() {
-		DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);		//in case if added service fee or discout of bill. ??? so this means, when added discount, will not save to db immediatly?
+		DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(this, 0, null);		//in case if added service fee or discout of bill. ??? so this means, when added discount, will not save to db immediatly?
 		initContent();	//always need to initContent, to make sure dish in selection ary has new property. e.g. saved dish should has different color.,
 	}
 
@@ -192,18 +147,18 @@ public class BillPanel extends BaseFragment
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            String opentime = DBUtil.getCursorString(rs, "opentime");
-        	int cashReceived = DBUtil.getCursorInt(rs, "cashReceived");
-        	int debitReceived = DBUtil.getCursorInt(rs, "debitReceived");
-            int visaReceived = DBUtil.getCursorInt(rs, "visaReceived");
-            int masterReceived = DBUtil.getCursorInt(rs, "masterReceived");
-            String otherreceived = DBUtil.getCursorString(rs, "otherreceived");
+            String opentime = DBUtil.getCursorString(rs,.getCursorString(rs, "opentime");
+        	int cashReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashReceived");
+        	int debitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "debitReceived");
+            int visaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "visaReceived");
+            int masterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "masterReceived");
+            String otherreceived = DBUtil.getCursorString(rs,.getCursorString(rs, "otherreceived");
             if(otherreceived == null) {
             	otherreceived = "";
             }
-        	int cashBack = DBUtil.getCursorInt(rs, "cashback");
-            int tip = DBUtil.getCursorInt(rs, "tip");
-            int status = DBUtil.getCursorInt(rs, "status");
+        	int cashBack = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashback");
+            int tip = DBUtil.getCursorString(rs,.getCursorInt(rs, "tip");
+            int status = DBUtil.getCursorString(rs,.getCursorInt(rs, "status");
         
 			//generate a bill in db and update the output with the new bill id
 			String createtime = BarUtil.df.format(new Date());
@@ -211,9 +166,9 @@ public class BillPanel extends BaseFragment
 	            "INSERT INTO bill(createtime, tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment,")
 	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
 				.append(createtime).append("', '")
-	            .append(tableID == null ? DBUtil.getCursorString(rs, "tableID") : tableID).append("', '")					//table
-	            .append(customerNumber == null ? DBUtil.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
-	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
+	            .append(tableID == null ? DBUtil.getCursorString(rs,.getCursorString(rs, "tableID") : tableID).append("', '")					//table
+	            .append(customerNumber == null ? DBUtil.getCursorString(rs,.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
+	            .append(total < 0 ? DBUtil.getCursorString(rs,.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
 	            .append(discount).append(", ")
 	            .append(tip).append(", ")
 	            .append(serviceFee).append(", ")			//currently used for storing service fee -_-!
@@ -234,7 +189,7 @@ public class BillPanel extends BaseFragment
 		   			.append("' and billIndex = '").append(customerNumber).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            return DBUtil.getCursorInt(rs, "id");
+            return DBUtil.getCursorString(rs,.getCursorInt(rs, "id");
 		 }catch(Exception e) {
 			L.e("BillPanel", "exception when cloning current bill record:" + sql,e);
 			return -1;
@@ -282,8 +237,8 @@ public class BillPanel extends BaseFragment
                 	.append(" and CATEGORY = '").append(currentTime).append("'");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 while (rs.moveToNext()) {
-                	dish.setOutputID(DBUtil.getCursorInt(rs, "id"));
-                	dish.setOrderedTime(DBUtil.getCursorString(rs, "time"));
+                	dish.setOutputID(DBUtil.getCursorString(rs,.getCursorInt(rs, "id"));
+                	dish.setOrderedTime(DBUtil.getCursorString(rs,.getCursorString(rs, "time"));
                 }
 		    }
 		}catch(Exception exp) {
@@ -330,9 +285,9 @@ public class BillPanel extends BaseFragment
     @Override
 	public void onClick(View o) {
 		if(o instanceof ArrowButton) {
-    		int selectedRow =  table.getSelectedItemPosition();
+    		int selectedRow = table.getSelectedItemPosition();
     		Dish dish = getOrderedDishAry().get(selectedRow);
-	        if(o == btnMore) {
+	        if(o == moreButton) {
 				if(dish.getOutputID() >= 0) {	//already saved
 					BarFrame.setStatusMes(BarFrame.consts.SendItemCanNotModify());
 					addContentToList(getOrderedDishAry().get(selectedRow));
@@ -340,7 +295,7 @@ public class BillPanel extends BaseFragment
 					int tQTY = getOrderedDishAry().get(selectedRow).getNum();
 					dish.setTotalPrice(dish.getTotalPrice() + dish.getTotalPrice() / tQTY);
 					dish.setNum(++tQTY);
-					
+
 					table.setValueAt(tQTY % BarOption.MaxQTY + "x", selectedRow, 0); //so the qty could be usd to save other info on high bit
 					table.setValueAt(BarOption.getMoneySign() 
 							+ BarUtil.formatMoney(dish.getTotalPrice()/100f),
@@ -348,7 +303,7 @@ public class BillPanel extends BaseFragment
 			    	checkWithRules();
 				}
 				logOperation(1, DBConsts.ORIGINAL, dish);
-	        } else if (o == btnLess) {
+	        } else if (o == lessButton) {
 				if(dish.getOutputID() < 0) {	//if it's already send, then do the removeItem.
 					if (adjustOnlyUI(selectedRow, dish))
 						return;
@@ -416,7 +371,7 @@ public class BillPanel extends BaseFragment
 			removeFromSelection(table.getSelectedRow());
 			logOperation(-1, DBConsts.ORIGINAL, curDish);
 		} else {// if it's send
-			if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) != 0)
+			if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle))
 				return;
 			//clean output from db immediately.
 			//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.deleted);
@@ -426,11 +381,11 @@ public class BillPanel extends BaseFragment
 				dish.setNum(1);
 				sendDishToKitchen(dish, true);//if billPrinted, means already finished prepare and dish is on table.no need to tell kitchen to stop it.
 				//update current bill is OK, because no bill printed yet. so no need to expire and regenerate a new bill.
-				DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
+				DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
 				//update output number.(because not print temporary bill, so no need to set the out put status to exipired)
-				DBUtil.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
+				DBUtil.getCursorString(rs,.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
 				if(curDish.getNum() == 1) {
-					DBUtil.updateOutput(dish.getOutputID(), "DELETED", DBConsts.DELETED);
+					DBUtil.getCursorString(rs,.updateOutput(dish.getOutputID(), "DELETED", DBConsts.DELETED);
 				}
 				logOperation(-1,DBConsts.SAVED, curDish);
 			}else { //if already billPrinted or refund, add to hashMapForRefund, waiting for confirmation action.
@@ -469,10 +424,10 @@ public class BillPanel extends BaseFragment
 			String comment = getComment();
 			if(getStatus() == DBConsts.BILL_PRINTED && !comment.contains(PrintService.FACTURE_REVISEE)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
 				setComment(comment + PrintService.FACTURE_REVISEE);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.updateBill(getBillID(), "comment", getComment());
+	    		DBUtil.getCursorString(rs,.updateBill(getBillID(), "comment", getComment());
 			}else if(getStatus() == DBConsts.COMPLETED && !comment.contains(ValuePossible.RE_FUND)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
 				setComment(comment + ValuePossible.RE_FUND);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.updateBill(getBillID(), "comment", getComment());
+	    		DBUtil.getCursorString(rs,.updateBill(getBillID(), "comment", getComment());
 			}
 		}
 	}
@@ -482,42 +437,22 @@ public class BillPanel extends BaseFragment
 	 */
 	private void logOperation(int operationType, int status, Dish dish) {
 		StringBuilder sql = new StringBuilder(
-				"insert into operationlog (OperationType, EMPLOYEEID, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) values (?,?,?,?,?,?,?,?,?,?,?,?)");
-		try {
-			PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());
-			pstmt.setInt(1, operationType);
-			pstmt.setInt(2, LoginDlg.USERID);
-			pstmt.setInt(3, status);
-			pstmt.setInt(4, dish.getBillID());
-			pstmt.setInt(5, dish.getOutputID());
-			pstmt.setString(6, BarFrame.instance.getCurTable());
-			pstmt.setString(7, BarFrame.instance.valOpenTime.getText());
-			pstmt.setString(8, BarFrame.instance.getCurBillIndex());
-			pstmt.setString(9, dish.getMName());
-			pstmt.setInt(10, dish.getPrice());
-			pstmt.setString(11, dish.getOrderedTime());
-			pstmt.setString(12, BarUtil.df.format(new Date()));
+			"insert into operationlog (OperationType, EMPLOYEEID, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) values (")
+				.append(operationType).append(",")
+				.append(LoginDlg.USERID).append(",")
+				.append(status).append(",")
+				.append(dish.getBillID()).append(",")
+				.append(dish.getOutputID()).append(",")
+				.append("'").append(BarFrame.instance.getCurTable()).append("',")
+				.append("'").append(BarFrame.instance.valOpenTime.getText()).append("',")
+				.append("'").append(BarFrame.instance.getCurBillIndex()).append("',")
+				.append("'").append(dish.getName1()).append("',")
+				.append(dish.getPrice()).append(",")
+				.append("'").append(dish.getOrderedTime()).append("',")
+				.append("'").append(BarUtil.df.format(new Date())).append("',");
 
-			pstmt.executeUpdate();
-			pstmt.close();
-		} catch (SQLException e) {
-			ErrorUtil.write(e);
-		}
+			AikaPos.db.execSQL(sql.toString(), null);
 	}
-	
-	@Override
-	public void componentResized(ComponentEvent e) {
-        reLayout();
-	}
-
-	@Override
-	public void componentMoved(ComponentEvent e) {}
-
-	@Override
-	public void componentShown(ComponentEvent e) {}
-
-	@Override
-	public void componentHidden(ComponentEvent e) {}
 	
 //	@deprecated
 	//was used when click send button, and found isFastFoodMode==true, then instead of returning back to table view, stay in
@@ -531,102 +466,101 @@ public class BillPanel extends BaseFragment
 //    }
     
     //table selection listener---------------------
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		//adjust more and less button status.
-		int selectedRow =  table.getSelectedRow();
-		if(selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
-			BarFrame.instance.curDish = null;	//if no row selected, reset curdish and return.
-			btnMore.setEnabled(false);
-			btnLess.setEnabled(false);
-			return;
-		}
-		if(status < DBConsts.COMPLETED && status >= DBConsts.ORIGINAL) { //completed and refunded not enable the less and more button. (while completed allow to click refund button)
-			SwingUtilities.invokeLater(new Runnable() {					//refunded can do nothing but return to table view.
-				@Override
-				public void run() {
-					btnMore.setEnabled(true);
-					btnLess.setEnabled(true);
-				}
-			});
-		}
-		if(this.getParent().getParent().getParent().getParent() instanceof RefundItemDlg) {
-			btnLess.setEnabled(true);
-		}
-		//if in salesPanel mode, then adjust it's curDish and numberDlg if it's on show.
-		//if in billListPanel mode, then change bill selection status and do moving dish.
-		Dish selectedDish = getOrderedDishAry().get(selectedRow);
-		if(salesPanel != null) {
-			BarFrame.instance.curDish = selectedDish;
-			if( BarFrame.numberPanelDlg.isVisible()) {	//if qty button seleted.
-				Object obj = table.getValueAt(selectedRow,0);
-				//update the qty in qtyDlg.
-				if(obj != null)
-					BarFrame.numberPanelDlg.setContents(obj.toString());
-			}
-			if(Cmd_DiscItem.getInstance().getSourceBtn().isSelected()) {
-				Object obj = table.getValueAt(selectedRow,2);
-				//update the discount in qtyDlg.
-				if(obj != null)
-					BarFrame.numberPanelDlg.setContents(obj.toString());
-			}
-		}else if(billListPanel != null) {
-			if(status >= DBConsts.COMPLETED) {
-				return;
-			}
-			if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
-				billButton.setSelected(!billButton.isSelected());
-				return;
-			}
-			//only not in splitting can reach here. 
- 			if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != null && billListPanel.getCurBillPanel() != this) {
-				billListPanel.moveDishToBill(this);
-				BarFrame.instance.curDish = null;
-			}else {
-				billButton.setSelected(true);
-				BarFrame.instance.curDish = selectedDish;
-			}
-		}
+	public void valueChanged() {
+//		//adjust more and less button status.
+//		int selectedRow =  table.getSelectedRow();
+//		if(selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
+//			BarFrame.instance.curDish = null;	//if no row selected, reset curdish and return.
+//			moreButton.setEnabled(false);
+//			lessButton.setEnabled(false);
+//			return;
+//		}
+//		if(status < DBConsts.COMPLETED && status >= DBConsts.ORIGINAL) { //completed and refunded not enable the less and more button. (while completed allow to click refund button)
+//			SwingUtilities.invokeLater(new Runnable() {					//refunded can do nothing but return to table view.
+//				@Override
+//				public void run() {
+//					moreButton.setEnabled(true);
+//					lessButton.setEnabled(true);
+//				}
+//			});
+//		}
+//		if(this.getParent().getParent().getParent().getParent() instanceof RefundItemDlg) {
+//			lessButton.setEnabled(true);
+//		}
+//		//if in salesPanel mode, then adjust it's curDish and numberDlg if it's on show.
+//		//if in billListPanel mode, then change bill selection status and do moving dish.
+//		Dish selectedDish = getOrderedDishAry().get(selectedRow);
+//		if(salesPanel != null) {
+//			BarFrame.instance.curDish = selectedDish;
+//			if( BarFrame.numberPanelDlg.isVisible()) {	//if qty button seleted.
+//				Object obj = table.getValueAt(selectedRow,0);
+//				//update the qty in qtyDlg.
+//				if(obj != null)
+//					BarFrame.numberPanelDlg.setContents(obj.toString());
+//			}
+//			if(Cmd_DiscItem.getInstance().getSourceBtn().isSelected()) {
+//				Object obj = table.getValueAt(selectedRow,2);
+//				//update the discount in qtyDlg.
+//				if(obj != null)
+//					BarFrame.numberPanelDlg.setContents(obj.toString());
+//			}
+//		}else if(billListPanel != null) {
+//			if(status >= DBConsts.COMPLETED) {
+//				return;
+//			}
+//			if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
+//				billButton.setSelected(!billButton.isSelected());
+//				return;
+//			}
+//			//only not in splitting can reach here.
+// 			if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != null && billListPanel.getCurBillPanel() != this) {
+//				billListPanel.moveDishToBill(this);
+//				BarFrame.instance.curDish = null;
+//			}else {
+//				billButton.setSelected(true);
+//				BarFrame.instance.curDish = selectedDish;
+//			}
+//		}
 	}
 
-	//table row color----------------------------------------------------------
-	@Override
-	public Color getBackgroundAtRow(int row) {
-		return null;
-	}
-
-	@Override
-	public Color getForegroundAtRow(int row) {
-		if(row < getOrderedDishAry().size()) {
-			Dish dish = getOrderedDishAry().get(row);
-			if(dish.getOutputID() > -1) {
-				return Color.GRAY;
-			}else {
-				return Color.BLACK;
-			}
-		}else
-			return null;
-	}
+//	//table row color----------------------------------------------------------
+//	@Override
+//	public Color getBackgroundAtRow(int row) {
+//		return null;
+//	}
+//
+//	@Override
+//	public Color getForegroundAtRow(int row) {
+//		if(row < getOrderedDishAry().size()) {
+//			Dish dish = getOrderedDishAry().get(row);
+//			if(dish.getOutputID() > -1) {
+//				return Color.GRAY;
+//			}else {
+//				return Color.BLACK;
+//			}
+//		}else
+//			return null;
+//	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				// 用户开始触摸
-				if(v == scrContent.getViewport()) {
+//				if(v == scrContent.getViewport()) {
 					if(billListPanel != null) {
 						if(status >= DBConsts.COMPLETED) {	//if the bill is closed, then ignore.
-							return;
+							return false;
 						}
 						if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
 							billButton.setSelected(!billButton.isSelected());
-							return;
+							return false;
 						}
 						//if not in split item mode (split item button not pressed.)
 						if(billListPanel.getCurBillPanel() == null) {
 							billListPanel.getSelectedBillPannels().add(this);
 							billButton.setSelected(!billButton.isSelected());
-							return;
+							return false;
 						}
 						if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != this) {	//this there's already an item ready for move.
 							billListPanel.moveDishToBill(this);
@@ -648,28 +582,26 @@ public class BillPanel extends BaseFragment
 							}
 						}
 					}
-				}
+//				}
 				break;
 			case MotionEvent.ACTION_UP:
 				stepCounter = 0;
 				if(isDragging == true) {
 					isDragging = false;
-					ListSelectionModel selectionModel = ((PIMTable)e.getSource()).getSelectionModel();
-					int selectedRow = selectionModel.getMinSelectionIndex();
+					int selectedRow = ((PIMTable)v).getSelectedRow();
 					if(selectedRow < 0 || selectedRow >= getOrderedDishAry().size())
-						return;
+						return false;
 
 					if(salesPanel != null && !BarFrame.numberPanelDlg.isVisible()) {	//if qty button not seleted.
 						if(getOrderedDishAry().get(selectedRow).getOutputID() >= 0) {
-							if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), DlgConst.DlgTitle,
-									JOptionPane.YES_NO_OPTION) != 0) {// 确定删除吗？
+							if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {// 确定删除吗？
 								table.setSelectedRow(-1);
-								return;
+								return false;
 							}
 						}
 
 						if(!notTooLateToChangeStatus()) {	//check if it's bill printed, if yes, need to reopen a bill.
-							return;
+							return false;
 						}
 
 						Dish dish = getOrderedDishAry().get(selectedRow);
@@ -691,35 +623,36 @@ public class BillPanel extends BaseFragment
 		}
 		return true; // 返回true表示事件已被处理
 	}
-    //add dish into the billPanel, tiggered by "+"button or the bubttons on menuPanel. \
+
+	//add dish into the billPanel, tiggered by "+"button or the bubttons on menuPanel. \
 	//moving items between bill doesn't go here.
     void addContentToList(Dish dish) {
     	if(!notTooLateToChangeStatus()) {
     		return;
     	}
         int tRowCount = table.getRowCount(); // add content to the table.
-        int tColCount = table.getColumnCount();
+        int tColCount = 4;
         int tValidRowCount = getUsedRowCount(); // get the used RowCount
-        if (tRowCount == tValidRowCount) { // no line is empty, add a new Line.
-            Object[][] tValues = new Object[tRowCount + 1][tColCount];
-            for (int r = 0; r < tRowCount; r++)
-                for (int c = 0; c < tColCount; c++)
-                    tValues[r][c] = table.getValueAt(r, c);
-            table.setDataVector(tValues, header);
-            resetColWidth();	//now there's a new line at the end of the existing lines
-            if(BarFrame.secondScreen != null) {
-            	BarFrame.customerFrame.billPanel.resetColWidth();
-            }
-        }else {
-        	tRowCount--;
-        }
+//        if (tRowCount == tValidRowCount) { // no line is empty, add a new Line.
+//            Object[][] tValues = new Object[tRowCount + 1][tColCount];
+//            for (int r = 0; r < tRowCount; r++)
+//                for (int c = 0; c < tColCount; c++)
+//                    tValues[r][c] = table.getValueAt(r, c);
+//            table.setAdapter(DataVector(tValues, header);
+//            resetColWidth();	//now there's a new line at the end of the existing lines
+////            if(BarFrame.secondScreen != null) {
+////            	BarFrame.customerFrame.billPanel.resetColWidth();
+////            }
+//        }else {
+//        	tRowCount--;
+//        }
         
         Dish newDish = dish.clone();		//@NOTE: incase the cloned dish contains outpurID properties.
         newDish.setOutputID(-1);
         newDish.setNum(1);
-        int price = dish.getPrice();
+        int price = (int)(dish.getPrice() * 100);
         
-        if("true".equals(dish.getPrompPrice()) && BarOption.isTreatPricePromtAsTaxInclude()) {
+        if(dish.getPricePomp() && BarOption.isTreatPricePromtAsTaxInclude()) {
         	price = (int)Math.round(price / ((100 + BarOption.getGST() + BarOption.getQST()) / 100.0));
         }
         newDish.setTotalPrice(price * 1);
@@ -732,28 +665,28 @@ public class BillPanel extends BaseFragment
         //update the interface.
         table.setValueAt("1x", tValidRowCount, 0); // set the count.
         table.setValueAt(NetUtil.trimContentFromHTML(dish.getLanguage(CustOpts.custOps.getUserLang())), tValidRowCount, 1);// set the Name.
-        table.setValueAt(dish.getSize() > 1 ? dish.getSize() : "", tValidRowCount, 2); // set the count.
+        table.setValueAt(dish.getSize() > 1 ? dish.getSize().toString() : "", tValidRowCount, 2); // set the count.
         table.setValueAt(BarOption.getMoneySign() + BarUtil.formatMoney(price/100f), tValidRowCount, 3); // set the price.
-        table.scrollRectToVisible(table.getCellRect(table.getRowCount()-1, 0, true));
+//        table.scrollRectToVisible(table.getCellRect(table.getRowCount()-1, 0, true));
         updateTotalArea(false);								//because value change will not be used to remove the record.
-        SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-		        table.setSelectedRow(getOrderedDishAry().size() - 1);
-		        if("true".equals(newDish.getPrompMofify())) {
-		    		AddModificationDlg.getInstance().isSettingMode = false;
-		    		AddModificationDlg.getInstance().initContent(BarFrame.instance.curDish.getModification(), 0);
-		    		AddModificationDlg.getInstance().setVisible(true);
-		        }
-	        	//if the original is not 0.00, then will still be treated as price promp not a taxInclude.
-		        if(newDish.getPrice() < 0 || "true".equals(newDish.getPrompPrice()) && !BarOption.isTreatPricePromtAsTaxInclude()) {
-		        	Cmd_ChangePrice.getInstance().showPriceChangeDlg();
-		        }
-		        //by now price is changed, then should check the rule.
-		        checkWithRules();
-			}
-		});
+//        SwingUtilities.invokeLater(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//		        table.setSelectedRow(getOrderedDishAry().size() - 1);
+//		        if("true".equals(newDish.getPrompMofify())) {
+//		    		AddModificationDlg.getInstance().isSettingMode = false;
+//		    		AddModificationDlg.getInstance().initContent(BarFrame.instance.curDish.getModification(), 0);
+//		    		AddModificationDlg.getInstance().setVisible(true);
+//		        }
+//	        	//if the original is not 0.00, then will still be treated as price promp not a taxInclude.
+//		        if(newDish.getPrice() < 0 || "true".equals(newDish.getPrompPrice()) && !BarOption.isTreatPricePromtAsTaxInclude()) {
+//		        	Cmd_ChangePrice.getInstance().showPriceChangeDlg();
+//		        }
+//		        //by now price is changed, then should check the rule.
+//		        checkWithRules();
+//			}
+//		});
         updateStatusMsg();
     }
     
@@ -762,7 +695,7 @@ public class BillPanel extends BaseFragment
 	}
 	
     private void checkWithRules() {
-    	Rule[] rules = BarFrame.menuPanel.getRules();
+    	CustomizedRule[] rules = BarFrame.menuPanel.getRules();
     	if(rules.length < 1) {
     		return;
     	}
@@ -771,8 +704,8 @@ public class BillPanel extends BaseFragment
 		removeTheRuleEffect();	
 		
 		// back up the rules and selected dishes.
-		ArrayList<Rule> copyOfRules = new ArrayList<>();
-		for (Rule rule : rules) {
+		ArrayList<CustomizedRule> copyOfRules = new ArrayList<>();
+		for (CustomizedRule rule : rules) {
 			copyOfRules.add(rule);
 		}
 		ArrayList<Dish> copyOfSelection = new ArrayList<Dish>();
@@ -781,7 +714,7 @@ public class BillPanel extends BaseFragment
 		}
 		
 		while(copyOfRules.size() > 0) {	//note: can not use while(copyOfRules.size() > 0), because 
-			Rule rule = copyOfRules.get(0);
+			CustomizedRule rule = copyOfRules.get(0);
 			if(ruleSatisfied(rule, copyOfSelection)) {	//all contained in current selection.
 				discount += rule.getActionPrice();			// add the action of the rule into the discount.
 				//@note: should not remove in this case, because satisfied rule could be used many times.
@@ -806,8 +739,8 @@ public class BillPanel extends BaseFragment
 //						
 //					}
 //				}
-				for(Rule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
-					if(ruleId == rule.getId()) {
+				for(CustomizedRule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
+					if(ruleId == rule.getId().intValue()) {
 						String[] ids = rule.getContent().split(",");
 						for (String id : ids) {
 							for(Dish dish2 : getOrderedDishAry()) {
@@ -822,8 +755,8 @@ public class BillPanel extends BaseFragment
 			}
 		}
 		for (Integer ruleId : ruleIds) {
-			for(Rule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
-				if(ruleId == rule.getId()) {
+			for(CustomizedRule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
+				if(ruleId == rule.getId().intValue()) {
 					discount -= rule.getActionPrice();
 					break;
 				}
@@ -832,7 +765,7 @@ public class BillPanel extends BaseFragment
 	}
 
 	//if all the dishes in the rule is contained in selectionList, then return the dishlist, so they can be removed).
-	private boolean ruleSatisfied(Rule rule, ArrayList<Dish> copyOfSelection) {
+	private boolean ruleSatisfied(CustomizedRule rule, ArrayList<Dish> copyOfSelection) {
 		String[] dishIdsInRule = rule.getContent().split(","); 
 		List<Dish> matchedDishesByRule = new ArrayList<Dish>();
 		for(String id : dishIdsInRule) {
@@ -851,7 +784,7 @@ public class BillPanel extends BaseFragment
 			//all relevent dishs will be removed the flag, and a action indicated price will
 			//be added back. then a checkWithRules will be performed.
 			for(Dish dish : matchedDishesByRule) {
-				dish.setRuleMark(rule.getId());	//this dish is the dish in selection, not a copy.
+				dish.setRuleMark(rule.getId().intValue());	//this dish is the dish in selection, not a copy.
 			}
 			return true;
 		}else {	//if not satisfied, add back for next use of next rule.
@@ -926,19 +859,19 @@ public class BillPanel extends BaseFragment
     		//L.e("BillPanel ", totalPrice + "the calculated total price are different from the total OnBill!" + totalOnBill, null);
     	}else {
     		valTotlePrice.setText(totalPrice);
-            BarFrame.setStatusMes(BarFrame.consts.getPennyRounded() + BarUtil.canadianPennyRound(valTotlePrice.getText()));
+            BarFrame.setStatusMes(BarFrame.consts.getPennyRounded() + BarUtil.canadianPennyRound(valTotlePrice.getText().toString()));
     	}
         //I comment this out because this should be done in cmd layer.
 //    	if(!skipSavingToDB) {//I removed the condition "getBillID() > 0 && " because it's shouldn't be possible.
 //	    	upateBillInfoIntoDB();
 //    	}
-		
-		if(BarFrame.secondScreen != null && salesPanel != null) {
-			BillPanel billPanel2 = BarFrame.customerFrame.billPanel;
-			
-			billPanel2.updateLabelValues(discount, serviceFee, subTotal, totalGst, totalQst);
-			billPanel2.valTotlePrice.setText(valTotlePrice.getText());
-		}
+//
+//		if(BarFrame.secondScreen != null && salesPanel != null) {
+//			BillPanel billPanel2 = BarFrame.customerFrame.billPanel;
+//
+//			billPanel2.updateLabelValues(discount, serviceFee, subTotal, totalGst, totalQst);
+//			billPanel2.valTotlePrice.setText(valTotlePrice.getText());
+//		}
     }
     
 	public void updateLabelValues(float discount, int serviceFee, float subTotal, float totalGst, float totalQst) {
@@ -957,7 +890,7 @@ public class BillPanel extends BaseFragment
 		if(tableName.length() == 0) {	//add this check in case background thread update tables every minute, might reinit the model of cmbCurTable, now I've added check to avoid it. 
 			L.e("BillPane", "no table info found from cmbCurtable", null);
 		}
-		String openTime = BarFrame.instance.valOpenTime.getText();	//if it in cmd_return action, the opentime will be null
+		String openTime = BarFrame.instance.valOpenTime.getText().toString();	//if it in cmd_return action, the opentime will be null
 		
 		//@Note, only when showing an expried bill (from checklistdlg), we give a billID to the method, for other case, we leave it empty.
 		//the BarFrame.instance.getCurBillID() always has value available, but we don't use it on purpose, because if the billID is empty, we'll know it's not a expired bill, the logic of fetching output is easier.
@@ -977,17 +910,16 @@ public class BillPanel extends BaseFragment
     		//because no table has been clicked. all we have is tableName and Bill Idx. (wait, who called BarFrame.instance.setCurBillID()? why not set vlStartTime also.) 
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
-    		int tColCount = table.getColumnCount();
-    		Object[] tValues = new Object[0][tColCount];
+    		Object[] tValues = new Object[0][4];
 			List list = new ArrayList();
 			list.add(tValues);
 			myAdapter = new MyAdapter(BarFrame.instance, list);
     		table.setAdapter(myAdapter);;
     		updateTotalArea(skipSavingToDB);
     		resetColWidth();
-    		if(BarFrame.secondScreen != null) {
-            	BarFrame.customerFrame.billPanel.resetColWidth();
-            }
+//    		if(BarFrame.secondScreen != null) {
+//            	BarFrame.customerFrame.billPanel.resetColWidth();
+//            }
     		return;
     	}
     	
@@ -1003,7 +935,7 @@ public class BillPanel extends BaseFragment
 			
 			// do not set the default selected value, if it's used in billListDlg.
 			if (salesPanel != null && getOrderedDishAry().size() > 0) {
-				table.setSelectedRow(getOrderedDishAry().size() - 1);
+				table.setSelection(getOrderedDishAry().size() - 1);
 			}
 		} catch (Exception e) {
 			L.e("BillPanel", " exception when initContent()", e);
@@ -1012,22 +944,22 @@ public class BillPanel extends BaseFragment
 		updateTotalArea(skipSavingToDB);
 		switch (status) {
 		case DBConsts.BILL_PRINTED:
-			setBackground(Color.green);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.GREEN);
 			break;
 		case DBConsts.SUSPENDED:
-			setBackground(Color.red);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.RED);
 			break;
 		case DBConsts.COMPLETED:
-			setBackground(Color.GRAY);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.GRAY);
 			break;
 		case DBConsts.VOIDED:
-			setBackground(Color.DARK_GRAY);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.DKGRAY);
 			break;
 		case DBConsts.EXPIRED:
-			setBackground(Color.yellow);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.YELLOW);
 			break;
 		case DBConsts.DELETED:
-			setBackground(Color.black);
+			findViewById(R.id.tableListView).setBackgroundColor(Color.BLACK);
 			break;
 
 		default:
@@ -1041,8 +973,8 @@ public class BillPanel extends BaseFragment
 			}
 		}
 
-		btnMore.setEnabled(false);
-		btnLess.setEnabled(false);
+		moreButton.setEnabled(false);
+		lessButton.setEnabled(false);
 		
 		//reset the flag which is only used for showing expired bills.
 		BarFrame.instance.setShowingAnExpiredBill(false);
@@ -1074,51 +1006,46 @@ public class BillPanel extends BaseFragment
     		sql.append(" and (deleted is null or deleted < ").append(DBConsts.VOIDED).append(")");
     	}
 
-    	ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-		rs.afterLast();
-		rs.relative(-1);
-		int tmpPos = rs.getRow();
+    	Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 
-		int tColCount = table.getColumnCount();
-		Object[][] tValues = new Object[tmpPos][tColCount];
-		rs.beforeFirst();
-		tmpPos = 0;
-		while (rs.next()) {
-			int modifiedTime = rs.getInt("OUTPUT.ARREARAGE");
-			int deleted = rs.getInt("OUTPUT.DELETED");
+		List<String[]> datas = new ArrayList<>();
+		String[] tValues = new String[4];
+		while (rs.moveToNext()) {
+			int modifiedTime = DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.ARREARAGE");
+			int deleted = DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.DELETED");
 			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
 				continue;
 			//BarUtil.df.parse(tableName)
 			}
 			Dish dish = new Dish();
-			dish.setCATEGORY(rs.getString("PRODUCT.CATEGORY"));
-			dish.setDiscount(rs.getInt("OUTPUT.discount"));//
-			dish.setDspIndex(rs.getInt("PRODUCT.INDEX"));
-			dish.setGst(rs.getInt("PRODUCT.FOLDERID"));
-			dish.setId(rs.getInt("PRODUCT.ID"));
-			dish.setLanguage(0, rs.getString("PRODUCT.CODE"));
-			dish.setLanguage(1, rs.getString("PRODUCT.MNEMONIC"));
-			dish.setLanguage(2, rs.getString("PRODUCT.SUBJECT"));
-			dish.setModification(rs.getString("OUTPUT.CONTENT"));//
-			dish.setNum(rs.getInt("OUTPUT.AMOUNT"));//
-			dish.setOutputID(rs.getInt("OUTPUT.ID"));//
-			dish.setPrice(rs.getInt("PRODUCT.PRICE"));
-			dish.setPrinter(rs.getString("PRODUCT.BRAND"));
-			dish.setPrompMenu(rs.getString("PRODUCT.UNIT"));
-			dish.setPrompModify(rs.getString("PRODUCT.PRODUCAREA"));
-			dish.setPrompPrice(rs.getString("PRODUCT.CONTENT"));
-			dish.setQst(rs.getInt("PRODUCT.STORE"));
-			dish.setSize(rs.getInt("PRODUCT.COST"));
+			dish.setCategoryId(Long.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CATEGORY")));
+			dish.setDiscount(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.discount"));//
+			dish.setDiscount(Integer.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.INDEX")));
+			dish.setGst(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.FOLDERID"));
+			dish.setId(DBUtil.getCursorString(rs,.getCursorLong(rs, "PRODUCT.ID"));
+			dish.setName1(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CODE"));
+			dish.setName2(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.MNEMONIC"));
+			dish.setName3(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.SUBJECT"));
+			dish.setModification(DBUtil.getCursorString(rs,.getCursorString(rs, "OUTPUT.CONTENT"));//
+			dish.setNum(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.AMOUNT"));//
+			dish.setOutputID(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.ID"));//
+			dish.setPrice(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.PRICE") / 100.0f);
+			dish.setPrinterIds(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.BRAND"));
+			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.UNIT")));
+			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.PRODUCAREA")));
+			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CONTENT")));
+			dish.setQst(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.STORE"));
+			dish.setSize(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.COST"));
 			dish.setCustomerIndex(billIndex);
-			dish.setOrderedTime(rs.getString("OUTPUT.TIME"));	//output time is table's open time. no need to remember output created time.
-			dish.setBillID(rs.getInt("OUTPUT.FOLDERID"));
-			dish.setTotalPrice(rs.getInt("OUTPUT.TOLTALPRICE"));
-			dish.setStatus(rs.getInt("OUTPUT.DELETED"));
+			dish.setOrderedTime(DBUtil.getCursorString(rs,.getCursorString(rs, "OUTPUT.TIME"));	//output time is table's open time. no need to remember output created time.
+			dish.setBillID(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.FOLDERID"));
+			dish.setTotalPrice(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.TOLTALPRICE"));
+			dish.setStatus(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.DELETED"));
 			dishAry.add(dish);
 			
-			tValues[tmpPos][0] = dish.getDisplayableNumWithX(dish.getNum());
+			tValues[0] = dish.getDisplayableNumWithX(dish.getNum());
 			
-			tValues[tmpPos][1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
+			tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
 
 			String modification = dish.getModification();
 			if(modification == null){
@@ -1138,21 +1065,21 @@ public class BillPanel extends BaseFragment
 				sb.append(BarUtil.changeToLangForModify(lang, LoginDlg.USERLANG)).append(" ");
 			}
 			if(dish.getDiscount() == 0) {
-				tValues[tmpPos][2] = sb.toString();
+				tValues[2] = sb.toString();
 			}else{
-				tValues[tmpPos][2] = sb.append("  -").append(BarOption.getMoneySign()).append(BarUtil.formatMoney(dish.getDiscount() / 100.0)).toString();
+				tValues[2] = sb.append("  -").append(BarOption.getMoneySign()).append(BarUtil.formatMoney(dish.getDiscount() / 100.0)).toString();
 			}
 			
-			tValues[tmpPos][3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
-			tmpPos++;
+			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
+			datas.add(tValues);
 		}
-
-		table.setDataVector(tValues, header);
+		myAdapter = new MyAdapter(BarFrame.instance, datas);
+		table.setAdapter(myAdapter);
 		
 		resetColWidth();
-        if(BarFrame.secondScreen != null && salesPanel != null) {
-        	BarFrame.customerFrame.billPanel.resetColWidth();
-        }
+//        if(BarFrame.secondScreen != null && salesPanel != null) {
+//        	BarFrame.customerFrame.billPanel.resetColWidth();
+//        }
 		return dishAry;
 	}
 
@@ -1163,16 +1090,15 @@ public class BillPanel extends BaseFragment
 				.append(" and tableID = '").append(tableName).append("'")
 				.append(" and opentime = '").append(openTime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(")");// for expired bills, for sure it will have billId.
-		
-		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
-		rs.beforeFirst();
-		if(rs.next()) {
-		    discount = rs.getInt("discount");
-		    serviceFee = rs.getInt("serviceFee");
-		    tip = rs.getInt("tip");
-		    cashback = rs.getInt("cashback");
-		    status = rs.getInt("status");
-		    comment = rs.getString("comment");
+
+		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+		if(rs.moveToNext()) {
+		    discount = DBUtil.getCursorString(rs,.getCursorInt(rs, "discount");
+		    serviceFee = DBUtil.getCursorString(rs,.getCursorInt(rs, "serviceFee");
+		    tip = DBUtil.getCursorString(rs,.getCursorInt(rs, "tip");
+		    cashback = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashback");
+		    status = DBUtil.getCursorString(rs,.getCursorInt(rs, "status");
+		    comment = DBUtil.getCursorString(rs,.getCursorString(rs, "comment");
 		    int pSF = comment.lastIndexOf(SERVICEFEE);
 		    int pDB = comment.lastIndexOf(DISCBILL);
 		    if(pSF > -1) {
@@ -1181,9 +1107,9 @@ public class BillPanel extends BaseFragment
 		    if(pDB > -1) {
 		    	discount = Integer.valueOf(comment.substring(pDB + 9, comment.indexOf("@", pDB)));
 		    }
-		    totalOnBill = rs.getInt("total");
-		    createTime = rs.getString("createTime");
-		    billID = rs.getInt("id");
+		    totalOnBill = DBUtil.getCursorString(rs,.getCursorInt(rs, "total");
+		    createTime = DBUtil.getCursorString(rs,.getCursorString(rs, "createTime");
+		    billID = DBUtil.getCursorString(rs,.getCursorInt(rs, "id");
 		}
 	}
 
@@ -1197,8 +1123,8 @@ public class BillPanel extends BaseFragment
         //set bill ID to 0 is not helpful, it should be updated in each call. setBillID(0);
         comment = "";
         status = DBConsts.ORIGINAL;
-        setBackground(null);
-        
+//        setBackground(null);
+
         totalGst = 0;
     	totalQst = 0;
     	subTotal = 0;
@@ -1208,39 +1134,39 @@ public class BillPanel extends BaseFragment
     }
     
     public void resetColWidth() {
-    	int tableWidth = getWidth();
-        PIMTableColumn tmpCol1 = table.getColumnModel().getColumn(0);
-        tmpCol1.setWidth(30);
-        tmpCol1.setPreferredWidth(30);
-        
-        PIMTableColumn tmpCol4 = table.getColumnModel().getColumn(3);
-        tmpCol4.setWidth(69);
-        tmpCol4.setPreferredWidth(69);
-        
-        //at first, teh tableWidth is 0, then after, the tableWidth will be 260. 
-        PIMTableColumn tmpCol2 = table.getColumnModel().getColumn(1);
-        int defaultWidth = (tableWidth - tmpCol1.getWidth() - tmpCol4.getWidth()) / 2 + 3;
-        tmpCol2.setWidth(BarOption.getNameColWidth(defaultWidth));
-        tmpCol2.setPreferredWidth(BarOption.getNameColWidth(defaultWidth));
-        
-        PIMTableColumn tmpCol3 = table.getColumnModel().getColumn(2);
-        defaultWidth = (tableWidth - tmpCol1.getWidth() - tmpCol2.getWidth() - tmpCol4.getWidth()) - 3;
-        tmpCol3.setWidth(defaultWidth - (scrContent.getVerticalScrollBar().isVisible() ? scrContent.getVerticalScrollBar().getWidth() : 0));
-        tmpCol3.setPreferredWidth(defaultWidth - (scrContent.getVerticalScrollBar().isVisible() ? scrContent.getVerticalScrollBar().getWidth() : 0));
-        
-        table.setRowHeight(billButton == null ? BarOption.getTableRowHeight() : BarOption.getListViewTableRowHeight());
-        
-        table.validate();
-        table.revalidate();
-        table.invalidate();
+//    	int tableWidth = getWidth();
+//        PIMTableColumn tmpCol1 = table.getColumnModel().getColumn(0);
+//        tmpCol1.setWidth(30);
+//        tmpCol1.setPreferredWidth(30);
+//
+//        PIMTableColumn tmpCol4 = table.getColumnModel().getColumn(3);
+//        tmpCol4.setWidth(69);
+//        tmpCol4.setPreferredWidth(69);
+//
+//        //at first, teh tableWidth is 0, then after, the tableWidth will be 260.
+//        PIMTableColumn tmpCol2 = table.getColumnModel().getColumn(1);
+//        int defaultWidth = (tableWidth - tmpCol1.getWidth() - tmpCol4.getWidth()) / 2 + 3;
+//        tmpCol2.setWidth(BarOption.getNameColWidth(defaultWidth));
+//        tmpCol2.setPreferredWidth(BarOption.getNameColWidth(defaultWidth));
+//
+//        PIMTableColumn tmpCol3 = table.getColumnModel().getColumn(2);
+//        defaultWidth = (tableWidth - tmpCol1.getWidth() - tmpCol2.getWidth() - tmpCol4.getWidth()) - 3;
+//        tmpCol3.setWidth(defaultWidth - (scrContent.getVerticalScrollBar().isVisible() ? scrContent.getVerticalScrollBar().getWidth() : 0));
+//        tmpCol3.setPreferredWidth(defaultWidth - (scrContent.getVerticalScrollBar().isVisible() ? scrContent.getVerticalScrollBar().getWidth() : 0));
+//
+//        table.setRowHeight(billButton == null ? BarOption.getTableRowHeight() : BarOption.getListViewTableRowHeight());
+//
+//        table.validate();
+//        table.revalidate();
+//        table.invalidate();
     }
 
     void removeFromSelection(int selectedRow) {
     	
 		int tValidRowCount = getUsedRowCount(); // get the used RowCount
     	if(selectedRow < 0 || selectedRow > tValidRowCount - 1) {
-    		JOptionPane.showMessageDialog(this, BarFrame.consts.OnlyOneShouldBeSelected());
-    		ErrorUtil.write("Unexpected row number when calling removeAtSelection : " + selectedRow);
+    		JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+    		L.e("BillPanel", "Unexpected row number when calling removeAtSelection : " + selectedRow, null);
     		return;
     	}
     	
@@ -1258,7 +1184,7 @@ public class BillPanel extends BaseFragment
 	}
     
 	private void removeSelectedLineFromTable(int selectedRow, int tValidRowCount) {
-		int tColCount = table.getColumnCount();
+		int tColCount = 4;
 		Object[][] tValues = new Object[tValidRowCount - 1][tColCount];
 		for (int r = 0; r < tValidRowCount; r++) {
 			if(r == selectedRow) {
@@ -1266,15 +1192,14 @@ public class BillPanel extends BaseFragment
 			}else {
 				int rowNum = r > selectedRow ? r : r + 1;
 			    for (int c = 0; c < tColCount; c++)
-			        tValues[rowNum-1][c] = table.getValueAt(r, c);
+			        tValues[rowNum-1][c] = ((MyAdapter)table.getAdapter()).getValueAt(r, c);
 			}
 		}
-		table.setDataVector(tValues, header);
 		resetColWidth();
-        if(BarFrame.secondScreen != null) {
-        	BarFrame.customerFrame.billPanel.resetColWidth();
-        }
-		table.setSelectedRow(tValues.length - 1); //@Note this will trigger a value change event, to set the curDish.
+//        if(BarFrame.secondScreen != null) {
+//        	BarFrame.customerFrame.billPanel.resetColWidth();
+//        }
+		table.setSelection(tValues.length - 1); //@Note this will trigger a value change event, to set the curDish.
 		updateTotalArea(false);
 		updateStatusMsg();
 	}
@@ -1307,26 +1232,26 @@ public class BillPanel extends BaseFragment
 							.append(", deleted = ").append(status)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
 							.append("' where id = ").append(newOutputId);
-					PIMDBModel.getStatement().executeUpdate(sql.toString());
+					AikaPos.db.execSQL(sql.toString());
 					//create ouput records specially for the decreased items, make them status as voided, so they can appear in the report.
 					newOutputId = Dish.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
 							.append("' where id = ").append(newOutputId);
-					PIMDBModel.getStatement().executeUpdate(sql.toString());
+					AikaPos.db.execSQL(sql.toString());
 				}else {
 					int newOutputId = Dish.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
 							.append("' where id = ").append(newOutputId);
-					PIMDBModel.getStatement().executeUpdate(sql.toString());
+					AikaPos.db.execSQL(sql.toString());
 				}
 				sql = new StringBuilder("update output set deleted = ").append(DBConsts.EXPIRED)
 						.append(" where id = ").append(dish.getOutputID());
-				PIMDBModel.getStatement().executeUpdate(sql.toString());
+				AikaPos.db.execSQL(sql.toString());
 				//TODO: if the 
 				//TODO: and the bill cash values, bill status
-			} catch (SQLException e) {
+			} catch (Exception e) {
 		        L.e("expireAndRegenerateOutputs", "数据库更新异常", e);
 			}
 	    }
@@ -1378,25 +1303,25 @@ public class BillPanel extends BaseFragment
 	 		// create a new bill=============================================================================
 	 		int newBillID = cloneCurrentBillRecord(null,
 					customerIdx,
-					Math.round(Float.valueOf(valTotlePrice.getText()) * 100));
+					Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100));
 	 		
 			//expire the old bill
 			StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.EXPIRED)
 	 				.append(" where id = ").append(getBillID());
-	 		PIMDBModel.getStatement().executeUpdate(sql.toString());
+			AikaPos.db.execSQL(sql.toString());
 	 		//================================================================================================
 	 		
 	        //when we reopen a refunded bill, we create a new bill which is a original bill, so we must clean the received money with the refund count.
 	 		if(status < DBConsts.ORIGINAL){	//save the old money numbers, in case the old status is negative(means have returned some/not all money).
 	 			StringBuilder sb = new StringBuilder("select * from bill where id = " + newBillID);
 
- 	    		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
- 	            rs.next();
+ 	    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
+ 	            rs.moveToNext();
  	        	
- 	            int oldCashReceived =rs.getInt("cashReceived");
- 	            int oldDebitReceived = rs.getInt("debitReceived");
- 	            int oldVisaReceived = rs.getInt("visaReceived");
- 	            int oldMasterReceived = rs.getInt("masterReceived");
+ 	            int oldCashReceived =DBUtil.getCursorString(rs,.getCursorInt(rs, "cashReceived");
+ 	            int oldDebitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "debitReceived");
+ 	            int oldVisaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "visaReceived");
+ 	            int oldMasterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "masterReceived");
  	        	
  	            //clean cashback and tip first, and clean status at the same time.
  	        	//set status = 0 immediatly when refund is covered by received money, in case another receive can also cover the refund, will be minus twice.
@@ -1453,11 +1378,11 @@ public class BillPanel extends BaseFragment
  	            		.append(", visaReceived = ").append(newVisaReceived)
  	            		.append(", masterReceived = ").append(newMasterReceived)
  	            		.append(" where id = ").append(newBillID);
- 	           PIMDBModel.getStatement().executeUpdate(sql.toString());
- 		 	   status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
+				AikaPos.db.execSQL(sql.toString());
+ 		 	    status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
 	 		}else if(status < DBConsts.COMPLETED){
 	 			//when splitting a bill in billPrinted status. new generated bill should be changed to saved status 
-	 			DBUtil.updateBill(newBillID, "status", DBConsts.SAVED);
+	 			DBUtil.getCursorString(rs,.updateBill(newBillID, "status", DBConsts.SAVED);
 	 		}
 	 		//NOTE:following changing will not affect the interface when reopenning a completed bill from SaleRecordDlg.
    			//tip must be able to set to 0.
@@ -1477,141 +1402,135 @@ public class BillPanel extends BaseFragment
     }
 
     void reLayout() {        
-    	// table area-------------
-        int poxX = 0;
-        int posY = 0;
-        int scrContentHeight = getHeight() - BarFrame.consts.TotalAreaHeight;
-        if(billButton != null) {
-        	billButton.setBounds(poxX, posY, getWidth(), CustOpts.BTN_HEIGHT + 16);
-        	posY += billButton.getHeight();
-// BarFrame.consts.TotalAreaHeight; has made up enought room for billbuton. the left is enough for a total Price.
-//        	scrContentHeight -= billButton.getHeight() - valTotlePrice.getPreferredSize().height - CustOpts.VER_GAP * 3;
-        }
-        scrContent.setBounds(poxX, posY, getWidth(), scrContentHeight);
-        
-		// sub total-------
-		if(billButton == null){
-        	btnMore.setBounds(scrContent.getX() + scrContent.getWidth() - BarFrame.consts.SCROLLBAR_WIDTH,
-        			scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP * 3, 
-            		BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH + 4);
-            btnLess.setBounds(btnMore.getX() - CustOpts.HOR_GAP - BarFrame.consts.SCROLLBAR_WIDTH, btnMore.getY(), 
-            		BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH + 4);
-            
-    		valTotlePrice.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP,
-    				btnLess.getX() - scrContent.getX() - 5, BarFrame.consts.TotalAreaHeight - CustOpts.VER_GAP - 3);
-    		
-        }else {
-    		valTotlePrice.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() - 15,
-    				scrContent.getWidth() - 5, BarFrame.consts.TotalAreaHeight - CustOpts.VER_GAP - 3);
-        }
-        lblSubTotle.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + 40 + CustOpts.VER_GAP * 2,
-        		150, lblSubTotle.getPreferredSize().height);
-        lblDiscount.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP, 
-        		110, lblSubTotle.getHeight());
-        lblServiceFee.setBounds(lblDiscount.getX(), lblDiscount.getY() + lblDiscount.getHeight() + CustOpts.VER_GAP, 
-        		110, lblDiscount.getHeight());
-        
-		lblTPS.setBounds(scrContent.getX() + lblServiceFee.getWidth(), lblDiscount.getY(),
-				100, lblTPS.getPreferredSize().height);
-		lblTVQ.setBounds(lblTPS.getX(), lblTPS.getY() + lblTPS.getHeight() + CustOpts.VER_GAP,
-				100, lblTVQ.getPreferredSize().height);
-		
+//    	// table area-------------
+//        int poxX = 0;
+//        int posY = 0;
+//        int scrContentHeight = getHeight() - BarFrame.consts.TotalAreaHeight;
+//        if(billButton != null) {
+//        	billButton.setBounds(poxX, posY, getWidth(), CustOpts.BTN_HEIGHT + 16);
+//        	posY += billButton.getHeight();
+//// BarFrame.consts.TotalAreaHeight; has made up enought room for billbuton. the left is enough for a total Price.
+////        	scrContentHeight -= billButton.getHeight() - valTotlePrice.getPreferredSize().height - CustOpts.VER_GAP * 3;
+//        }
+//        scrContent.setBounds(poxX, posY, getWidth(), scrContentHeight);
+//
+//		// sub total-------
+//		if(billButton == null){
+//        	moreButton.setBounds(scrContent.getX() + scrContent.getWidth() - BarFrame.consts.SCROLLBAR_WIDTH,
+//        			scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP * 3,
+//            		BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH + 4);
+//            lessButton.setBounds(moreButton.getX() - CustOpts.HOR_GAP - BarFrame.consts.SCROLLBAR_WIDTH, moreButton.getY(),
+//            		BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH + 4);
+//
+//    		valTotlePrice.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP,
+//    				lessButton.getX() - scrContent.getX() - 5, BarFrame.consts.TotalAreaHeight - CustOpts.VER_GAP - 3);
+//
+//        }else {
+//    		valTotlePrice.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() - 15,
+//    				scrContent.getWidth() - 5, BarFrame.consts.TotalAreaHeight - CustOpts.VER_GAP - 3);
+//        }
+//        lblSubTotle.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + 40 + CustOpts.VER_GAP * 2,
+//        		150, lblSubTotle.getPreferredSize().height);
+//        lblDiscount.setBounds(scrContent.getX(), scrContent.getY() + scrContent.getHeight() + CustOpts.VER_GAP,
+//        		110, lblSubTotle.getHeight());
+//        lblServiceFee.setBounds(lblDiscount.getX(), lblDiscount.getY() + lblDiscount.getHeight() + CustOpts.VER_GAP,
+//        		110, lblDiscount.getHeight());
+//
+//		lblTPS.setBounds(scrContent.getX() + lblServiceFee.getWidth(), lblDiscount.getY(),
+//				100, lblTPS.getPreferredSize().height);
+//		lblTVQ.setBounds(lblTPS.getX(), lblTPS.getY() + lblTPS.getHeight() + CustOpts.VER_GAP,
+//				100, lblTVQ.getPreferredSize().height);
+//
     }
     
     private void initComponent() {
-        lblDiscount = new TextView();
-        lblServiceFee = new TextView();
-        lblSubTotle = new TextView(BarFrame.consts.Subtotal());
-        lblTPS = new TextView(BarFrame.consts.GST());
-        lblTVQ = new TextView(BarFrame.consts.QST());
-        valTotlePrice = new TextView();
-        btnMore = new ArrowButton("<html><h1 style='text-align: center; font-size:40px; padding-bottom: 5px; color:#18F507;'>+</h1></html>");
-        btnLess = new ArrowButton("<html><h1 style='text-align: center; font-size:40px; padding-bottom: 5px; color:#FB112C;'>-</h1></html>");
-        
-        Color bg = BarOption.getBK("Bill");
-    	if(bg == null) {
-    		bg = new Color(216,216,216);
-    	}
-        setBackground(bg);
-        setLayout(null);
-													//in that method will check if the mirrorTable exist.
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        table.setAutoscrolls(true);
-        table.setCellEditable(false);
-        table.setRenderAgent(this);
-        table.setHasSorter(false);
-        table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        table.setFont(BarOption.getSelectionFont());
-        if(BarOption.isMultiLineCellRender()) {
-        	table.setDefaultRenderer(Object.class, new TextAreaPIMTableCellRenderer());
-        }
-        header = new String[] {BarFrame.consts.Count(), BarFrame.consts.ProdName(), "", BarFrame.consts.Price()};
-        table.setDataVector(new Object[0][header.length], header);
-        //seems following 4 lines useless...because the table.getColumnModel().getColumn(1) seems doesn't work.
-        DefaultPIMTableCellRenderer tCellRender = new DefaultPIMTableCellRenderer();
-        tCellRender.setOpaque(true);
-        tCellRender.setBackground(Color.LIGHT_GRAY);
-        table.getColumnModel().getColumn(1).setCellRenderer(tCellRender);
+        lblSubTotle.setText(BarFrame.consts.Subtotal());
+        lblTPS.setText(BarFrame.consts.GST());
+        lblTVQ.setText(BarFrame.consts.QST());
 
-        valTotlePrice.setFont(BarOption.lessBigFont);
-        valTotlePrice.setHorizontalAlignment(SwingConstants.RIGHT);
+//        String bg = BarOption.getBK("Bill");
+//    	if(bg == null) {
+//    		bg = "#d8d8d8";
+//    	}
+//        setBackgroundColor(Color.parseColor(bg));
+//        setLayout(null);
+													//in that method will check if the mirrorTable exist.
+//        table.setRenderAgent(this);
+//        table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+//        table.setFont(BarOption.getSelectionFont());
+//        if(BarOption.isMultiLineCellRender()) {
+//        	table.setDefaultRenderer(Object.class, new TextAreaPIMTableCellRenderer());
+//        }
+		headerName.setText(BarFrame.consts.ProdName());
+		headerQty.setText(BarFrame.consts.Count());
+		headerPrice.setText(BarFrame.consts.Price());
+		
+        table.setAdapter(myAdapter);
+        //seems following 4 lines useless...because the table.getColumnModel().getColumn(1) seems doesn't work.
+//        DefaultPIMTableCellRenderer tCellRender = new DefaultPIMTableCellRenderer();
+//        tCellRender.setOpaque(true);
+//        tCellRender.setBackground(Color.LIGHT_GRAY);
+//        table.getColumnModel().getColumn(1).setCellRenderer(tCellRender);
+
+//        valTotlePrice.setFont(BarOption.lessBigFont);
+//        valTotlePrice.setHorizontalAlignment(SwingConstants.RIGHT);
         //@do_not_work! valTotlePrice.setHorizontalAlignment(SwingConstants.RIGHT);
         //@work! valTotlePrice.setAlignmentX(Component.RIGHT_ALIGNMENT);
       //@do_not_work!valTotlePrice.setBackground(Color.RED);
       //@do_not_work!valTotlePrice.setOpaque(false);
         
-        TextView tLbl = new TextView();
-        tLbl.setOpaque(true);
-        tLbl.setBackground(Color.GRAY);
-        scrContent.setCorner(JScrollPane.LOWER_RIGHT_CORNER, tLbl);
-        Font tFont = PIMPool.pool.getFont((String) CustOpts.custOps.hash2.get(PaneConsts.DFT_FONT), Font.PLAIN, 40);
+//        TextView tLbl = new TextView();
+//        tLbl.setAlpha(1.0f);
+//        tLbl.setBackgroundColor(Color.GRAY);
+//        scrContent.setCorner(JScrollPane.LOWER_RIGHT_CORNER, tLbl);
+//        Font tFont = PIMPool.pool.getFont((String) CustOpts.custOps.hash2.get(PaneConsts.DFT_FONT), Font.PLAIN, 40);
 
         // Margin-----------------
-        Image temp = PIMPool.pool.getImage(PaneConsts.IAMGE_PATH.concat("more2.png"));
-        ImageIcon icon = new ImageIcon(temp);
-        btnMore.setBorder(null);
-        btnMore.setIcon(icon);
-
-        temp = PIMPool.pool.getImage(PaneConsts.IAMGE_PATH.concat("less2.png"));
-        icon = new ImageIcon(temp);
-        btnLess.setBorder(null);
-        btnLess.setIcon(icon);
-        
-        // border----------
-        table.setBorder(null);
-        table.setShowGrid(false);
+//        Image temp = PIMPool.pool.getImage(PaneConsts.IAMGE_PATH.concat("more2.png"));
+//        ImageIcon icon = new ImageIcon(temp);
+//        moreButton.setBorder(null);
+//        moreButton.setIcon(icon);
+//
+//        temp = PIMPool.pool.getImage(PaneConsts.IAMGE_PATH.concat("less2.png"));
+//        icon = new ImageIcon(temp);
+//        lessButton.setBorder(null);
+//        lessButton.setIcon(icon);
+//
+//        // border----------
+//        table.setBorder(null);
+//        table.setShowGrid(false);
         // forcus-------------
         table.setFocusable(false);
-        btnMore.setFocusable(false);
-        btnLess.setFocusable(false);
+        moreButton.setFocusable(false);
+        lessButton.setFocusable(false);
         
         // disables
-        btnMore.setEnabled(false);
-        btnLess.setEnabled(false);
+        moreButton.setEnabled(false);
+        lessButton.setEnabled(false);
         
         // built
         if(billButton != null) {
-        	add(billButton);
+//        	add(billButton);
         	billButton.addActionListener(this);
         }else {
-            add(btnMore);
-            add(btnLess);
-            add(lblDiscount);
-            add(lblServiceFee);
-            add(lblSubTotle);
-            add(lblTPS);
-            add(lblTVQ);
+//            add(moreButton);
+//            add(lessButton);
+//            add(lblDiscount);
+//            add(lblServiceFee);
+//            add(lblSubTotle);
+//            add(lblTPS);
+//            add(lblTVQ);
         }
-        add(valTotlePrice);
-        add(scrContent);
-
-        addComponentListener(this);
-        btnMore.addActionListener(this);
-        btnLess.addActionListener(this);
-        table.addMouseMotionListener(this);
-        table.addMouseListener(this);
-        table.getSelectionModel().addListSelectionListener(this);
-        scrContent.getViewport().addMouseListener(this);
+//        add(valTotlePrice);
+//        add(scrContent);
+//
+//        addComponentListener(this);
+//        moreButton.addActionListener(this);
+//        lessButton.addActionListener(this);
+//        table.addMouseMotionListener(this);
+//        table.addMouseListener(this);
+//        table.getSelectionModel().addListSelectionListener(this);
+//        scrContent.getViewport().addMouseListener(this);
 		reLayout();
     }
     
@@ -1630,21 +1549,39 @@ public class BillPanel extends BaseFragment
     	return zippedStr;
     }
 
+	@XViewByID(R.id.headerName)
+	private TextView headerName;
+	@XViewByID(R.id.headerQty)
+	private TextView headerQty;
+	@XViewByID(R.id.headerModify)
+	private TextView headerModify;
+	@XViewByID(R.id.headerPrice)
+	private TextView headerPrice;
+	
 	@XViewByID(R.id.tableListView)
-	public ListView table;
+	public PIMTable table;
 	public MyAdapter myAdapter;
+	@XViewByID(R.id.lblSubTotle)
     public TextView lblSubTotle;
+	@XViewByID(R.id.lblTPS)
     public TextView lblTPS;
+	@XViewByID(R.id.lblTVQ)
     public TextView lblTVQ;
-    public TextView lblDiscount;
+    @XViewByID(R.id.lblDiscount)
+	public TextView lblDiscount;
+	@XViewByID(R.id.lblServiceFee)
     public TextView lblServiceFee;
+	@XViewByID(R.id.valTotlePrice)
     public TextView valTotlePrice;
+	@XViewByID(R.id.moreButton)
     
-    private ArrowButton btnMore;
-    private ArrowButton btnLess;
+    private ArrowButton moreButton;
+	@XViewByID(R.id.lessButton)
+    private ArrowButton lessButton;
     
 	public String[] header;
-	
+
+	@XViewByID(R.id.billButton)
     private ISButton sourceBtn;
 
 	@Override
@@ -1684,6 +1621,6 @@ public class BillPanel extends BaseFragment
 	}
 	
 	public void enableBtnLess() {
-		btnLess.setEnabled(true);
+		lessButton.setEnabled(true);
 	}
 }

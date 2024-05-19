@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.action;
 
+import android.view.View;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
@@ -31,8 +33,7 @@ public class Cmd_QTY implements SamActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		
+	public void onClick(View v) {
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		

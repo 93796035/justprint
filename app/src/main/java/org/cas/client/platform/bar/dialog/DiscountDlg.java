@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.dialog;
 
+import android.view.View;
+
 import androidx.fragment.app.DialogFragment;
 
 import java.awt.Insets;
@@ -144,7 +146,7 @@ public class DiscountDlg extends DialogFragment
      *            动作事件
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void onClick(View v) {
         curContent = tfdQTY.getText();
         
         Object o = e.getSource();
@@ -542,13 +544,13 @@ public class DiscountDlg extends DialogFragment
 			sql = new StringBuilder("select * from CustomizedRule where ruleName = '").append(ruleName)
 					.append("' and content = '").append(content.substring(1)).append("'");
 			try {
-	            ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sql.toString());
+	            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 	            rs.beforeFirst();
-	            rs.next();
-	            rule.setId(rs.getInt("id"));
-	            rule.setRuleName(rs.getString("ruleName"));
-	            rule.setContent(rs.getString("content"));
-	            rule.setAction(rs.getInt("action"));
+	            rs.moveToNext();
+	            rule.setId(DBUtil.getCursorString(rs,.getCursorInt(rs,"id"));
+	            rule.setRuleName(DBUtil.getCursorString(rs,"ruleName"));
+	            rule.setContent(DBUtil.getCursorString(rs,"content"));
+	            rule.setAction(DBUtil.getCursorString(rs,.getCursorInt(rs,"action"));
 	            rs.close();// 关闭
 	        } catch (SQLException exp) {
 	            L.e("DiscountDlg ", "Exception when fetching a rule." + sql, exp);

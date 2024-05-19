@@ -1,10 +1,11 @@
-package com.just.print.util;
+package org.cas.client.platform.casutil;
 
 import android.util.Log;
 
 import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
 import com.just.print.sys.server.DataSyncService;
+import com.just.print.util.AppUtils;
 
 /**
  * Created by Simon&Nicholas on 7/28/2017.
