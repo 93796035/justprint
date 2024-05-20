@@ -2,21 +2,20 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.Date;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.ui.panel.TablesPanel;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
-import org.cas.client.platform.bar.pannel.TablesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.bar.uibeans.TableButton;
+
+import java.util.Date;
 
 public class Cmd_AddBill implements  SamActionListener {
 
@@ -40,12 +39,12 @@ public class Cmd_AddBill implements  SamActionListener {
 	
 	@Override
 	public void onClick(View v) {
-		TablesPanel tablesPanel = (TablesPanel)BarFrame.instance.panels[0];
+		TablesPanel tablesPanel = (TablesPanel) BarFrame.instance.panels[0];
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		//save unsaved output
     	billPanel.unsavedItemsCheck();
-    	DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
+    	DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
     	if(BarOption.isCounterMode()){
     		//create a new table(which is considered as bill in counter mode).
     		int billIdx = BarOption.popKitchenBillIdx();
@@ -53,8 +52,7 @@ public class Cmd_AddBill implements  SamActionListener {
     		TableButton tableToggleButton = new TableButton();
     		tableToggleButton.setText(String.valueOf(billIdx));
     		tableToggleButton.setTableName(String.valueOf(billIdx));
-    		ActionEvent evt = new ActionEvent(tableToggleButton, 0, null);
-       	 	tablesPanel.actionPerformed(evt);
+       	 	tablesPanel.onClick(tableToggleButton);
     	}else {
     		BarFrame.instance.addNewBillInCurTable();
     	}

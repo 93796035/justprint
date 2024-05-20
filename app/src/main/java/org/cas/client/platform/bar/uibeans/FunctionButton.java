@@ -60,7 +60,7 @@ public class FunctionButton extends Button implements ISButton{
 
 	@Override
 	public void addActionListener(SamActionListener actionListener) {
-		//super.addActionListener(actionListener);
+		super.setOnClickListener(actionListener);
 		this.actionListener = actionListener;
 		actionListener.setSourceBtn(this);
 	}

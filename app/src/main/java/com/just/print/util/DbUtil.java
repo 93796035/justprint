@@ -3,8 +3,8 @@ package com.just.print.util;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Base64;
 
-import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
+import com.just.print.app.Options;
 
 import org.cas.client.platform.casutil.L;
 import org.json.JSONObject;
@@ -27,7 +27,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.Date;
 
-public class DBUtil.getCursorString(rs, extends Thread{
+public class DbUtil extends Thread{
 
     final private static String DATABASE_NAME_PREFFIX = "JustPrinter_"; //data/user/0/com.just.print/databases/ ; /data/data/com.whatsapp/databases/msgstore.db
     private static File file = null;
@@ -44,7 +44,7 @@ public class DBUtil.getCursorString(rs, extends Thread{
         //https://developer.android.com/reference/android/content/Context.html#getDatabasePath(java.lang.String)
         file = AikaPos.instance.getApplicationContext().getDatabasePath(DATABASE_NAME_PREFFIX + Options.getShopName(AikaPos.instance.getApplicationContext()));
         if (file.exists()){
-            DBUtil.getCursorString(rs, util = new DBUtil.getCursorString(rs,();
+            DbUtil util = new DbUtil();
             if(license != null && license.length() > 0){
                 util.license = license;
             }
@@ -77,10 +77,6 @@ public class DBUtil.getCursorString(rs, extends Thread{
             configurations.append(",").append(Options.keysToSync[i]).append(":").append(Options.getCustomData(Options.keysToSync[i]));
         }
         return configurations.substring(1);
-    }
-
-    public static void main(String args[]){
-        new DBUtil.getCursorString(rs,().run();
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.just.print.app.BaseFragment;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.action.Cmd_CombineAll;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintUtil;
 import org.cas.client.platform.bar.uibeans.ArrowButton;
@@ -135,7 +136,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                FunctionToggleButton billButton = new FunctionToggleButton(String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "contactID")));
+                FunctionToggleButton billButton = new FunctionToggleButton(String.valueOf(DBUtil.getCursorInt(rs, "contactID")));
 //                billButton.setMargin(new Insets(0, 0, 0, 0));
 
                 BillPanel billPanel = new BillPanel(this, billButton);
@@ -143,7 +144,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 billPanel.initContent();
                 billPanels.add(billPanel);
 
-                latestID = DBUtil.getCursorString(rs,.getCursorInt(rs, "contactID");
+                latestID = DBUtil.getCursorInt(rs, "contactID");
             }
         } catch (Exception e) {
             L.e("BillListPane", "Unexpected exception when init the bill panels." + sql, e);
@@ -256,7 +257,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             StringBuilder sql = new StringBuilder("select toltalprice from output where id = ").append(BarFrame.instance.curDish.getOutputID());
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                outputTotalPrice = DBUtil.getCursorString(rs,.getCursorInt(rs, "toltalprice");
+                outputTotalPrice = DBUtil.getCursorInt(rs, "toltalprice");
                 break;
             }
             rs.close();// 关闭
@@ -416,17 +417,17 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                int num = DBUtil.getCursorString(rs,.getCursorInt(rs,"OUTPUT.AMOUNT");
+                int num = DBUtil.getCursorInt(rs,"OUTPUT.AMOUNT");
                 if(num < BarOption.MaxQTY) {
                     continue;
                 }
                 Dish dish = new Dish();
                 dish.setNum(num);
-                dish.setDiscount(DBUtil.getCursorString(rs,.getCursorInt(rs,"discount"));//
-                dish.setId((long)DBUtil.getCursorString(rs,.getCursorInt(rs,"PRODUCTID"));
-                dish.setModification(DBUtil.getCursorString(rs,.getCursorString(rs, "OUTPUT.CONTENT"));//
-                dish.setOutputID(DBUtil.getCursorString(rs,.getCursorInt(rs,"OUTPUT.ID"));//
-                dish.setTotalPrice(DBUtil.getCursorString(rs,.getCursorInt(rs,"OUTPUT.TOLTALPRICE"));
+                dish.setDiscount(DBUtil.getCursorInt(rs,"discount"));//
+                dish.setId((long)DBUtil.getCursorInt(rs,"PRODUCTID"));
+                dish.setModification(DBUtil.getCursorString(rs, "OUTPUT.CONTENT"));//
+                dish.setOutputID(DBUtil.getCursorInt(rs,"OUTPUT.ID"));//
+                dish.setTotalPrice(DBUtil.getCursorInt(rs,"OUTPUT.TOLTALPRICE"));
                 dishes.add(dish);
             }
         }catch(Exception exp) {
@@ -508,7 +509,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             sql.append(" order by id");//if order by billIndex, then "9" will be the last one. so should order by id
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if (rs != null && rs.moveToFirst()) {
-                num = DBUtil.getCursorString(rs,.getCursorInt(rs, "billIndex");
+                num = DBUtil.getCursorInt(rs, "billIndex");
             }
         } catch (Exception exp) {
             L.d("BillListPane.getANewBillNumber", "found no bill on an already opened table.");

@@ -17,6 +17,8 @@ import com.just.print.db.expand.DaoExpand;
 
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
+
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
 
@@ -104,25 +106,25 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             while (rs.moveToNext()) {
                 TableButton tableToggleButton = new TableButton();
 
-                int id = DBUtil.getCursorString(rs,.getCursorInt(rs, "ID");
-                int type = DBUtil.getCursorString(rs,.getCursorInt(rs, "type");
+                int id = DBUtil.getCursorInt(rs, "ID");
+                int type = DBUtil.getCursorInt(rs, "type");
 
                 //check if it's already created and added into tableAry.
                 //because a table contains split bills, then there will be more than one records, and the total should counts the total on all the bills.
                 if(tableIds.contains(id)) {
-                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs,.getCursorString(rs, "name"));
-                    tableToggleButton.setTotal(tableToggleButton.getTotal() + DBUtil.getCursorString(rs,.getCursorInt(rs, "total"));
+                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs, "name"));
+                    tableToggleButton.setTotal(tableToggleButton.getTotal() + DBUtil.getCursorInt(rs, "total"));
 
                     tableToggleButton.setTypeStatusAndName(
-                            DBUtil.getCursorString(rs,.getCursorString(rs, "openTime"),
-                            DBUtil.getCursorString(rs,.getCursorString(rs, "createTime"),
+                            DBUtil.getCursorString(rs, "openTime"),
+                            DBUtil.getCursorString(rs, "createTime"),
                             type,
-                            DBUtil.getCursorString(rs,.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorString(rs,.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
-                            DBUtil.getCursorString(rs,.getCursorString(rs, "Name"));
+                            DBUtil.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
+                            DBUtil.getCursorString(rs, "Name"));
                     //THIS ROUND STOP HERE!!!!!!!!
                     continue;
                 }else {
-                    tableToggleButton.setTotal(DBUtil.getCursorString(rs,.getCursorInt(rs, "total"));
+                    tableToggleButton.setTotal(DBUtil.getCursorInt(rs, "total"));
                 }
 
                 //check if it's the logo table.

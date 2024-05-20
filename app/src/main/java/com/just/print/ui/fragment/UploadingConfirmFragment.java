@@ -7,6 +7,7 @@ import com.just.print.R;
 import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.util.DBUtil.getCursorString(rs,;
+import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 
@@ -40,7 +41,7 @@ public class UploadingConfirmFragment extends BaseFragment{
             showToast("Please activate the application first.");
             return;
         }
-        DBUtil.getCursorString(rs,.syncDbOntoServer(license, Options.getShopName(),true);
+        DbUtil.syncDbOntoServer(license, Options.getShopName(),true);
         getActivity().finish();
     }
 

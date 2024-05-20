@@ -53,6 +53,14 @@ public class Dish {
     private List<M2M_SaleRecordMark> m2M_SaleRecordMarkList;
 
     // KEEP FIELDS - put your custom fields here
+    public Dish(int id, String category, String name1, String name2, String name3, String printerStr) {
+        setId((long)id);
+        setCategoryId(Long.valueOf(category));
+        setLanguage(0, name1);
+        setLanguage(1, name2);
+        setLanguage(2, name3);
+        setPrinterIds(printerStr);
+    }
     // KEEP FIELDS END
 
     public Dish() {

@@ -21,6 +21,8 @@ import com.just.print.db.bean.User;
 import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
+
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
@@ -105,7 +107,7 @@ public class LoginDlg extends DialogFragment {
 //            String[] tSuperKey = new String[tmpPos];
 //            tmpPos = 0;
 //            while (rs.moveToNext()) {
-//                tSuperKey[tmpPos] = DBUtil.getCursorString(rs,.getCursorString(rs,"type");
+//                tSuperKey[tmpPos] = DBUtil.getCursorString(rs,"type");
 //                tmpPos++;
 //            }
 //            rs.close();// 关闭
@@ -184,7 +186,7 @@ public class LoginDlg extends DialogFragment {
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sqlBuilder.toString(), null);
                     if(rs.moveToNext()) {
-                        lastPrintTime = DBUtil.getCursorString(rs,.getCursorString(rs, "ANNIVERSARY");
+                        lastPrintTime = DBUtil.getCursorString(rs, "ANNIVERSARY");
                         if(lastPrintTime != null && lastPrintTime.length() > 10) {
                             if(lastPrintTime.indexOf(".") > 0) {
                                 lastPrintTime = lastPrintTime.substring(0, lastPrintTime.indexOf(".") );
@@ -205,10 +207,10 @@ public class LoginDlg extends DialogFragment {
                         //if didn't found any batch, means never print yet, set current batchIdx to 1
                         while(rs.moveToNext()) {
                             if(LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
-                                curBatchIdx = String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "id") + 1);
+                                curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "id") + 1);
                                 break;
                             }else {	// if it's super admin, then no need to show "next" batch number.
-                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs,"id"))).concat(",");
+                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs,"id"))).concat(",");
                             }
                         }
                     }catch(Exception exp) {

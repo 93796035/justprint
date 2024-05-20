@@ -69,7 +69,7 @@ public class SalesPanel extends PicturePane{
         billPanel.updateTotalArea(false);
 
         billPanel.unsavedItemsCheck();
-        DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);
+        DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);
     }
 
     //Todo: Maybe it's safe to delete this method, because I think no need to touch ouputs.
