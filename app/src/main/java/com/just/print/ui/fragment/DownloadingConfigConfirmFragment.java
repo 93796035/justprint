@@ -7,15 +7,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
-import com.just.print.util.DBUtil.getCursorString(rs,;
+import com.just.print.app.Options;
 import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XViewByID;
-
-import org.cas.client.platform.bar.model.DBUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

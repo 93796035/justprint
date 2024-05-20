@@ -15,7 +15,7 @@ import com.just.print.sys.model.AbsModel;
 import com.just.print.sys.model.QueryShopResult;
 import com.just.print.ui.panel.OrderFragmentActivity;
 import com.just.print.util.Base64Util;
-import com.just.print.util.DBUtil.getCursorString(rs,;
+import com.just.print.util.DbUtil;
 import com.just.print.util.DbUtil;
 import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;

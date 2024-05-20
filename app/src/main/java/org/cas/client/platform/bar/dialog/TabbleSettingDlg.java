@@ -215,12 +215,12 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //            	TableButton tableToggleButton = new TableButton();
 //
 //    			tableToggleButton.setBackground(bg);
-//            	tableToggleButton.setId(DBUtil.getCursorString(rs,.getCursorInt(rs,"ID"));
-//            	int x = DBUtil.getCursorString(rs,.getCursorInt(rs,"posX");
-//        		int y = DBUtil.getCursorString(rs,.getCursorInt(rs,"posY");
-//        		int w = DBUtil.getCursorString(rs,.getCursorInt(rs,"width");
-//        		int h = DBUtil.getCursorString(rs,.getCursorInt(rs,"height");
-//        		int type = DBUtil.getCursorString(rs,.getCursorInt(rs,"type");
+//            	tableToggleButton.setId(DBUtil.getCursorInt(rs,"ID"));
+//            	int x = DBUtil.getCursorInt(rs,"posX");
+//        		int y = DBUtil.getCursorInt(rs,"posY");
+//        		int w = DBUtil.getCursorInt(rs,"width");
+//        		int h = DBUtil.getCursorInt(rs,"height");
+//        		int type = DBUtil.getCursorInt(rs,"type");
 //        		if(x > getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99)) {
 //        			x = getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99);
 //        		}
@@ -241,7 +241,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //        			h = 99;
 //        		}
 //        		tableToggleButton.setBounds(x, y, w, h);
-//            	tableToggleButton.setTypeStatusAndName("", "", DBUtil.getCursorString(rs,.getCursorInt(rs,"type"), 0, DBUtil.getCursorString(rs,"Name"));		//it's rectanglee or round?
+//            	tableToggleButton.setTypeStatusAndName("", "", DBUtil.getCursorInt(rs,"type"), 0, DBUtil.getCursorString(rs,"Name"));		//it's rectanglee or round?
 //            	//tableToggleButton.setMargin(new Insets(0, 0, 0, 0));
 //    			tableToggleButton.addActionListener(this);
 //    			tableToggleButton.addMouseMotionListener(new MouseMotionListener(){

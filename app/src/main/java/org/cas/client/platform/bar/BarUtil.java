@@ -13,7 +13,7 @@ import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.uibeans.MoreButton;
 import org.cas.client.platform.cascustomize.CustOpts;
 //import org.cas.client.platform.bar.model.DBConsts;
-//import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+//import org.cas.client.platform.bar.model.DBUtil;
 //import org.cas.client.platform.bar.model.Dish;
 //import org.cas.client.platform.bar.pannel.BarFrame;
 //import org.cas.client.platform.bar.pannel.BillPanel;
@@ -112,15 +112,15 @@ public class BarUtil {
 //                rs.beforeFirst();
 //                int tIdx = 0;
 //                while (rs.moveToNext()) {
-//                    tIDAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"ID");
+//                    tIDAry[tIdx] = DBUtil.getCursorInt(rs,"ID");
 //                    tCodeAry[tIdx] = DBUtil.getCursorString(rs,"Code");
-//                    tPriceAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Price");
+//                    tPriceAry[tIdx] = DBUtil.getCursorInt(rs,"Price");
 //                    tMnemonicAry[tIdx] = DBUtil.getCursorString(rs,"Mnemonic");
 //                    tSubjectAry[tIdx] = DBUtil.getCursorString(rs,"Subject");
-//                    tStoreAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Store");
+//                    tStoreAry[tIdx] = DBUtil.getCursorInt(rs,"Store");
 //                    tUnitAry[tIdx] = DBUtil.getCursorString(rs,"Unit");
 //                    tCategoryAry[tIdx] = DBUtil.getCursorString(rs,"Category");
-//                    tCostAry[tIdx] = DBUtil.getCursorString(rs,.getCursorInt(rs,"Cost");
+//                    tCostAry[tIdx] = DBUtil.getCursorInt(rs,"Cost");
 //                    tContentAry[tIdx] = DBUtil.getCursorString(rs,"Content");
 //                    tIdx++;
 //                }
@@ -702,7 +702,7 @@ public class BarUtil {
 //            //which was generated when opening table (the creatTime is same as open time)
 //            String comment = billPanel.getComment();
 //            boolean hasModificationInPrice = comment.contains(BillPanel.SERVICEFEE) || comment.contains(BillPanel.DISCBILL);
-//            boolean hasItemAddedOrRemoved = DBUtil.getCursorString(rs,.isThereItemAddOrRemoved(billPanel.getBillID(), true);
+//            boolean hasItemAddedOrRemoved = DBUtil.isThereItemAddOrRemoved(billPanel.getBillID(), true);
 //            if(hasItemAddedOrRemoved || hasModificationInPrice) {
 //                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
 //                    billPanel.expireAndReGenerateBill(null);
@@ -710,12 +710,12 @@ public class BarUtil {
 //                // if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
 //                //the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
 //                //not confuse about the outputs（ which was actually generated before first time print) should belongs to which bill.
-//                DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
+//                DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
 //                //have to call this, because need to report mev there's a change. but inside, may not print bill out on printer.
 //                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
 //                    billPanel.setComment(billPanel.getComment() + PrintService.TRANSACTION_ONLY);
 //                    PrintService.printTemporaryBill(billPanel, billPanel.getOrderedDishAry(), true);
-//                    DBUtil.getCursorString(rs,.cleanTemporalInfoInComment(billPanel, comment);
+//                    DBUtil.cleanTemporalInfoInComment(billPanel, comment);
 //                }
 //            }
 //        }

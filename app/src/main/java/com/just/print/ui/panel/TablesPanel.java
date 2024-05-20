@@ -23,7 +23,7 @@ import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
 
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.action.Cmd_CancelAll;
 import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 import org.cas.client.platform.bar.model.DBConsts;
@@ -138,22 +138,22 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 tableIds.add(id);
                 tableToggleButton.setId(id);				//ID
 
-                tableToggleButton.setStatus(DBUtil.getCursorString(rs,.getCursorInt(rs, "s1"));
-                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs,.getCursorString(rs, "nname"));
+                tableToggleButton.setStatus(DBUtil.getCursorInt(rs, "s1"));
+                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs, "nname"));
 
                 //for table mode, setTypeStatusAndName should go after setting bounds, because depends on the status, it might change the size.
                 RelativeLayout.LayoutParams params = tableToggleButton.setTypeStatusAndName(
-                        DBUtil.getCursorString(rs,.getCursorString(rs, "openTime"),
-                        DBUtil.getCursorString(rs,.getCursorString(rs, "createTime"),
+                        DBUtil.getCursorString(rs, "openTime"),
+                        DBUtil.getCursorString(rs, "createTime"),
                         type,
-                        DBUtil.getCursorString(rs,.getCursorInt(rs, "s2"),
-                        DBUtil.getCursorString(rs,.getCursorString(rs, "Name"));
+                        DBUtil.getCursorInt(rs, "s2"),
+                        DBUtil.getCursorString(rs, "Name"));
 
                 //location
-                int x = DBUtil.getCursorString(rs,.getCursorInt(rs, "posX");
-                int y = DBUtil.getCursorString(rs,.getCursorInt(rs, "posY");
-                int w = DBUtil.getCursorString(rs,.getCursorInt(rs, "width");
-                int h = DBUtil.getCursorString(rs,.getCursorInt(rs, "height");
+                int x = DBUtil.getCursorInt(rs, "posX");
+                int y = DBUtil.getCursorInt(rs, "posY");
+                int w = DBUtil.getCursorInt(rs, "width");
+                int h = DBUtil.getCursorInt(rs, "height");
 //                if(BarOption.isCounterMode()) {
 //                    if(tableToggleButton.getStatus() == 0){
 //                        x = -100;
@@ -196,7 +196,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 ((RelativeLayout)mRoot).addView(tableToggleButton, params);
 
                 //dsp_Index is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
-                if(DBUtil.getCursorString(rs,.getCursorInt(rs, "dsp_Index") < 0) {
+                if(DBUtil.getCursorInt(rs, "dsp_Index") < 0) {
                     tableToggleButton.setOnTouchListener(this);
 //                    tableToggleButton.addMouseMotionListener(this);
                 }
@@ -325,8 +325,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     BarFrame.instance.switchMode(2);
                 } else { // if it's not empty
                     if(num == 1 && CustOpts.custOps.getValue("FrobiddenQuickEnter") == null) {	// display the only bill
-                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs,.getCursorString(rs, "customerNumber"));
-                        BarFrame.instance.setCurBillID(DBUtil.getCursorString(rs,.getCursorInt(rs, "id"));
+                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs, "customerNumber"));
+                        BarFrame.instance.setCurBillID(DBUtil.getCursorInt(rs, "id"));
                         BarFrame.instance.hideBillIdx(true);
                         BarFrame.instance.switchMode(2);
                     }else { //or switch to the bill panel to show all the bills.

@@ -9,7 +9,7 @@ import com.just.print.R;
 import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.dao.SaleRecordDao;
-import com.just.print.util.DBUtil.getCursorString(rs,;
+import com.just.print.util.DbUtil;
 import com.just.print.util.DbUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;

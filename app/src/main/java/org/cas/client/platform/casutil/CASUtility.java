@@ -1654,7 +1654,7 @@ public class CASUtility {
 //            ResultSet rs = stmt.executeQuery(sql);
 //            rs.beforeFirst();
 //            while (rs.moveToNext())
-//                tAmount = DBUtil.getCursorString(rs,.getCursorInt(rs,"Type");
+//                tAmount = DBUtil.getCursorInt(rs,"Type");
 //            rs.close();
 //
 //            // 拿当前日期和上次计数启动的启动日期相比,如果不同,则增加一次启动次数到数据库和Config文件中.

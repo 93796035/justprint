@@ -22,19 +22,17 @@ import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
 
-import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.casutil.L;
-
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.dialog.statistics.ReportDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst0;
 import org.cas.client.platform.bar.i18n.BarDlgConst1;
 import org.cas.client.platform.bar.i18n.BarDlgConst2;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -197,7 +195,7 @@ public class LoginDlg extends DialogFragment {
                     L.e("LoginDlg ", "Exception when ertiving ANNIVERSARY." + sqlBuilder, exp);
                 }//so, by default, we set time to currentday(customized start time + current time), while if this user has printed before, then we set start time to last print time.
 
-                ArrayList<Bill> salesAndRefunds = ReportDlg.queryRelevantCompleteAndRefundBillList(lastPrintTime, endTime, false);
+                List<Bill> salesAndRefunds = ReportDlg.queryRelevantCompleteAndRefundBillList(lastPrintTime, endTime, false);
                 if (salesAndRefunds.size() > 0) {
                     String curBatchIdx = "1";
                     //get current batchIdx

@@ -62,10 +62,10 @@ public class Cmd_GiftCard implements SamActionListener {
             	rs.beforeFirst();
                 tmpPos = 0;
                 rs.moveToNext();
-                int id = DBUtil.getCursorString(rs,.getCursorInt(rs,"id");
-                int category = DBUtil.getCursorString(rs,.getCursorInt(rs,"style");
+                int id = DBUtil.getCursorInt(rs,"id");
+                int category = DBUtil.getCursorInt(rs,"style");
                 String productCode = DBUtil.getCursorString(rs,"IP");
-                int value = DBUtil.getCursorString(rs,.getCursorInt(rs,"langType");
+                int value = DBUtil.getCursorInt(rs,"langType");
                 if(value <=0) {
                     JOptionPane.showMessageDialog(null, BarFrame.consts.InvalidCoupon());
                     return;

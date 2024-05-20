@@ -29,7 +29,7 @@ import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.action.Cmd_OpenDrawer;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -169,16 +169,16 @@ public class PayDlg extends DialogFragment
             rs.moveToNext();
         	
         	//save old values
-            oldTotal = DBUtil.getCursorString(rs,.getCursorInt(rs,"total");
-        	oldCashReceived =DBUtil.getCursorString(rs,.getCursorInt(rs,"cashReceived");
-        	oldDebitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"debitReceived");
-        	oldVisaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"visaReceived");
-        	oldMasterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs,"masterReceived");
+            oldTotal = DBUtil.getCursorInt(rs,"total");
+        	oldCashReceived =DBUtil.getCursorInt(rs,"cashReceived");
+        	oldDebitReceived = DBUtil.getCursorInt(rs,"debitReceived");
+        	oldVisaReceived = DBUtil.getCursorInt(rs,"visaReceived");
+        	oldMasterReceived = DBUtil.getCursorInt(rs,"masterReceived");
         	oldOtherReceived = DBUtil.getCursorString(rs,"otherReceived");
         	
-        	oldCashback = DBUtil.getCursorString(rs,.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
-        	oldTip = DBUtil.getCursorString(rs,.getCursorInt(rs,"tip");
-        	oldStatus = DBUtil.getCursorString(rs,.getCursorInt(rs,"status");
+        	oldCashback = DBUtil.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
+        	oldTip = DBUtil.getCursorInt(rs,"tip");
+        	oldStatus = DBUtil.getCursorInt(rs,"status");
         	//cashReceived
         	onSrcCashReceived = oldCashReceived + oldCashback;
         	if(oldStatus < DBConsts.ORIGINAL) {
@@ -568,7 +568,7 @@ public class PayDlg extends DialogFragment
 		}else {
 			billPanel.setComment(comment + PrintService.LATEST_PAY + " : " + inputedContent + "\n");
 		}
-		DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", billPanel.getComment());
+		DBUtil.updateBill(billPanel.getBillID(), "comment", billPanel.getComment());
 	}
 
 	private void showChangeDlg(BillPanel billPanel, int left) {
@@ -577,10 +577,10 @@ public class PayDlg extends DialogFragment
 		//if the last pay was with cash, then might need cash back (no change, paid with a "50" bill)
 		if(getTitle().equals(BarFrame.consts.EnterCashPayment())){
 			changeDlg.setTitle(BarFrame.consts.Change());
-			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "cashback", oldCashback + left);
+			DBUtil.updateBill(billPanel.getBillID(), "cashback", oldCashback + left);
 		}else {
 			changeDlg.setTitle(BarFrame.consts.Tip());
-			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "TIP", oldTip - left);	//otherwise, treated as tip. the tip in DB are positive, because it means we earned money.
+			DBUtil.updateBill(billPanel.getBillID(), "TIP", oldTip - left);	//otherwise, treated as tip. the tip in DB are positive, because it means we earned money.
 		}
 		
 		changeDlg.setVisible(true);		//note: is't a non-modal dialog.
@@ -591,7 +591,7 @@ public class PayDlg extends DialogFragment
 		try {
 			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
 			if(rs.moveToNext()) {
-				return DBUtil.getCursorString(rs,.getCursorInt(rs,"status");
+				return DBUtil.getCursorInt(rs,"status");
 			}
 		}catch(Exception e) {
 			ErrorUtil.write(e);

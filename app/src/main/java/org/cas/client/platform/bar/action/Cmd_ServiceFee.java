@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -62,7 +62,7 @@ public class Cmd_ServiceFee implements SamActionListener {
      				: Math.round(Float.valueOf(curContent) * 100);
 
 			String newComment = billPanel.getComment() + BillPanel.SERVICEFEE + billPanel.serviceFee + "@";
-	     	DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", newComment);
+	     	DBUtil.updateBill(billPanel.getBillID(), "comment", newComment);
 	     	billPanel.setComment(newComment);
      		billPanel.updateTotalArea(true);
      		

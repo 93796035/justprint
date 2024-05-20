@@ -12,7 +12,7 @@ import com.just.print.db.bean.Dish;
 import com.stupid.method.reflect.StupidReflect;
 
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;

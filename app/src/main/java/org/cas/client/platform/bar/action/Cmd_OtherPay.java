@@ -67,7 +67,7 @@ public class Cmd_OtherPay implements SamActionListener {
     	try {
     		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
             rs.moveToNext();
-            oldTotal = DBUtil.getCursorString(rs,.getCursorInt(rs,"total");
+            oldTotal = DBUtil.getCursorInt(rs,"total");
     	}catch(Exception exp) {
     		ErrorUtil.write(exp);
     	}

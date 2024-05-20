@@ -26,7 +26,7 @@ import com.just.print.util.JOptionPane;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
@@ -139,7 +139,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			if (rs.moveToNext()) {
-				String lastPrintTime = DBUtil.getCursorString(rs,.getCursorString(rs,"ANNIVERSARY");
+				String lastPrintTime = DBUtil.getCursorString(rs,"ANNIVERSARY");
 				if (lastPrintTime != null && lastPrintTime.length() > 10) {
 					startTime = lastPrintTime;
 					if (startTime.indexOf(".") > 0) {
@@ -158,10 +158,10 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				curBatchIdx = "1";
 				while (rs.moveToNext()) {
 					if (LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
-						curBatchIdx = String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "id") + 1);
+						curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "id") + 1);
 						break;
 					} else {
-						curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "id"))).concat(",");
+						curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs, "id"))).concat(",");
 					}
 				}
 			} catch (Exception exp) {
@@ -191,7 +191,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 					try {
 						Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 						rs.moveToNext();
-						startTime = DBUtil.getCursorString(rs,.getCursorString(rs,"version");
+						startTime = DBUtil.getCursorString(rs,"version");
 						endTime = BarUtil.df.format(new Date());
 						updateTimeFields(startTime, endTime);
 						updatePreviewContent();
@@ -203,9 +203,9 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 					try {
 						Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 						rs.moveToNext();
-						endTime = DBUtil.getCursorString(rs,.getCursorString(rs,"version");
+						endTime = DBUtil.getCursorString(rs,"version");
 						rs.moveToNext();
-						startTime = DBUtil.getCursorString(rs,.getCursorString(rs,"version");
+						startTime = DBUtil.getCursorString(rs,"version");
 						updateTimeFields(startTime, endTime);
 						updatePreviewContent();
 					} catch (Exception exp) {
@@ -369,23 +369,23 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			while (rs.moveToNext()) {
 				Bill bill = new Bill();
-				bill.setId(DBUtil.getCursorString(rs,.getCursorLong(rs, "id"));
-				bill.setCreatedTime(DBUtil.getCursorString(rs,.getCursorString(rs, "createTime"));
-				bill.setTableName(DBUtil.getCursorString(rs,.getCursorString(rs, "tableID"));
-				bill.setCustomerNumber(DBUtil.getCursorString(rs,.getCursorString(rs, "billIndex"));
-				bill.setTotal(DBUtil.getCursorString(rs,.getCursorInt(rs, "total"));
-				bill.setDiscount(DBUtil.getCursorString(rs,.getCursorInt(rs, "discount"));
-				bill.setCashReceived(DBUtil.getCursorString(rs,.getCursorInt(rs, "cashReceived"));
-				bill.setDebitReceived(DBUtil.getCursorString(rs,.getCursorInt(rs, "debitReceived"));
-				bill.setVisaReceived(DBUtil.getCursorString(rs,.getCursorInt(rs, "visaReceived"));
-				bill.setMasterReceived(DBUtil.getCursorString(rs,.getCursorInt(rs, "masterReceived"));
-				bill.setOtherReceived(DBUtil.getCursorString(rs,.getCursorString(rs, "otherReceived"));
-				bill.setTip(DBUtil.getCursorString(rs,.getCursorInt(rs, "tip"));
-				bill.setCashback(DBUtil.getCursorString(rs,.getCursorInt(rs, "cashback"));
-				bill.setStatus(DBUtil.getCursorString(rs,.getCursorInt(rs, "status"));
-				bill.setUserId(DBUtil.getCursorString(rs,.getCursorInt(rs, "employee.nName"));
-				bill.setComment(DBUtil.getCursorString(rs,.getCursorString(rs, "Comment"));
-				bill.setOpenTime(DBUtil.getCursorString(rs,.getCursorString(rs, "OpenTime"));
+				bill.setId(DBUtil.getCursorLong(rs, "id"));
+				bill.setCreatedTime(DBUtil.getCursorString(rs, "createTime"));
+				bill.setTableName(DBUtil.getCursorString(rs, "tableID"));
+				bill.setCustomerNumber(DBUtil.getCursorString(rs, "billIndex"));
+				bill.setTotal(DBUtil.getCursorInt(rs, "total"));
+				bill.setDiscount(DBUtil.getCursorInt(rs, "discount"));
+				bill.setCashReceived(DBUtil.getCursorInt(rs, "cashReceived"));
+				bill.setDebitReceived(DBUtil.getCursorInt(rs, "debitReceived"));
+				bill.setVisaReceived(DBUtil.getCursorInt(rs, "visaReceived"));
+				bill.setMasterReceived(DBUtil.getCursorInt(rs, "masterReceived"));
+				bill.setOtherReceived(DBUtil.getCursorString(rs, "otherReceived"));
+				bill.setTip(DBUtil.getCursorInt(rs, "tip"));
+				bill.setCashback(DBUtil.getCursorInt(rs, "cashback"));
+				bill.setStatus(DBUtil.getCursorInt(rs, "status"));
+				bill.setUserId(DBUtil.getCursorInt(rs, "employee.nName"));
+				bill.setComment(DBUtil.getCursorString(rs, "Comment"));
+				bill.setOpenTime(DBUtil.getCursorString(rs, "OpenTime"));
 				salesAndRefunds.add(bill);
 			}
 			rs.close();
@@ -450,10 +450,10 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 				if (rs.moveToNext()) {
-					String name = DBUtil.getCursorString(rs,.getCursorString(rs,"Name") + " " + DBUtil.getCursorString(rs,.getCursorString(rs,"FName");
-					String taxAccount1 = DBUtil.getCursorString(rs,.getCursorString(rs,"BANKNUMBER");
-					String taxAccount2 = DBUtil.getCursorString(rs,.getCursorString(rs,"SSCNumber");
-					String address = DBUtil.getCursorString(rs,.getCursorString(rs,"ADDRESS");
+					String name = DBUtil.getCursorString(rs,"Name") + " " + DBUtil.getCursorString(rs,"FName");
+					String taxAccount1 = DBUtil.getCursorString(rs,"BANKNUMBER");
+					String taxAccount2 = DBUtil.getCursorString(rs,"SSCNumber");
+					String address = DBUtil.getCursorString(rs,"ADDRESS");
 					if (taxAccount1.length() == 15 && taxAccount2.length() == 16) {
 						int yearFrom = Integer.parseInt(tfdYearFrom.getText().toString());
 						int yearTo = Integer.parseInt(tfdYearTo.getText().toString());
@@ -482,7 +482,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
-				recentLoginTime = DBUtil.getCursorString(rs,.getCursorString(rs,"starttime");
+				recentLoginTime = DBUtil.getCursorString(rs,"starttime");
 			}
 			rs.close();
 		} catch (Exception e) {
@@ -514,9 +514,9 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 //		try {
 //			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //			rs.moveToNext();
-//			docRUT.setDF(DBUtil.getCursorString(rs,.getCursorString(rs,"value"));
-//			docRUT.setNO(DBUtil.getCursorString(rs,.getCursorString(rs,"status"));
-//			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorString(rs,.getCursorInt(rs, "type") / 100.00f));
+//			docRUT.setDF(DBUtil.getCursorString(rs,"value"));
+//			docRUT.setNO(DBUtil.getCursorString(rs,"status"));
+//			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
 //		} catch (SQLException e1) {
 //			L.e("BarOption", "Unexpected exception when getting next order id from db with:" + sql, e1);
 //		}

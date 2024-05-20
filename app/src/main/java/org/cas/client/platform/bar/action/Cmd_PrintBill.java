@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -63,16 +63,16 @@ public class Cmd_PrintBill implements SamActionListener {
 		// if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
 		//the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
 		//not confuse about the outputs(which was actually generated before first time print) should belongs to which bill.
-		DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
+		DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
 		BarFrame.instance.updateOutputStatus(DBConsts.BILL_PRINTED);
 		
 		//no price and item change, means should print a internal bill.
 		String comment = billPanel.getComment();
 		boolean hasModificationInPrice = comment.contains(BillPanel.SERVICEFEE) || comment.contains(BillPanel.DISCBILL);
-		boolean hasItemAddedOrRemoved = DBUtil.getCursorString(rs,.isThereItemAddOrRemoved(billPanel.getBillID(), false);
+		boolean hasItemAddedOrRemoved = DBUtil.isThereItemAddOrRemoved(billPanel.getBillID(), false);
 		PrintService.printTemporaryBill(billPanel, billPanel.getOrderedDishAry(), hasItemAddedOrRemoved || hasModificationInPrice);
         
-		DBUtil.getCursorString(rs,.cleanTemporalInfoInComment(billPanel, comment);
+		DBUtil.cleanTemporalInfoInComment(billPanel, comment);
 		
 		if(BarOption.isCounterMode()) {
     		if(BarOption.stayAfterSave()){

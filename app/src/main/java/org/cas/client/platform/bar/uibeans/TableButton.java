@@ -11,7 +11,7 @@ import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.dialog.TableDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 
@@ -55,7 +55,7 @@ public class TableButton extends Button {
         setOpenTime(openTime);
         setWaiterName(BarFrame.instance.getCurrentUser().getNickName());
 
-        DBUtil.getCursorString(rs,.updateTableStatusInDB(getTableName(), openTime);
+        DBUtil.updateTableStatusInDB(getTableName(), openTime);
         int billId = BarFrame.instance.createAnEmptyBill(getTableName(), openTime, 0, 0);
         BarFrame.instance.setCurBillID(billId);
 

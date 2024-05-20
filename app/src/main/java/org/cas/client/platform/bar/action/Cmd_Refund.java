@@ -12,7 +12,7 @@ import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.dialog.ChangeDlg;
 import org.cas.client.platform.bar.dialog.RefundItemDlg;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -126,7 +126,7 @@ public class Cmd_Refund implements SamActionListener {
         billPanel.expireAndReGenerateBill(null);
     		    		
 		//update the new bill's status in db to be the refund amount, (if we support multi-time refund, next time refund will base on this number).
-		DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "status", refundedLifeTime);
+		DBUtil.updateBill(billPanel.getBillID(), "status", refundedLifeTime);
 		
 		//prepare infomation for customer (bill)
 		PrintService.printRefund(billPanel, - Math.round(toRefundThisTime * 100), BarFrame.instance.getCurBillIndex(), false);
@@ -150,7 +150,7 @@ public class Cmd_Refund implements SamActionListener {
  		try {
  			ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
  		    rs.moveToNext();
- 		 	int cashChange = DBUtil.getCursorString(rs,.getCursorInt(rs,"cashReceived");
+ 		 	int cashChange = DBUtil.getCursorInt(rs,"cashReceived");
  			if(refundAmount < -1 && cashChange > 0 ) {
  				Cmd_OpenDrawer.getInstance().actionPerformed(null);
  			    if(cashChange > 0 - refundAmount) {

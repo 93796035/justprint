@@ -1,6 +1,10 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
 import android.view.View;
+
+import com.just.print.app.AikaPos;
+import com.just.print.db.bean.Dish;
 
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
@@ -8,7 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.model.Dish;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillListPanel;
 import org.cas.client.platform.bar.pannel.BillPanel;
@@ -63,9 +69,8 @@ public class Cmd_CombineAll implements SamActionListener {
 					.append(" and (status is null or status < ").append(DBConsts.COMPLETED).append(")");
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-	            rs.beforeFirst();
 	            while (rs.moveToNext()) {
-	                idxMap.put(DBUtil.getCursorString(rs,.getCursorInt(rs,"id"), DBUtil.getCursorString(rs,.getCursorInt(rs,"billIndex"));
+	                idxMap.put(DBUtil.getCursorInt(rs,"id"), DBUtil.getCursorInt(rs,"billIndex"));
 	            }
 			}catch(Exception exp) {
 				L.e("BillListPanel", "exception when change output back to original bill" + sql, exp);

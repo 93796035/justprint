@@ -27,7 +27,7 @@ import org.cas.client.platform.bar.action.SamActionListener;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.DataSyncService;
 import org.cas.client.platform.bar.net.NetUtil;
 import org.cas.client.platform.bar.print.PrintService;
@@ -132,7 +132,7 @@ public class BillPanel extends BaseFragment
 	//if there's new dish added.... update the total value field of bill record.
 	//and make sure new added dish will be updated with new information.
 	public void billPricesUpdateToDB() {
-		DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(this, 0, null);		//in case if added service fee or discout of bill. ??? so this means, when added discount, will not save to db immediatly?
+		DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);		//in case if added service fee or discout of bill. ??? so this means, when added discount, will not save to db immediatly?
 		initContent();	//always need to initContent, to make sure dish in selection ary has new property. e.g. saved dish should has different color.,
 	}
 
@@ -147,18 +147,18 @@ public class BillPanel extends BaseFragment
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            String opentime = DBUtil.getCursorString(rs,.getCursorString(rs, "opentime");
-        	int cashReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashReceived");
-        	int debitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "debitReceived");
-            int visaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "visaReceived");
-            int masterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "masterReceived");
-            String otherreceived = DBUtil.getCursorString(rs,.getCursorString(rs, "otherreceived");
+            String opentime = DBUtil.getCursorString(rs, "opentime");
+        	int cashReceived = DBUtil.getCursorInt(rs, "cashReceived");
+        	int debitReceived = DBUtil.getCursorInt(rs, "debitReceived");
+            int visaReceived = DBUtil.getCursorInt(rs, "visaReceived");
+            int masterReceived = DBUtil.getCursorInt(rs, "masterReceived");
+            String otherreceived = DBUtil.getCursorString(rs, "otherreceived");
             if(otherreceived == null) {
             	otherreceived = "";
             }
-        	int cashBack = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashback");
-            int tip = DBUtil.getCursorString(rs,.getCursorInt(rs, "tip");
-            int status = DBUtil.getCursorString(rs,.getCursorInt(rs, "status");
+        	int cashBack = DBUtil.getCursorInt(rs, "cashback");
+            int tip = DBUtil.getCursorInt(rs, "tip");
+            int status = DBUtil.getCursorInt(rs, "status");
         
 			//generate a bill in db and update the output with the new bill id
 			String createtime = BarUtil.df.format(new Date());
@@ -166,9 +166,9 @@ public class BillPanel extends BaseFragment
 	            "INSERT INTO bill(createtime, tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment,")
 	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
 				.append(createtime).append("', '")
-	            .append(tableID == null ? DBUtil.getCursorString(rs,.getCursorString(rs, "tableID") : tableID).append("', '")					//table
-	            .append(customerNumber == null ? DBUtil.getCursorString(rs,.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
-	            .append(total < 0 ? DBUtil.getCursorString(rs,.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
+	            .append(tableID == null ? DBUtil.getCursorString(rs, "tableID") : tableID).append("', '")					//table
+	            .append(customerNumber == null ? DBUtil.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
+	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
 	            .append(discount).append(", ")
 	            .append(tip).append(", ")
 	            .append(serviceFee).append(", ")			//currently used for storing service fee -_-!
@@ -189,7 +189,7 @@ public class BillPanel extends BaseFragment
 		   			.append("' and billIndex = '").append(customerNumber).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            return DBUtil.getCursorString(rs,.getCursorInt(rs, "id");
+            return DBUtil.getCursorInt(rs, "id");
 		 }catch(Exception e) {
 			L.e("BillPanel", "exception when cloning current bill record:" + sql,e);
 			return -1;
@@ -237,8 +237,8 @@ public class BillPanel extends BaseFragment
                 	.append(" and CATEGORY = '").append(currentTime).append("'");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 while (rs.moveToNext()) {
-                	dish.setOutputID(DBUtil.getCursorString(rs,.getCursorInt(rs, "id"));
-                	dish.setOrderedTime(DBUtil.getCursorString(rs,.getCursorString(rs, "time"));
+                	dish.setOutputID(DBUtil.getCursorInt(rs, "id"));
+                	dish.setOrderedTime(DBUtil.getCursorString(rs, "time"));
                 }
 		    }
 		}catch(Exception exp) {
@@ -381,11 +381,11 @@ public class BillPanel extends BaseFragment
 				dish.setNum(1);
 				sendDishToKitchen(dish, true);//if billPrinted, means already finished prepare and dish is on table.no need to tell kitchen to stop it.
 				//update current bill is OK, because no bill printed yet. so no need to expire and regenerate a new bill.
-				DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
+				DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
 				//update output number.(because not print temporary bill, so no need to set the out put status to exipired)
-				DBUtil.getCursorString(rs,.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
+				DBUtil.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
 				if(curDish.getNum() == 1) {
-					DBUtil.getCursorString(rs,.updateOutput(dish.getOutputID(), "DELETED", DBConsts.DELETED);
+					DBUtil.updateOutput(dish.getOutputID(), "DELETED", DBConsts.DELETED);
 				}
 				logOperation(-1,DBConsts.SAVED, curDish);
 			}else { //if already billPrinted or refund, add to hashMapForRefund, waiting for confirmation action.
@@ -424,10 +424,10 @@ public class BillPanel extends BaseFragment
 			String comment = getComment();
 			if(getStatus() == DBConsts.BILL_PRINTED && !comment.contains(PrintService.FACTURE_REVISEE)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
 				setComment(comment + PrintService.FACTURE_REVISEE);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.getCursorString(rs,.updateBill(getBillID(), "comment", getComment());
+	    		DBUtil.updateBill(getBillID(), "comment", getComment());
 			}else if(getStatus() == DBConsts.COMPLETED && !comment.contains(ValuePossible.RE_FUND)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
 				setComment(comment + ValuePossible.RE_FUND);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.getCursorString(rs,.updateBill(getBillID(), "comment", getComment());
+	    		DBUtil.updateBill(getBillID(), "comment", getComment());
 			}
 		}
 	}
@@ -1011,36 +1011,36 @@ public class BillPanel extends BaseFragment
 		List<String[]> datas = new ArrayList<>();
 		String[] tValues = new String[4];
 		while (rs.moveToNext()) {
-			int modifiedTime = DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.ARREARAGE");
-			int deleted = DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.DELETED");
+			int modifiedTime = DBUtil.getCursorInt(rs, "OUTPUT.ARREARAGE");
+			int deleted = DBUtil.getCursorInt(rs, "OUTPUT.DELETED");
 			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
 				continue;
 			//BarUtil.df.parse(tableName)
 			}
 			Dish dish = new Dish();
-			dish.setCategoryId(Long.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CATEGORY")));
-			dish.setDiscount(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.discount"));//
-			dish.setDiscount(Integer.valueOf(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.INDEX")));
-			dish.setGst(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.FOLDERID"));
-			dish.setId(DBUtil.getCursorString(rs,.getCursorLong(rs, "PRODUCT.ID"));
-			dish.setName1(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CODE"));
-			dish.setName2(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.MNEMONIC"));
-			dish.setName3(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.SUBJECT"));
-			dish.setModification(DBUtil.getCursorString(rs,.getCursorString(rs, "OUTPUT.CONTENT"));//
-			dish.setNum(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.AMOUNT"));//
-			dish.setOutputID(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.ID"));//
-			dish.setPrice(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.PRICE") / 100.0f);
-			dish.setPrinterIds(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.BRAND"));
-			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.UNIT")));
-			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.PRODUCAREA")));
-			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs,.getCursorString(rs, "PRODUCT.CONTENT")));
-			dish.setQst(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.STORE"));
-			dish.setSize(DBUtil.getCursorString(rs,.getCursorInt(rs, "PRODUCT.COST"));
+			dish.setCategoryId(Long.valueOf(DBUtil.getCursorString(rs, "PRODUCT.CATEGORY")));
+			dish.setDiscount(DBUtil.getCursorInt(rs, "OUTPUT.discount"));//
+			dish.setDiscount(Integer.valueOf(DBUtil.getCursorInt(rs, "PRODUCT.INDEX")));
+			dish.setGst(DBUtil.getCursorInt(rs, "PRODUCT.FOLDERID"));
+			dish.setId(DBUtil.getCursorLong(rs, "PRODUCT.ID"));
+			dish.setName1(DBUtil.getCursorString(rs, "PRODUCT.CODE"));
+			dish.setName2(DBUtil.getCursorString(rs, "PRODUCT.MNEMONIC"));
+			dish.setName3(DBUtil.getCursorString(rs, "PRODUCT.SUBJECT"));
+			dish.setModification(DBUtil.getCursorString(rs, "OUTPUT.CONTENT"));//
+			dish.setNum(DBUtil.getCursorInt(rs, "OUTPUT.AMOUNT"));//
+			dish.setOutputID(DBUtil.getCursorInt(rs, "OUTPUT.ID"));//
+			dish.setPrice(DBUtil.getCursorInt(rs, "PRODUCT.PRICE") / 100.0f);
+			dish.setPrinterIds(DBUtil.getCursorString(rs, "PRODUCT.BRAND"));
+			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.UNIT")));
+			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.PRODUCAREA")));
+			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.CONTENT")));
+			dish.setQst(DBUtil.getCursorInt(rs, "PRODUCT.STORE"));
+			dish.setSize(DBUtil.getCursorInt(rs, "PRODUCT.COST"));
 			dish.setCustomerIndex(billIndex);
-			dish.setOrderedTime(DBUtil.getCursorString(rs,.getCursorString(rs, "OUTPUT.TIME"));	//output time is table's open time. no need to remember output created time.
-			dish.setBillID(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.FOLDERID"));
-			dish.setTotalPrice(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.TOLTALPRICE"));
-			dish.setStatus(DBUtil.getCursorString(rs,.getCursorInt(rs, "OUTPUT.DELETED"));
+			dish.setOrderedTime(DBUtil.getCursorString(rs, "OUTPUT.TIME"));	//output time is table's open time. no need to remember output created time.
+			dish.setBillID(DBUtil.getCursorInt(rs, "OUTPUT.FOLDERID"));
+			dish.setTotalPrice(DBUtil.getCursorInt(rs, "OUTPUT.TOLTALPRICE"));
+			dish.setStatus(DBUtil.getCursorInt(rs, "OUTPUT.DELETED"));
 			dishAry.add(dish);
 			
 			tValues[0] = dish.getDisplayableNumWithX(dish.getNum());
@@ -1093,12 +1093,12 @@ public class BillPanel extends BaseFragment
 
 		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		if(rs.moveToNext()) {
-		    discount = DBUtil.getCursorString(rs,.getCursorInt(rs, "discount");
-		    serviceFee = DBUtil.getCursorString(rs,.getCursorInt(rs, "serviceFee");
-		    tip = DBUtil.getCursorString(rs,.getCursorInt(rs, "tip");
-		    cashback = DBUtil.getCursorString(rs,.getCursorInt(rs, "cashback");
-		    status = DBUtil.getCursorString(rs,.getCursorInt(rs, "status");
-		    comment = DBUtil.getCursorString(rs,.getCursorString(rs, "comment");
+		    discount = DBUtil.getCursorInt(rs, "discount");
+		    serviceFee = DBUtil.getCursorInt(rs, "serviceFee");
+		    tip = DBUtil.getCursorInt(rs, "tip");
+		    cashback = DBUtil.getCursorInt(rs, "cashback");
+		    status = DBUtil.getCursorInt(rs, "status");
+		    comment = DBUtil.getCursorString(rs, "comment");
 		    int pSF = comment.lastIndexOf(SERVICEFEE);
 		    int pDB = comment.lastIndexOf(DISCBILL);
 		    if(pSF > -1) {
@@ -1107,9 +1107,9 @@ public class BillPanel extends BaseFragment
 		    if(pDB > -1) {
 		    	discount = Integer.valueOf(comment.substring(pDB + 9, comment.indexOf("@", pDB)));
 		    }
-		    totalOnBill = DBUtil.getCursorString(rs,.getCursorInt(rs, "total");
-		    createTime = DBUtil.getCursorString(rs,.getCursorString(rs, "createTime");
-		    billID = DBUtil.getCursorString(rs,.getCursorInt(rs, "id");
+		    totalOnBill = DBUtil.getCursorInt(rs, "total");
+		    createTime = DBUtil.getCursorString(rs, "createTime");
+		    billID = DBUtil.getCursorInt(rs, "id");
 		}
 	}
 
@@ -1318,10 +1318,10 @@ public class BillPanel extends BaseFragment
  	    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
  	            rs.moveToNext();
  	        	
- 	            int oldCashReceived =DBUtil.getCursorString(rs,.getCursorInt(rs, "cashReceived");
- 	            int oldDebitReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "debitReceived");
- 	            int oldVisaReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "visaReceived");
- 	            int oldMasterReceived = DBUtil.getCursorString(rs,.getCursorInt(rs, "masterReceived");
+ 	            int oldCashReceived =DBUtil.getCursorInt(rs, "cashReceived");
+ 	            int oldDebitReceived = DBUtil.getCursorInt(rs, "debitReceived");
+ 	            int oldVisaReceived = DBUtil.getCursorInt(rs, "visaReceived");
+ 	            int oldMasterReceived = DBUtil.getCursorInt(rs, "masterReceived");
  	        	
  	            //clean cashback and tip first, and clean status at the same time.
  	        	//set status = 0 immediatly when refund is covered by received money, in case another receive can also cover the refund, will be minus twice.
@@ -1382,7 +1382,7 @@ public class BillPanel extends BaseFragment
  		 	    status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
 	 		}else if(status < DBConsts.COMPLETED){
 	 			//when splitting a bill in billPrinted status. new generated bill should be changed to saved status 
-	 			DBUtil.getCursorString(rs,.updateBill(newBillID, "status", DBConsts.SAVED);
+	 			DBUtil.updateBill(newBillID, "status", DBConsts.SAVED);
 	 		}
 	 		//NOTE:following changing will not affect the interface when reopenning a completed bill from SaleRecordDlg.
    			//tip must be able to set to 0.

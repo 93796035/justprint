@@ -21,7 +21,7 @@ import com.just.print.ui.fragment.LoginDlg;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 
@@ -100,7 +100,7 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
-				int id = DBUtil.getCursorString(rs,.getCursorInt(rs, "id");
+				int id = DBUtil.getCursorInt(rs, "id");
 				sql = "update evaluation set endtime = '" + BarUtil.df.format(new Date()) + "' where id = " + id;
 				AikaPos.db.execSQL(sql);
 			} else {

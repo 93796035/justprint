@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
 import org.cas.client.platform.bar.pannel.SalesPanel;
@@ -48,7 +48,7 @@ public class Cmd_Send implements SamActionListener {
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		billPanel.unsavedItemsCheck();
-		DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
+		DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
 		
     	if(BarOption.isCounterMode()) {
     		if(!BarOption.stayAfterSave()) {

@@ -8,7 +8,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.model.Dish;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
@@ -58,7 +58,7 @@ public class Cmd_SplitBill implements  SamActionListener {
 		}
 		
 		billPanel.unsavedItemsCheck();	//print
-		DBUtil.getCursorString(rs,.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);		//save ??shall we update the time (the third parameter)?
+		DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);		//save ??shall we update the time (the third parameter)?
 		
 		if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
 			if(JOptionPane.showConfirmDialog(BarFrame.instance, 

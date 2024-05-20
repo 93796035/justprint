@@ -25,7 +25,7 @@ import com.just.print.util.JOptionPane;
 import com.stupid.method.reflect.StupidReflect;
 
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 
 import java.util.ArrayList;

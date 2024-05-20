@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.model.DBUtil.getCursorString(rs,;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.pannel.BillPanel;
@@ -79,7 +79,7 @@ public class Cmd_DiscBill implements SamActionListener {
 			
 			billPanel.discount = discount > originalSubtotal  ? originalSubtotal : discount;
 			String newComment = billPanel.getComment() + BillPanel.DISCBILL + Math.round(billPanel.discount) + "@";
-			DBUtil.getCursorString(rs,.updateBill(billPanel.getBillID(), "comment", newComment);
+			DBUtil.updateBill(billPanel.getBillID(), "comment", newComment);
 			billPanel.setComment(newComment);
 			billPanel.updateTotalArea(true);
 			
