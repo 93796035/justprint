@@ -34,10 +34,10 @@ public class Cmd_ServiceFee implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 //		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.ServiceFee());
- 		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.ServiceFeeNotice());
+// 		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.ServiceFeeNotice());
 		BarFrame.numberPanelDlg.setBtnSource(null);
  		BarFrame.numberPanelDlg.setFloatSupport(true);
- 		BarFrame.numberPanelDlg.setPercentSupport(true);
+// 		BarFrame.numberPanelDlg.setPercentSupport(true);
  		
 // 		BarFrame.numberPanelDlg.setModal(true);
 		BarFrame.numberPanelDlg.reLayout();

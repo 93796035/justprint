@@ -1,6 +1,5 @@
 package com.just.print.db.bean;
 
-import com.just.print.app.BarFrame;
 import com.just.print.db.dao.DaoSession;
 import de.greenrobot.dao.DaoException;
 
@@ -167,26 +166,6 @@ public class CustomizedRule {
     }
 
     // KEEP METHODS - put your custom methods here
-    public float getActionPrice() {
-        if(action >= 60) {
-            return action;
-        }else {
-            //get the price of the dishes
-            String[] ids = content.split(",");
-            int totalPrice = 0;
-            for(String id : ids) {
-                for(Dish dish : BarFrame.menuPanel.getDishAry()) {
-                    if(id.equals(String.valueOf(dish.getId()))) {
-                        totalPrice += dish.getPrice();
-                        break;
-                    }
-                }
-            }
-            //then calculate the discount price.
-            return Math.round(Float.valueOf(totalPrice * action) / 100f);
-        }
-    }
-
     // KEEP METHODS END
 
 }

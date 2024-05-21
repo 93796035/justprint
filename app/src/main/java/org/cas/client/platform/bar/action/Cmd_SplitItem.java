@@ -7,6 +7,7 @@ import com.just.print.db.bean.Dish;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.util.JOptionPane;
 
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
 
@@ -58,7 +59,7 @@ public class Cmd_SplitItem implements SamActionListener {
 				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.NoBillSeleted());
 				return;
 			}
-			Dish.splitOutput(BarFrame.instance.curDish, selectedPanels.size() + 1, null); // update the num and totalprice of curDish
+			DBUtil.splitOutput(BarFrame.instance.curDish, selectedPanels.size() + 1, null); // update the num and totalprice of curDish
 			for (BillPanel billPanel : selectedPanels) { // insert new output with other billID
 				int billIndex = Integer.valueOf(billPanel.billButton.getText());
 				//generate a bill for each new occupied panel, incase there's discount info need to set into it.
@@ -73,7 +74,7 @@ public class Cmd_SplitItem implements SamActionListener {
 				}
 				Dish dish = BarFrame.instance.curDish.clone();
 				dish.setBillID(billPanel.getBillID());
-				Dish.splitOutput(dish, selectedPanels.size() + 1, billPanel.billButton.getText());
+				DBUtil.splitOutput(dish, selectedPanels.size() + 1, billPanel.billButton.getText());
 			}
 
 			BarFrame.instance.curDish = null;

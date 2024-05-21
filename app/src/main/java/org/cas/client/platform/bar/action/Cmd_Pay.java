@@ -50,7 +50,7 @@ public class Cmd_Pay implements SamActionListener {
 			BarFrame.payDlg.updateBill(billPanel.getBillID());
 		}
 		//show dialog-------------------------------------
- 		BarFrame.payDlg.setFloatSupport(true);
+// 		BarFrame.payDlg.setFloatSupport(true);
 
 		String txtOnButton = ((FunctionButton)v).getText();
 // 		if(txtOnButton.equals(BarFrame.consts.CASH())) {

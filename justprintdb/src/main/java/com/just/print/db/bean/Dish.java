@@ -1,17 +1,9 @@
 package com.just.print.db.bean;
 
-import android.database.DatabaseUtils;
-
-import com.just.print.app.AikaPos;
-import com.just.print.app.BarFrame;
 import com.just.print.db.dao.DaoSession;
 import com.just.print.db.dao.DishDao;
 import com.just.print.db.dao.M2M_MenuPrintDao;
 import com.just.print.db.dao.M2M_SaleRecordMarkDao;
-import com.just.print.ui.fragment.LoginDlg;
-
-import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.casutil.L;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -289,21 +281,6 @@ public class Dish {
     }
 
     // KEEP METHODS - put your custom methods here
-    public void changeOutputStatusInDB(int status) {
-        if(getOutputID() < 0) {
-            return;
-        }
-        setStatus(status);
-
-        StringBuilder sql = new StringBuilder("update output set deleted = ").append(status)
-                .append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000))
-                .append(" where id = ").append(getOutputID());
-        try {
-            AikaPos.db.execSQL(sql.toString());
-        } catch (Exception exp) {
-            L.e("Dish", "exception when exec sql："+sql, exp);
-        }
-    }
     public int getOutputID() {
         return outputID;
     }
@@ -312,51 +289,7 @@ public class Dish {
         this.outputID = outputID;
     }
 
-    public static int createOutput(Dish dish, String billIndex, String createTime) {
-        return createSplitedOutput(dish, billIndex, 1, createTime);
-    }
 
-    public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {
-        // 使用PreparedStatement替代Statement以提高性能和安全性
-
-        StringBuilder sql = new StringBuilder("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, EMPLOYEEID, TIME, CATEGORY, FOLDERID) VALUES (")
-           .append("'").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("',") // SUBJECT
-           .append("'").append(billIndex).append("',") // CONTACTID
-           .append(dish.getId()).append(",") // PRODUCTID
-           .append(dish.getNum()).append(",") // AMOUNT
-           .append(dish.getPrice() * splitRate).append(",") // TOLTALPRICE
-           .append(dish.getDiscount() * splitRate).append("',") // DISCOUNT
-           .append("'").append(dish.getModification()).append("',") // CONTENT
-           .append(LoginDlg.USERID).append(",") // EMPLOYEEID
-           .append("'").append(BarFrame.instance.valOpenTime.getText()).append("',") // TIME
-           .append("'").append(createdTime != null ? createdTime : dish.getOrderedTime()).append("',")// CATEGORY
-           .append(dish.getBillID()); // FOLDERID
-        AikaPos.db.execSQL(sql.toString()); // 执行插入操作
-        return (int) DatabaseUtils.longForQuery(AikaPos.db, "SELECT last_insert_rowid()", null);
-    }
-
-    public static String getDisplayableNumWithX(int num) {
-        //first pick out the number on 100,0000 and 10000 position
-        return getDisplayableNum(num).append("x").toString();
-    }
-
-    public static StringBuilder getDisplayableNum(int num) {
-        //first pick out the number on 100,0000 and 10000 position
-        int pK = num /(BarOption.MaxQTY * 100);
-        if(num > BarOption.MaxQTY * 100) {
-            num = num %(BarOption.MaxQTY * 100);
-        }
-        int pS = num /BarOption.MaxQTY;
-        if(num > BarOption.MaxQTY) {
-            num = num % BarOption.MaxQTY;
-        }
-        StringBuilder strNum = new StringBuilder(String.valueOf(num));
-        if(pS > 0)
-            strNum.append("/").append(pS);
-        if(pK > 0)
-            strNum.append("/").append(pK);
-        return strNum;
-    }
     //none saving fields-----------------------------------------
     private int num = 1;
     private float discount;
@@ -490,67 +423,6 @@ public class Dish {
         dish.setTotalPrice(totalPrice);
         dish.setStatus(status);
         return dish;
-    }
-
-    public static void splitOutputList(ArrayList<Dish> selectdDishAry, int splitAmount, String billIndex, int billID) {
-        for(int i = 0; i < selectdDishAry.size(); i++) {
-            Dish dish = selectdDishAry.get(i);
-            if(billID > 0)
-                dish.setBillID(billID);
-            splitOutput(dish, splitAmount, billIndex, dish.getBillID());
-        }
-    }
-
-    public static void splitOutput(Dish dish, int splitAmount, String billIndex) {
-        splitOutput(dish, splitAmount, billIndex, 0);
-    }
-
-    public static void splitOutput(Dish dish, int splitAmount, String billIndex, int billId) {
-        int num = dish.getNum();			//current amount
-        //first pick out the number on 100,0000 and 10000 position
-        int pK = num /(BarOption.MaxQTY * 100);
-        if(num > BarOption.MaxQTY * 100) {
-            num = num %(BarOption.MaxQTY * 100);
-        }
-        int pS = num /BarOption.MaxQTY;
-        if(num > BarOption.MaxQTY) {
-            num = num % BarOption.MaxQTY;
-        }
-        //calculate the new rate of dividing price, and the new num to update into the db.
-        float splitRate = (float) 1.0 / splitAmount;	//default division rate.
-        int pX = splitAmount * BarOption.MaxQTY;
-
-        //check the new split number should be added onto pS or pK.
-        if(pS > 0) {	//while if it's already a float, then reset the division rate.
-            //dont' need ot do it as the total price is not price anymore, now we save final pirce in total price. splitRate = splitRate / pS;
-            num += pS * BarOption.MaxQTY ;		//if more than one time division, put the number on higher position.
-            pX *= 100;
-        }
-        if(pK > 0) {
-            //splitRate = splitRate / pK;
-            num += pK * BarOption.MaxQTY * 100;
-            pX *= 100;
-        }
-        num += pX;
-        if(billIndex == null) {		//updating the original output.
-            StringBuilder sql = new StringBuilder("update output set amount = ").append(num)
-                    .append(", category = ").append(dish.getBillID())
-                    .append(", TOLTALPRICE = ").append(dish.getTotalPrice() * splitRate)
-                    .append(", discount = ").append(dish.getDiscount() * splitRate)
-                    .append(" where id = ").append(dish.getOutputID());
-            try {
-                AikaPos.db.execSQL(sql.toString());
-            } catch (Exception exp) {
-                L.e("Dish ", "splitOutput" + sql, exp);
-            }
-        }else {						//creating a splited one.
-            dish.setNum(num);
-            createSplitedOutput(dish, billIndex, splitRate, null);
-        }
-    }
-    //create new outputs.
-    public static void splitOutputList(ArrayList<Dish> selectdDishAry, int splitAmount, String billIndex) {
-        splitOutputList(selectdDishAry, splitAmount, billIndex, 0);
     }
     // KEEP METHODS END
 

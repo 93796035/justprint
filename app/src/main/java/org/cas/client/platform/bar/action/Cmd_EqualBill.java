@@ -10,6 +10,7 @@ import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.FunctionButton;
 import org.cas.client.platform.bar.uibeans.ISButton;
@@ -50,10 +51,10 @@ public class Cmd_EqualBill implements SamActionListener {
 		}
 		BarFrame.numberPanelDlg.setBtnSource((FunctionButton)o);
 		BarFrame.numberPanelDlg.setFloatSupport(false);
-		BarFrame.numberPanelDlg.setPercentSupport(false);
+//		BarFrame.numberPanelDlg.setPercentSupport(false);
 //		BarFrame.numberPanelDlg.setModal(true);
 		BarFrame.numberPanelDlg.reLayout();
-		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.QTYNOTICE());
+//		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.QTYNOTICE());
 //		BarFrame.numberPanelDlg.setVisible(o.isSelected());
 		if(NumberPanelDlg.confirmed) {
 			int num = Integer.valueOf(NumberPanelDlg.curContent);
@@ -68,7 +69,7 @@ public class Cmd_EqualBill implements SamActionListener {
 			}
 			
 			//split into {num} bills. each dish's number and price will be divided by {num}.
-			Dish.splitOutputList(panel.getOrderedDishAry(), num, null);//the third parameter is null, means update existing outputs
+			DBUtil.splitOutputList(panel.getOrderedDishAry(), num, null);//the third parameter is null, means update existing outputs
 			//update existing bill.
 			int curBillId = billListPanel.getCurBillPanel().getBillID();
 			if(curBillId > 0) {
@@ -100,7 +101,7 @@ public class Cmd_EqualBill implements SamActionListener {
 				for (Dish dish : panel.getOrderedDishAry()) {
 					tDishAry.add(dish.clone());
 				}
-				Dish.splitOutputList(tDishAry, num, String.valueOf(billIndex), id);
+				DBUtil.splitOutputList(tDishAry, num, String.valueOf(billIndex), id);
 			}
 		}
 		billListPanel.initContent();

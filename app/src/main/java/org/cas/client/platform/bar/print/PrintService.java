@@ -1539,7 +1539,7 @@ public class PrintService{
             
             //NOTE: the number could be bigger than 10000.
             //number and price:
-            StringBuilder numberAndPrice = new StringBuilder(" ").append(Dish.getDisplayableNumWithX(d.getNum()))
+            StringBuilder numberAndPrice = new StringBuilder(" ").append(DBUtil.getDisplayableNumWithX(d.getNum()))
             		.append(BarUtil.formatMoney(d.getTotalPrice()/d.getNum()/100f));
             
             sb.append(numberAndPrice);
@@ -2391,7 +2391,7 @@ public class PrintService{
                 content.append("  ").append(product);
                 
                 int i = DBUtil.getCursorInt(rs,"Output.amount");
-                String displayableNum = Dish.getDisplayableNum(i).toString();
+                String displayableNum = DBUtil.getDisplayableNum(i).toString();
                 content.append(BarUtil.generateString(3 - displayableNum.length(), " ")).append(displayableNum);
                 
                 float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"Output.toltalPrice") / 100.0));

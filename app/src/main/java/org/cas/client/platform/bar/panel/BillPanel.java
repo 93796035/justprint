@@ -224,7 +224,7 @@ public class BillPanel extends BaseFragment
 		    for (Dish dish : dishes) {
 		    	String curBillIndex = BarFrame.instance.getCurBillIndex();
 		    	String currentTime = BarUtil.df.format(new Date());
-		    	Dish.createOutput(dish, curBillIndex, currentTime);	//at this moment, the num should have not been splitted.
+		    	DBUtil.createOutput(dish, curBillIndex, currentTime);	//at this moment, the num should have not been splitted.
 		        //in case some store need to stay in the interface after clicking the send button. 
                 StringBuilder sql = new StringBuilder("Select id, time from output where SUBJECT = '")
                     .append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
@@ -607,7 +607,7 @@ public class BillPanel extends BaseFragment
 						Dish dish = getOrderedDishAry().get(selectedRow);
 						removeFromSelection(selectedRow);
 						if(dish.getOutputID() > -1) {	//if already saved, then check if there's a refTo information in comment, if yes, means this output belongs to a printed bill. should be put into void.
-							dish.changeOutputStatusInDB(comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the output is just saved and send to
+							DBUtil.changeOutputStatusInDB(dish, comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the output is just saved and send to
 						} 																												//kitchen, not appeared in previous bill, then just change it to deleted.
 						//update array second.
 					}
@@ -716,7 +716,7 @@ public class BillPanel extends BaseFragment
 		while(copyOfRules.size() > 0) {	//note: can not use while(copyOfRules.size() > 0), because 
 			CustomizedRule rule = copyOfRules.get(0);
 			if(ruleSatisfied(rule, copyOfSelection)) {	//all contained in current selection.
-				discount += rule.getActionPrice();			// add the action of the rule into the discount.
+				discount += DBUtil.getActionPrice(rule);			// add the action of the rule into the discount.
 				//@note: should not remove in this case, because satisfied rule could be used many times.
 			}else {
 				copyOfRules.remove(rule);				// when a rule not satisfied, the rule will be removed from list.
@@ -757,7 +757,7 @@ public class BillPanel extends BaseFragment
 		for (Integer ruleId : ruleIds) {
 			for(CustomizedRule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
 				if(ruleId == rule.getId().intValue()) {
-					discount -= rule.getActionPrice();
+					discount -= DBUtil.getActionPrice(rule);
 					break;
 				}
 			}
@@ -1043,7 +1043,7 @@ public class BillPanel extends BaseFragment
 			dish.setStatus(DBUtil.getCursorInt(rs, "OUTPUT.DELETED"));
 			dishAry.add(dish);
 			
-			tValues[0] = dish.getDisplayableNumWithX(dish.getNum());
+			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
 			
 			tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
 
@@ -1224,7 +1224,7 @@ public class BillPanel extends BaseFragment
 				//clone and expire old output, modify the  new output.
 				Dish originalDish = originalDishes.get(dish.getOutputID());
 				if(originalDish != null) {
-					int newOutputId = Dish.createOutput(originalDish, BarFrame.instance.getCurBillIndex(), originalDish.getOrderedTime());
+					int newOutputId = DBUtil.createOutput(originalDish, BarFrame.instance.getCurBillIndex(), originalDish.getOrderedTime());
 					//为啥dish中记录的是要退还de钱，不是还剩下的钱呢？可能是为了打印时方便？现在为了算出来剩余的钱给新生成的output，必须做些调整：
 					sql = new StringBuilder("update output set amount = ").append(originalDish.getNum())
 							.append(", toltalprice = ").append(originalDish.getTotalPrice())
@@ -1234,13 +1234,13 @@ public class BillPanel extends BaseFragment
 							.append("' where id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 					//create ouput records specially for the decreased items, make them status as voided, so they can appear in the report.
-					newOutputId = Dish.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
+					newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
 							.append("' where id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 				}else {
-					int newOutputId = Dish.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
+					int newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
 							.append("' where id = ").append(newOutputId);

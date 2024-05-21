@@ -68,10 +68,10 @@ public class Cmd_ChangePrice implements SamActionListener {
 	public void showPriceChangeDlg() {
 		NumberPanelDlg numberPanelDlg = BarFrame.numberPanelDlg;
 //		numberPanelDlg.setTitle(BarFrame.consts.CHANGEPRICE());
-		numberPanelDlg.setNotice(BarFrame.consts.ChangePriceNotice());
+//		numberPanelDlg.setNotice(BarFrame.consts.ChangePriceNotice());
 		numberPanelDlg.setBtnSource(sourceBtn);//pomp up a numberPanelDlg
 		numberPanelDlg.setFloatSupport(true);
-		numberPanelDlg.setPercentSupport(false);
+//		numberPanelDlg.setPercentSupport(false);
 //		numberPanelDlg.setModal(false);
 		
 		if(sourceBtn == null) {		//when added a "change price dish" onto the billPanel frome menu panel, will show dlg with null as sourcebtn.

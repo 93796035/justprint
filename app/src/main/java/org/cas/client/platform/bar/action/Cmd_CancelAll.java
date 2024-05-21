@@ -8,6 +8,7 @@ import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
 
@@ -55,7 +56,7 @@ public class Cmd_CancelAll implements SamActionListener {
 			for (int i = orderedDishAry.size() - 1; i > lastBilledRow; i--) {
 				Dish dish = orderedDishAry.get(i);
 				if(dish.getOutputID() > 0) {
-					dish.changeOutputStatusInDB(DBConsts.DELETED);
+					DBUtil.changeOutputStatusInDB(dish, DBConsts.DELETED);
 					sendedDishes.add(dish);
 				}
 				orderedDishAry.remove(i);

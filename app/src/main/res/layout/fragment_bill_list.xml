@@ -15,7 +15,7 @@
             android:id="@+id/btnLeft"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:text="<<"
+            android:text="&lt;&lt;"
             android:enabled="false" />
 
         <View
@@ -29,7 +29,7 @@
             android:id="@+id/btnRight"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:text=">>"
+            android:text="&gt;&gt;"
             android:enabled="false" />
     </LinearLayout>
 
