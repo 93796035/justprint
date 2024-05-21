@@ -47,6 +47,9 @@ package org.cas.client.platform.bar.web_srm;
 //import java.util.*;
 //import java.util.concurrent.*;
 
+import android.database.Cursor;
+
+import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
@@ -1129,15 +1132,15 @@ public class MevUtils {
 			 }
 		}
 	}
-//
-//	public static boolean isBillIdAlreayInMevBatch(int billID) {
-//		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where id = ").append(billID);
-//		try {
-//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-//			return rs.moveToNext();
-//		}catch(Exception exp) {
-//			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
-//		}
-//		return false;
-//	}
+
+	public static boolean isBillIdAlreayInMevBatch(int billID) {
+		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where id = ").append(billID);
+		try {
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+			return rs.moveToNext();
+		}catch(Exception exp) {
+			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
+		}
+		return false;
+	}
 }

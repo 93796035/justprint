@@ -2,27 +2,21 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.BillListPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillListPanel;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.TablesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
-import org.cas.client.platform.bar.print.PrintUtil;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.bar.web_srm.MevUtils;
-import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Cmd_PrintAll implements SamActionListener {
 
@@ -47,7 +41,7 @@ public class Cmd_PrintAll implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 		
-		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
+		BillListPanel billListPanel = (BillListPanel) BarFrame.instance.panels[1];
 		
 		ArrayList<BillPanel> unclosedBillPanels = billListPanel.gatherAllUnclosedBillPanels();
 		for (BillPanel billPanel : unclosedBillPanels) {
@@ -92,7 +86,7 @@ public class Cmd_PrintAll implements SamActionListener {
 	    			billPanel.setStatus(DBConsts.BILL_PRINTED);
 	    			billPanel.initContent();
 	    		} else {//if not set to stay (in current table), move to next table.... 
-	    			((TablesPanel)BarFrame.instance.panels[0]).switchToOtherTable();
+//	    			((TablesPanel)BarFrame.instance.panels[0]).switchToOtherTable();
 	    		}
 		    } else {
 		    	BarFrame.instance.switchMode(0); //switch interface to mode 0(table selection interface)

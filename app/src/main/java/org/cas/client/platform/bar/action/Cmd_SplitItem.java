@@ -3,19 +3,14 @@ package org.cas.client.platform.bar.action;
 import android.view.View;
 
 import com.just.print.app.BarFrame;
+import com.just.print.db.bean.Dish;
+import com.just.print.ui.panel.BillListPanel;
+import com.just.print.util.JOptionPane;
 
-import java.awt.event.ActionEvent;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-
-import org.cas.client.platform.bar.model.Dish;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillListPanel;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
+
+import java.util.List;
 
 public class Cmd_SplitItem implements SamActionListener {
 
@@ -38,8 +33,7 @@ public class Cmd_SplitItem implements SamActionListener {
 	}
 	
 	@Override
-	public void onClick(View v) {
-		this.sourceBtn = (FunctionToggleButton)e.getSource();
+	public void onClick(View sourceBtn) {
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
 		
 		if(sourceBtn.isSelected()) {//select

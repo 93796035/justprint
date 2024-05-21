@@ -293,6 +293,7 @@ public class LoginDlg extends DialogFragment {
     }
 
     private static LoginDlg instance = null;
+    private LoginDlg(){}
     public static LoginDlg getInstance(){
         if(instance == null){
             instance = new LoginDlg();

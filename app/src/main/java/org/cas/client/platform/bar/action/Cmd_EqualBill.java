@@ -2,22 +2,20 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.db.bean.Dish;
+import com.just.print.ui.panel.BillListPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.model.Dish;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillListPanel;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
+import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.bar.uibeans.FunctionButton;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
+
+import java.util.ArrayList;
 
 public class Cmd_EqualBill implements SamActionListener {
 
@@ -40,10 +38,9 @@ public class Cmd_EqualBill implements SamActionListener {
 	}
 	
 	@Override
-	public void onClick(View v) {
-		FunctionToggleButton o = (FunctionToggleButton)e.getSource();
+	public void onClick(View o) {
 		//splite bill eually
-		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
+		BillListPanel billListPanel = (BillListPanel) BarFrame.instance.panels[1];
 		
 		BillPanel panel = billListPanel.getCurBillPanel();
 		if(panel == null) {
@@ -51,13 +48,13 @@ public class Cmd_EqualBill implements SamActionListener {
 			o.setSelected(false);
 			return;
 		}
-		BarFrame.numberPanelDlg.setBtnSource(o);
+		BarFrame.numberPanelDlg.setBtnSource((FunctionButton)o);
 		BarFrame.numberPanelDlg.setFloatSupport(false);
 		BarFrame.numberPanelDlg.setPercentSupport(false);
-		BarFrame.numberPanelDlg.setModal(true);
+//		BarFrame.numberPanelDlg.setModal(true);
 		BarFrame.numberPanelDlg.reLayout();
 		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.QTYNOTICE());
-		BarFrame.numberPanelDlg.setVisible(o.isSelected());
+//		BarFrame.numberPanelDlg.setVisible(o.isSelected());
 		if(NumberPanelDlg.confirmed) {
 			int num = Integer.valueOf(NumberPanelDlg.curContent);
 			if(num < 2) {
@@ -76,11 +73,11 @@ public class Cmd_EqualBill implements SamActionListener {
 			int curBillId = billListPanel.getCurBillPanel().getBillID();
 			if(curBillId > 0) {
 				try {
-					StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(panel.valTotlePrice.getText()) * 100)/num)
+					StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(panel.valTotlePrice.getText().toString()) * 100)/num)
 							.append(", discount = discount/").append(num)
 							.append(", serviceFee = serviceFee/").append(num)
 					.append(" where id = ").append(curBillId);
-					PIMDBModel.getStatement().executeUpdate(sql.toString());
+					AikaPos.db.execSQL(sql.toString());
 					
 					panel.discount /= num;
 					panel.serviceFee /= num;
@@ -97,7 +94,7 @@ public class Cmd_EqualBill implements SamActionListener {
 				//and eventually, if the bill id is not 0, will calculate the service fee and discount into Total.
 				int id = panel.cloneCurrentBillRecord(null,
 						String.valueOf(billIndex),
-						Math.round(Float.valueOf(panel.valTotlePrice.getText()) * 100/num));
+						Math.round(Float.valueOf(panel.valTotlePrice.getText().toString()) * 100/num));
 
 				ArrayList<Dish> tDishAry = new ArrayList<Dish>();
 				for (Dish dish : panel.getOrderedDishAry()) {

@@ -18,7 +18,9 @@ import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
 
+import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
 import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
 
@@ -33,6 +35,7 @@ import org.cas.client.platform.bar.uibeans.TableButton;
 import org.cas.client.platform.cascustomize.CustOpts;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 
 public class TablesPanel extends PicturePane implements View.OnClickListener, View.OnTouchListener{
@@ -357,5 +360,71 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 break;
         }
         return true;
+    }
+
+    public void switchToOtherTable() {
+        if(BarOption.unclosedBillFirst()) {
+            TableButton tblBtn = locateAnUnclosedTable();
+            if(tblBtn != null) {
+                onClick(tblBtn);
+            }else {
+                locateAEmptyTable();
+            }
+        }else {			//if no, create a new table wich next billIdx(will be table id)
+            locateAEmptyTable();
+        }
+    }
+
+    private TableButton locateAnUnclosedTable() {
+        ArrayList<TableButton> btnTables = TablesPanel.btnTables;
+        String curTable = (String)BarFrame.instance.getCmbCurTable().getSelectedItem();
+        TableButton tblBtn = null;
+        for (int i = 0; i < TablesPanel.btnTables.size(); i++) {
+            if(btnTables.get(i).getStatus() > DBConsts.ORIGINAL && !btnTables.get(i).getText().equals(curTable)) {
+                tblBtn = btnTables.get(i);
+                break;
+            }
+        }
+        return tblBtn;
+    }
+
+    private void locateAEmptyTable() {
+        TableButton tblBtn = null;
+        //check if there's an empty bill for each table.
+        for (int i = 0; i < TablesPanel.btnTables.size(); i++) {
+            if(btnTables.get(i).getStatus() == DBConsts.OPENNED ) {
+                String opentime = btnTables.get(i).getOpenTime();
+                String tableName = btnTables.get(i).getTableName();
+                StringBuilder sql = new StringBuilder("select * from Bill where status = 0 and tableId = '")
+                        .append(tableName).append("' and opentime = '").append(opentime).append("'");
+                try {
+                    Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+                    int tmpPos = rs.getCount();
+                    if(tmpPos == 1) {	//if there's no this coupon number in database, then warning and return.
+                        tblBtn = btnTables.get(i);
+                        break;
+                    }
+                }catch(Exception exp) {
+                    L.e("TablesPane", "exception happend when locateAEmptyTable: " + sql, exp);
+                }
+            }
+        }
+
+        if(tblBtn != null) {
+            onClick(tblBtn);
+        }else {
+            createNew();
+        }
+    }
+
+    private void createNew() {
+        int billIdx = BarOption.popKitchenBillIdx();
+        CreateNewOrderAction.makeSureTableExistsAndOpened(String.valueOf(billIdx), BarUtil.df.format(new Date()));
+        TableButton tableToggleButton = new TableButton();
+        tableToggleButton.setText(String.valueOf(billIdx));
+        tableToggleButton.setTableName(String.valueOf(billIdx));
+
+        TablesPanel tablesPanel = (TablesPanel)BarFrame.instance.panels[0];
+        tablesPanel.onClick(tableToggleButton);
     }
 }

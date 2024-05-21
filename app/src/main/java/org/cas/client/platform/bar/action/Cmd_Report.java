@@ -8,19 +8,10 @@ import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
 
-import java.awt.event.ActionEvent;
-import java.sql.ResultSet;
-
-import javax.swing.JOptionPane;
-
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.dialog.statistics.ReportDlg;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
-import org.cas.client.platform.pimmodel.PIMDBModel;
 
 public class Cmd_Report implements SamActionListener {
 
@@ -45,18 +36,16 @@ public class Cmd_Report implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 		if(!BarOption.isSingleUser()) {
-			LoginDlg loginDlg = new LoginDlg(BarFrame.instance);
-			loginDlg.noRefresh = true;
-			loginDlg.setVisible(true);
+			LoginDlg.getInstance().noRefresh = true;
+			LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
 	        if (LoginDlg.PASSED == true) {
-	    		ReportDlg dlg = new ReportDlg(BarFrame.instance);
-	    		dlg.setVisible(true);
+	    		ReportDlg dlg = new ReportDlg();
+//	    		dlg.setVisible(true);
 	        }
 		}else {
 			if(BarOption.isNeedLoginBeforeReport()) {
-				LoginDlg loginDlg = new LoginDlg(BarFrame.instance);
-				loginDlg.noRefresh = true;
-				loginDlg.show();setVisible(true);
+				LoginDlg.getInstance().noRefresh = true;
+				LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
 	            if (LoginDlg.PASSED != true) {
 	            	return;
 	            }
@@ -82,8 +71,8 @@ public class Cmd_Report implements SamActionListener {
             	BarFrame.checkSignIn();
 	    	}
 	            
-			ReportDlg dlg = new ReportDlg(BarFrame.instance);
-    		dlg.setVisible(true);
+			ReportDlg dlg = new ReportDlg();
+//    		dlg.setVisible(true);
 		}
 	}
 }

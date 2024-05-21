@@ -2,16 +2,12 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
-import javax.swing.JOptionPane;
-
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.resource.international.DlgConst;
 
 public class Cmd_Setting implements SamActionListener {
 
@@ -36,16 +32,16 @@ public class Cmd_Setting implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		if(billPanel.getNewDishes().size() > 0) {
-    		if(JOptionPane.showConfirmDialog(BarFrame.instance, 
-    				BarFrame.consts.COMFIRMLOSTACTION(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) != 0) {
+    		if(JOptionPane.showConfirmDialog(BarFrame.instance,
+    				BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
                 return;	
             }else {
     			//call cancel all
-    			Cmd_CancelAll.getInstance().actionPerformed(null);
+//    			Cmd_CancelAll.getInstance().actionPerformed(null);
             }
     	}
 		BarFrame.instance.switchMode(3);

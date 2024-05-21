@@ -2,24 +2,20 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
-import org.cas.client.platform.bar.pannel.TablesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.casutil.ErrorUtil;
-import org.cas.client.platform.pimmodel.PIMDBModel;
-import org.cas.client.resource.international.DlgConst;
+
+import java.util.Date;
 
 public class Cmd_Send implements SamActionListener {
 
@@ -44,7 +40,7 @@ public class Cmd_Send implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		billPanel.unsavedItemsCheck();
@@ -52,17 +48,17 @@ public class Cmd_Send implements SamActionListener {
 		
     	if(BarOption.isCounterMode()) {
     		if(!BarOption.stayAfterSave()) {
-    			((TablesPanel)BarFrame.instance.panels[0]).switchToOtherTable();
+//    			((TablesPanel)BarFrame.instance.panels[0]).switchToOtherTable();
     		}
 	    }else {
 	    	if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
-    			if(JOptionPane.showConfirmDialog(BarFrame.instance, 
-	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) == 0) {
+    			if(JOptionPane.showConfirmDialog(BarFrame.instance,
+	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
 	            	//clean partial input
 	            	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
 	            	sql.append(" where id = ").append(billPanel.getBillID());
 	            	try {
-	        			PIMDBModel.getStatement().executeUpdate(sql.toString());
+	        			AikaPos.db.execSQL(sql.toString());
 	        			salesPanel.partialPaid = false;
 	        		}catch(Exception exp) {
 	        			ErrorUtil.write(exp);

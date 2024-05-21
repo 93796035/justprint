@@ -2,15 +2,12 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
-import javax.swing.JOptionPane;
-
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 
 public class Cmd_QTY implements SamActionListener {
 
@@ -34,18 +31,18 @@ public class Cmd_QTY implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		
- 		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.QTY());
- 		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.QTYNOTICE());
-		BarFrame.instance.numberPanelDlg.setBtnSource(sourceBtn);//pomp up a numberPanelDlg
- 		BarFrame.numberPanelDlg.setFloatSupport(false);
- 		BarFrame.numberPanelDlg.setPercentSupport(false);
- 		BarFrame.numberPanelDlg.setModal(true);
- 		BarFrame.instance.numberPanelDlg.reLayout();
-		//should no record selected, select the last one.
-		BarFrame.instance.numberPanelDlg.setVisible(sourceBtn.isSelected());	//@NOTE: it's not model mode.
+// 		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.QTY());
+// 		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.QTYNOTICE());
+//		BarFrame.instance.numberPanelDlg.setBtnSource(sourceBtn);//pomp up a numberPanelDlg
+// 		BarFrame.numberPanelDlg.setFloatSupport(false);
+// 		BarFrame.numberPanelDlg.setPercentSupport(false);
+// 		BarFrame.numberPanelDlg.setModal(true);
+// 		BarFrame.instance.numberPanelDlg.reLayout();
+//		//should no record selected, select the last one.
+//		BarFrame.instance.numberPanelDlg.setVisible(sourceBtn.isSelected());	//@NOTE: it's not model mode.
 		
 		if(sourceBtn.isSelected()) {
 			try {

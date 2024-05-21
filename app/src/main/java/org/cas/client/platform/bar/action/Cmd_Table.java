@@ -2,12 +2,7 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-
-import org.cas.client.platform.bar.dialog.TabbleSettingDlg;
-import org.cas.client.platform.bar.pannel.BarFrame;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 
 public class Cmd_Table implements SamActionListener {
 
@@ -30,6 +25,6 @@ public class Cmd_Table implements SamActionListener {
 	}
 	@Override
 	public void onClick(View v) {
-		new TabbleSettingDlg(BarFrame.instance).setVisible(true);
+//		new TabbleSettingDlg().setVisible(true);
 	}
 }

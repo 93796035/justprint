@@ -1,22 +1,21 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
 import android.view.View;
+import android.widget.Toast;
 
-import java.awt.event.ActionEvent;
-import java.sql.ResultSet;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.uibeans.FunctionButton;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
 import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
+
+import java.util.Date;
 
 public class Cmd_GiftCard implements SamActionListener {
 
@@ -39,27 +38,32 @@ public class Cmd_GiftCard implements SamActionListener {
 	}
 
 	@Override
-	public void onClick(View v) {
-		
-		FunctionButton o = (FunctionButton)e.getSource();
-		
-		String giftCardNumber  = JOptionPane.showInputDialog(null, BarFrame.consts.Account());
-		if(giftCardNumber == null || giftCardNumber.length() == 0)
+	public void onClick(View o) {
+
+		final String[] giftCardNumber = new String[1];
+		JOptionPane.showInputDialog(null, BarFrame.consts.Account(), new JOptionPane.InputDialogListener() {
+			@Override
+			public void onInputReceived(String input) {
+				giftCardNumber[0] = input;
+			}
+			@Override
+			public void onInputCanceled() {
+				Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
+			}
+		});
+		if(giftCardNumber[0] == null || giftCardNumber[0].length() == 0)
 			return;
 		
-		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 2 and name = '").append(giftCardNumber)
+		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 2 and name = '").append(giftCardNumber[0])
 				.append("' and (status is null or status = 0)");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-			rs.afterLast();
-            rs.relative(-1);
-            int tmpPos = rs.getRow();
+            int tmpPos = rs.getCount();
             if(tmpPos == 0) {	//if there's no this coupon number in database, then warning and return.
             	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidCoupon());
             	return;
             }else {			//if the number is OK.
             	//get out every field of first matching record.
-            	rs.beforeFirst();
                 tmpPos = 0;
                 rs.moveToNext();
                 int id = DBUtil.getCursorInt(rs,"id");
@@ -73,18 +77,18 @@ public class Cmd_GiftCard implements SamActionListener {
                 //show up the payDialog, waiting for user to input money, after confirm, the money should be deduct from the account of this card
                 BarFrame.payDlg.maxInput = (float)(value / 100.0);
                 BarFrame.setStatusMes(BarFrame.consts.CurrentBalanceMsg() + BarFrame.payDlg.maxInput);
-                Cmd_Pay.getInstance().actionPerformed(new ActionEvent(o, 0, ""));
+                Cmd_Pay.getInstance().onClick(o);
                 
                 if (BarFrame.payDlg.inputedContent != null && BarFrame.payDlg.inputedContent.length() > 0) {
                     float newBalance = (float)(value / 100.0) - Float.valueOf(BarFrame.payDlg.inputedContent);
 	                sql = new StringBuilder("update hardware set status = ").append(DBConsts.EXPIRED)
                     		.append(" where id = ").append(id);
-                    PIMDBModel.getStatement().executeUpdate(sql.toString());
-					sql = new StringBuilder("INSERT INTO Hardware (name, category, langType, ip, style, status) VALUES ('").append(giftCardNumber)
+                    AikaPos.db.execSQL(sql.toString());
+					sql = new StringBuilder("INSERT INTO Hardware (name, category, langType, ip, style, status) VALUES ('").append(giftCardNumber[0])
 					    .append("', 2, ").append(Math.round(newBalance * 100)).append(", '")
 					    .append(BarUtil.df.format(new Date())).append("', ").append(LoginDlg.USERID).append(", ")
 					    .append(DBConsts.ORIGINAL).append(")");
-					PIMDBModel.getStatement().executeUpdate(sql.toString());
+					AikaPos.db.execSQL(sql.toString());
                 }
             }
 		}catch(Exception exp) {

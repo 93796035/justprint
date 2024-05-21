@@ -2,11 +2,7 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-
-import org.cas.client.platform.bar.dialog.ReasonDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 
 public class Cmd_VoidReason implements SamActionListener {
 
@@ -30,6 +26,6 @@ public class Cmd_VoidReason implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		new ReasonDlg(true).setVisible(true);
+//		new ReasonDlg(true).setVisible(true);
 	}
 }

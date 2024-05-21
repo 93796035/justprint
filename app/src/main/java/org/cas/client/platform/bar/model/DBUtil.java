@@ -7,6 +7,7 @@ import com.just.print.app.AikaPos;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.casutil.L;
 
 import java.util.Date;
@@ -237,37 +238,37 @@ public class DBUtil {
 //			L.e("BillPane", "Excepioint in updateing bill info:" + sql, e);
 //		}
 //	}
-//
-//	//clean the temporal info from comment.
-//	public static void cleanTemporalInfoInComment(BillPanel billPanel, String comment) {
-//		int pServiceFee = comment.lastIndexOf(BillPanel.SERVICEFEE);
-//		if(pServiceFee > -1) {
-//			int end = comment.indexOf("@", pServiceFee);
-//			comment = comment.substring(0, pServiceFee) + comment.substring(end + 1);
-//		}
-//
-//		int pDiscBill = comment.lastIndexOf(BillPanel.DISCBILL); //pDB might changed because of the removing of SERVICEFEE.
-//		if(pDiscBill > -1) {
-//			int end = comment.indexOf("@", pDiscBill);
-//			comment = comment.substring(0, pDiscBill) + comment.substring(end + 1);
-//		}
-//
-//		int pTransacOnly = comment.lastIndexOf(PrintService.TRANSACTION_ONLY); //pDB might changed because of the removing of SERVICEFEE.
-//		if(pTransacOnly > -1) {
-//			int end = comment.indexOf("@", pTransacOnly);
-//			comment = comment.substring(0, pTransacOnly) + comment.substring(end + 1);
-//		}
-//
-//		DBUtil.updateBill(billPanel.getBillID(), "comment", comment);
-//
-//		//update the bill with new createTime and new comment
-//	    //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system),
-//		DBUtil.updateBill(billPanel.getBillID(), "status", DBConsts.BILL_PRINTED);
-//
-//		//NOTE: if some thing goes wrong for original bill printing, then we will have trouble (btw, it's hard to know if there's problem when printing
-//		//because action will prepare the content and send to the q
-//		billPanel.setStatus(DBConsts.BILL_PRINTED);
-//	}
+
+	//clean the temporal info from comment.
+	public static void cleanTemporalInfoInComment(BillPanel billPanel, String comment) {
+		int pServiceFee = comment.lastIndexOf(BillPanel.SERVICEFEE);
+		if(pServiceFee > -1) {
+			int end = comment.indexOf("@", pServiceFee);
+			comment = comment.substring(0, pServiceFee) + comment.substring(end + 1);
+		}
+
+		int pDiscBill = comment.lastIndexOf(BillPanel.DISCBILL); //pDB might changed because of the removing of SERVICEFEE.
+		if(pDiscBill > -1) {
+			int end = comment.indexOf("@", pDiscBill);
+			comment = comment.substring(0, pDiscBill) + comment.substring(end + 1);
+		}
+
+		int pTransacOnly = comment.lastIndexOf(PrintService.TRANSACTION_ONLY); //pDB might changed because of the removing of SERVICEFEE.
+		if(pTransacOnly > -1) {
+			int end = comment.indexOf("@", pTransacOnly);
+			comment = comment.substring(0, pTransacOnly) + comment.substring(end + 1);
+		}
+
+		DBUtil.updateBill(billPanel.getBillID(), "comment", comment);
+
+		//update the bill with new createTime and new comment
+	    //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system),
+		DBUtil.updateBill(billPanel.getBillID(), "status", DBConsts.BILL_PRINTED);
+
+		//NOTE: if some thing goes wrong for original bill printing, then we will have trouble (btw, it's hard to know if there's problem when printing
+		//because action will prepare the content and send to the q
+		billPanel.setStatus(DBConsts.BILL_PRINTED);
+	}
 
 	public static String getCursorString(Cursor cursor, String columnName) {
 		int columnIndex = cursor.getColumnIndex(columnName);

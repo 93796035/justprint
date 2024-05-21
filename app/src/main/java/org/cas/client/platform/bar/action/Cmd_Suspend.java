@@ -2,24 +2,21 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.casutil.ErrorUtil;
-import org.cas.client.platform.pimmodel.PIMDBModel;
-import org.cas.client.resource.international.DlgConst;
+
+import java.util.Date;
 
 public class Cmd_Suspend implements SamActionListener {
 
@@ -44,14 +41,13 @@ public class Cmd_Suspend implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 
     	if(salesPanel.billPanel.getStatus() > DBConsts.SUSPENDED || salesPanel.billPanel.getStatus() < DBConsts.ORIGINAL) {
 			return;
 		}
-    	if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.confirmSuspend(), DlgConst.DlgTitle,
-	                JOptionPane.YES_NO_OPTION) != 0) {
+    	if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.confirmSuspend(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
 			return;
 		}
     	
@@ -70,7 +66,7 @@ public class Cmd_Suspend implements SamActionListener {
 	                .append(" where SUBJECT = '").append(tableID)
 	                .append("' and time = '").append(BarFrame.instance.valOpenTime.getText())
 	                .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
-			PIMDBModel.getStatement().executeUpdate(sql.toString());
+			AikaPos.db.execSQL(sql.toString());
         }catch(Exception exp) {
         	ErrorUtil.write(exp);
         }

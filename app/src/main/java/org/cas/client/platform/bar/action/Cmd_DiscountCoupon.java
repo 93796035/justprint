@@ -1,23 +1,23 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
 import android.view.View;
+import android.widget.Toast;
 
-import java.awt.event.ActionEvent;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.db.bean.Dish;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
-import javax.swing.JOptionPane;
-
-import org.cas.client.platform.bar.model.Dish;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
+
+import java.util.ArrayList;
 
 public class Cmd_DiscountCoupon implements SamActionListener {
 
@@ -41,32 +41,39 @@ public class Cmd_DiscountCoupon implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
-		
-		String couponCode  = JOptionPane.showInputDialog(null, BarFrame.consts.couponCode());
-		if(couponCode == null || couponCode.length() == 0)
+
+		final String[] couponCode = new String[1];
+		JOptionPane.showInputDialog(null, BarFrame.consts.couponCode(), new JOptionPane.InputDialogListener() {
+			@Override
+			public void onInputReceived(String input) {
+				couponCode[0] = input;
+			}
+			@Override
+			public void onInputCanceled() {
+				Toast.makeText(AikaPos.instance.getApplicationContext(), "Input is invalid.", Toast.LENGTH_SHORT).show();
+			}
+		});
+		if(couponCode[0] == null || couponCode[0].length() == 0)
 			return;
 		
-		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 1 and name = '").append(couponCode)
+		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 1 and name = '").append(couponCode[0])
 				.append("' and (status is null or status = 0)");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-			rs.afterLast();
-            rs.relative(-1);
-            int tmpPos = rs.getRow();
+            int tmpPos = rs.getCount();
             if(tmpPos == 0) {	//if there's no this coupon number in database, then warning and return.
             	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidCoupon());
             	return;
             }else {			//if the number is OK.
             	//get out every field of first matching record.
-            	rs.beforeFirst();
                 tmpPos = 0;
                 rs.moveToNext();
-                int id = DBUtil.getCursorString(rs,.getCursorInt(rs,"id");
-                int category = DBUtil.getCursorString(rs,.getCursorInt(rs,"style");
+                int id = DBUtil.getCursorInt(rs,"id");
+                int category = DBUtil.getCursorInt(rs,"style");
                 String productCode = DBUtil.getCursorString(rs,"IP");
-                int value = DBUtil.getCursorString(rs,.getCursorInt(rs,"langType");
+                int value = DBUtil.getCursorInt(rs,"langType");
                 
                 //check if the coupon can be applied on current bill
                 int langIdx = CustOpts.custOps.getUserLang();
@@ -82,8 +89,8 @@ public class Cmd_DiscountCoupon implements SamActionListener {
                 //if matchedDishesOnBill is null, then apply the coupon to the whole bill.
                 if(matchedDishesOnBill == null) {
                     if(category == 0) {//mean the price is absolute price, not percentage.
-                    	int total = Math.round(Float.valueOf(salesPanel.billPanel.valTotlePrice.getText()) * 100);
-                    	value = value > total ?  total : value;
+//                    	int total = Math.round(Float.valueOf(salesPanel.billPanel.valTotlePrice.getText()) * 100);
+//                    	value = value > total ?  total : value;
                     	salesPanel.discountBill(value);
                     }else {
                     	value = Math.round((salesPanel.billPanel.subTotal + salesPanel.billPanel.discount) * (Float.valueOf(value/100f) / 100f));
@@ -94,7 +101,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
                     //if the total is 0, then close cur bill.
                     if("0.00".equals(salesPanel.billPanel.valTotlePrice.getText())) {
                     	PrintService.printReceipt(salesPanel.billPanel, false, true, true);
-                    	BarFrame.instance.completeCurrentBill();
+//                    	BarFrame.instance.completeCurrentBill();
                     	BarFrame.instance.actionAfterBillClosed(); 
                     }
                 } else {//apply the coupon only to the dish item.
@@ -105,7 +112,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
 					}
                 	//calculate coupon value:
                 	if(category == 0) {//mean the price is absolute price, not persentage.
-                		value = value > mostExpensiveDish.getPrice() ? mostExpensiveDish.getPrice() : value;
+                		value = value > mostExpensiveDish.getPrice() ? (int)(mostExpensiveDish.getPrice() * 100) : value;
                     }else {
                     	value = Math.round(mostExpensiveDish.getPrice() * (Float.valueOf(value) / 100f));
                     }
@@ -115,7 +122,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
                 
             	//update the status of the coupon.
             	sql = new StringBuilder("update hardware set status = 1 where id = ").append(id);
-            	PIMDBModel.getStatement().executeUpdate(sql.toString());
+            	AikaPos.db.execSQL(sql.toString());
             }
 		}catch(Exception exp) {
 			L.e("Redeem Coupon", "exception happend when redeem coupon: " + sql, exp);
@@ -142,7 +149,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
     					|| codes[m].trim().equalsIgnoreCase(BarFrame.menuPanel.categoryNameMetrix[2][i].trim())) {
     				//add all relavant dishes
     		        for (int j = 0; j < dishAry.length; j++) {
-    					if(dishAry[j].getCATEGORY().trim().equals(BarFrame.menuPanel.categoryNameMetrix[0][i].trim())) {
+    					if(dishAry[j].getCategoryId().equals(BarFrame.menuPanel.categoryNameMetrix[0][i].trim())) {
     						appliableDishes.add(dishAry[j].getLanguage(langIdx));
     					}
     		        }

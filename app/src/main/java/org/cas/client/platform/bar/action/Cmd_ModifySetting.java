@@ -2,11 +2,8 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-
 import org.cas.client.platform.bar.dialog.modifyDish.AddModificationDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 
 public class Cmd_ModifySetting implements SamActionListener {
 
@@ -32,6 +29,6 @@ public class Cmd_ModifySetting implements SamActionListener {
 	public void onClick(View v) {
 		AddModificationDlg.getInstance().isSettingMode = true;;
 		AddModificationDlg.getInstance().initContent("", 0);
-		AddModificationDlg.getInstance().setVisible(true);
+//		AddModificationDlg.getInstance().setVisible(true);
 	}
 }

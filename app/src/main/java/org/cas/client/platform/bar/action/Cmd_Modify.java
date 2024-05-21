@@ -2,15 +2,11 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.BarFrame;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.modifyDish.AddModificationDlg;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillListPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 
 public class Cmd_Modify implements SamActionListener {
 
@@ -52,6 +48,6 @@ public class Cmd_Modify implements SamActionListener {
 
 		AddModificationDlg.getInstance().isSettingMode = false;
 		AddModificationDlg.getInstance().initContent(BarFrame.instance.curDish.getModification(), 0);
-		AddModificationDlg.getInstance().setVisible(true);
+//		AddModificationDlg.getInstance().setVisible(true);
 	}
 }

@@ -37,7 +37,7 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 	private TextView lblUnit;
 	private TextView lblUnit2;
 
-	public CheckInOutListDlg() {
+	public CheckInOutListDlg(BarFrame instance) {
 	}
 
 	@Nullable

@@ -2,23 +2,20 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.ui.panel.TablesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
-import org.cas.client.platform.bar.pannel.TablesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.bar.web_srm.MevUtils;
+
+import java.util.Date;
 
 public class Cmd_PrintBill implements SamActionListener {
 
@@ -43,7 +40,7 @@ public class Cmd_PrintBill implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		//check status if it's closed(voided, completed, refunded), do not allow to print.

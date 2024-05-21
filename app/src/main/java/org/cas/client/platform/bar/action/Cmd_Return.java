@@ -1,23 +1,19 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.sql.ResultSet;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
-import org.cas.client.platform.pimmodel.PIMDBModel;
-import org.cas.client.resource.international.DlgConst;
 
 public class Cmd_Return implements SamActionListener {
 
@@ -42,16 +38,16 @@ public class Cmd_Return implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		if(billPanel.getNewDishes().size() > 0) {
-    		if(JOptionPane.showConfirmDialog(BarFrame.instance, 
-    				BarFrame.consts.COMFIRMLOSTACTION(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) != 0) {
+    		if(JOptionPane.showConfirmDialog(BarFrame.instance,
+    				BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
                 return;	
             }else {
     			//call cancel all
-    			Cmd_CancelAll.getInstance().actionPerformed(null);
+    			Cmd_CancelAll.getInstance().onClick(v);
             }
     	}
 
@@ -65,13 +61,13 @@ public class Cmd_Return implements SamActionListener {
     		//when bill saved(dish send to bach end), will do a check and as if waiter want to cancel the paid item.
         	if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
     			if(JOptionPane.showConfirmDialog(BarFrame.instance, 
-	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) == 0) {
+	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
     				//check if the otehr receivement is not null, add back to gift card.
     				//clean partial input
 	            	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
 	            	sql.append(" where id = ").append(billPanel.getBillID());
 	            	try {
-	        			PIMDBModel.getStatement().executeUpdate(sql.toString());
+	        			AikaPos.db.execSQL(sql.toString());
 	        			salesPanel.partialPaid = false;
 	        		}catch(Exception exp) {
 	        			ErrorUtil.write(exp);
@@ -100,13 +96,10 @@ public class Cmd_Return implements SamActionListener {
 					.append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 					.append(" and contactID = ").append(curBill).append(")"); 	//in future version, might need to check the deleted property.
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-			rs.afterLast();
-		    rs.relative(-1);
-		    
-		    if(rs.getRow() == 0) {			//if still empty 
+		    if(rs.getCount() == 0) {			//if still empty
 		    	//no related output, then don't record this bill in db at all.
 		    	sql = new StringBuilder("delete from bill where id = ").append(billID);
-		    	PIMDBModel.getStatement().executeUpdate(sql.toString());
+		    	AikaPos.db.execSQL(sql.toString());
 		    }
 		}catch(Exception exp) {
 			L.e("counter mode returning... ", "error happend when deleting an empty bill with ID:"+ billID, exp);

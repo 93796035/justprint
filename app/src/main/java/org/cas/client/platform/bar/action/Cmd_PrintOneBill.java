@@ -2,15 +2,14 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.BillListPanel;
 
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillListPanel;
-import org.cas.client.platform.bar.pannel.BillPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
+
+import java.util.ArrayList;
 
 public class Cmd_PrintOneBill implements SamActionListener {
 
@@ -35,7 +34,7 @@ public class Cmd_PrintOneBill implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 
-		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
+		BillListPanel billListPanel = (BillListPanel) BarFrame.instance.panels[1];
 		
 		if(!billListPanel.checkColosedBill()) {
 			return;

@@ -5,8 +5,14 @@ import android.database.Cursor;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.PicturePane;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
+import org.cas.client.platform.bar.i18n.BarDlgConst;
+import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.uibeans.ISButton;
@@ -33,6 +39,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -482,23 +489,23 @@ public class BarUtil {
     public static boolean empty(String content) {
         return content == null || content.trim().length() == 0;
     }
-//
-//    public static String getMoneyStrOut(String strDisCount) {
-//        int idx = strDisCount.indexOf("-" + BarOption.getMoneySign());
-//        if(idx < 0) {
-//            return "0";
-//        }
-//
-//        strDisCount = strDisCount.substring(idx + 2);
-//
-//        idx = strDisCount.indexOf(BarDlgConst.delimiter);
-//        if(idx > 0) {
-//            strDisCount = strDisCount.substring(0, idx);
-//        }
-//
-//        return strDisCount;
-//    }
-//
+
+    public static String getMoneyStrOut(String strDisCount) {
+        int idx = strDisCount.indexOf("-" + BarOption.getMoneySign());
+        if(idx < 0) {
+            return "0";
+        }
+
+        strDisCount = strDisCount.substring(idx + 2);
+
+        idx = strDisCount.indexOf(BarDlgConst.delimiter);
+        if(idx > 0) {
+            strDisCount = strDisCount.substring(0, idx);
+        }
+
+        return strDisCount;
+    }
+
 //    //TODO:I'll make the price on interface, so no need to calculate every time, and more friendly for user.
 //    public static float calculateLabelsPrices(String[] labels) {
 //        Float pirce = 0.0f;
@@ -677,50 +684,50 @@ public class BarUtil {
         return finalLabel.toString();
     }
 
-//    //currently called from cmd_pay and cmd_paymethod
-//    public static boolean routineCheckBeforePrintingReceipt() {
-//        SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
-//        BillPanel billPanel = salesPanel.billPanel;
-//        if(billPanel.getOrderedDishAry().size() == 0) {
-//            JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastOneShouldBeSelected());
-//            return false;
-//        }
-//
-//        billPanel.unsavedItemsCheck();	//process the new added items (send output records to printer and db).
-//
-//        //if it's already paid, show comfirmDialog.
-//        if(billPanel.getStatus() >= DBConsts.COMPLETED || billPanel.getStatus() < DBConsts.ORIGINAL) {
-//            if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConfirmPayAgain(), DlgConst.DlgTitle, JOptionPane.YES_NO_OPTION) != 0) {
-//                return false;
-//            }
-//        }
-//
-//        if(!BarOption.isCounterMode()) {
-//            //has price or item change, means should regenerate a temporal bill of billPrinted status before generating the closed bill,
-//            //so the closed bill will always be same with the last temporal bill. while be noticed that here is before printing receipt, while means not like in
-//            //Cmd_printBill, here, no expireAdnReGenerate() has been called, so the bill id is still pointing to the old bill, and, the old bill might be the one
-//            //which was generated when opening table (the creatTime is same as open time)
-//            String comment = billPanel.getComment();
-//            boolean hasModificationInPrice = comment.contains(BillPanel.SERVICEFEE) || comment.contains(BillPanel.DISCBILL);
-//            boolean hasItemAddedOrRemoved = DBUtil.isThereItemAddOrRemoved(billPanel.getBillID(), true);
-//            if(hasItemAddedOrRemoved || hasModificationInPrice) {
-//                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
-//                    billPanel.expireAndReGenerateBill(null);
-//                }
-//                // if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
-//                //the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
-//                //not confuse about the outputs（ which was actually generated before first time print) should belongs to which bill.
-//                DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
-//                //have to call this, because need to report mev there's a change. but inside, may not print bill out on printer.
-//                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
-//                    billPanel.setComment(billPanel.getComment() + PrintService.TRANSACTION_ONLY);
-//                    PrintService.printTemporaryBill(billPanel, billPanel.getOrderedDishAry(), true);
-//                    DBUtil.cleanTemporalInfoInComment(billPanel, comment);
-//                }
-//            }
-//        }
-//        return true;
-//    }
+    //currently called from cmd_pay and cmd_paymethod
+    public static boolean routineCheckBeforePrintingReceipt() {
+        SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
+        BillPanel billPanel = salesPanel.billPanel;
+        if(billPanel.getOrderedDishAry().size() == 0) {
+            JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastOneShouldBeSelected());
+            return false;
+        }
+
+        billPanel.unsavedItemsCheck();	//process the new added items (send output records to printer and db).
+
+        //if it's already paid, show comfirmDialog.
+        if(billPanel.getStatus() >= DBConsts.COMPLETED || billPanel.getStatus() < DBConsts.ORIGINAL) {
+            if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConfirmPayAgain(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
+                return false;
+            }
+        }
+
+        if(!BarOption.isCounterMode()) {
+            //has price or item change, means should regenerate a temporal bill of billPrinted status before generating the closed bill,
+            //so the closed bill will always be same with the last temporal bill. while be noticed that here is before printing receipt, while means not like in
+            //Cmd_printBill, here, no expireAdnReGenerate() has been called, so the bill id is still pointing to the old bill, and, the old bill might be the one
+            //which was generated when opening table (the creatTime is same as open time)
+            String comment = billPanel.getComment();
+            boolean hasModificationInPrice = comment.contains(BillPanel.SERVICEFEE) || comment.contains(BillPanel.DISCBILL);
+            boolean hasItemAddedOrRemoved = DBUtil.isThereItemAddOrRemoved(billPanel.getBillID(), true);
+            if(hasItemAddedOrRemoved || hasModificationInPrice) {
+                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
+                    billPanel.expireAndReGenerateBill(null);
+                }
+                // if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
+                //the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
+                //not confuse about the outputs（ which was actually generated before first time print) should belongs to which bill.
+                DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
+                //have to call this, because need to report mev there's a change. but inside, may not print bill out on printer.
+                if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
+                    billPanel.setComment(billPanel.getComment() + PrintService.TRANSACTION_ONLY);
+                    PrintService.printTemporaryBill(billPanel, billPanel.getOrderedDishAry(), true);
+                    DBUtil.cleanTemporalInfoInComment(billPanel, comment);
+                }
+            }
+        }
+        return true;
+    }
 
     public static String splitStringToThreshold(String text, int targetLength) {
         StringBuilder strings = new StringBuilder();

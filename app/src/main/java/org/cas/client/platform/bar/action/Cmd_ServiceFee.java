@@ -2,18 +2,14 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-
-import javax.swing.JOptionPane;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.panel.SalesPanel;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.resource.international.DlgConst;
 
 public class Cmd_ServiceFee implements SamActionListener {
 
@@ -37,15 +33,15 @@ public class Cmd_ServiceFee implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.ServiceFee());
+//		BarFrame.numberPanelDlg.setTitle(BarFrame.consts.ServiceFee());
  		BarFrame.numberPanelDlg.setNotice(BarFrame.consts.ServiceFeeNotice());
 		BarFrame.numberPanelDlg.setBtnSource(null);
  		BarFrame.numberPanelDlg.setFloatSupport(true);
  		BarFrame.numberPanelDlg.setPercentSupport(true);
  		
- 		BarFrame.numberPanelDlg.setModal(true);
+// 		BarFrame.numberPanelDlg.setModal(true);
 		BarFrame.numberPanelDlg.reLayout();
- 		BarFrame.numberPanelDlg.setVisible(true);
+// 		BarFrame.numberPanelDlg.setVisible(true);
 
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
@@ -67,7 +63,7 @@ public class Cmd_ServiceFee implements SamActionListener {
      		billPanel.updateTotalArea(true);
      		
      	}catch(Exception exp) {
-         	JOptionPane.showMessageDialog(BarFrame.numberPanelDlg, DlgConst.FORMATERROR);
+         	JOptionPane.showMessageDialog(BarFrame.numberPanelDlg, org.cas.client.resources.international.DlgConst.FORMATERROR);
      		return;
      	}
 		

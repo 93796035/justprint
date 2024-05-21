@@ -6,15 +6,8 @@ import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.TablesPanel;
 
-import java.awt.event.ActionEvent;
-
 import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.dialog.TableDlg;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.TablesPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
 
 public class Cmd_AddTable implements SamActionListener {
 
@@ -42,9 +35,8 @@ public class Cmd_AddTable implements SamActionListener {
 		TablesPanel tablesPanel = (TablesPanel) BarFrame.instance.panels[0];
 		
 		if(!BarOption.isSingleUser()) {
-			LoginDlg loginDlg = new LoginDlg(BarFrame.instance);
-			loginDlg.noRefresh = true;
-			loginDlg.setVisible(true);
+			LoginDlg.getInstance().noRefresh = true;
+			LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
             if (LoginDlg.PASSED == true) {
             	BarFrame.checkSignIn();
             	//@note: lowdown a little the level, to enable the admin do sales work.
@@ -55,7 +47,7 @@ public class Cmd_AddTable implements SamActionListener {
             	return;
             }
 		}
-		new TableDlg(null, null).setVisible(true);
+//		new TableDlg(null, null).show(BarFrame.instance.getSupportFragmentManager(), "table_dialog");
 		tablesPanel.initContent();
 	}
 }

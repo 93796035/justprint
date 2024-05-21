@@ -1,26 +1,25 @@
 package org.cas.client.platform.bar.action;
 
+import android.database.Cursor;
 import android.view.View;
 
-import java.awt.event.ActionEvent;
-import java.sql.ResultSet;
-import java.util.Date;
-
-import javax.swing.JButton;
+import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.ui.panel.SalesPanel;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.dialog.PayDlg;
 import org.cas.client.platform.bar.model.DBConsts;
-import org.cas.client.platform.bar.pannel.BarFrame;
-import org.cas.client.platform.bar.pannel.BillPanel;
-import org.cas.client.platform.bar.pannel.SalesPanel;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.uibeans.FunctionButton;
 import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.bar.uibeans.SamActionListener;
-import org.cas.client.platform.cascontrol.dialog.logindlg.LoginDlg;
 import org.cas.client.platform.casutil.ErrorUtil;
-import org.cas.client.platform.pimmodel.PIMDBModel;
+
+import java.util.Date;
 
 public class Cmd_OtherPay implements SamActionListener {
 
@@ -49,7 +48,7 @@ public class Cmd_OtherPay implements SamActionListener {
 			return;
 		}
 
-    	BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
+    	BillPanel billPanel = ((SalesPanel) BarFrame.instance.panels[2]).billPanel;
     	
 		
 		if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
@@ -65,7 +64,7 @@ public class Cmd_OtherPay implements SamActionListener {
 		int oldTotal = 0;
 		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
     	try {
-    		ResultSet rs = PIMDBModel.getReadOnlyStatement().executeQuery(sb.toString());
+    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
             oldTotal = DBUtil.getCursorInt(rs,"total");
     	}catch(Exception exp) {
@@ -84,11 +83,11 @@ public class Cmd_OtherPay implements SamActionListener {
    	    	StringBuilder sql = new StringBuilder("update bill set cashReceived = ").append(oldTotal)
    		   	    	.append(", DEBITRECEIVED = 0, VISARECEIVED = 0, MASTERRECEIVED = 0")
    	    		.append(", createTime = '").append(paidTime)
-	   	    	.append("', otherReceived = '").append(((JButton)e.getSource()).getText())
+	   	    	.append("', otherReceived = '").append(((FunctionButton)v).getText())
 	   	    	.append("', status = ").append(DBConsts.COMPLETED)
 	   	    	.append(", employeeid = ").append(LoginDlg.USERID)
 	   	    	.append(" where id = ").append(billId);
-			PIMDBModel.getStatement().executeUpdate(sql.toString());
+			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.
 			sql = new StringBuilder("update output set deleted = ").append(DBConsts.COMPLETED)
 					.append(" where time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
@@ -99,7 +98,7 @@ public class Cmd_OtherPay implements SamActionListener {
 			}else {
 				sql.append(" and ( deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
 			}
-			PIMDBModel.getStatement().executeUpdate(sql.toString());
+			AikaPos.db.execSQL(sql.toString());
    		}catch(Exception exp) {
 			ErrorUtil.write(exp);
 		}

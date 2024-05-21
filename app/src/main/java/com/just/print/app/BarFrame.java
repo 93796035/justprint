@@ -662,6 +662,29 @@ public class BarFrame extends BaseFragmentActivity {
         }
     }
 
+    public boolean adminAuthentication() {
+        int oldUserType = LoginDlg.getUSERTYPE();
+        int oldID = LoginDlg.USERID;
+        int oldUserLang = LoginDlg.USERLANG;
+        String oldUserName = LoginDlg.USERNAME;
+
+        LoginDlg.getInstance().noRefresh = true;
+        LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+        if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) { // 如果用户选择了确定按钮。
+//Let's change to everything keep the same after the admin authentication.
+//        	valOperator.setText(LoginDlg.USERNAME);
+//            setStatusMes(consts.ADMIN_MODE());
+//the interface will be changed to yellow color for warning.
+//            revalidate();
+            LoginDlg.setUSERTYPE(oldUserType);
+            LoginDlg.USERID = oldID;
+            LoginDlg.USERLANG = oldUserLang;
+            LoginDlg.USERNAME = oldUserName;
+            return true;
+        }
+        return false;
+    }
+
     public int switchMode(int index) {
 //        if(curPanelIdx == 3) {	//if it's switching from setting panel, then ask to do a login.
 //            if(ignoreLogin == false) {
@@ -928,5 +951,18 @@ public class BarFrame extends BaseFragmentActivity {
     }
     public void setShowingAnExpiredBill(boolean isShowingAnExpiredBill) {
         this.isShowingAnExpiredBill = isShowingAnExpiredBill;
+    }
+
+    public void updateOutputStatus(int status){
+        //update status of relevant outputs to be completed.
+        StringBuilder sql = new StringBuilder("update output set deleted = ").append(status)
+                .append(" where subject = '").append(cmbCurTable.getSelectedItem())
+                .append("' and contactID = ").append(getCurBillIndex())
+                .append(" and (deleted is null or deleted < ").append(DBConsts.COMPLETED).append(")");
+        try {
+            AikaPos.db.execSQL(sql.toString());
+        } catch (Exception e) {
+            L.e("BarFrame", "unexpected error occured whenn updating output status.", e);
+        }
     }
 }
