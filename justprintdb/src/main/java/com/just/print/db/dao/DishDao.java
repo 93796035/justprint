@@ -1,6 +1,5 @@
 package com.just.print.db.dao;
 
-import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -8,8 +7,6 @@ import android.database.sqlite.SQLiteStatement;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
-import de.greenrobot.dao.query.Query;
-import de.greenrobot.dao.query.QueryBuilder;
 
 import com.just.print.db.bean.Dish;
 
@@ -39,14 +36,13 @@ public class DishDao extends AbstractDao<Dish, Long> {
         public final static Property PricePomp = new Property(10, Boolean.class, "pricePomp", false, "pricePomp");
         public final static Property MenuPomp = new Property(11, Boolean.class, "menuPomp", false, "menuPomp");
         public final static Property ModifyPomp = new Property(12, Boolean.class, "ModifyPomp", false, "ModifyPomp");
-        public final static Property CategoryId = new Property(13, Long.class, "categoryId", false, "categoryId");
+        public final static Property Category = new Property(13, String.class, "category", false, "category");
         public final static Property Status = new Property(14, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(15, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
 
-    private Query<Dish> category_DishListQuery;
 
     public DishDao(DaoConfig config) {
         super(config);
@@ -74,7 +70,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
                 "'pricePomp' INTEGER," + // 10: pricePomp
                 "'menuPomp' INTEGER," + // 11: menuPomp
                 "'ModifyPomp' INTEGER," + // 12: ModifyPomp
-                "'categoryId' INTEGER," + // 13: categoryId
+                "'category' TEXT," + // 13: category
                 "'STATUS' INTEGER," + // 14: status
                 "'VERSION' INTEGER);"); // 15: version
     }
@@ -155,9 +151,9 @@ public class DishDao extends AbstractDao<Dish, Long> {
             stmt.bindLong(13, ModifyPomp ? 1l: 0l);
         }
  
-        Long categoryId = entity.getCategoryId();
-        if (categoryId != null) {
-            stmt.bindLong(14, categoryId);
+        String category = entity.getCategory();
+        if (category != null) {
+            stmt.bindString(14, category);
         }
  
         Integer status = entity.getStatus();
@@ -200,7 +196,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
             cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0, // pricePomp
             cursor.isNull(offset + 11) ? null : cursor.getShort(offset + 11) != 0, // menuPomp
             cursor.isNull(offset + 12) ? null : cursor.getShort(offset + 12) != 0, // ModifyPomp
-            cursor.isNull(offset + 13) ? null : cursor.getLong(offset + 13), // categoryId
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // category
             cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14), // status
             cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15) // version
         );
@@ -223,7 +219,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
         entity.setPricePomp(cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0);
         entity.setMenuPomp(cursor.isNull(offset + 11) ? null : cursor.getShort(offset + 11) != 0);
         entity.setModifyPomp(cursor.isNull(offset + 12) ? null : cursor.getShort(offset + 12) != 0);
-        entity.setCategoryId(cursor.isNull(offset + 13) ? null : cursor.getLong(offset + 13));
+        entity.setCategory(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
         entity.setStatus(cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14));
         entity.setVersion(cursor.isNull(offset + 15) ? null : cursor.getInt(offset + 15));
      }
@@ -251,18 +247,4 @@ public class DishDao extends AbstractDao<Dish, Long> {
         return true;
     }
     
-    /** Internal query to resolve the "dishList" to-many relationship of Category. */
-    public List<Dish> _queryCategory_DishList(Long categoryId) {
-        synchronized (this) {
-            if (category_DishListQuery == null) {
-                QueryBuilder<Dish> queryBuilder = queryBuilder();
-                queryBuilder.where(Properties.CategoryId.eq(null));
-                category_DishListQuery = queryBuilder.build();
-            }
-        }
-        Query<Dish> query = category_DishListQuery.forCurrentThread();
-        query.setParameter(0, categoryId);
-        return query.list();
-    }
-
 }

@@ -75,7 +75,7 @@ public class Cmd_MoveItem implements SamActionListener {
 //
 //				int billId = 0;
 //				//check if the bill exist
-//				StringBuilder sql = new StringBuilder("Select id, status from Bill where billIndex = '").append(targetBillIdx)
+//				StringBuilder sql = new StringBuilder("Select _id, status from Bill where billIndex = '").append(targetBillIdx)
 //				.append("' and tableId = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("'")
 //				.append(" and opentime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 //				.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(")");

@@ -99,7 +99,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         try {
             // load all the tables ---------------------------
             //have to fetch the bill by outputs, because there's some table might have no output one it, it exist just in case user want to undo the split......
-            StringBuilder sql = new StringBuilder("select t.id, t.opentime, t.status as s1, e.nname, b.createtime, b.total, t.posx, t.posy, t.width, t.height, t.dsp_Index, t.type, b.status as s2, t.name")
+            StringBuilder sql = new StringBuilder("select t.id, t.opentime, t.status as s1, e.nname, b.createtime, b.total, t.posx, t.posy, t.width, t.height, t.displayIdx, t.type, b.status as s2, t.name")
                     .append(" from dining_Table as t left join bill as b on t.name = b.tableID and t.opentime = b.opentime")
                     .append(" and (b.status is null or b.status < ").append(DBConsts.COMPLETED).append(")")
                     .append(" left join employee as e on b.EMPLOYEEID = e.id");
@@ -198,8 +198,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 btnTables.add(tableToggleButton);
                 ((RelativeLayout)mRoot).addView(tableToggleButton, params);
 
-                //dsp_Index is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
-                if(DBUtil.getCursorInt(rs, "dsp_Index") < 0) {
+                //displayIdx is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
+                if(DBUtil.getCursorInt(rs, "displayIdx") < 0) {
                     tableToggleButton.setOnTouchListener(this);
 //                    tableToggleButton.addMouseMotionListener(this);
                 }
@@ -207,7 +207,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             }
 
 //            if(btnLogo == null) {
-//            	sql = new StringBuilder("INSERT INTO DINING_TABLE (name, DSP_INDEX, posX, posY, width, height, type) VALUES ('")
+//            	sql = new StringBuilder("INSERT INTO DINING_TABLE (name, displayIdx, posX, posY, width, height, type) VALUES ('")
 //    					.append("logo").append("', -1, ")
 //    					.append(CustOpts.HOR_GAP).append(", ")
 //    					.append(CustOpts.VER_GAP).append(", 133, 200, ")
@@ -278,7 +278,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
             BillPanel billPanel = salesPanel.billPanel;
             if(billPanel.getNewDishes().size() > 0) {
-                if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMLOSTACTION(), "Warning")) {
+                if(JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMLOSTACTION(), "Warning")) {
                     return;
                 }else {
                     Cmd_CancelAll.getInstance().onClick(null);

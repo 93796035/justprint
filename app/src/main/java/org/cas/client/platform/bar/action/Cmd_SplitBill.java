@@ -58,7 +58,7 @@ public class Cmd_SplitBill implements  SamActionListener {
 		DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, null);		//save ??shall we update the time (the third parameter)?
 		
 		if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
-			if(JOptionPane.showConfirmDialog(BarFrame.instance, 
+			if(JOptionPane.showConfirmDialog(
     				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
             	//clean partial input
             	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");

@@ -1124,7 +1124,7 @@ public class MevUtils {
 			 int expiredWarningDays = BarOption.getExpiredWarningDays();
 			 if(TimeUnit.MILLISECONDS.toDays(millisecondsDifference) < expiredWarningDays || daysDifference < expiredWarningDays){
 				 //TODO: should change here into a option with two buttons.
-                if(JOptionPane.showConfirmDialog(null, "certificate is about to expire! Would you like to re-activate it!",
+                if(JOptionPane.showConfirmDialog("certificate is about to expire! Would you like to re-activate it!",
    					 BarFrame.consts.ComboMenu())) {
 		   				//if selected yes, start to do recertificate.
 		   				MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.REM);

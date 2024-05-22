@@ -227,7 +227,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	public int makeSureBillExists(String waiter, String createtime, String tableID, String billIndex, Float totalPrice) {
 		//considered the case that, client added dish from slave machine in an existing bill.
 		//should the bill exist, then should update the total price, and return back the id.
-		StringBuilder sql = new StringBuilder("select id, status from bill where tableId = '").append(tableID).append("'")
+		StringBuilder sql = new StringBuilder("select _id, status from bill where tableId = '").append(tableID).append("'")
 				.append(" and opentime = '").append(createtime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.COMPLETED)
 				.append(" and status >= ").append(DBConsts.ORIGINAL).append(")");
@@ -445,13 +445,13 @@ public class CreateNewOrderAction implements SamActionListener {
 	
 	//processing request from pad.
 	public void makeSureCategoryExist(String categoryName) {
-		StringBuilder sql = new StringBuilder("select ID, LANG1, LANG2, LANG3, DSP_INDEX from CATEGORY where LANG1 = ? or LANG2 = ? or LANG3 = ?");
+		StringBuilder sql = new StringBuilder("select _id, name1, name2, name3, displayIdx from CATEGORY where LANG1 = ? or LANG2 = ? or LANG3 = ?");
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{categoryName,categoryName,categoryName});
             if(rs.moveToNext()) {
             	// we don't need to synchronize the category with pad for now. synchronizeLocalCategory(menuIdx, idx, rs);
             }else {
-            	sql = new StringBuilder("select count(*) from CATEGORY where DSP_INDEX >= 0");
+            	sql = new StringBuilder("select count(*) from CATEGORY where displayIdx >= 0");
             	rs = AikaPos.db.rawQuery(sql.toString(), null);
             	int dspIndex = !rs.moveToNext() ? 1 : rs.getInt(1) + 1;
             	createNewCategory(categoryName, categoryName, categoryName, dspIndex);
@@ -464,7 +464,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	//make it exist, and return the English version of category.
 	private String makeSureCategoryExist(String location, int menuIdx, int idx) {
 		//if less than category exist, then add category to 3.
-        String sql = "select ID, LANG1, LANG2, LANG3, DSP_INDEX from CATEGORY where DSP_INDEX = " + idx;
+        String sql = "select _id, name1, name2, name3, displayIdx from CATEGORY where displayIdx = " + idx;
         try {
             Cursor rs = AikaPos.db.rawQuery(sql, null);
             int tmpPos = rs.getCount();
@@ -503,7 +503,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		String lName3 = DBUtil.getCursorString(rs, "Name3");
 		
 		if(!name1.equals(lName1) || !name2.equals(lName2) || !name3.equals(lName3)) {
-			StringBuilder sql = new StringBuilder("Update category set LANG1 = ?, LANG2 = ?, LANG3 = ? where dsp_Index = ").append(subMenuIdx);
+			StringBuilder sql = new StringBuilder("Update category set LANG1 = ?, LANG2 = ?, LANG3 = ? where displayIdx = ").append(subMenuIdx);
 			AikaPos.db.execSQL(sql.toString(), new String[]{name1, name2, name3});
 			BarFrame.menuPanel.initComponent();
 		}
@@ -523,7 +523,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	
 	//add a category
 	private void createNewCategory(String lang1, String lang2, String lang3, int dspIdx) {
-        StringBuilder sql = new StringBuilder("INSERT INTO Category(LANG1, LANG2, LANG3, DSP_INDEX) VALUES(?, ?, ?, ")
+        StringBuilder sql = new StringBuilder("INSERT INTO Category(LANG1, LANG2, LANG3, displayIdx) VALUES(?, ?, ?, ")
             		.append(dspIdx).append(")");
         try {
 	        AikaPos.db.execSQL(sql.toString(), new String[]{lang1,lang2,lang3});
@@ -535,7 +535,7 @@ public class CreateNewOrderAction implements SamActionListener {
 
 	//the dencity must be a null or $1
 	private Dish makeSureDishExist(String category, String location, int menuIdx, String menuName, int price, String seletedPrinterIdStr) {
-		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, PRODUCAREA, INDEX
+		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
 		StringBuilder sql = new StringBuilder("select * from product where deleted != true and index = ").append(menuIdx).append(" and category = ?");
         
         try {
@@ -560,8 +560,8 @@ public class CreateNewOrderAction implements SamActionListener {
 	
 	//process reqeust from pad.
 	public Dish makeSureDishExist(String category, String menuName, int price) {
-		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, PRODUCAREA, INDEX
-		StringBuilder sql = new StringBuilder("select * from product where deleted != true and category = ? and (CODE = ? or MNEMONIC = ? or SUBJECT = ?)");
+		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
+		StringBuilder sql = new StringBuilder("select * from product where status = 0 and category = ? and (name1 = ? or name2 = ? or name3 = ?)");
 
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{category, menuName, menuName, menuName});
@@ -638,7 +638,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		String name3 = contentMap.get("zh_service_" + location + "_description");
 		seletedPrinterIdStr = convertPrinterIPtoIdx(seletedPrinterIdStr);
 		StringBuilder sql = new StringBuilder(
-                 "INSERT INTO Product(CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, store, Cost,  BRAND, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")//CODE//MNEMONIC//SUBJECT
+                 "INSERT INTO Product(name1, name2, name3, PRICE, gst, qst, size, printerIds, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")//CODE//MNEMONIC//SUBJECT
                  .append(price).append(", ")	//PRICE
                  .append(1).append(", ")		//FOLDERID---if need gst?
                  .append(1).append(", ")		//store---if need qst?

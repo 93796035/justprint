@@ -427,7 +427,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	private boolean confirmBatchClose() {
-		return JOptionPane.showConfirmDialog(getContext(), BarFrame.consts.cleanTheBatch(), org.cas.client.resources.international.DlgConst.DlgTitle);
+		return JOptionPane.showConfirmDialog(BarFrame.consts.cleanTheBatch(), org.cas.client.resources.international.DlgConst.DlgTitle);
 	}
 
 	private void closeBatchAndPrintReport() {

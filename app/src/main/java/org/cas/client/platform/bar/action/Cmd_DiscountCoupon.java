@@ -149,7 +149,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
     					|| codes[m].trim().equalsIgnoreCase(BarFrame.menuPanel.categoryNameMetrix[2][i].trim())) {
     				//add all relavant dishes
     		        for (int j = 0; j < dishAry.length; j++) {
-    					if(dishAry[j].getCategoryId().equals(BarFrame.menuPanel.categoryNameMetrix[0][i].trim())) {
+    					if(dishAry[j].getCategory().equals(BarFrame.menuPanel.categoryNameMetrix[0][i].trim())) {
     						appliableDishes.add(dishAry[j].getLanguage(langIdx));
     					}
     		        }

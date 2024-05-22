@@ -26,7 +26,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
         public final static Property OpenTime = new Property(2, String.class, "openTime", false, "openTime");
-        public final static Property DspIdx = new Property(3, Integer.class, "dspIdx", false, "dspIdx");
+        public final static Property DisplayIdx = new Property(3, Integer.class, "displayIdx", false, "displayIdx");
         public final static Property PosX = new Property(4, Integer.class, "posX", false, "posX");
         public final static Property PosY = new Property(5, Integer.class, "posY", false, "posY");
         public final static Property Width = new Property(6, Integer.class, "width", false, "WIDTH");
@@ -55,7 +55,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'NAME' TEXT," + // 1: name
                 "'openTime' TEXT," + // 2: openTime
-                "'dspIdx' INTEGER," + // 3: dspIdx
+                "'displayIdx' INTEGER," + // 3: displayIdx
                 "'posX' INTEGER," + // 4: posX
                 "'posY' INTEGER," + // 5: posY
                 "'WIDTH' INTEGER," + // 6: width
@@ -91,9 +91,9 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
             stmt.bindString(3, openTime);
         }
  
-        Integer dspIdx = entity.getDspIdx();
-        if (dspIdx != null) {
-            stmt.bindLong(4, dspIdx);
+        Integer displayIdx = entity.getDisplayIdx();
+        if (displayIdx != null) {
+            stmt.bindLong(4, displayIdx);
         }
  
         Integer posX = entity.getPosX();
@@ -151,7 +151,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // openTime
-            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // dspIdx
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // displayIdx
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // posX
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // posY
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // width
@@ -169,7 +169,7 @@ public class DiningTableDao extends AbstractDao<DiningTable, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setOpenTime(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setDspIdx(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
+        entity.setDisplayIdx(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
         entity.setPosX(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
         entity.setPosY(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setWidth(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));

@@ -36,7 +36,7 @@ public class Cmd_Setting implements SamActionListener {
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		if(billPanel.getNewDishes().size() > 0) {
-    		if(JOptionPane.showConfirmDialog(BarFrame.instance,
+    		if(JOptionPane.showConfirmDialog(
     				BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
                 return;	
             }else {

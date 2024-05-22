@@ -42,7 +42,7 @@ public class Cmd_Return implements SamActionListener {
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		if(billPanel.getNewDishes().size() > 0) {
-    		if(JOptionPane.showConfirmDialog(BarFrame.instance,
+    		if(JOptionPane.showConfirmDialog(
     				BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
                 return;	
             }else {
@@ -60,7 +60,7 @@ public class Cmd_Return implements SamActionListener {
     	}else {	//for table mode
     		//when bill saved(dish send to bach end), will do a check and as if waiter want to cancel the paid item.
         	if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
-    			if(JOptionPane.showConfirmDialog(BarFrame.instance, 
+    			if(JOptionPane.showConfirmDialog(
 	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
     				//check if the otehr receivement is not null, add back to gift card.
     				//clean partial input

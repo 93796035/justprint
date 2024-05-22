@@ -697,7 +697,7 @@ public class BarUtil {
 
         //if it's already paid, show comfirmDialog.
         if(billPanel.getStatus() >= DBConsts.COMPLETED || billPanel.getStatus() < DBConsts.ORIGINAL) {
-            if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConfirmPayAgain(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
+            if(JOptionPane.showConfirmDialog(BarFrame.consts.ConfirmPayAgain(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
                 return false;
             }
         }

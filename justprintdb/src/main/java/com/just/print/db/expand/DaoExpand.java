@@ -37,7 +37,7 @@ public final class DaoExpand {
     }
 
     static public List<Dish> queryMenuByCategory(DishDao menuDao, Category category) {
-        return addQueryBuilderNotDelete(menuDao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()))).list();
+        return addQueryBuilderNotDelete(menuDao.queryBuilder().where(DishDao.Properties.Category.eq(category.getId()))).list();
     }
 
     public static final <T> QueryBuilder<T> addQueryBuilderNotDelete(QueryBuilder<T> builder) {
@@ -49,7 +49,7 @@ public final class DaoExpand {
     }
 
     static public List<Dish> queryMenuByCategory(Category category, DishDao dao) {
-        return dao.queryBuilder().where(DishDao.Properties.CategoryId.eq(category.getId()), DishDao.Properties.Status.notEq(State.DELETED)).list();
+        return dao.queryBuilder().where(DishDao.Properties.Category.eq(category.getId()), DishDao.Properties.Status.notEq(State.DELETED)).list();
     }
 
     static public List<SaleRecord> querySalesByBill(String billId, SaleRecordDao dao) {

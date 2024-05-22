@@ -262,7 +262,7 @@ public class LoginDlg extends DialogFragment {
 
     private void initContent() {
         users = DaoExpand.queryAllTables(AikaPos.daoSession.getUserDao());
-        String sql = "select ID, Type, UserName, PASSWORD, LANG from useridentity where ID > 5";
+        String sql = "select _id, Type, UserName, PASSWORD, LANG from useridentity where ID > 5";
     }
     public static int getUSERTYPE() {
         return USERTYPE;

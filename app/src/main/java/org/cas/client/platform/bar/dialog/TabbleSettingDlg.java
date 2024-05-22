@@ -208,7 +208,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //            Statement smt = PIMDBModel.getReadOnlyStatement();
 //
 //            // load all the categorys---------------------------
-//            ResultSet rs = smt.executeQuery("select ID, Name, posX, posY, width, height, type, status from dining_Table");
+//            ResultSet rs = smt.executeQuery("select _id, Name, posX, posY, width, height, type, status from dining_Table");
 //            rs.beforeFirst();
 //
 //            while (rs.moveToNext()) {
@@ -312,8 +312,8 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //				int row = idx / 10 + 1;
 //				int col = idx % 10;
 //
-//				sql = new StringBuilder("INSERT INTO DINING_TABLE (name, DSP_INDEX, posX, posY, width, height, type) VALUES ('")
-//						.append(string).append("', 1, ")		//dsp_index is currently used to point to the client id. -1 means not pointing to any client.
+//				sql = new StringBuilder("INSERT INTO DINING_TABLE (name, displayIdx, posX, posY, width, height, type) VALUES ('")
+//						.append(string).append("', 1, ")		//displayIdx is currently used to point to the client id. -1 means not pointing to any client.
 //						.append(col * 90 + CustOpts.HOR_GAP).append(", ")
 //						.append(row * 90 + CustOpts.VER_GAP).append(", 90, 90, ")
 //						.append(DBConsts.LOGO_TYPE + idx).append(")").toString();		//type == -2 mean the table will get image with name as file name.

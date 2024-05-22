@@ -67,7 +67,7 @@ public class TableButton extends Button {
 //            //update the table with the client info
 //            openTime = BarUtil.df.format(customerMatchingDlg.openTime);
 //            setOpenTime(openTime);
-//            StringBuilder sql = new StringBuilder("update dining_Table set dsp_index = ").append(customerMatchingDlg.selectedID).append(",")
+//            StringBuilder sql = new StringBuilder("update dining_Table set displayIdx = ").append(customerMatchingDlg.selectedID).append(",")
 //                    .append(" opentime = '").append(openTime).append("'")
 //                    .append(" WHERE name = '").append(tableName).append("'");
 //            try {

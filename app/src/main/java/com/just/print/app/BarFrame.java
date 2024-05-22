@@ -154,10 +154,10 @@ public class BarFrame extends BaseFragmentActivity {
             if (timeLeft < 3024000000l) {   //3024000000L == 35days
                 ToastUtil.showToast("Application is about to expire! Please re-activate it!");
             }
-            switchFragment(new RegisterFragment());
+//            switchFragment(new RegisterFragment());
         } else {
             ToastUtil.showToast("Application expired! Please re-activate it!");
-            switchFragment(new ActivateFragment());
+//            switchFragment(new ActivateFragment());
         }
 
         //==========================================================
@@ -256,7 +256,6 @@ public class BarFrame extends BaseFragmentActivity {
         if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
                 && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
             existingIdApprlCheck();
-            MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
         }
         //this line is kind of slow, and because the frame is no decoration by default, so
         //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
@@ -281,31 +280,38 @@ public class BarFrame extends BaseFragmentActivity {
                 @Override
                 public void onInputReceived(String input) {
                     BarOption.setBillingNumber(input);
+                    //No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
+                    //it's already checked, and only when it's true, can reach to this method.
+                    JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", "APPAREIL_ID", new JOptionPane.ConfirmDialogCallback() {
+                        @Override
+                        public void onResult(boolean confirmed) {
+                            if (confirmed) {
+                                JOptionPane.showInputDialog("identifiant d'appareil", "<html>Veuillez inscrirer votre identifiant d'appareil<br> avant d'effectuer une requête:</html>", new JOptionPane.InputDialogListener() {
+                                    @Override
+                                    public void onInputReceived(String input) {
+                                        BarOption.setCertifiedDeviceId(input);
+                                    }
+
+                                    @Override
+                                    public void onInputCanceled() {
+                                        Toast.makeText(AikaPos.instance.getApplicationContext(), "certificate request canceled! Please input \"identifiant d\'appareil\" to let the software ready to work.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                //if the input idApprl not valid, will endup not saved, when getting this configration will get "0000-0000-0000" .
+                                if (BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+                                    JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
+                                    existingIdApprlCheck();
+                                }
+                            }
+                            MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
+                        }
+                    });
                 }
                 @Override
                 public void onInputCanceled() {
                     Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
                 }
             });
-        }
-        //No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
-        //it's already checked, and only when it's true, can reach to this method.
-        if (JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", consts.Code())) {
-            JOptionPane.showInputDialog("identifiant d'appareil", "<html>Veuillez inscrirer votre identifiant d'appareil<br> avant d'effectuer une requête:</html>", new JOptionPane.InputDialogListener() {
-                @Override
-                public void onInputReceived(String input) {
-                    BarOption.setCertifiedDeviceId(input);
-                }
-                @Override
-                public void onInputCanceled() {
-                    Toast.makeText(AikaPos.instance.getApplicationContext(), "certificate request canceled! Please input \"identifiant d\'appareil\" to let the software ready to work.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            //if the input idApprl not valid, will endup not saved, when getting this configration will get "0000-0000-0000" .
-            if(BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
-                JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
-                existingIdApprlCheck();
-            }
         }
     }
 

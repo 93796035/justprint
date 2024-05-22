@@ -95,7 +95,7 @@ public class Cmd_Refund implements SamActionListener {
 	
 	public static int checkRefundAmount(float refund, int refundAmount) {
 		if(refundAmount < -1) {	//if already refund, then add into existing amount. //currently not possible, because we have checked the status to make sure status must be completed.
-			if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.AlreadyRefund() + BarOption.getMoneySign() + (0-refundAmount) / 100.0, org.cas.client.resources.international.DlgConst.DlgTitle
+			if (JOptionPane.showConfirmDialog(BarFrame.consts.AlreadyRefund() + BarOption.getMoneySign() + (0-refundAmount) / 100.0, org.cas.client.resources.international.DlgConst.DlgTitle
 				)) {// already refunded, sure to refund again?
 				return Integer.MAX_VALUE;
 			}else {

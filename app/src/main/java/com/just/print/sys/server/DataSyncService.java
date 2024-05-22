@@ -104,8 +104,8 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                         for (SelectionDetail selectionDetail : lastSelection) {
                             orderContent.append("DishStart:");
                             Dish menu = selectionDetail.getDish();
-                            Category categoryStr = AikaPos.daoSession.getCategoryDao().load(menu.getCategoryId());
-                            orderContent.append(URLEncoder.encode(categoryStr.getName1(), "UTF-8")).append("\n");
+                            String categoryStr = menu.getCategory();
+                            orderContent.append(URLEncoder.encode(categoryStr, "UTF-8")).append("\n");
                             orderContent.append(URLEncoder.encode(menu.getName1(), "UTF-8")).append("\n");
                             orderContent.append(selectionDetail.getDish().getPrice()).append("\n");
                             orderContent.append(selectionDetail.getDishNum()).append("\n");
@@ -283,7 +283,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 JSONObject jo = jsonTables.getJSONObject(i);
                 Mark table = new Mark();
                 table.setName1(jo.getString("name"));
-                table.setStatus(jo.getInt("dsp_index"));
+                table.setStatus(jo.getInt("displayIdx"));
                 table.setVersion(-1);
                 table.setId(markDao.insert(table));
             }

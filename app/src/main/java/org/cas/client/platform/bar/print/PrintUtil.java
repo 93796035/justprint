@@ -1069,7 +1069,7 @@ public class PrintUtil {
 
 	//customer info is saved in employee table.
 	static String findClientInfoByTableName(String tableName) {
-		StringBuilder sql = new StringBuilder("select e.NName, e.phone, e.address from dining_table as d, contact as e where d.dsp_index = e.id and d.name = '").append(tableName).append("'");
+		StringBuilder sql = new StringBuilder("select e.NName, e.phone, e.address from dining_table as d, contact as e where d.displayIdx = e.id and d.name = '").append(tableName).append("'");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {

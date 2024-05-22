@@ -139,10 +139,10 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
             int dspIndex = Integer.parseInt(tfdDspIndex.getText().toString());
 
             if (prodID == -1) {
-                String sql = "INSERT INTO Dish (CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, store, Cost, BRAND, CATEGORY, displayIdx, CONTENT, Unit, PRODUCAREA) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO Dish (name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, displayIdx, pricePomp, menuPomp, ModifyPomp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 db.execSQL(sql, new Object[]{lang1, lang2, lang3, price, gst, qst, size, printers, "category", dspIndex, cbxPricePomp.isChecked(), cbxMenuPomp.isChecked(), cbxModifyPomp.isChecked()});
             } else {
-                String sql = "UPDATE dish SET CODE = ?, MNEMONIC = ?, SUBJECT = ?, PRICE = ?, FOLDERID = ?, store = ?, Cost = ?, BRAND = ?, CATEGORY = ?, displayIdx = ?, CONTENT = ?, Unit = ?, PRODUCAREA = ? WHERE ID = ?";
+                String sql = "UPDATE dish SET name1 = ?, name2 = ?, name3 = ?, PRICE = ?, gst = ?, qst = ?, size = ?, printerIds = ?, CATEGORY = ?, displayIdx = ?, pricePomp = ?, menuPomp = ?, ModifyPomp = ? WHERE ID = ?";
                 db.execSQL(sql, new Object[]{lang1, lang2, lang3, price, gst, qst, size, printers, "category", dspIndex, cbxPricePomp.isChecked(), cbxMenuPomp.isChecked(), cbxModifyPomp.isChecked(), prodID});
             }
 

@@ -17,7 +17,7 @@ public class DiningTable {
     private Long id;
     private String name;
     private String openTime;
-    private Integer dspIdx;
+    private Integer displayIdx;
     private Integer posX;
     private Integer posY;
     private Integer width;
@@ -43,11 +43,11 @@ public class DiningTable {
         this.id = id;
     }
 
-    public DiningTable(Long id, String name, String openTime, Integer dspIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer status, Integer version) {
+    public DiningTable(Long id, String name, String openTime, Integer displayIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer status, Integer version) {
         this.id = id;
         this.name = name;
         this.openTime = openTime;
-        this.dspIdx = dspIdx;
+        this.displayIdx = displayIdx;
         this.posX = posX;
         this.posY = posY;
         this.width = width;
@@ -87,12 +87,12 @@ public class DiningTable {
         this.openTime = openTime;
     }
 
-    public Integer getDspIdx() {
-        return dspIdx;
+    public Integer getDisplayIdx() {
+        return displayIdx;
     }
 
-    public void setDspIdx(Integer dspIdx) {
-        this.dspIdx = dspIdx;
+    public void setDisplayIdx(Integer displayIdx) {
+        this.displayIdx = displayIdx;
     }
 
     public Integer getPosX() {

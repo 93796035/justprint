@@ -43,7 +43,7 @@ public class MainGenerator {
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   price |
         // +---------+-----------+------------+---------+
-        Entity user = schema.addEntity("User");
+        Entity user = schema.addEntity("USER");
         user.addIdProperty();
         user.addStringProperty("firstName").columnName("firstName");
         user.addStringProperty("secondName").columnName("secondName");
@@ -75,7 +75,7 @@ public class MainGenerator {
         dinningTable.addIdProperty();
         dinningTable.addStringProperty("name");
         dinningTable.addStringProperty("openTime").columnName("openTime");
-        dinningTable.addIntProperty("dspIdx").columnName("dspIdx");
+        dinningTable.addIntProperty("displayIdx").columnName("displayIdx");
         dinningTable.addIntProperty("posX").columnName("posX");
         dinningTable.addIntProperty("posY").columnName("posY");
         dinningTable.addIntProperty("width");
@@ -96,28 +96,27 @@ public class MainGenerator {
 
         //  @table Menu
         //  @pk id
-        //  @fk pid, categoryId
+        //  @fk pid, category
         //  pid->Printer.id;
-        //  categoryId->Category.id;
+        //  category->Category.id;
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  categoryId    |   manem |
+        // |    id   |   pid   |  category    |   manem |
         // +---------+---------+---------+---------+
         Entity dish = schema.addEntity("Dish");//category->dish
         dish.addIdProperty();
         dish.addStringProperty("name1").columnName("NAME1");
         dish.addStringProperty("name2").columnName("NAME2");
         dish.addStringProperty("name3").columnName("NAME3");
-        dish.addFloatProperty("price");//price
-        dish.addIntProperty("gst");//price
-        dish.addIntProperty("qst");//price
-        dish.addIntProperty("size");//size
+        dish.addFloatProperty("price");
+        dish.addIntProperty("gst");
+        dish.addIntProperty("qst");
+        dish.addIntProperty("size");
         dish.addStringProperty("printerIds").columnName("printerIds");
         dish.addIntProperty("displayIdx").columnName("displayIdx");//size
         dish.addBooleanProperty("pricePomp").columnName("pricePomp");//size
         dish.addBooleanProperty("menuPomp").columnName("menuPomp");//size
         dish.addBooleanProperty("ModifyPomp").columnName("ModifyPomp");//size
-        Property.PropertyBuilder categoryId = dish.addLongProperty("categoryId").columnName("categoryId");
-        category.addToMany(dish, categoryId.getProperty());
+        dish.addStringProperty("category").columnName("category");
 
         // +---------+---------+---------+---------+
         // |    id   |   pid   |  mid    |   manem |
@@ -132,7 +131,7 @@ public class MainGenerator {
         dish.addToMany(menuPrint, menuId.getProperty());
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  categoryId    |   manem |
+        // |    id   |   pid   |  category    |   manem |
         // +---------+---------+---------+---------+
         //  @table Mark
         Entity mark = schema.addEntity("Mark");
@@ -239,7 +238,7 @@ public class MainGenerator {
         device.addStringProperty("userName").columnName("userName");
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  categoryId    |   manem |
+        // |    id   |   pid   |  category   |   manem |
         // +---------+---------+---------+---------+
         //  @table Log
         Entity log = schema.addEntity("Log");

@@ -394,7 +394,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
     public boolean checkColosedBill() {
         for (BillPanel billPanel : billPanels) {
             if(billPanel.getStatus() == DBConsts.COMPLETED) {
-                if (JOptionPane.showConfirmDialog(this, BarFrame.consts.workOnOnlyUnclosedBills(),
+                if (JOptionPane.showConfirmDialog(BarFrame.consts.workOnOnlyUnclosedBills(),
                         org.cas.client.resources.international.DlgConst.DlgTitle)) {
                     return false;
                 }

@@ -101,7 +101,7 @@ public class MenuPanel extends View implements View.OnClickListener {
     public void initRules() {
 		int tmpPos;
 		//load all printers--------------------------
-		String sql = "select * from CustomizedRule where status != -100 order by dspidx";
+		String sql = "select * from Customized_Rule where status != -100 order by disp_Idx";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			tmpPos = rs.getCount();
@@ -109,7 +109,7 @@ public class MenuPanel extends View implements View.OnClickListener {
 			tmpPos = 0;
 			while (rs.moveToNext()) {
 				rules[tmpPos] = new CustomizedRule();
-				rules[tmpPos].setId(Long.valueOf(DBUtil.getCursorInt(rs, "id")));
+				rules[tmpPos].setId(Long.valueOf(DBUtil.getCursorInt(rs, "_id")));
 				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "ruleName"));
 				rules[tmpPos].setContent(DBUtil.getCursorString(rs, "content"));
 				rules[tmpPos].setAction(DBUtil.getCursorInt(rs,"action")); // discount price( it's an int formatted)
@@ -132,7 +132,7 @@ public class MenuPanel extends View implements View.OnClickListener {
 	private void loadAllCategorys() {
 		try {
             // load all the categorys---------------------------
-            Cursor rs = AikaPos.db.rawQuery("select ID, LANG1, LANG2, LANG3 from CATEGORY  where DSP_INDEX >= 0 order by DSP_INDEX", null);
+            Cursor rs = AikaPos.db.rawQuery("select _ID, name1, name2, name3 from CATEGORY  where displayIdx >= 0 order by displayIdx", null);
             int tmpPos = rs.getCount();
             categoryNameMetrix = new String[3][tmpPos];
             PrintService.allCategory = new Category[tmpPos];
@@ -159,8 +159,9 @@ public class MenuPanel extends View implements View.OnClickListener {
 	private void loadAllDishes() {
 		try {
             // load all the dishes----------------------------
-            Cursor rs =
-            		AikaPos.db.rawQuery("select ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, PRODUCAREA, displayIdx from dish where deleted != true order by displayIdx", null);
+            Cursor rs = AikaPos.db.rawQuery(
+				"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from dish where status == 0 order by displayIdx",
+					null);
             int tmpPos = rs.getCount();
             dishNameMetrix = new String[3][tmpPos];
             dishAry = new Dish[tmpPos];
@@ -178,19 +179,19 @@ public class MenuPanel extends View implements View.OnClickListener {
                 }
 
                 dishAry[tmpPos] = new Dish();
-                dishAry[tmpPos].setId(DBUtil.getCursorLong(rs,"ID"));
+                dishAry[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
                 dishAry[tmpPos].setLanguage(0, dishNameMetrix[0][tmpPos]);
                 dishAry[tmpPos].setLanguage(1, dishNameMetrix[1][tmpPos]);
                 dishAry[tmpPos].setLanguage(2, dishNameMetrix[2][tmpPos]);
                 dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs,"PRICE")/100.0f);
-                dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs,"FOLDERID"));
-                dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs,"STORE"));
-                dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs,"COST"));
-                dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "BRAND"));
-                dishAry[tmpPos].setCategoryId(Long.valueOf(DBUtil.getCursorString(rs, "CATEGORY")));
-                dishAry[tmpPos].setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "CONTENT")));
-                dishAry[tmpPos].setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "UNIT")));
-                dishAry[tmpPos].setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCAREA")));
+                dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs,"gst"));
+                dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs,"qst"));
+                dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs,"size"));
+                dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "printerids"));
+                dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "CATEGORY"));
+                dishAry[tmpPos].setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "pricePomp")));
+                dishAry[tmpPos].setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "menuPomp")));
+                dishAry[tmpPos].setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "modifyPomp")));
                 dishAry[tmpPos].setDisplayIdx(DBUtil.getCursorInt(rs, "displayIdx"));
                 tmpPos++;
             }
@@ -205,7 +206,7 @@ public class MenuPanel extends View implements View.OnClickListener {
 		
 		int tmpPos;
 		//load all printers--------------------------
-		String sql = "select * from hardware where category = 0 order by id";
+		String sql = "select * from Printer where category = 0 order by _id";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			tmpPos = rs.getCount();
@@ -213,12 +214,12 @@ public class MenuPanel extends View implements View.OnClickListener {
 			tmpPos = 0;
 			while (rs.moveToNext()) {
 				printers[tmpPos] = new Printer();
-				printers[tmpPos].setId(DBUtil.getCursorLong(rs,"id"));
-				printers[tmpPos].setName(DBUtil.getCursorString(rs,"name"));
-				printers[tmpPos].setIp(DBUtil.getCursorString(rs,"ip"));
-				printers[tmpPos].setStyle(DBUtil.getCursorInt(rs,"style")); // index p1, p2.....
+				printers[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
+				printers[tmpPos].setName(DBUtil.getCursorString(rs,"NAME"));
+				printers[tmpPos].setIp(DBUtil.getCursorString(rs,"IP"));
+				printers[tmpPos].setStyle(DBUtil.getCursorInt(rs,"STYLE")); // index p1, p2.....
 				printers[tmpPos].setCategory(DBUtil.getCursorInt(rs,"langType"));
-				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs,"status"));
+				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs,"STATus"));
 				tmpPos++;
 			}
 			rs.close();
@@ -303,7 +304,7 @@ public class MenuPanel extends View implements View.OnClickListener {
         classifiedDishAry = new ArrayList<Dish>();
         classifiedMenuIndex = 0;
         for (int i = 0; i < dishAry.length; i++) {
-			if(dishAry[i].getCategoryId().equals(tgbActiveCategory.getLang1Text())) {
+			if(dishAry[i].getCategory().equals(tgbActiveCategory.getLang1Text())) {
 				
 				classifiedDishNameMetrix[0][classifiedMenuIndex] = dishNameMetrix[0][i];
 				classifiedDishNameMetrix[1][classifiedMenuIndex] = dishNameMetrix[1][i];

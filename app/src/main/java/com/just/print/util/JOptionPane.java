@@ -11,6 +11,8 @@ import com.just.print.app.BarFrame;
 
 import org.cas.client.platform.bar.panel.BillPanel;
 
+import java.util.concurrent.CountDownLatch;
+
 public class JOptionPane {
     public static final int YES_NO_OPTION = 0;
 
@@ -35,17 +37,16 @@ public class JOptionPane {
         showMessageDialog(atLeastTwoTableShouldBeSelected);
     }
 
-    public static boolean showConfirmDialog(Object instance, String content, String title){
+    public static void showConfirmDialog(Object instance, String content, String title, ConfirmDialogCallback callback){
         AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
         builder.setTitle(title);
         builder.setMessage(content);  // 假设你已经有适合安卓的方式来获取这个消息
 
-        final boolean[] valueFR = new boolean[1];
         // 添加 "Yes" 按钮
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                valueFR[0] = true;
+                callback.onResult(true);
             }
         });
 
@@ -53,14 +54,13 @@ public class JOptionPane {
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                valueFR[0] =  false;
+                callback.onResult(false);
             }
         });
 
         // 创建并显示对话框
         AlertDialog dialog = builder.create();
         dialog.show();
-        return valueFR[0];
     }
 
     public static void showInputDialog(String title, String message, InputDialogListener listener) {
@@ -94,9 +94,52 @@ public class JOptionPane {
         dialog.show();
     }
 
+    public static boolean showConfirmDialog(String content, String title) {
+        final boolean[] result = {false};
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
+        builder.setTitle(title);
+        builder.setMessage(content);
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                result[0] = true;
+                latch.countDown();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                result[0] = false;
+                latch.countDown();
+            }
+        });
+
+        // 显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        try {
+            // 等待用户输入
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return result[0];
+    }
+
     // 输入监听器接口
     public interface InputDialogListener {
         void onInputReceived(String input);
         void onInputCanceled();
+    }
+
+    //==================================================
+    public interface ConfirmDialogCallback {
+        void onResult(boolean confirmed);
     }
 }

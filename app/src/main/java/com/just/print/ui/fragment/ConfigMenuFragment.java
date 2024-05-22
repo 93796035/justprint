@@ -140,12 +140,12 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                 case R.id.delCategory:
                     Category cag = categoryXAdapter.get(i);
                     long cid = cag.getId();
-                    List<Dish> mList = menuDao._queryCategory_DishList(cid);
+//                    List<Dish> mList = menuDao._queryCategory_DishList(cid);
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage("Are you sure to delete \"" + cag.getName1() + "\"?")
                             .setTitle("Notice");
-                    builder.setNegativeButton("Delete", new CategoryDeleteListener(mList, cag));
+//                    builder.setNegativeButton("Delete", new CategoryDeleteListener(mList, cag));
                     builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -460,7 +460,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menu.setId(Long.valueOf(mid.getText().toString()));
             menu.setStatus(State.OPENNED);
             menu.setName1(mname.getText().toString().trim());
-            menu.setCategoryId(mCategory.getId());
+            menu.setCategory(mCategory.getName1());
             menu.setPrice(price);
             menuDao.insert(menu);
             previouseCode = menu.getId().toString();
@@ -469,7 +469,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             modifyingMenu.setId(Long.valueOf(mid.getText().toString()));
             modifyingMenu.setStatus(State.OPENNED);
             modifyingMenu.setName1(mname.getText().toString().trim());
-            modifyingMenu.setCategoryId(mCategory.getId());
+            modifyingMenu.setCategory(mCategory.getName1());
             modifyingMenu.setPrice(price);
             menuDao.insert(modifyingMenu);
             menu = modifyingMenu;

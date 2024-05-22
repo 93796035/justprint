@@ -9,7 +9,7 @@ import java.util.List;
  * 微软的TextField的长度限制是228（约）， 本类的限制因为没有规格约束，暂定为912（约） // ID I NTEGER IDENTITY PRIMARY KEY // DELETED BIT DEFAULT false //
  * language1 CODE VARCHAR(255) // language2 MNEMONIC VARCHAR(255) // language3 SUBJECT VARCHAR(255) // price PRICE
  * INTEGER // gst FOLDERID INTEGER // qst STORE INTEGER // size COST INTEGER // printer BRAND VARCHAR(255) // CATEGORY
- * CATEGORY VARCHAR(255) // prompmenu UNIT VARCHAR(255) // prompprice CONTENT VARCHAR(255) // promp mofify PRODUCAREA
+ * CATEGORY VARCHAR(255) // prompmenu UNIT VARCHAR(255) // prompprice CONTENT VARCHAR(255) // ModifyPomp
  * VARCHAR(255)
  */
 public class TableDlg// extends JDialog implements ICASDialog, ActionListener, ComponentListener
@@ -147,7 +147,7 @@ public class TableDlg// extends JDialog implements ICASDialog, ActionListener, C
 //			if(settingTableDlg == null){//if called from Cmd_AddTable, then give it negative tpye.
 //				type = -type;
 //			}
-//			sql.append("INSERT INTO DINING_TABLE (name, posX, posY, type, dsp_Index) VALUES (?, ")
+//			sql.append("INSERT INTO DINING_TABLE (name, posX, posY, type, displayIdx) VALUES (?, ")
 //			.append(tfdX.getText()).append(", ").append(tfdY.getText()).append(", ")
 //			.append(type).append(", ").append(isTemprallyCreatedTbl ? -1 : 0).append(")");
 //		}else {

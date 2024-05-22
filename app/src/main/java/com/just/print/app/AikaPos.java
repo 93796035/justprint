@@ -91,17 +91,17 @@ public class AikaPos extends Application {
     }
 
     private void insertHardwareData() {
-        String sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P1', 0, 0, 'mev', 1, 42)";
+        String sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P1', 0, 0, 'mev', 1, 42)";
         db.execSQL(sql);
-        sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P2', 0, 1, '192.168.1.88', 0, 32)";
+        sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P2', 0, 1, '192.168.1.88', 0, 32)";
         db.execSQL(sql);
-        sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P3', 0, 2, '', 0, 32)";
+        sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P3', 0, 2, '192.168.1.87', 0, 32)";
         db.execSQL(sql);
-        sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P4', 0, 2, '', 0, 32)";
+        sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P4', 0, 2, '192.168.1.86', 0, 32)";
         db.execSQL(sql);
-        sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P5', 0, 2, '', 0, 32)";
+        sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P5', 0, 2, '192.168.1.85', 0, 32)";
         db.execSQL(sql);
-        sql = "INSERT INTO PRINTER (name, category, langType, ip, style, status) VALUES ('P6', 0, 2, '', 0, 32)";
+        sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P6', 0, 2, '192.168.1.84', 0, 32)";
         db.execSQL(sql);
     }
 

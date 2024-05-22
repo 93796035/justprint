@@ -48,7 +48,7 @@ public class DataSyncService extends Thread{
                 StringBuilder orderContent = new StringBuilder();
                 for (Dish dish : lastSelection) {
                     orderContent.append("DishStart:");
-                    orderContent.append(URLEncoder.encode(dish.getCategoryId().toString(), "UTF-8")).append("\n");	//category
+                    orderContent.append(URLEncoder.encode(dish.getCategory().toString(), "UTF-8")).append("\n");	//category
                     orderContent.append(URLEncoder.encode(dish.getName1(), "UTF-8")).append("\n");			//menu name
 
                     orderContent.append(Double.valueOf(dish.getPrice()/100.0)).append("\n");					//price

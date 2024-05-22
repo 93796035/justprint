@@ -47,7 +47,7 @@ public class Cmd_Suspend implements SamActionListener {
     	if(salesPanel.billPanel.getStatus() > DBConsts.SUSPENDED || salesPanel.billPanel.getStatus() < DBConsts.ORIGINAL) {
 			return;
 		}
-    	if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.confirmSuspend(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
+    	if(JOptionPane.showConfirmDialog(BarFrame.consts.confirmSuspend(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
 			return;
 		}
     	

@@ -496,18 +496,18 @@ public class DiscountDlg extends DialogFragment
 //			}else {
 //				f = Float.valueOf(actionStr) * 100;
 //			}
-//			//sql = "CREATE CACHED TABLE CustomizedRule (id INTEGER IDENTITY PRIMARY KEY, ruleName VARCHAR(255),  content VARCHAR(255), action INTEGER, status INTEGER,  ext1 VARCHAR(255),  ext2 VARCHAR(255),  ext3 VARCHAR(255),)";
-//			StringBuilder sql = new StringBuilder("INSERT INTO CustomizedRule (ruleName, content, action, status, dspIdx) VALUES ('").append(ruleName)
+//			//sql = "CREATE CACHED TABLE Customized_Rule (id INTEGER IDENTITY PRIMARY KEY, ruleName VARCHAR(255),  content VARCHAR(255), action INTEGER, status INTEGER,  ext1 VARCHAR(255),  ext2 VARCHAR(255),  ext3 VARCHAR(255),)";
+//			StringBuilder sql = new StringBuilder("INSERT INTO Customized_Rule (ruleName, content, action, status, dspIdx) VALUES ('").append(ruleName)
 //				    .append("', '").append(content.substring(1)).append("', ").append(Math.round(f)).append(", 0, 0)");
 //
 //			try {
 //    			PIMDBModel.getStatement().executeUpdate(sql.toString());
 //    		}catch(Exception exp) {
-//    			L.e("DiscountDlg ", "Exception when insert a rule into CustomizedRule.", exp);
+//    			L.e("DiscountDlg ", "Exception when insert a rule into Customized_Rule.", exp);
 //    		}
 //
 //			Rule rule = new Rule();
-//			sql = new StringBuilder("select * from CustomizedRule where ruleName = '").append(ruleName)
+//			sql = new StringBuilder("select * from Customized_Rule where ruleName = '").append(ruleName)
 //					.append("' and content = '").append(content.substring(1)).append("'");
 //			try {
 //	            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

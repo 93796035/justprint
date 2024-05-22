@@ -280,9 +280,9 @@ public class WifiPrintService implements Runnable{
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<SelectionDetail>() {
                     @Override
                     public int compare(SelectionDetail dishesDetailModel, SelectionDetail t1) {
-                        Category c1 = AikaPos.daoSession.getCategoryDao().load(dishesDetailModel.getDish().getCategoryId());
-                        Category c2 = AikaPos.daoSession.getCategoryDao().load(t1.getDish().getCategoryId());
-                        return c1.getDisplayIdx().compareTo(c2.getDisplayIdx());
+                        String c1 = dishesDetailModel.getDish().getCategory();
+                        String c2 = t1.getDish().getCategory();
+                        return c1.compareTo(c2);
                     }
                 });
             }
@@ -311,11 +311,11 @@ public class WifiPrintService implements Runnable{
                         List<SelectionDetail> tlist = new ArrayList<SelectionDetail>();
                         String currentCategory = null;
                         for(SelectionDetail selectionDetail : dishList){
-                            Category c1 = AikaPos.daoSession.getCategoryDao().load(selectionDetail.getDish().getCategoryId());
+                            String c1 = selectionDetail.getDish().getCategory();
                             if(currentCategory == null){    //if not set yet, then set the first value.
-                                currentCategory = c1.getName1();
+                                currentCategory = c1;
                                 tlist.add(selectionDetail);
-                            } else if(currentCategory.equals(c1.getName1())){    //if same with previous, then add into the list.
+                            } else if(currentCategory.equals(c1)){    //if same with previous, then add into the list.
                                 tlist.add(selectionDetail);
                             } else {  //if not same, means current category is completed, then add current list into ipContent map, and start a new list.
                                 String formattedContent = formatContentForPrint(tlist, kitchenBillIdx, isCancel, priceOfBill, printerIP);
@@ -324,7 +324,7 @@ public class WifiPrintService implements Runnable{
 
                                 tlist = new ArrayList<SelectionDetail>();
 
-                                currentCategory = c1.getName1();
+                                currentCategory = c1;
                                 tlist.add(selectionDetail);
                             }
                         }

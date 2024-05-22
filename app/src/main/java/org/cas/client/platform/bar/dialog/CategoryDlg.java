@@ -99,19 +99,19 @@ public class CategoryDlg extends DialogFragment {
             // adjust affected category's Index
             if (newIndex > dspIndex) {
                 for (int i = dspIndex + 1; i <= newIndex; i++) {
-                    String sql = "UPDATE Category SET DSP_INDEX = " + (i - 1) + " where DSP_INDEX = " + i;
+                    String sql = "UPDATE Category SET displayIdx = " + (i - 1) + " where displayIdx = " + i;
                     AikaPos.db.execSQL(sql);
                 }
             } else if (newIndex < dspIndex) {
                 for (int i = dspIndex - 1; i >= newIndex; i--) {
-                    String sql = "UPDATE Category SET DSP_INDEX = " + (i + 1) + " where DSP_INDEX = " + i;
+                    String sql = "UPDATE Category SET displayIdx = " + (i + 1) + " where displayIdx = " + i;
                     AikaPos.db.execSQL(sql);
                 }
             }
 
             // Save to DB
             if (dspIndex <= menuPanel.categoryNameMetrix[0].length && menuPanel.categoryNameMetrix[0][dspIndex - 1] != null) {
-                String sql = "UPDATE Category SET LANG1 = ?, LANG2 = ?, LANG3 = ?, DSP_INDEX = ? where LANG1 = ?";
+                String sql = "UPDATE Category SET LANG1 = ?, LANG2 = ?, LANG3 = ?, displayIdx = ? where LANG1 = ?";
                 AikaPos.db.execSQL(sql, new Object[]{
                         BarUtil.addHTMLTAG(tfdCategoryName1.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName2.getText().toString()),
@@ -124,7 +124,7 @@ public class CategoryDlg extends DialogFragment {
                     AikaPos.db.execSQL(sql, new Object[]{tfdCategoryName1.getText().toString()});
                 }
             } else {
-                String sql = "INSERT INTO Category(LANG1, LANG2, LANG3, DSP_INDEX) VALUES(?,?,?,?)";
+                String sql = "INSERT INTO Category(LANG1, LANG2, LANG3, displayIdx) VALUES(?,?,?,?)";
                 AikaPos.db.execSQL(sql, new Object[]{BarUtil.addHTMLTAG(tfdCategoryName1.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName2.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName3.getText().toString()),

@@ -385,21 +385,21 @@ public class PrintService{
                 Collections.sort(ipSelectionsMap.get(key), new Comparator<Dish>() {
                     @Override
                     public int compare(Dish dish1, Dish dish2) {
-                        long c1 = dish1.getCategoryId();
-                        long c2 = dish2.getCategoryId();
+                        String c1 = dish1.getCategory();
+						String c2 = dish2.getCategory();
                         int dspIdx = 0;
                         for(int i = 0; i < allCategory.length; i++) {
-                        	if(c1 == allCategory[i].getId()){
+                        	if(c1.equals(allCategory[i])){
                         		dspIdx = i;
                         		break;
                         	}
                         }
                         for(int i = 0; i < allCategory.length; i++) {
-                        	if(c2 == allCategory[i].getId()){
+                        	if(c2.equals(allCategory[i])){
                         		return dspIdx - i;
                         	}
                         }
-                        return (int)(c1 - c2);
+                        return (int)(c1.compareTo(c2));
                     }
                 });
             }

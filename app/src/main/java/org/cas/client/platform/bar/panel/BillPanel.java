@@ -226,7 +226,7 @@ public class BillPanel extends BaseFragment
 		    	String currentTime = BarUtil.df.format(new Date());
 		    	DBUtil.createOutput(dish, curBillIndex, currentTime);	//at this moment, the num should have not been splitted.
 		        //in case some store need to stay in the interface after clicking the send button. 
-                StringBuilder sql = new StringBuilder("Select id, time from output where SUBJECT = '")
+                StringBuilder sql = new StringBuilder("Select _id, time from output where SUBJECT = '")
                     .append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
                     .append("' and CONTACTID = ").append(curBillIndex)
                     .append(" and PRODUCTID = ").append(dish.getId())
@@ -338,7 +338,7 @@ public class BillPanel extends BaseFragment
 	private boolean adjustOnlyUI(int selectedRow, Dish dish) {
 		if(getOrderedDishAry().get(selectedRow).getNum() == 1) {
 			if("true".equals(CustOpts.custOps.getValue("noticeForLastOne"))) {
-				if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION2(), "WARNING!")) {
+				if (JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION2(), "WARNING!")) {
 					table.setSelectedRow(-1);
 					return true;
 				}
@@ -371,7 +371,7 @@ public class BillPanel extends BaseFragment
 			removeFromSelection(table.getSelectedRow());
 			logOperation(-1, DBConsts.ORIGINAL, curDish);
 		} else {// if it's send
-			if(JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle))
+			if(JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle))
 				return;
 			//clean output from db immediately.
 			//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.deleted);
@@ -594,7 +594,7 @@ public class BillPanel extends BaseFragment
 
 					if(salesPanel != null && !BarFrame.numberPanelDlg.isVisible()) {	//if qty button not seleted.
 						if(getOrderedDishAry().get(selectedRow).getOutputID() >= 0) {
-							if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {// 确定删除吗？
+							if (JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {// 确定删除吗？
 								table.setSelectedRow(-1);
 								return false;
 							}
@@ -1018,7 +1018,7 @@ public class BillPanel extends BaseFragment
 			//BarUtil.df.parse(tableName)
 			}
 			Dish dish = new Dish();
-			dish.setCategoryId(Long.valueOf(DBUtil.getCursorString(rs, "PRODUCT.CATEGORY")));
+			dish.setCategory(DBUtil.getCursorString(rs, "PRODUCT.CATEGORY"));
 			dish.setDiscount(DBUtil.getCursorInt(rs, "OUTPUT.discount"));//
 			dish.setDiscount(Integer.valueOf(DBUtil.getCursorInt(rs, "PRODUCT.INDEX")));
 			dish.setGst(DBUtil.getCursorInt(rs, "PRODUCT.FOLDERID"));

@@ -2,9 +2,6 @@ package com.just.print.db.bean;
 
 import com.just.print.db.dao.CategoryDao;
 import com.just.print.db.dao.DaoSession;
-import com.just.print.db.dao.DishDao;
-
-import java.util.List;
 
 import de.greenrobot.dao.DaoException;
 
@@ -31,7 +28,6 @@ public class Category {
     /** Used for active entity operations. */
     private transient CategoryDao myDao;
 
-    private List<Dish> dishList;
 
     // KEEP FIELDS - put your custom fields here
     // KEEP FIELDS END
@@ -115,29 +111,7 @@ public class Category {
         this.version = version;
     }
 
-    /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */
-    public List<Dish> getDishList() {
-        if (dishList == null) {
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            DishDao targetDao = daoSession.getDishDao();
-            List<Dish> dishListNew = targetDao._queryCategory_DishList(id);
-            synchronized (this) {
-                if(dishList == null) {
-                    dishList = dishListNew;
-                }
-            }
-        }
-        return dishList;
-    }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    public synchronized void resetDishList() {
-        dishList = null;
-    }
-
-    /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */
     public void delete() {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
@@ -145,7 +119,6 @@ public class Category {
         myDao.delete(this);
     }
 
-    /** Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context. */
     public void update() {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
@@ -153,7 +126,6 @@ public class Category {
         myDao.update(this);
     }
 
-    /** Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context. */
     public void refresh() {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
@@ -186,7 +158,6 @@ public class Category {
         this.language = language;
         this.name1 = language[0];
     }
-
     // KEEP METHODS END
 
 }
