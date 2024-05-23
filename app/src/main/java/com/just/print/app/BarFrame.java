@@ -182,13 +182,6 @@ public class BarFrame extends BaseFragmentActivity {
         discountDlg = new DiscountDlg();
         payDlg = new PayDlg();
 
-        //activation check
-        String returnStr = validateActivation(null);
-        if(!"OK".equals(returnStr)) { 	// if not valid, might because of expired, then give clean the bill head,
-            if(!"OK".equals(validateActivation(returnStr))) {	// give another valid with passcode (first time with null).
-                System.exit(0);
-            }
-        }
 
         //single user or not, display login dialog or mainInterface.
         if(BarOption.isSingleUser()) {
@@ -250,13 +243,14 @@ public class BarFrame extends BaseFragmentActivity {
         new BackGroundTimerThread().start();
 
         findViewById(R.id.BarFrame).invalidate();
+        //activation check
+        validateActivation();
+//        if(!"OK".equals(returnStr)) { 	// if not valid, might because of expired, then give clean the bill head,
+//            if(!"OK".equals(validateActivation(returnStr))) {	// give another valid with passcode (first time with null).
+//                System.exit(0);
+//            }
+//        }
 
-        //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
-        //different Appareil ID, so they know the data is from which machine.
-        if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
-                && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
-            existingIdApprlCheck();
-        }
         //this line is kind of slow, and because the frame is no decoration by default, so
         //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
 //        SwingUtilities.invokeLater(new Runnable() {
@@ -276,6 +270,18 @@ public class BarFrame extends BaseFragmentActivity {
     private static void existingIdApprlCheck() {
         if(BarOption.getBillingNumber() == null
                 || BarOption.getBillingNumber().length() < 5){
+            JOptionPane.showInputDialog("Activate", consts.activeCode(), new JOptionPane.InputDialogListener(){
+
+                @Override
+                public void onInputReceived(String input) {
+
+                }
+
+                @Override
+                public void onInputCanceled() {
+
+                }
+            });
             JOptionPane.showInputDialog("Numéro de facturation", "Veuillez saisir votre numéro de facturation:", new JOptionPane.InputDialogListener() {
                 @Override
                 public void onInputReceived(String input) {
@@ -315,18 +321,19 @@ public class BarFrame extends BaseFragmentActivity {
         }
     }
 
-    private String validateActivation(String activateCode) {
+    private void validateActivation() {
         if(BarOption.getBillHeadInfo() == null || BarOption.getBillHeadInfo().trim().length() == 0 ) { //if store info not found, means first time use.
-            if(activateCode == null) {
-                activateCode = JOptionPane.showInputDialog(null, consts.activeCode());
-            }
-            if("asdfas".equals(activateCode)) {
-                BarOption.setBillHeadInfo("AikaPos");
-                return "OK";
-            }else {
-                authenticate(activateCode);
-                return "OK";
-            }
+            JOptionPane.showInputDialog("Activate", consts.activeCode(), new JOptionPane.InputDialogListener() {
+                @Override
+                public void onInputReceived(String input) {
+                    authenticate(input);
+                }
+
+                @Override
+                public void onInputCanceled() {
+
+                }
+            });
         }else {	//already started
             L.d("bill info is:", BarOption.getBillHeadInfo());
             long timeLeft = checkDaysleft();
@@ -334,13 +341,18 @@ public class BarFrame extends BaseFragmentActivity {
                 if (timeLeft < 3024000000l) {   //3024000000L == 35days
                     JOptionPane.showMessageDialog(null, "Application is about to expire! Please re-activate it!");
                 }
-                //check certificate time
-                MevUtils.checkCertificateDate();
-                return "OK";
+                //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
+                //different Appareil ID, so they know the data is from which machine.
+                if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
+                        && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+                    existingIdApprlCheck();
+                }else {
+                    MevUtils.checkCertificateDate();//check certificate time
+                }
             }else {
                 BarOption.setBillHeadInfo(null);
                 CustOpts.custOps.saveData();//save to hd.
-                return activateCode;	//because the activateCode is null, so this will cause a dialog for inputting activate code,
+//                return activateCode;	//because the activateCode is null, so this will cause a dialog for inputting activate code,
                 //but after inputting code, will not have chance to come in again and do the authenticate. so I think should do system.exit()
             }
         }
@@ -373,7 +385,7 @@ public class BarFrame extends BaseFragmentActivity {
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 runOnUiThread(() -> {
                     // Handle failure in activation
-                    showErrorDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
+                    JOptionPane.showMessageDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
                 });
             }
 
@@ -381,10 +393,11 @@ public class BarFrame extends BaseFragmentActivity {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseString = response.body().string();
-                    runOnUiThread(() -> processActivationResponse(responseString));
+//                    runOnUiThread(() ->
+                            processActivationResponse(responseString);
                 } else {
                     runOnUiThread(() -> {
-                        showErrorDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
+                        JOptionPane.showMessageDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
                     });
                 }
             }
@@ -394,7 +407,7 @@ public class BarFrame extends BaseFragmentActivity {
     private void processActivationResponse(String response) {
         int p = response.indexOf("_");
         if (p == -1) {
-            showErrorDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
+            JOptionPane.showMessageDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
             return;
         }
 
@@ -402,19 +415,62 @@ public class BarFrame extends BaseFragmentActivity {
         String timeLeft = response.substring(0, p);
         long time = "none".equals(timeLeft) ? 100L * 365 * 24 * 3600 * 1000 : Long.parseLong(timeLeft) * 24 * 3600 * 1000;
         if (time > 0) {
-            // Set various options based on the parsed response
+            BarOption.setActivateTimeLeft(String.valueOf(time * 24 * 3600 * 1000));
+            BarOption.setLastSuccessStr(String.valueOf(new Date().getTime()));
+
+            String billHeadInfo = response.substring(p + 1);
+            //get out bill head info
+            p = billHeadInfo.indexOf("_");
+            if (p > 0) {
+                BarOption.setBillHeadInfo(billHeadInfo.substring(0, p));
+                //get out GST-----put all string left into gst first, then get the first part for the real gst.
+                String GST = billHeadInfo.substring(p + 1);
+                p = GST.indexOf("_");
+                if(p > 0) {
+                    BarOption.setGSTAccount(GST.substring(0, p));
+                    //get out QST----put all string left into qst first, then get the first part as the real qst.
+                    String QST = GST.substring(p + 1);
+                    p = QST.indexOf("_");
+                    if(p > 0) {
+                        BarOption.setQSTAccount(QST.substring(0, p));
+                        String authorizationCode = QST.substring(p + 1);
+                        p = authorizationCode.indexOf("_");
+                        if(p > 0) {
+                            BarOption.setMandatoryAuthorizationCode(authorizationCode.substring(0, p));
+                            String billingNumber = authorizationCode.substring(p + 1);
+                            p = billingNumber.indexOf("_");
+                            if(p > 0) {
+                                BarOption.setBillingNumber(billingNumber.substring(0, p));
+
+                                //get out the last part: activated times, this value is updated on server before return to here.
+                                //if there's more contents, goes before this line, it's like put string left into XXX,
+                                //then check if there's "_", if yes, get the real value XXX, all string after "_" goes into ActivateTimes......
+                                //activateTimes must be the last part.
+                                //Be noticed that if you added new part, should consider if it need to be encr
+                                BarOption.setActivatedTimes(billingNumber.substring(p + 1));
+                            }else {
+                                BarOption.setBillingNumber(billingNumber); //ER0001
+                            }
+                        }else {
+                            BarOption.setMandatoryAuthorizationCode(authorizationCode);
+                        }
+                    }else {
+                        BarOption.setQSTAccount(QST);
+                    }
+                }else {
+                    BarOption.setGSTAccount(GST);
+                }
+            }else {
+                BarOption.setBillHeadInfo(billHeadInfo);
+            }
+
+            // @NOTE: can not use JOptionPane.showMessageDialog, because it will be hided by
+            // LoginDlg, and stuck there.
             setStatusMes("Application is activated successfully!");
         } else {
-            showErrorDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
+            JOptionPane.showMessageDialog(null,
+                    "Software expired, please contact us at info@ShareTheGoodOnes.com");
         }
-    }
-
-    private void showErrorDialog(String message) {
-        new AlertDialog.Builder(this)
-                .setTitle("Error")
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
     }
 
     public static void setStatusMes(String pMes) {
