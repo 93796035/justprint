@@ -44,21 +44,11 @@ public class Cmd_DiscountCoupon implements SamActionListener {
 		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 
-		final String[] couponCode = new String[1];
-		JOptionPane.showInputDialog(null, BarFrame.consts.couponCode(), new JOptionPane.InputDialogListener() {
-			@Override
-			public void onInputReceived(String input) {
-				couponCode[0] = input;
-			}
-			@Override
-			public void onInputCanceled() {
-				Toast.makeText(AikaPos.instance.getApplicationContext(), "Input is invalid.", Toast.LENGTH_SHORT).show();
-			}
-		});
-		if(couponCode[0] == null || couponCode[0].length() == 0)
+		final String couponCode = JOptionPane.showInputDialog(null, BarFrame.consts.couponCode());
+		if(couponCode == null || couponCode.length() == 0)
 			return;
 		
-		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 1 and name = '").append(couponCode[0])
+		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 1 and name = '").append(couponCode)
 				.append("' and (status is null or status = 0)");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

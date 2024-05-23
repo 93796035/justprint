@@ -318,16 +318,7 @@ public class BarFrame extends BaseFragmentActivity {
     private String validateActivation(String activateCode) {
         if(BarOption.getBillHeadInfo() == null || BarOption.getBillHeadInfo().trim().length() == 0 ) { //if store info not found, means first time use.
             if(activateCode == null) {
-                JOptionPane.showInputDialog("Enter Code", "Please input your activation code:", new JOptionPane.InputDialogListener() {
-                    @Override
-                    public void onInputReceived(String input) {
-                        validateActivation(input);
-                    }
-                    @Override
-                    public void onInputCanceled() {
-                        Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                activateCode = JOptionPane.showInputDialog(null, consts.activeCode());
             }
             if("asdfas".equals(activateCode)) {
                 BarOption.setBillHeadInfo("AikaPos");

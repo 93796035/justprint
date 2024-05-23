@@ -94,6 +94,49 @@ public class JOptionPane {
         dialog.show();
     }
 
+    public static String showInputDialog(String title, String message) {
+        final String[] result = new String[]{null};
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        // 创建一个EditText用于输入
+        final EditText input = new EditText(BarFrame.instance);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // 设置“确定”按钮及其动作
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                result[0] = input.getText().toString();
+                latch.countDown();
+            }
+        });
+
+        // 设置“取消”按钮及其动作
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                latch.countDown();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        try {
+            // 等待用户输入
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result[0];
+    }
+
+
     public static boolean showConfirmDialog(String content, String title) {
         final boolean[] result = {false};
         final CountDownLatch latch = new CountDownLatch(1);
@@ -123,7 +166,6 @@ public class JOptionPane {
         dialog.show();
 
         try {
-            // 等待用户输入
             latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();

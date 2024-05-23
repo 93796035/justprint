@@ -40,21 +40,11 @@ public class Cmd_GiftCard implements SamActionListener {
 	@Override
 	public void onClick(View o) {
 
-		final String[] giftCardNumber = new String[1];
-		JOptionPane.showInputDialog(null, BarFrame.consts.Account(), new JOptionPane.InputDialogListener() {
-			@Override
-			public void onInputReceived(String input) {
-				giftCardNumber[0] = input;
-			}
-			@Override
-			public void onInputCanceled() {
-				Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
-			}
-		});
-		if(giftCardNumber[0] == null || giftCardNumber[0].length() == 0)
+		final String giftCardNumber = JOptionPane.showInputDialog(null, BarFrame.consts.Account());
+		if(giftCardNumber == null || giftCardNumber.length() == 0)
 			return;
 		
-		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 2 and name = '").append(giftCardNumber[0])
+		StringBuilder sql = new StringBuilder("SELECT * from hardware where category = 2 and name = '").append(giftCardNumber)
 				.append("' and (status is null or status = 0)");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -84,7 +74,7 @@ public class Cmd_GiftCard implements SamActionListener {
 	                sql = new StringBuilder("update hardware set status = ").append(DBConsts.EXPIRED)
                     		.append(" where id = ").append(id);
                     AikaPos.db.execSQL(sql.toString());
-					sql = new StringBuilder("INSERT INTO Hardware (name, category, langType, ip, style, status) VALUES ('").append(giftCardNumber[0])
+					sql = new StringBuilder("INSERT INTO Hardware (name, category, langType, ip, style, status) VALUES ('").append(giftCardNumber)
 					    .append("', 2, ").append(Math.round(newBalance * 100)).append(", '")
 					    .append(BarUtil.df.format(new Date())).append("', ").append(LoginDlg.USERID).append(", ")
 					    .append(DBConsts.ORIGINAL).append(")");
