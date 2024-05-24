@@ -186,9 +186,9 @@ public class BarFrame extends BaseFragmentActivity {
         //single user or not, display login dialog or mainInterface.
         if(BarOption.isSingleUser()) {
             singleUserLoginProcess();
-        }else {
-            instance.setVisible(true);
         }
+
+
 
         //counter mode or not
         if(BarOption.isCounterMode()) {
@@ -242,7 +242,7 @@ public class BarFrame extends BaseFragmentActivity {
         //also will trigger a refresh of tableivew for the waiting time.
         new BackGroundTimerThread().start();
 
-        findViewById(R.id.BarFrame).invalidate();
+
         //activation check
         validateActivation();
 //        if(!"OK".equals(returnStr)) { 	// if not valid, might because of expired, then give clean the bill head,
@@ -359,7 +359,7 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     private void authenticate(String inputedSN) {
-        if (inputedSN == null || inputedSN.length() != 6) {
+        if (inputedSN == null || inputedSN.length() != 6 && !inputedSN.equals("9")) {
             JOptionPane.showMessageDialog(null, "Please input correct license code");
             return;
         }
@@ -412,7 +412,7 @@ public class BarFrame extends BaseFragmentActivity {
         }
 
         // Process the response as in your existing code
-        String timeLeft = response.substring(0, p);
+        String timeLeft = response.substring(0, p).trim();
         long time = "none".equals(timeLeft) ? 100L * 365 * 24 * 3600 * 1000 : Long.parseLong(timeLeft) * 24 * 3600 * 1000;
         if (time > 0) {
             BarOption.setActivateTimeLeft(String.valueOf(time * 24 * 3600 * 1000));

@@ -4,6 +4,7 @@ import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.TablesPanel;
 
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 //import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 //import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
 //import org.cas.client.platform.bar.pannel.BarFrame;
@@ -35,15 +36,15 @@ public class BackGroundTimerThread extends Thread{
 //    			BarFrame.customerFrame.refresh();
 //			}
 //
-//			//refresh the table view every 1 mints
-//			counterForTableRefresh++;
-//			if (counterForTableRefresh >= 6) {
-//				counterForTableRefresh = 0;
-//				if (BarFrame.instance.curPanelIdx == 0 && !Cmd_ChangeTable.getInstance().getSourceBtn().isSelected()) {
-//					((TablesPanel) BarFrame.instance.panels[0]).initContent();
-//				}
-//			}
-//
+			//refresh the table view every 1 mints
+			counterForTableRefresh++;
+			if (counterForTableRefresh >= 6) {
+				counterForTableRefresh = 0;
+				if (BarFrame.instance.curPanelIdx == 0 && !Cmd_ChangeTable.getInstance().getSourceBtn().isSelected()) {
+					((TablesPanel) BarFrame.instance.panels[0]).initContent();
+				}
+			}
+
     	}
     }
 
