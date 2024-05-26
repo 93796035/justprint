@@ -94,7 +94,7 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 		int p = time.indexOf(" ");
 		time = time.substring(0, p + 1) + BarOption.getStartTime();
 
-		String sql = "Select * from evaluation where EMPLOYEEID = " + LoginDlg.USERID + " and startTime > '" + time
+		String sql = "Select * from evaluation where userId = " + LoginDlg.USERID + " and startTime > '" + time
 				+ "' and endTime is null";
 
 		try {
@@ -104,7 +104,7 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 				sql = "update evaluation set endtime = '" + BarUtil.df.format(new Date()) + "' where id = " + id;
 				AikaPos.db.execSQL(sql);
 			} else {
-				sql = "INSERT INTO evaluation(startTime, EMPLOYEEID, subject) VALUES ('" + BarUtil.df.format(new Date())
+				sql = "INSERT INTO evaluation(startTime, userId, subject) VALUES ('" + BarUtil.df.format(new Date())
 						+ "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME + "')";
 				AikaPos.db.execSQL(sql);
 			}

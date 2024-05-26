@@ -99,18 +99,18 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         try {
             // load all the tables ---------------------------
             //have to fetch the bill by outputs, because there's some table might have no output one it, it exist just in case user want to undo the split......
-            StringBuilder sql = new StringBuilder("select t.id, t.opentime, t.status as s1, e.nname, b.createtime, b.total, t.posx, t.posy, t.width, t.height, t.displayIdx, t.type, b.status as s2, t.name")
-                    .append(" from dining_Table as t left join bill as b on t.name = b.tableID and t.opentime = b.opentime")
+            StringBuilder sql = new StringBuilder("select t._id, t.openTime, t.STATUS as s1, e.nickName, b.createdTime, b.TOTAL, t.posX, t.posY, t.WIDTH, t.HEIGHT, t.displayIdx, t.TYPE, b.status as s2, t.name")
+                    .append(" from dining_Table as t left join bill as b on t.name = b.tableName and t.opentime = b.opentime")
                     .append(" and (b.status is null or b.status < ").append(DBConsts.COMPLETED).append(")")
-                    .append(" left join employee as e on b.EMPLOYEEID = e.id");
+                    .append(" left join USER as e on b.userId = e._id");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             int yPos = 0;
             HashSet<Integer> tableIds = new HashSet<Integer>();
             while (rs.moveToNext()) {
                 TableButton tableToggleButton = new TableButton();
 
-                int id = DBUtil.getCursorInt(rs, "ID");
-                int type = DBUtil.getCursorInt(rs, "type");
+                int id = DBUtil.getCursorInt(rs, "_id");
+                int type = DBUtil.getCursorInt(rs, "TYPE");
 
                 //check if it's already created and added into tableAry.
                 //because a table contains split bills, then there will be more than one records, and the total should counts the total on all the bills.
@@ -120,7 +120,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
 
                     tableToggleButton.setTypeStatusAndName(
                             DBUtil.getCursorString(rs, "openTime"),
-                            DBUtil.getCursorString(rs, "createTime"),
+                            DBUtil.getCursorString(rs, "createdTime"),
                             type,
                             DBUtil.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
                             DBUtil.getCursorString(rs, "Name"));
@@ -192,8 +192,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
 //                    }
 //                    tableToggleButton.setBounds(x, y, w, h);
 //                }
-                params.leftMargin = convertDpToPixel(x, getActivity());
-                params.topMargin = convertDpToPixel(y, getActivity());
+                params.leftMargin = convertDpToPixel(x, BarFrame.instance);
+                params.topMargin = convertDpToPixel(y, BarFrame.instance);
 
                 btnTables.add(tableToggleButton);
                 ((RelativeLayout)mRoot).addView(tableToggleButton, params);

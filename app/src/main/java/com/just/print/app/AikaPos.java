@@ -1,8 +1,11 @@
 package com.just.print.app;
 
+import com.just.print.R;
+
 import android.app.Application;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 
 import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.User;
@@ -13,11 +16,22 @@ import com.just.print.db.dao.UserDao;
 import com.just.print.ui.fragment.LoginDlg;
 
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.web_srm.MevUtils;
+import org.cas.client.platform.casutil.L;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class AikaPos extends Application {
 
@@ -39,25 +53,31 @@ public class AikaPos extends Application {
                 null);
         db = helper.getWritableDatabase();//database file is generated now
         daoSession = new DaoMaster(db).newSession();
-        // 检查User表是否存在
-        if (isTableExists(db, "USER")) {
-            // 检查User表是否为空
-            if (isTableEmpty(db, "USER")) {
-
-                insertInitialUsers(daoSession); //this is the right way, which access db with a list in one shot.
-                initOtherTableWithRawSQL(daoSession); //this is for quicket migration from Windows.
-            }
+        // 检查User表是否为空
+        if (isTableEmpty(db, "USER")) {
+            insertInitialUsers(daoSession); //this is the right way, which access db with a list in one shot.
+            initOtherTableWithRawSQL(daoSession); //this is for quicket migration from Windows.
+            copyKeystoreToInternalStorage();
         }
     }
 
-    private boolean isTableExists(SQLiteDatabase db, String tableName) {
-        Cursor rs = db.rawQuery("SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?", new String[]{"table", tableName});
-        boolean exists = false;
-        if (rs.moveToFirst()) {
-            exists = rs.getInt(0) > 0;
+    public void copyKeystoreToInternalStorage() {
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.jckconfig); // 假设keystore文件保存在res/raw文件夹中
+            OutputStream outputStream = new FileOutputStream(new File(getFilesDir(), "jckconfig"));
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        rs.close();
-        return exists;
     }
 
     private boolean isTableEmpty(SQLiteDatabase db, String tableName) {
@@ -107,31 +127,31 @@ public class AikaPos extends Application {
 
     private void createEvaluationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
-                "ID INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, EMPLOYEEID INTEGER, " +
+                "ID INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
                 "SUBJECT TEXT, receive INTEGER, target INTEGER, profit INTEGER);";
         db.execSQL(sql);
     }
 
     private void createBillTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Bill (" +
-                "ID INTEGER PRIMARY KEY, createtime TEXT, tableID TEXT, BillIndex TEXT, " +
+                "ID INTEGER PRIMARY KEY, createtime TEXT, tableName TEXT, BillIndex TEXT, " +
                 "total INTEGER, discount INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
                 "debitReceived INTEGER, visaReceived INTEGER, masterReceived INTEGER, " +
                 "otherReceived TEXT, tip INTEGER, cashback INTEGER, status INTEGER, " +
-                "EMPLOYEEID INTEGER, Comment TEXT, opentime TEXT, invoiceId INTEGER);";
+                "userId INTEGER, Comment TEXT, opentime TEXT, invoiceId INTEGER);";
         db.execSQL(sql);
     }
 
     private void createWEBSRMBatchTable() {
         String sql = "CREATE TABLE IF NOT EXISTS WEBSRMBATCH (" +
-                "ID INTEGER PRIMARY KEY, EMPLOYEEID INTEGER, jsonToSend TEXT, " +
+                "ID INTEGER PRIMARY KEY, userId INTEGER, jsonToSend TEXT, " +
                 "signatransm TEXT, emprCertifSEV TEXT, strUrlQRCode TEXT);";
         db.execSQL(sql);
     }
 
     private void createOperationLogTable() {
         String sql = "CREATE TABLE IF NOT EXISTS OPERATIONLOG (" +
-                "ID INTEGER PRIMARY KEY, OperationType INTEGER, EMPLOYEEID INTEGER, " +
+                "ID INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
                 "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tablename TEXT, " +
                 "opentime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
                 "orderTime TEXT, operationTime TEXT, other1 INTEGER, other2 INTEGER, " +

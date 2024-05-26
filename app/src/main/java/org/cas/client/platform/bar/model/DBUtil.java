@@ -59,7 +59,7 @@ public class DBUtil {
 	}
 	private static void moveBillToTable(int billID, String newTable, int billIdx, String openTime) {
 		StringBuilder sql;
-		sql = new StringBuilder("update bill set tableID = '").append(newTable)
+		sql = new StringBuilder("update bill set tableName = '").append(newTable)
 				.append("', BillIndex = '").append(billIdx)
 				.append("' , opentime = '").append(openTime)
 				.append("' where id = ").append(billID);
@@ -192,7 +192,7 @@ public class DBUtil {
 		//all the bill should already completed when table closed except those was generated while has no output on it.
 		//this is the designed time to clean those bills.
 		StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
-				.append(" WHERE tableID = '").append(tableName)
+				.append(" WHERE tableName = '").append(tableName)
 				.append("' and OPENTIME = '").append(openTime)
 				.append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
 		try {
@@ -329,7 +329,7 @@ public class DBUtil {
 	public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {
 		// 使用PreparedStatement替代Statement以提高性能和安全性
 
-		StringBuilder sql = new StringBuilder("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, EMPLOYEEID, TIME, CATEGORY, FOLDERID) VALUES (")
+		StringBuilder sql = new StringBuilder("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES (")
 				.append("'").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("',") // SUBJECT
 				.append("'").append(billIndex).append("',") // CONTACTID
 				.append(dish.getId()).append(",") // PRODUCTID
@@ -337,7 +337,7 @@ public class DBUtil {
 				.append(dish.getPrice() * splitRate).append(",") // TOLTALPRICE
 				.append(dish.getDiscount() * splitRate).append("',") // DISCOUNT
 				.append("'").append(dish.getModification()).append("',") // CONTENT
-				.append(LoginDlg.USERID).append(",") // EMPLOYEEID
+				.append(LoginDlg.USERID).append(",") // userId
 				.append("'").append(BarFrame.instance.valOpenTime.getText()).append("',") // TIME
 				.append("'").append(createdTime != null ? createdTime : dish.getOrderedTime()).append("',")// CATEGORY
 				.append(dish.getBillID()); // FOLDERID

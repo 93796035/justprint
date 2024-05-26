@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -379,7 +380,14 @@ public class UtilesJSON{
             return null;
         }
     }
+	public static void test() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+		KeyStore keyStore = KeyStore.getInstance(MevUtils.KEYSTORE_TYPE);
 
+		L.i("UtilesJSON", "Loading keystore...");
+		keyStore.load(new FileInputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
+		L.i("UtilesJSON", "Keystore loaded successfully");
+
+	}
 	public static WEBSRM_Response sendJson(String url, Map<String, String> httpHeadersDict, String json,
 			String certificateSerialNumberSRS) {
 		WEBSRM_Response responseWEBSRM = new WEBSRM_Response();
@@ -400,8 +408,10 @@ public class UtilesJSON{
 
 			//if (certificateSerialNumberSRS != null) {
 				KeyStore keyStore = KeyStore.getInstance(MevUtils.KEYSTORE_TYPE);
-				keyStore.load(new FileInputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
 
+			L.i("UtilesJSON", "Loading keystore...");
+				keyStore.load(new FileInputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
+			L.i("UtilesJSON", "Keystore loaded successfully");
 				KeyManagerFactory keyManagerFactory = KeyManagerFactory
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, MevUtils.KEYSTORE_KEY.toCharArray());

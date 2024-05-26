@@ -85,7 +85,7 @@ public class Cmd_OtherPay implements SamActionListener {
    	    		.append(", createTime = '").append(paidTime)
 	   	    	.append("', otherReceived = '").append(((FunctionButton)v).getText())
 	   	    	.append("', status = ").append(DBConsts.COMPLETED)
-	   	    	.append(", employeeid = ").append(LoginDlg.USERID)
+	   	    	.append(", userId = ").append(LoginDlg.USERID)
 	   	    	.append(" where id = ").append(billId);
 			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.

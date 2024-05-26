@@ -180,7 +180,7 @@ public class LoginDlg extends DialogFragment {
                 //check if there's unclosed bill
                 String endTime = BarUtil.df.format(new Date()).substring(0, 11) + BarOption.getStartTime();
                 String lastPrintTime = "";
-                StringBuilder sqlBuilder = new StringBuilder("select ANNIVERSARY from employee where id = ").append(LoginDlg.USERID);
+                StringBuilder sqlBuilder = new StringBuilder("select ANNIVERSARY from USER where id = ").append(LoginDlg.USERID);
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sqlBuilder.toString(), null);
                     if(rs.moveToNext()) {

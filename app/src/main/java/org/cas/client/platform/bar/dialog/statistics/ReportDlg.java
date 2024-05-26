@@ -135,7 +135,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	private void initContent() {
 		String endTime = BarUtil.df.format(new Date());
 		String startTime = endTime.substring(0, 11) + BarOption.getStartTime();
-		StringBuilder sql = new StringBuilder("select ANNIVERSARY from employee where id = ").append(LoginDlg.USERID);
+		StringBuilder sql = new StringBuilder("select ANNIVERSARY from USER where id = ").append(LoginDlg.USERID);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			if (rs.moveToNext()) {
@@ -354,14 +354,14 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	public static List<Bill> queryRelevantCompleteAndRefundBillList(String startTime, String endTimeStr, boolean showOnlyMine) {
-		StringBuilder sql = new StringBuilder("select * from bill, employee where createTime >= '").append(startTime)
+		StringBuilder sql = new StringBuilder("select * from bill, USER where createTime >= '").append(startTime)
 				.append("' and createTime <= '").append(endTimeStr)
-				.append("' and bill.employeeId = employee.id ")
+				.append("' and bill.userId = employee._id ")
 				.append(" and (bill.status < ").append(DBConsts.ORIGINAL)
 				.append(" or bill.status = ").append(DBConsts.COMPLETED).append(")");
 		if ((LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS && !BarOption.showRecordFromOtherWaiter())
 				|| showOnlyMine) {
-			sql.append(" and employee.id = ").append(LoginDlg.USERID);
+			sql.append(" and employee._id = ").append(LoginDlg.USERID);
 		}
 
 		List<Bill> salesAndRefunds = new ArrayList<>();
@@ -371,7 +371,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				Bill bill = new Bill();
 				bill.setId(DBUtil.getCursorLong(rs, "id"));
 				bill.setCreatedTime(DBUtil.getCursorString(rs, "createTime"));
-				bill.setTableName(DBUtil.getCursorString(rs, "tableID"));
+				bill.setTableName(DBUtil.getCursorString(rs, "tableName"));
 				bill.setCustomerNumber(DBUtil.getCursorString(rs, "billIndex"));
 				bill.setTotal(DBUtil.getCursorInt(rs, "total"));
 				bill.setDiscount(DBUtil.getCursorInt(rs, "discount"));
@@ -446,7 +446,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	private void sendReportToWeb() {
 		if (BarFrame.instance.menuPanel.getPrinters()[0].getIp().toLowerCase().startsWith("mev")) {
-			StringBuilder sql = new StringBuilder("select * from employee where id = ").append(LoginDlg.USERID);
+			StringBuilder sql = new StringBuilder("select * from USER where id = ").append(LoginDlg.USERID);
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 				if (rs.moveToNext()) {
@@ -478,7 +478,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException {
 		String recentLoginTime = null;
-		String sql = "select * from evaluation where employeeId = " + userId + " order by starttime desc";
+		String sql = "select * from evaluation where userId = " + userId + " order by starttime desc";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
@@ -588,7 +588,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	public static void updateLastPrintTime(String endTime) {
-		StringBuilder sql = new StringBuilder("update employee set anniversary = '").append(endTime).append("' where id = ").append(LoginDlg.USERID);
+		StringBuilder sql = new StringBuilder("update USER set anniversary = '").append(endTime).append("' where id = ").append(LoginDlg.USERID);
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		} catch (Exception exp) {

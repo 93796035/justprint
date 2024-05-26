@@ -666,7 +666,7 @@ public class BarOption {
 	
 	//this is actually the order#. not the bill#.
 	//if the system crushed, we might cleaned the db from under .storm07111 to make the app restart.
-	//To avoid the order# restart from 0 again, which will cause the owner lost the real number of how many dish employee has sold in current batch. 
+	//To avoid the order# restart from 0 again, which will cause the owner lost the real number of how many dish USER has sold in current batch.
 	//we have to put back the right orderIdx into the customization table, so we make a copy of current order# in config file..
 	//who's using it? who "don't want to use it?"
 	public static String getNextOrderId() {

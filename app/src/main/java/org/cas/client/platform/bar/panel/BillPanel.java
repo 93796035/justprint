@@ -87,17 +87,14 @@ public class BillPanel extends BaseFragment
 
 	public BillPanel(SalesPanel salesPanel) {
 		this.salesPanel = salesPanel;
-		initComponent();
 	}
 	public BillPanel(CustomerFrame parent, BarDlgConst langConsts) {
 		this.customerFrame = parent;
-		initComponent();
 	}
 
 	public BillPanel(BillListPanel billListPanel, FunctionToggleButton billButton) {
 		this.billListPanel = billListPanel;
 		this.billButton = billButton;
-		initComponent();
 	}
 
 	@Override
@@ -107,7 +104,7 @@ public class BillPanel extends BaseFragment
 
 	@Override
 	public void onCreated(Bundle savedInstanceState) {
-
+		initComponent();
 	}
 	//find the new (not saved) items, then send then to kitchen, save then to db. send to server...
 	public boolean unsavedItemsCheck() {
@@ -137,7 +134,7 @@ public class BillPanel extends BaseFragment
 	}
 
 	//if the tableId is null, then use the sameID of original bill.
-	public int cloneCurrentBillRecord(String tableID, String customerNumber, int total) {
+	public int cloneCurrentBillRecord(String tableName, String customerNumber, int total) {
 		if(total < 0) {
 			total = Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100);
 		}
@@ -163,10 +160,10 @@ public class BillPanel extends BaseFragment
 			//generate a bill in db and update the output with the new bill id
 			String createtime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
-	            "INSERT INTO bill(createtime, tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment,")
+	            "INSERT INTO bill(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
 	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
 				.append(createtime).append("', '")
-	            .append(tableID == null ? DBUtil.getCursorString(rs, "tableID") : tableID).append("', '")					//table
+	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table
 	            .append(customerNumber == null ? DBUtil.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
 	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
 	            .append(discount).append(", ")
@@ -233,7 +230,7 @@ public class BillPanel extends BaseFragment
                     .append(" and AMOUNT = ").append(dish.getNum())
                     .append(" and TOLTALPRICE = ").append(dish.getTotalPrice())
                     .append(" and DISCOUNT = ").append(dish.getDiscount())
-                    .append(" and EMPLOYEEID = ").append(LoginDlg.USERID)
+                    .append(" and userId = ").append(LoginDlg.USERID)
                 	.append(" and CATEGORY = '").append(currentTime).append("'");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 while (rs.moveToNext()) {
@@ -437,7 +434,7 @@ public class BillPanel extends BaseFragment
 	 */
 	private void logOperation(int operationType, int status, Dish dish) {
 		StringBuilder sql = new StringBuilder(
-			"insert into operationlog (OperationType, EMPLOYEEID, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) values (")
+			"insert into operationlog (OperationType, userId, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) values (")
 				.append(operationType).append(",")
 				.append(LoginDlg.USERID).append(",")
 				.append(status).append(",")
@@ -993,7 +990,7 @@ public class BillPanel extends BaseFragment
     	StringBuilder sql = new StringBuilder("select * from OUTPUT, PRODUCT where OUTPUT.SUBJECT = '")
     		.append(tableName)
     		.append("' and CONTACTID = ").append(billIndex)
-    		.append(" AND OUTPUT.PRODUCTID = PRODUCT.ID and output.time = '").append(openTime).append("'");
+    		.append(" AND OUTPUT.PRODUCTID = PRODUCT._id and output.time = '").append(openTime).append("'");
 
 		//if no billId given, means to display the latest bill(should there be also some expired ones), it must be the last completed bill or a not completed bill (might be billPrinted, but not a closed one,
 		//Only if we select bill from checkOrderDlg, and selected an expired one, there will be a billID).
@@ -1087,7 +1084,7 @@ public class BillPanel extends BaseFragment
 		StringBuilder sql = billId != null && billId.length() > 0 ? 
 				new StringBuilder("select * from Bill where id = ").append(billId)
 				: new StringBuilder("select * from Bill where billIndex = '").append(billIdx).append("'")
-				.append(" and tableID = '").append(tableName).append("'")
+				.append(" and tableName = '").append(tableName).append("'")
 				.append(" and opentime = '").append(openTime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(")");// for expired bills, for sure it will have billId.
 

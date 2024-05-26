@@ -228,7 +228,7 @@ public class MainGenerator {
         websrmBatch.addStringProperty("signatransm");
         websrmBatch.addStringProperty("emprCertifSev").columnName("emprCertifSev");
         websrmBatch.addStringProperty("strUrlQRCode").columnName("strUrlQRCode");
-        websrmBatch.addIntProperty("employeeId").columnName("employeeId");
+        websrmBatch.addIntProperty("userId").columnName("userId");
 
         // +---------+-----------+------------+---------+
         // |    id   |   mname   |  number    |   Device |

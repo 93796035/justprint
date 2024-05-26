@@ -504,7 +504,7 @@ public class PrintService{
 //        				PrintUtil.errorPrinterList.add(entry.getKey());
 //        			}
              		
-         			//or if didn't print well, add to error list, because employee never want to fix the printer...they always call boss.
+         			//or if didn't print well, add to error list, because USER never want to fix the printer...they always call boss.
          			JOptionPane.showMessageDialog(BarFrame.instance, entry.getKey() + BarFrame.consts.PrinterSettingError());
          			PrintUtil.errorPrinterList.add(entry.getKey());
          			BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);
@@ -1276,12 +1276,12 @@ public class PrintService{
 
 		content.append("Inv#   Table#      Total").append("\n");
 		
-        StringBuilder sql = new StringBuilder("select * from bill, employee where bill.employeeId = employee.id ")
+        StringBuilder sql = new StringBuilder("select * from bill, USER where bill.userId = employee._id ")
         		.append(" and createTime >= '").append(startTime)
         		.append("' and createTime <= '").append(endTime)
         		.append("' and bill.status = ").append(DBConsts.COMPLETED);
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
-        	sql.append(" and employee.id = ").append(LoginDlg.USERID);
+        	sql.append(" and employee._id = ").append(LoginDlg.USERID);
         }
         sql.append(" order by id");
         
@@ -1289,9 +1289,9 @@ public class PrintService{
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-            	String tableID = DBUtil.getCursorString(rs,"tableID");
+            	String tableName = DBUtil.getCursorString(rs,"tableName");
             	String orderId = String.valueOf(DBUtil.getCursorString(rs, "id"));
-            	content.append(orderId).append(BarUtil.generateString(12 - orderId.length() - (tableID == null ? 4 : tableID.length()), " ")).append(tableID);
+            	content.append(orderId).append(BarUtil.generateString(12 - orderId.length() - (tableName == null ? 4 : tableName.length()), " ")).append(tableName);
             	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
             	totalSales += total;
             	String totalStr = BarUtil.formatMoney(total);
@@ -2152,7 +2152,7 @@ public class PrintService{
 		for (Bill bill : list) {
   			String tableId = bill.getTableName();
   			if(tableId == null) {
-  				L.e("Found bill with no tableID", "found a bill with no tableID", null);
+  				L.e("Found bill with no tableName", "found a bill with no tableName", null);
   				continue;
   			}
   			Character firstCharacter = tableId.trim().substring(0, 1).toUpperCase().toCharArray()[0];
@@ -2296,16 +2296,16 @@ public class PrintService{
 		StringBuilder sql = new StringBuilder("Select * from bill where bill.status = ").append(DBConsts.VOIDED)
 				.append(" and createTime >= '").append(startDateStr).append("' and createTime <= '").append(endDateStr).append("'");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
-        	sql.append(" and employeeId = ").append(LoginDlg.USERID);
+        	sql.append(" and userId = ").append(LoginDlg.USERID);
         }else {
-        	sql.append(" order by employeeId");
+        	sql.append(" order by userId");
         }
         
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             double totalSales = 0f;
             while (rs.moveToNext()) {
-                Integer billId = DBUtil.getCursorInt(rs,"ID");
+                Integer billId = DBUtil.getCursorInt(rs,"_id");
                 content.append(billId);
                 
                 String time = DBUtil.getCursorString(rs,"opentime");
@@ -2322,7 +2322,7 @@ public class PrintService{
                 content.append(BarUtil.generateString(8 - money.length(), " ")).append(money);
                 totalSales += f;
 
-                Integer employeeId = DBUtil.getCursorInt(rs,"employeeId");
+                Integer employeeId = DBUtil.getCursorInt(rs,"userId");
                 content.append("  ").append(employeeId);
                 
                 String comment = DBUtil.getCursorString(rs,"comment");
@@ -2364,9 +2364,9 @@ public class PrintService{
 		StringBuilder sql = new StringBuilder("Select * from Output, product, bill where bill.status != ").append(DBConsts.VOIDED)
 				.append(" and output.deleted = ").append(DBConsts.VOIDED)
 				.append(" and time >= '").append(startDateStr).append("' and time <= '").append(endDateStr)
-				.append("' and output.productID = product.id and output.folderId = bill.id");
+				.append("' and output.productID = product._id and output.folderId = bill._id");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
-        	sql.append(" and employeeId = ").append(LoginDlg.USERID);
+        	sql.append(" and userId = ").append(LoginDlg.USERID);
         }
         
         try {
@@ -2424,13 +2424,13 @@ public class PrintService{
 
 		content.append("Inv#   Table#      Total").append("\n");
 		
-        StringBuilder sql = new StringBuilder("select * from bill, employee where bill.employeeId = employee.id ")
+        StringBuilder sql = new StringBuilder("select * from bill, USER where bill.userId = employee._id ")
         		//.append(" and createTime >= '").append(startTime)
         		//.append("' and createTime <= '").append(endTime)
         		.append(" and (bill.status is null or (bill.status >= ").append(DBConsts.ORIGINAL)
         		.append(" and bill.status < ").append(DBConsts.COMPLETED).append("))");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
-        	sql.append(" and employee.id = ").append(LoginDlg.USERID);
+        	sql.append(" and employee._id = ").append(LoginDlg.USERID);
         }
 
         float totalSales = 0.0f;
@@ -2439,8 +2439,8 @@ public class PrintService{
             while (rs.moveToNext()) {
             	String id = String.valueOf(DBUtil.getCursorInt(rs,"id"));
             	content.append(id);
-            	String tableID = DBUtil.getCursorString(rs,"tableID");
-            	content.append(BarUtil.generateString(12 - id.length() - tableID.length(), " ")).append(tableID);
+            	String tableName = DBUtil.getCursorString(rs,"tableName");
+            	content.append(BarUtil.generateString(12 - id.length() - tableName.length(), " ")).append(tableName);
             	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
             	totalSales += total;
             	String formattedTotal = BarUtil.formatMoney(total);

@@ -82,11 +82,14 @@ import org.cas.client.platform.cascustomize.CustOpts;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -112,10 +115,10 @@ public class MevUtils {
 	public static final String ALIAS_CERTIFICAT_PSI = "_ALIAS_CERTIFICAT.PSI";
 
 	public static final String KEYSTORE_TYPE = "PKCS12";
-	public static final String KEYSTORE_FILE = "c:/AikaPos/jre/lib/jckconfig";
+	public static final File KEYSTORE_FILE = new File(AikaPos.instance.getFilesDir(), "jckconfig");
 	public static final String KEYSTORE_KEY = "Eric";
 
-	private static ECPrivateKey privateKey;
+	private static PrivateKey privateKey;
 
 	private static Map<String, String> httpHeaders = getHTTPHeaders();
 
@@ -216,7 +219,7 @@ public class MevUtils {
 			KeyPair keyPair = kpg.generateKeyPair();
 
 			//public key and the X500Name subject are used to build the certificate request.
-			ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+			PublicKey publicKey = (PublicKey)keyPair.getPublic();
 			final SubjectPublicKeyInfo clePublique = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 			//OK, this is my infomation which need to be certified, and this is my public key, please build a request for me, so I can send
 			//it to CA organization, and they will give me a certificate. so, in future, I can show people the trustable certificate, and they
@@ -233,7 +236,7 @@ public class MevUtils {
 			csrBuilder.addAttribute(Extension.extendedKeyUsage, new ExtendedKeyUsage(keyPurposeIds));
 
 			//private key is used to sign the content before publish it out
-			privateKey = (ECPrivateKey) keyPair.getPrivate();
+			privateKey = keyPair.getPrivate();
 			JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256withECDSA");
 			ContentSigner signer = signerBuilder.build(privateKey);
 			//here, the first usage of the signer will be sign certificate request???? -----no, it's used as parameter just to tell the
@@ -276,6 +279,7 @@ public class MevUtils {
     		String modif,
     		Map<String, String> httpHeadersDict,
     		String reqeustContentInJASON){
+
 		WEBSRM_Response response = UtilesJSON.CertificatesRequest(modif, httpHeadersDict, reqeustContentInJASON, BarOption.getCertificateSerialNumberSRS());
 		String responseString = response.getResponseJsonWEBSRM();
 		if(responseString == null) {
@@ -705,12 +709,12 @@ public class MevUtils {
 //			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //			while (rs.moveToNext()) {
 //				String[] record = new String[6];
-//				record[0] = DBUtil.getCursorString(rs,"ID");
+//				record[0] = DBUtil.getCursorString(rs,"_id");
 //				record[1] = DBUtil.getCursorString(rs,"JSONTOSEND");
 //				record[2] = DBUtil.getCursorString(rs,"SIGNATRANSM");
 //				record[3] = DBUtil.getCursorString(rs,"EMPRCERTIFSEV");
 //				record[4] = DBUtil.getCursorString(rs,"STRURLQRCODE");
-//				record[5] = DBUtil.getCursorString(rs,"EMPLOYEEID");
+//				record[5] = DBUtil.getCursorString(rs,"userId");
 //				values.add(record);
 //			}
 //		}catch(Exception exp) {
@@ -923,7 +927,7 @@ public class MevUtils {
 //				}else {
 //					jsonToSend = jsonToSend.substring(0, jsonToSend.length() - 3);
 //				}
-//				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, employeeId) VALUES (")
+//				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, userId) VALUES (")
 //					.append(billID).append(", '")
 //					.append(jsonToSend).append("', '")
 //				    .append(signatransm).append("', '")
@@ -999,7 +1003,7 @@ public class MevUtils {
 //	        	errorMsg.append("Id : " + error).append("\n");
 //	        }
 //			JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString(), "Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//			StringBuilder sql = new StringBuilder("delete from employee where nname is '" + userName + "'");
+//			StringBuilder sql = new StringBuilder("delete from USER where nname is '" + userName + "'");
 //			try {
 //				PIMDBModel.getStatement().executeUpdate(sql.toString());
 //			} catch (Exception exp) {

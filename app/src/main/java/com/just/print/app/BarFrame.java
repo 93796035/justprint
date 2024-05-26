@@ -1,7 +1,7 @@
 package com.just.print.app;
 
-import android.app.AlertDialog;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -19,16 +19,12 @@ import com.just.print.R;
 import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.User;
-import com.just.print.ui.fragment.ActivateFragment;
 import com.just.print.ui.fragment.LoginDlg;
-import com.just.print.ui.fragment.RegisterFragment;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
+import com.just.print.ui.panel.SettingPanel;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
-
-import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.casutil.L;
 import com.just.print.util.StringUtils;
 import com.just.print.util.ToastUtil;
 import com.stupid.method.reflect.StupidReflect;
@@ -36,7 +32,6 @@ import com.stupid.method.reflect.annotation.XViewByID;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.action.Cmd_CheckInOut;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.dialog.DiscountDlg;
@@ -48,6 +43,7 @@ import org.cas.client.platform.bar.i18n.BarDlgConst0;
 import org.cas.client.platform.bar.i18n.BarDlgConst1;
 import org.cas.client.platform.bar.i18n.BarDlgConst2;
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.panel.CustomerFrame;
@@ -55,6 +51,7 @@ import org.cas.client.platform.bar.panel.MenuPanel;
 import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.L;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -123,10 +120,9 @@ public class BarFrame extends BaseFragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        instance = this;
         setContentView(R.layout.activity_main);
         new StupidReflect(this).init();
-
+        instance = this;
         //this block should be useless, because dubug is already set value.-----no, it's static, so give a init here.
         // or maybe onCreate method could be called more than one time? so every time switch back to this page,
         // the oncreate will be called again? so we can update the debug setting without restart app?
@@ -160,6 +156,10 @@ public class BarFrame extends BaseFragmentActivity {
 //            switchFragment(new ActivateFragment());
         }
 
+        panels[0] = new TablesPanel();
+        panels[1] = new BillListPanel();
+        panels[2] = new SalesPanel();
+        panels[3] = new SettingPanel();
         //==========================================================
         menuPanel = new MenuPanel();	//have to be after initModel, before new BarFrame().
         switch (CustOpts.custOps.getUserLang()){//before login, the system language is the last change of userLanguage, (depends on who logged in last time.
@@ -187,8 +187,6 @@ public class BarFrame extends BaseFragmentActivity {
         if(BarOption.isSingleUser()) {
             singleUserLoginProcess();
         }
-
-
 
         //counter mode or not
         if(BarOption.isCounterMode()) {
@@ -267,71 +265,24 @@ public class BarFrame extends BaseFragmentActivity {
 //		});
     }
 
-    private static void existingIdApprlCheck() {
-        if(BarOption.getBillingNumber() == null
-                || BarOption.getBillingNumber().length() < 5){
-            JOptionPane.showInputDialog("Activate", consts.activeCode(), new JOptionPane.InputDialogListener(){
-
-                @Override
-                public void onInputReceived(String input) {
-
-                }
-
-                @Override
-                public void onInputCanceled() {
-
-                }
-            });
-            JOptionPane.showInputDialog("Numéro de facturation", "Veuillez saisir votre numéro de facturation:", new JOptionPane.InputDialogListener() {
-                @Override
-                public void onInputReceived(String input) {
-                    BarOption.setBillingNumber(input);
-                    //No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
-                    //it's already checked, and only when it's true, can reach to this method.
-                    JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", "APPAREIL_ID", new JOptionPane.ConfirmDialogCallback() {
-                        @Override
-                        public void onResult(boolean confirmed) {
-                            if (confirmed) {
-                                JOptionPane.showInputDialog("identifiant d'appareil", "<html>Veuillez inscrirer votre identifiant d'appareil<br> avant d'effectuer une requête:</html>", new JOptionPane.InputDialogListener() {
-                                    @Override
-                                    public void onInputReceived(String input) {
-                                        BarOption.setCertifiedDeviceId(input);
-                                    }
-
-                                    @Override
-                                    public void onInputCanceled() {
-                                        Toast.makeText(AikaPos.instance.getApplicationContext(), "certificate request canceled! Please input \"identifiant d\'appareil\" to let the software ready to work.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                                //if the input idApprl not valid, will endup not saved, when getting this configration will get "0000-0000-0000" .
-                                if (BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
-                                    JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
-                                    existingIdApprlCheck();
-                                }
-                            }
-                            MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
-                        }
-                    });
-                }
-                @Override
-                public void onInputCanceled() {
-                    Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }
-
     private void validateActivation() {
         if(BarOption.getBillHeadInfo() == null || BarOption.getBillHeadInfo().trim().length() == 0 ) { //if store info not found, means first time use.
             JOptionPane.showInputDialog("Activate", consts.activeCode(), new JOptionPane.InputDialogListener() {
                 @Override
                 public void onInputReceived(String input) {
-                    authenticate(input);
+
+                    if (input == null || input.length() != 6 && !input.equals("9")) {
+                        JOptionPane.showMessageDialog(null, "Please input correct license code");
+                        return;
+                    }
+                    BarOption.setLicense(input.equals("9") ? "ER0001" : input);
+
+                    activateAccount();
                 }
 
                 @Override
                 public void onInputCanceled() {
-
+                    Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
                 }
             });
         }else {	//already started
@@ -358,16 +309,6 @@ public class BarFrame extends BaseFragmentActivity {
         }
     }
 
-    private void authenticate(String inputedSN) {
-        if (inputedSN == null || inputedSN.length() != 6 && !inputedSN.equals("9")) {
-            JOptionPane.showMessageDialog(null, "Please input correct license code");
-            return;
-        }
-        BarOption.setLicense(inputedSN);
-
-        activateAccount();
-    }
-
     private void activateAccount() {
         OkHttpClient client = new OkHttpClient();
         String url = "http://216.137.179.176/activeAccount";
@@ -382,26 +323,69 @@ public class BarFrame extends BaseFragmentActivity {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                runOnUiThread(() -> {
-                    // Handle failure in activation
-                    JOptionPane.showMessageDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
-                });
-            }
-
-            @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseString = response.body().string();
-//                    runOnUiThread(() ->
-                            processActivationResponse(responseString);
+                    processActivationResponse(responseString);
+                    runOnUiThread(() -> {
+                        existingIdApprlCheck();
+                    });
                 } else {
                     runOnUiThread(() -> {
                         JOptionPane.showMessageDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
                     });
                 }
             }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                runOnUiThread(() -> {
+                    // Handle failure in activation
+                    JOptionPane.showMessageDialog("Activation failed with error code 520, please contact us at info@ShareTheGoodOnes.com");
+                });
+            }
         });
+    }
+
+    private static void existingIdApprlCheck() {
+        if (BarOption.getBillingNumber() == null || BarOption.getBillingNumber().length() < 5) {
+            BarOption.setBillingNumber(BarOption.getLicense());
+            // No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
+            // it's already checked, and only when it's true, can reach to this method.
+            JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", "APPAREIL_ID", new JOptionPane.ConfirmDialogCallback() {
+                @Override
+                public void onResult(boolean confirmed) {
+                    if (confirmed) {
+                        JOptionPane.showInputDialog("identifiant d'appareil", "<html>Veuillez inscrirer votre identifiant d'appareil<br> avant d'effectuer une requête:</html>", new JOptionPane.InputDialogListener() {
+                            @Override
+                            public void onInputReceived(String input) {
+                                BarOption.setCertifiedDeviceId(input);
+                            }
+
+                            @Override
+                            public void onInputCanceled() {
+                                Toast.makeText(AikaPos.instance.getApplicationContext(), "certificate request canceled! Please input \"identifiant d\'appareil\" to let the software ready to work.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        // if the input idApprl not valid, will end up not saved, when getting this configuration will get "0000-0000-0000".
+                        if (BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+                            JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
+                            existingIdApprlCheck();
+                        }
+                    }
+                    new AskWebMevToSignTask().execute(ValuePossible.Modif.AJO); // 使用name()方法将枚举转换为String
+                }
+            });
+        }
+    }
+
+    // AsyncTask to execute askWebMevToSignTheCertificates
+    private static class AskWebMevToSignTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            MevUtils.askWebMevToSignTheCertificates(params[0]); // 使用字符串参数
+            return null;
+        }
     }
 
     private void processActivationResponse(String response) {
@@ -644,8 +628,8 @@ public class BarFrame extends BaseFragmentActivity {
         //create a bill for it. in case there will be something like order fee in future. this bill has no create time yet, so will not display minutes on buttom in counter mode.(counter
         //mode calculated created time, table mode calculates waited minutes by opentime.
         StringBuilder sql = new StringBuilder(
-                "INSERT INTO bill(createtime, tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment, opentime, status) VALUES ('")
-                .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment, opentime, status) VALUES ('")
+                "INSERT INTO bill(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
+                .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
                 .append(tableName).append("', '")	//table
                 .append(newBillIdx).append("', ")			//bill
                 .append(0).append(", ")	//total
@@ -660,7 +644,7 @@ public class BarFrame extends BaseFragmentActivity {
         try {
             AikaPos.db.execSQL(sql.toString());
             sql = new StringBuilder("Select id from bill where opentime = '").append(openTime)
-                    .append("' and tableID = '").append(tableName)
+                    .append("' and tableName = '").append(tableName)
                     .append("' and BillIndex = '").append(newBillIdx).append("'");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if (rs != null && rs.moveToFirst()) {
@@ -871,7 +855,7 @@ public class BarFrame extends BaseFragmentActivity {
         //all the bill should already completed when table closed except those was generated while has no output on it.
         //this is the designed time to clean those bills.
         StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
-                .append(" WHERE tableID = '").append(tableName)
+                .append(" WHERE tableName = '").append(tableName)
                 .append("' and OPENTIME = '").append(openTime)
                 .append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
         try {
@@ -945,7 +929,7 @@ public class BarFrame extends BaseFragmentActivity {
         int p = time.indexOf(" ");
         time = time.substring(0, p + 1) + BarOption.getStartTime();
 
-        String sql = "Select * from evaluation where EMPLOYEEID = " + LoginDlg.USERID + " and startTime > '" + time
+        String sql = "Select * from evaluation where userId = " + LoginDlg.USERID + " and startTime > '" + time
                 + "' and endTime is null";
 
         try {
@@ -954,7 +938,7 @@ public class BarFrame extends BaseFragmentActivity {
             if(DBUtil.getCursorInt(rs, "id") > -1);	//if not throwning exception (means there is a record), then do nothing.
             return;
         }catch(Exception exp) {			//otherwise(if no record yet), generate a record.
-            sql = "INSERT INTO evaluation(startTime, EMPLOYEEID, subject) VALUES ('" + BarUtil.df.format(new Date())
+            sql = "INSERT INTO evaluation(startTime, userId, subject) VALUES ('" + BarUtil.df.format(new Date())
                     + "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME +"')";
             try {
                 AikaPos.db.execSQL(sql);

@@ -426,7 +426,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 dish.setDiscount(DBUtil.getCursorInt(rs,"discount"));//
                 dish.setId((long)DBUtil.getCursorInt(rs,"PRODUCTID"));
                 dish.setModification(DBUtil.getCursorString(rs, "OUTPUT.CONTENT"));//
-                dish.setOutputID(DBUtil.getCursorInt(rs,"OUTPUT.ID"));//
+                dish.setOutputID(DBUtil.getCursorInt(rs,"OUTPUT._ID"));//
                 dish.setTotalPrice(DBUtil.getCursorInt(rs,"OUTPUT.TOLTALPRICE"));
                 dishes.add(dish);
             }

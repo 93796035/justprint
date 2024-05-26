@@ -54,7 +54,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
                 "'SIGNATRANSM' TEXT," + // 2: signatransm
                 "'emprCertifSev' TEXT," + // 3: emprCertifSev
                 "'strUrlQRCode' TEXT," + // 4: strUrlQRCode
-                "'employeeId' INTEGER," + // 5: employeeId
+                "'userId' INTEGER," + // 5: employeeId
                 "'STATUS' INTEGER," + // 6: status
                 "'VERSION' INTEGER);"); // 7: version
     }

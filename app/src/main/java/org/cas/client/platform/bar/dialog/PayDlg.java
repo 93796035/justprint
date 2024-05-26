@@ -150,7 +150,7 @@ public class PayDlg extends DialogFragment
 //   	    		//we use this field to indicate when the bill was really finished, it will determine which batch this bill will display on.)
 //   	    		.append(", createTime = '").append(paidTime).append("'")
 //	   	    	.append(", status = ").append(DBConsts.COMPLETED)
-//	   	    	.append(", employeeid = ").append(LoginDlg.USERID)
+//	   	    	.append(", userId = ").append(LoginDlg.USERID)
 //	   	    	.append(" where id = ").append(billId);
 //			PIMDBModel.getStatement().executeUpdate(sql.toString());
 //			//update the status of relevant outputs.

@@ -119,7 +119,7 @@ public class BarUtil {
 //                rs.beforeFirst();
 //                int tIdx = 0;
 //                while (rs.moveToNext()) {
-//                    tIDAry[tIdx] = DBUtil.getCursorInt(rs,"ID");
+//                    tIDAry[tIdx] = DBUtil.getCursorInt(rs,"_ID");
 //                    tCodeAry[tIdx] = DBUtil.getCursorString(rs,"Code");
 //                    tPriceAry[tIdx] = DBUtil.getCursorInt(rs,"Price");
 //                    tMnemonicAry[tIdx] = DBUtil.getCursorString(rs,"Mnemonic");

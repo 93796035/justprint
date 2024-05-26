@@ -60,10 +60,10 @@ public class Cmd_Suspend implements SamActionListener {
     	DBUtil.updatePriceAndCreateTimeInBillRecord(salesPanel.billPanel, DBConsts.SUSPENDED, BarUtil.df.format(new Date()));
     	//update outputs
         try {
-        	String tableID = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
+        	String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
         	//update outputs
 			StringBuilder sql = new StringBuilder("update output set deleted = ").append(DBConsts.SUSPENDED)
-	                .append(" where SUBJECT = '").append(tableID)
+	                .append(" where SUBJECT = '").append(tableName)
 	                .append("' and time = '").append(BarFrame.instance.valOpenTime.getText())
 	                .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
 			AikaPos.db.execSQL(sql.toString());

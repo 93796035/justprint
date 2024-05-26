@@ -143,7 +143,7 @@ public class MenuPanel extends View implements View.OnClickListener {
                 categoryNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "name3");
                 
                 PrintService.allCategory[tmpPos] =  new Category();
-                PrintService.allCategory[tmpPos].setId(DBUtil.getCursorLong(rs,"ID"));
+                PrintService.allCategory[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
                 PrintService.allCategory[tmpPos].setDisplayIdx(tmpPos);
                 PrintService.allCategory[tmpPos].setLanguage(new String[]{categoryNameMetrix[0][tmpPos],
                 		categoryNameMetrix[1][tmpPos], categoryNameMetrix[2][tmpPos]});
@@ -219,7 +219,7 @@ public class MenuPanel extends View implements View.OnClickListener {
 				printers[tmpPos].setIp(DBUtil.getCursorString(rs,"IP"));
 				printers[tmpPos].setStyle(DBUtil.getCursorInt(rs,"STYLE")); // index p1, p2.....
 				printers[tmpPos].setCategory(DBUtil.getCursorInt(rs,"langType"));
-				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs,"STATus"));
+				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs,"STATUS"));
 				tmpPos++;
 			}
 			rs.close();

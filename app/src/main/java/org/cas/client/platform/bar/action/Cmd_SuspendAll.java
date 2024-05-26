@@ -40,10 +40,10 @@ public class Cmd_SuspendAll implements  SamActionListener {
 		}
 		
         try {
-        	String tableID = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
+        	String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
         	//update outputs
 			StringBuilder sql = new StringBuilder("update output set deleted = ").append(DBConsts.SUSPENDED)
-	                .append(" where SUBJECT = '").append(tableID)
+	                .append(" where SUBJECT = '").append(tableName)
 	                .append("' and time = '").append(BarFrame.instance.valOpenTime.getText())
 	                .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
 			AikaPos.db.execSQL(sql.toString());
@@ -55,7 +55,7 @@ public class Cmd_SuspendAll implements  SamActionListener {
 			AikaPos.db.execSQL(sql.toString());
 			
         	//update the tabel status
-			BarFrame.instance.closeTableAndBillInDB(tableID, null);
+			BarFrame.instance.closeTableAndBillInDB(tableName, null);
         }catch(Exception exp) {
         	ErrorUtil.write(exp);
         }

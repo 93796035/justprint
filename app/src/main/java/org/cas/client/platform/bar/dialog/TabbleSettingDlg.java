@@ -215,7 +215,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //            	TableButton tableToggleButton = new TableButton();
 //
 //    			tableToggleButton.setBackground(bg);
-//            	tableToggleButton.setId(DBUtil.getCursorInt(rs,"ID"));
+//            	tableToggleButton.setId(DBUtil.getCursorInt(rs,"_id"));
 //            	int x = DBUtil.getCursorInt(rs,"posX");
 //        		int y = DBUtil.getCursorInt(rs,"posY");
 //        		int w = DBUtil.getCursorInt(rs,"width");

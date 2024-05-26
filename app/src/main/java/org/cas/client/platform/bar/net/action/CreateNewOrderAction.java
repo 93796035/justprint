@@ -55,10 +55,10 @@ public class CreateNewOrderAction implements SamActionListener {
 		JSONObject rjson = new JSONObject(json);
 		String lastModifiedTime = rjson.getString("lastModifiedTime");
 		
-		//prepare tableID and billIndex
+		//prepare tableName and billIndex
 		if(rjson.has("waiter") && rjson.has("table") && rjson.has("billIndex") && rjson.has("totalPrice") && rjson.has("orderContent")) {
 			String waiter = rjson.getString("waiter");
-			String tableID = rjson.getString("table");
+			String tableName = rjson.getString("table");
 			String billIndex = rjson.getString("billIndex");
 			Double totalPrice =  rjson.getDouble("totalPrice");
 			String orderContent = rjson.getString("orderContent");
@@ -75,14 +75,14 @@ public class CreateNewOrderAction implements SamActionListener {
 	        	openTime = BarUtil.df.format(new Date());
 	        }
 	        //table
-	        if(tableID != null && tableID.length() > 0) {
-	        	makeSureTableExistsAndOpened(tableID, openTime);
+	        if(tableName != null && tableName.length() > 0) {
+	        	makeSureTableExistsAndOpened(tableName, openTime);
 	        }
 	        //bills
-	        int billId = makeSureBillExists(waiter, openTime, tableID, billIndex, totalPrice.floatValue());
+	        int billId = makeSureBillExists(waiter, openTime, tableName, billIndex, totalPrice.floatValue());
 	
 	        if(billId < 0) {
-	        	L.e("Request new orders", "Failed to create a bill with createtime:" + openTime + " tableID:" + tableID + " billIndex:" + " price:" + totalPrice, null);
+	        	L.e("Request new orders", "Failed to create a bill with createtime:" + openTime + " tableName:" + tableName + " billIndex:" + " price:" + totalPrice, null);
 	        	return lastModifiedTime;
 	        }
 	        
@@ -109,7 +109,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		    	dish.setModification(markStr);
 		    	price = price * num + markPrice;
 		    	//if totalPrice is negative, means the request is a cancel request.
-				createOutputRecord(dish.getId().intValue(), openTime, tableID, billIndex, billId, markStr, num, totalPrice < 0 ? -1 * price : price);
+				createOutputRecord(dish.getId().intValue(), openTime, tableName, billIndex, billId, markStr, num, totalPrice < 0 ? -1 * price : price);
 			}
 			//automatically set the ShowProcessingBill flag.
 			CustOpts.custOps.setKeyAndValue("ShowProcessingBill", "true");
@@ -189,30 +189,30 @@ public class CreateNewOrderAction implements SamActionListener {
 //
 //	    for (int i = 0; i < mainOrders.size(); i++) {
 //	        MainOrder mainOrder = mainOrders.get(i);
-//	        //prepare tableID and billIndex
-//	        String tableID = mainOrder.sizeTable;
+//	        //prepare tableName and billIndex
+//	        String tableName = mainOrder.sizeTable;
 //	        //@NOTE: do we really should use the billIdx from client? what if there's multible client?
-//	        String billIndex = "1";			//@default value, will change if tableID contains "_".
-//	        int p = tableID.indexOf("_");
+//	        String billIndex = "1";			//@default value, will change if tableName contains "_".
+//	        int p = tableName.indexOf("_");
 //	        if(p > 0) {
-//	        	billIndex = tableID.substring(p+1);
-//	        	tableID = tableID.substring(0, p);
+//	        	billIndex = tableName.substring(p+1);
+//	        	tableName = tableName.substring(0, p);
 //	        }
 //	        //table
-//	        makeSureTableExistsAndOpened(tableID, openTime);
+//	        makeSureTableExistsAndOpened(tableName, openTime);
 //
 //	        //bills
-//	        int billId = generateBill(findEmployeeId(mainOrder.contactPerson.name), openTime, tableID, billIndex, Float.valueOf(mainOrder.payCondition));
+//	        int billId = generateBill(findEmployeeId(mainOrder.contactPerson.name), openTime, tableName, billIndex, Float.valueOf(mainOrder.payCondition));
 //            if(billId < 0) {
-//            	L.e("Request new orders", "Failed to create a bill with createtime:" + openTime + " tableID:" + tableID + " billIndex:" + billIndex + " price:" + mainOrder.payCondition, null);
+//            	L.e("Request new orders", "Failed to create a bill with createtime:" + openTime + " tableName:" + tableName + " billIndex:" + billIndex + " price:" + mainOrder.payCondition, null);
 //            	return;
 //            }
 //
 //            //outputs
-//            List<Dish> dishes = generateOutputs(mainOrder, openTime, tableID, billIndex, billId, materials);
+//            List<Dish> dishes = generateOutputs(mainOrder, openTime, tableName, billIndex, billId, materials);
 //
 //            //send these output to kitchen.
-//            //PrintService.printTemporaryOrderList(dishes, tableID, billIndex, "customer", false);
+//            //PrintService.printTemporaryOrderList(dishes, tableName, billIndex, "customer", false);
 //
 //            //send request to update the status to be 50.
 //        	new HttpRequestClient(
@@ -224,10 +224,10 @@ public class CreateNewOrderAction implements SamActionListener {
 //	    }
 	}
 	
-	public int makeSureBillExists(String waiter, String createtime, String tableID, String billIndex, Float totalPrice) {
+	public int makeSureBillExists(String waiter, String createtime, String tableName, String billIndex, Float totalPrice) {
 		//considered the case that, client added dish from slave machine in an existing bill.
 		//should the bill exist, then should update the total price, and return back the id.
-		StringBuilder sql = new StringBuilder("select _id, status from bill where tableId = '").append(tableID).append("'")
+		StringBuilder sql = new StringBuilder("select _id, status from bill where tableId = '").append(tableName).append("'")
 				.append(" and opentime = '").append(createtime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.COMPLETED)
 				.append(" and status >= ").append(DBConsts.ORIGINAL).append(")");
@@ -257,12 +257,12 @@ public class CreateNewOrderAction implements SamActionListener {
         }
 		
 		int employeeId = findEmployeeId(waiter);
-		return generateBill(employeeId, createtime, tableID, billIndex, totalPrice);
+		return generateBill(employeeId, createtime, tableName, billIndex, totalPrice);
 	}
 
 	private int findEmployeeId(String waiter) {
 		StringBuilder sql;
-		sql = new StringBuilder("select id from employee where nname = '").append(waiter).append("'");
+		sql = new StringBuilder("select id from USER where nname = '").append(waiter).append("'");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
         	if(rs.moveToNext()) {
@@ -275,19 +275,19 @@ public class CreateNewOrderAction implements SamActionListener {
 		return 0;
 	}
 	
-	public int generateBill(int employeeId, String createtime, String tableID, String billIndex, Float total) {
+	public int generateBill(int employeeId, String createtime, String tableName, String billIndex, Float total) {
 		//create a bill
 		StringBuilder sql = new StringBuilder(
-		        "INSERT INTO bill(createtime, tableID, BillIndex, total, discount, tip, serviceFee, cashback, EMPLOYEEID, Comment, opentime) VALUES ('")
+		        "INSERT INTO bill(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime) VALUES ('")
 				.append(createtime).append("', '")			//createtime
-		        .append(tableID).append("', '")				//tableID
+		        .append(tableName).append("', '")				//tableID
 		        .append(billIndex).append("', ")			//BillIndex
 		        .append(Math.round(total * 100)).append(", ")	 //remove the $ ahead.
 		        .append(0).append(", ")	//discount
 		        .append(0).append(", ")	//tip
 		        .append(0).append(", ")	//serviceFee
 		        .append(0).append(", ")	//cashback
-		        .append(employeeId).append(", '")		//emoployid--0 is the id of automactically generated DEFAULT employee when first time use.
+		        .append(employeeId).append(", '")		//emoployid--0 is the id of automactically generated DEFAULT USER when first time use.
 		        .append("").append("', '")					//Comment
 		        .append(createtime).append("')");				//opentime
 		try {
@@ -302,7 +302,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		 }
 	}
 
-	public List<Dish> generateOutputs(MainOrder mainOrder, String createtime, String tableID, String billIndex,
+	public List<Dish> generateOutputs(MainOrder mainOrder, String createtime, String tableName, String billIndex,
 			int billId, List<Material> materials) {
 		
 		List<Dish> dishes = new ArrayList<Dish>();
@@ -322,19 +322,19 @@ public class CreateNewOrderAction implements SamActionListener {
 		    	dish.setModification(material.remark);
 		    	dishes.add(dish);
 		    	
-				createOutputRecord(dish.getId().intValue(), createtime, tableID, billIndex, billId, material.remark, num, price);
+				createOutputRecord(dish.getId().intValue(), createtime, tableName, billIndex, billId, material.remark, num, price);
 			}
 		}
 		return dishes;
 	}
 
-	private void createOutputRecord(int productID, String openTime, String tableID, String billIndex, int billId,
+	private void createOutputRecord(int productID, String openTime, String tableName, String billIndex, int billId,
 			 String remark, int num, int price) {
 		StringBuilder sql;
 		try {
 			sql = new StringBuilder(
-		    	"INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, EMPLOYEEID, TIME, CATEGORY, FOLDERID) VALUES ('")
-					.append(tableID).append("', ")	//subject ->table id
+		    	"INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES ('")
+					.append(tableName).append("', ")	//subject ->table id
 		            .append(billIndex).append(", ")			//contactID ->bill id
 		            .append(productID).append(", ")	//product id
 		            .append(num).append(", ")	//amount

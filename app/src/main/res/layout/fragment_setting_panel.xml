@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/tfdGST"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="GST"/>
+
+        <EditText
+            android:id="@+id/tfdQST"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="QST"/>
+
+        <EditText
+            android:id="@+id/tfdBillPageRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Bill Page Row"/>
+
+        <EditText
+            android:id="@+id/tfdBillPageCol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Bill Page Col"/>
+
+        <EditText
+            android:id="@+id/tfdStartTimeOfDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Start Time Of Day"/>
+
+        <EditText
+            android:id="@+id/tfdPrinterMinReachTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Printer Min Reach Time"/>
+
+        <EditText
+            android:id="@+id/tfdServerHost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Server Host"/>
+
+        <EditText
+            android:id="@+id/tfdDBHost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="DB Host"/>
+
+        <EditText
+            android:id="@+id/tfdMevWaitTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mev Wait Time"/>
+
+        <EditText
+            android:id="@+id/tfdLogoutTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Logout Time"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsTrainingMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Training Mode"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsSingleUserMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Single User Mode"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsDiscoutAffectTax"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Discount Affect Tax"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsServiceFeeAffectTax"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Service Fee Affect Tax"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsBuffetMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Buffet Mode"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsFastFoodMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Fast Food Mode"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsHideRecordFromOtherWaiter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Hide Record From Other Waiter"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsWaiterAllowedToDiscount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Waiter Allowed To Discount"/>
+
+        <CheckBox
+            android:id="@+id/cbxIsWaiterAllowedToChangePrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Is Waiter Allowed To Change Price"/>
+
+        <CheckBox
+            android:id="@+id/cbxShowCustomerFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show Customer Frame"/>
+
+        <Button
+            android:id="@+id/bkMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Backup Menu"/>
+
+        <Button
+            android:id="@+id/restoreMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restore Menu"/>
+
+        <Button
+            android:id="@+id/bkConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Backup Config"/>
+
+        <Button
+            android:id="@+id/restoreConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restore Config"/>
+
+        <Button
+            android:id="@+id/moreOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="More Options"/>
+
+    </LinearLayout>
+</ScrollView>
