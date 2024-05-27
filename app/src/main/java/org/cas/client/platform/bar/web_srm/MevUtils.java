@@ -1003,7 +1003,7 @@ public class MevUtils {
 //	        	errorMsg.append("Id : " + error).append("\n");
 //	        }
 //			JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString(), "Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//			StringBuilder sql = new StringBuilder("delete from USER where nname is '" + userName + "'");
+//			StringBuilder sql = new StringBuilder("delete from USER where nickName is '" + userName + "'");
 //			try {
 //				PIMDBModel.getStatement().executeUpdate(sql.toString());
 //			} catch (Exception exp) {

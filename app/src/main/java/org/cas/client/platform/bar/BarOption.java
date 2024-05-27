@@ -173,18 +173,18 @@ public class BarOption {
 	}
 
 	public static String getMainFrameBK() {
-		String c = getBK("mainFrameBK");
-		if(c == null) {
-			c = "eeeeee";
+		String colorStr = getBK("mainFrameBK");
+		if(colorStr == null) {
+			colorStr = "eeeeee";
 		}
-		return c;
+		return colorStr.startsWith("#") ? colorStr : "#" + colorStr;
 	}
 	public static String getAdminMainFramelBK() {
-		String c = getBK("adminMainFrameBK");
-		if(c == null) {
-			c = "F47733";
+		String colorStr = getBK("adminMainFrameBK");
+		if(colorStr == null) {
+			colorStr = "F47733";
 		}
-		return c;
+		return colorStr.startsWith("#") ? colorStr : "#" + colorStr;
 	}
 	public static void setBK(String color, String key) {
 		CustOpts.custOps.setKeyAndValue(key, color);
@@ -199,7 +199,7 @@ public class BarOption {
 	}
 
     public static String getBillHeadInfo() {
-    	if(billHeadInfo == null || billHeadInfo.length() == 0) {
+     	if(billHeadInfo == null || billHeadInfo.length() == 0) {
 	    	billHeadInfo = (String)CustOpts.custOps.getValue("jingqi");
 	    	if(billHeadInfo != null && billHeadInfo.length() > 0) {
 	    		try {

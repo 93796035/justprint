@@ -20,6 +20,7 @@ import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
 import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
@@ -64,6 +65,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         initContent();
+        //this thread will start a request thread every 10 seconds to fetch new order from server..
+        //also will trigger a refresh of tableivew for the waiting time.
+        new BackGroundTimerThread().start();
         return mRoot;
     }
     @Override
@@ -90,10 +94,14 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         for (int i = btnTables.size() - 1; i >=0; i--) {
             TableButton tableToggleButton = btnTables.get(i);
             btnTables.remove(i);
-            ((RelativeLayout)mRoot).removeView(tableToggleButton);
+            if(mRoot != null){
+                ((RelativeLayout)mRoot).removeView(tableToggleButton);
+            }
         }
         if(btnLogo != null) {
-            ((RelativeLayout)mRoot).removeView(btnLogo);
+            if(mRoot != null){
+                ((RelativeLayout)mRoot).removeView(btnLogo);
+            }
         }
 
         try {
@@ -142,7 +150,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 tableToggleButton.setId(id);				//ID
 
                 tableToggleButton.setStatus(DBUtil.getCursorInt(rs, "s1"));
-                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs, "nname"));
+                tableToggleButton.setWaiterName(DBUtil.getCursorString(rs, "nickName"));
 
                 //for table mode, setTypeStatusAndName should go after setting bounds, because depends on the status, it might change the size.
                 RelativeLayout.LayoutParams params = tableToggleButton.setTypeStatusAndName(
@@ -196,8 +204,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 params.topMargin = convertDpToPixel(y, BarFrame.instance);
 
                 btnTables.add(tableToggleButton);
-                ((RelativeLayout)mRoot).addView(tableToggleButton, params);
-
+                if(mRoot != null) {
+                    ((RelativeLayout) mRoot).addView(tableToggleButton, params);
+                }
                 //displayIdx is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
                 if(DBUtil.getCursorInt(rs, "displayIdx") < 0) {
                     tableToggleButton.setOnTouchListener(this);

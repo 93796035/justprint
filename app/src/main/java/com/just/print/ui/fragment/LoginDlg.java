@@ -49,15 +49,21 @@ public class LoginDlg extends DialogFragment {
     public static String MODETRANS = "O";
     public static int USERLANG;
     public static final int USER_STATUS = 1;
-    public static  final int ADMIN_STATUS = 2;
-    public static  final int SUPER_ADMIN = 3;
+    public static final int ADMIN_STATUS = 2;
+    public static final int SUPER_ADMIN = 3;
 
     public boolean noRefresh;
+    private EditText passwordField; // 添加成员变量
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_login, null);
+
+        // 初始化密码输入框
+        passwordField = view.findViewById(R.id.password_field);
+
         // 数字按钮事件
         for (int id : new int[]{
                 R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5,
@@ -68,7 +74,6 @@ public class LoginDlg extends DialogFragment {
         // 设置后退按钮事件
         Button backButton = view.findViewById(R.id.button_left_arrow);
         backButton.setOnClickListener(v -> {
-            EditText passwordField = view.findViewById(R.id.password_field);
             int length = passwordField.getText().length();
             if (length > 0) {
                 passwordField.setText(passwordField.getText().delete(length - 1, length));
@@ -76,7 +81,6 @@ public class LoginDlg extends DialogFragment {
         });
 
         view.findViewById(R.id.button_ok).setOnClickListener(v -> {
-            EditText passwordField = view.findViewById(R.id.password_field);
             String inputPassword = passwordField.getText().toString();
             attemptLogin(inputPassword);
         });
@@ -86,45 +90,15 @@ public class LoginDlg extends DialogFragment {
     }
 
     private void attemptLogin(String inputPassword) {
-        if(inputPassword.length() > 1 && inputPassword.equals(BarOption.getSuperPassword())){
+        if (inputPassword.length() > 1 && inputPassword.equals(BarOption.getSuperPassword())) {
             PASSED = true;
             LoginDlg.failedTimes = 0;
             setUSERTYPE(LoginDlg.SUPER_ADMIN);
             USERNAME = "superAdmin";
-            ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
+            ((BarFrame) getActivity()).switchFragment(TablesPanel.getInstance());
             BarFrame.instance.resetInactivityTimer();
             return;
         }
-        // Object tUserName = general.cmbUserName.getSelectedItem();
-//        String sql = "select type from useridentity where ID < 6 order by id";
-//        try {
-//            Cursor rs = AikaPos.db.rawQuery(sql, null);
-//            int tmpPos = rs.getCount();
-//            if (tmpPos < 6)
-//                L.e("LoginDlg", "No userIdentity found, data base was destroyed.", null);
-//            String[] tSuperKey = new String[tmpPos];
-//            tmpPos = 0;
-//            while (rs.moveToNext()) {
-//                tSuperKey[tmpPos] = DBUtil.getCursorString(rs,"type");
-//                tmpPos++;
-//            }
-//            rs.close();// 关闭
-//
-//            if (new StringBuilder(tSuperKey[2]).append(tSuperKey[4]).append(tSuperKey[0]).append(tSuperKey[1])
-//                    .append(tSuperKey[5]).append(tSuperKey[3]).toString().equals(tPassword)) {
-//                PASSED = true;
-//                LoginDlg.failedTimes = 0;
-//                setUSERTYPE(ADMIN_STATUS);// 无论姓名选的是什么，只要密码和超级密码相符，则级别就是经理人（或者更高）。
-//                USERNAME = "System";
-//                MODETRANS = "F";	//if logged in with internal user account, the mev will be set into training mode.
-//                setVisible(false);
-//
-//                BarFrame.resetInactivityTimer();
-//                return;
-//            }
-//        } catch (SQLException exp) {
-//            ErrorUtil.write(exp);
-//        }
 
         // 以下为密码不是超级密码的情况：
         User user = matchingWithExistingPassword(inputPassword);
@@ -142,7 +116,6 @@ public class LoginDlg extends DialogFragment {
             USERID = user.getId().intValue();
             setUSERTYPE(user.getRole()); // 并标记下用户的级别
             USERNAME = user.getNickName();
-//            MODETRANS = general.modeTrans[i];
             USERLANG = user.getLang();
             CustOpts.custOps.setUserLang(USERLANG);//next start up will use it as default interface language.
 
@@ -168,8 +141,7 @@ public class LoginDlg extends DialogFragment {
                         break;
                 }
                 CmdBtnsManagerDlg.initButtons();
-//                    BarFrame.instance.initComponent();
-                ((TablesPanel)BarFrame.instance.panels[0]).initContent();
+                ((TablesPanel) BarFrame.instance.panels[0]).initContent();
             }
             if(BarOption.isTrainingMode()) {
                 MODETRANS = "F";
@@ -257,29 +229,29 @@ public class LoginDlg extends DialogFragment {
             JOptionPane.showMessageDialog(BarFrame.instance, "Invalid Password");
         }
         LoginDlg.failedTimes++;
-        ((EditText)getActivity().findViewById(R.id.password_field)).selectAll();
+        passwordField.selectAll(); // 使用已经初始化的 passwordField 实例
     }
 
     private void initContent() {
         users = DaoExpand.queryAllTables(AikaPos.daoSession.getUserDao());
-        String sql = "select _id, Type, UserName, PASSWORD, LANG from useridentity where ID > 5";
     }
+
     public static int getUSERTYPE() {
         return USERTYPE;
     }
 
     public static void setUSERTYPE(int uSERTYPE) {
         USERTYPE = uSERTYPE;
-        if(USERTYPE >= ADMIN_STATUS) {
-            BarFrame.instance.findViewById(R.id.BarFrame).setBackgroundColor(Color.parseColor(BarOption.getAdminMainFramelBK()));//"AdminMainFramelBK"));
-        }else {
-            BarFrame.instance.findViewById(R.id.BarFrame).setBackgroundColor(Color.parseColor(BarOption.getMainFrameBK()));//"AdminMainFrameBK"));
+        if (USERTYPE >= ADMIN_STATUS) {
+            BarFrame.instance.findViewById(R.id.BarFrame).setBackgroundColor(Color.parseColor(BarOption.getAdminMainFramelBK()));
+        } else {
+            BarFrame.instance.findViewById(R.id.BarFrame).setBackgroundColor(Color.parseColor(BarOption.getMainFrameBK()));
         }
     }
 
     public static User matchingWithExistingPassword(String input) {
         for (User user : users) {
-            if(input.equals(user.getPwd())) {
+            if (input.equals(user.getPwd())) {
                 return user;
             }
         }
@@ -288,8 +260,7 @@ public class LoginDlg extends DialogFragment {
 
     private void onNumberClick(View v) {
         Button button = (Button) v;
-        EditText passwordField = getDialog().findViewById(R.id.password_field);
-        passwordField.append(button.getText());
+        passwordField.append(button.getText()); // 使用已经初始化的 passwordField 实例
     }
 
     private static LoginDlg instance = null;

@@ -236,19 +236,9 @@ public class BarFrame extends BaseFragmentActivity {
             instance.switchMode(0);	//while instance is still null if don't put it in the later.
         }
 
-        //this thread will start a request thread every 10 seconds to fetch new order from server..
-        //also will trigger a refresh of tableivew for the waiting time.
-        new BackGroundTimerThread().start();
-
-
         //activation check
         validateActivation();
-//        if(!"OK".equals(returnStr)) { 	// if not valid, might because of expired, then give clean the bill head,
-//            if(!"OK".equals(validateActivation(returnStr))) {	// give another valid with passcode (first time with null).
-//                System.exit(0);
-//            }
-//        }
-
+        LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
         //this line is kind of slow, and because the frame is no decoration by default, so
         //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
 //        SwingUtilities.invokeLater(new Runnable() {
@@ -266,11 +256,12 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     private void validateActivation() {
-        if(BarOption.getBillHeadInfo() == null || BarOption.getBillHeadInfo().trim().length() == 0 ) { //if store info not found, means first time use.
+        long timeLeft = checkDaysleft();
+        if(timeLeft < 0 || BarOption.getBillHeadInfo() == null
+                || BarOption.getBillHeadInfo().trim().length() == 0) { //if store info not found, means first time use.
             JOptionPane.showInputDialog("Activate", consts.activeCode(), new JOptionPane.InputDialogListener() {
                 @Override
                 public void onInputReceived(String input) {
-
                     if (input == null || input.length() != 6 && !input.equals("9")) {
                         JOptionPane.showMessageDialog(null, "Please input correct license code");
                         return;
@@ -285,26 +276,18 @@ public class BarFrame extends BaseFragmentActivity {
                     Toast.makeText(AikaPos.instance.getApplicationContext(), "Activation canceled! Please activate to let the software ready to work.", Toast.LENGTH_SHORT).show();
                 }
             });
-        }else {	//already started
+        }else {	//already started and timeLeft > 0
             L.d("bill info is:", BarOption.getBillHeadInfo());
-            long timeLeft = checkDaysleft();
-            if(timeLeft > 0) {
-                if (timeLeft < 3024000000l) {   //3024000000L == 35days
-                    JOptionPane.showMessageDialog(null, "Application is about to expire! Please re-activate it!");
-                }
-                //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
-                //different Appareil ID, so they know the data is from which machine.
-                if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
-                        && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
-                    existingIdApprlCheck();
-                }else {
-                    MevUtils.checkCertificateDate();//check certificate time
-                }
+            if (timeLeft < 3024000000l) {   //3024000000L == 35days
+                JOptionPane.showMessageDialog(null, "Application is about to expire! Please re-activate it!");
+            }
+            //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
+            //different Appareil ID, so they know the data is from which machine.
+            if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
+                    && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
+                existingIdApprlCheck();
             }else {
-                BarOption.setBillHeadInfo(null);
-                CustOpts.custOps.saveData();//save to hd.
-//                return activateCode;	//because the activateCode is null, so this will cause a dialog for inputting activate code,
-                //but after inputting code, will not have chance to come in again and do the authenticate. so I think should do system.exit()
+                MevUtils.checkCertificateDate();//check certificate time
             }
         }
     }
@@ -691,6 +674,7 @@ public class BarFrame extends BaseFragmentActivity {
                 if (LoginDlg.getUSERTYPE() >= LoginDlg.ADMIN_STATUS) {
                     LoginDlg.setUSERTYPE(LoginDlg.USER_STATUS);
                 }
+
                 BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
             }else {	//if closed the dialog without inputting the right pw, then system exit.
                 CustOpts.custOps.saveData();

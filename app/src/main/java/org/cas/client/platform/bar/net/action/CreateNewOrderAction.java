@@ -262,7 +262,7 @@ public class CreateNewOrderAction implements SamActionListener {
 
 	private int findEmployeeId(String waiter) {
 		StringBuilder sql;
-		sql = new StringBuilder("select id from USER where nname = '").append(waiter).append("'");
+		sql = new StringBuilder("select id from USER where nickName = '").append(waiter).append("'");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
         	if(rs.moveToNext()) {
