@@ -41,9 +41,9 @@ public class MainGenerator {
     protected void create(Schema schema) {
 
         // +---------+-----------+------------+---------+
-        // |    id   |   mname   |  number    |   price |
+        // USER
         // +---------+-----------+------------+---------+
-        Entity user = schema.addEntity("USER");
+        Entity user = schema.addEntity("User");
         user.addIdProperty();
         user.addStringProperty("firstName").columnName("firstName");
         user.addStringProperty("secondName").columnName("secondName");
@@ -55,10 +55,8 @@ public class MainGenerator {
         user.addStringProperty("noTVQ").columnName("noTVQ");
         user.addStringProperty("pwd");
 
-        //  @table Printer
-        //  @pk id
         // +---------+---------+---------+---------+
-        // |    id   |   pname |   ip    |   note  |
+        // Printer
         // +---------+---------+---------+---------+
         Entity printer = schema.addEntity("Printer");
         printer.addIdProperty();
@@ -69,7 +67,7 @@ public class MainGenerator {
         printer.addIntProperty("langType").columnName("langType");
 
         // +---------+-----------+------------+---------+
-        // |    id   |   mname   |  number    |   price |
+        // DiningTable
         // +---------+-----------+------------+---------+
         Entity dinningTable = schema.addEntity("DiningTable");
         dinningTable.addIdProperty();
@@ -82,10 +80,8 @@ public class MainGenerator {
         dinningTable.addIntProperty("height");
         dinningTable.addIntProperty("type");
 
-        //  @table Category 类别
-        //  @pk id
         // +---------+---------+-------------+
-        // |    id   |   cname |  displayIdx |
+        // Category
         // +---------+---------+-------------+
         Entity category = schema.addEntity("Category");
         category.addIdProperty();
@@ -100,7 +96,7 @@ public class MainGenerator {
         //  pid->Printer.id;
         //  category->Category.id;
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  category    |   manem |
+        // Dish
         // +---------+---------+---------+---------+
         Entity dish = schema.addEntity("Dish");//category->dish
         dish.addIdProperty();
@@ -119,7 +115,7 @@ public class MainGenerator {
         dish.addStringProperty("category").columnName("category");
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  mid    |   manem |
+        // M2M_MenuPrint
         // +---------+---------+---------+---------+
         // printer and dish are multi to multi, add a dish table.
         Entity menuPrint = schema.addEntity("M2M_MenuPrint");
@@ -131,7 +127,7 @@ public class MainGenerator {
         dish.addToMany(menuPrint, menuId.getProperty());
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  category    |   manem |
+        // Mark
         // +---------+---------+---------+---------+
         //  @table Mark
         Entity mark = schema.addEntity("Mark");
@@ -144,7 +140,7 @@ public class MainGenerator {
         // @table SaleRecord
         //  @pk id
         // +---------+-----------+------------+---------+
-        // |    id   |   mname   |  number    |   price |
+        // SaleRecord
         // +---------+-----------+------------+---------+
         Entity saleRecord = schema.addEntity("SaleRecord");
         saleRecord.addIdProperty();
@@ -162,7 +158,7 @@ public class MainGenerator {
         saleRecord.addStringProperty("createdTime").columnName("createdTime");
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  mid    |   manem |
+        // M2M_SaleRecordMark
         // +---------+---------+---------+---------+
         // printer and dish are multi to multi, add a dish table.
         Entity saleRecordMark = schema.addEntity("M2M_SaleRecordMark");
@@ -174,7 +170,7 @@ public class MainGenerator {
         dish.addToMany(saleRecordMark, markId.getProperty());
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  mid    |   manem |
+        // Bill
         // +---------+---------+---------+---------+
         Entity bill = schema.addEntity("Bill");
         bill.addIdProperty();
@@ -197,7 +193,7 @@ public class MainGenerator {
         bill.addIntProperty("invoiceId").columnName("invoiceId");
 
         // +---------+-----------+Customizations+---------+
-        // |    id   |   mname   |  number    |   price |
+        // Customizations
         // +---------+-----------+------------+---------+
         Entity customizations = schema.addEntity("Customizations");
         customizations.addIdProperty();
@@ -207,7 +203,7 @@ public class MainGenerator {
 
 
         // +---------+-----------+Customizations+---------+
-        // |    id   |   mname   |  number    |   price |
+        // CustomizedRule
         // +---------+-----------+------------+---------+
         Entity customizedRule = schema.addEntity("CustomizedRule");
         customizedRule.addIdProperty();
@@ -220,7 +216,7 @@ public class MainGenerator {
         customizedRule.addStringProperty("ext3");
 
         // +---------+--------WebsrmBatch---+------------+---------+
-        // |    id   |   mname   |  number    |   price |
+        // WebsrmBatch
         // +---------+-----------+------------+---------+
         Entity websrmBatch = schema.addEntity("WebsrmBatch");
         websrmBatch.addIdProperty();
@@ -231,14 +227,14 @@ public class MainGenerator {
         websrmBatch.addIntProperty("userId").columnName("userId");
 
         // +---------+-----------+------------+---------+
-        // |    id   |   mname   |  number    |   Device |
+        // Device
         // +---------+-----------+------------+---------+
         Entity device = schema.addEntity("Device");//在线设备
         device.addStringProperty("ip");
         device.addStringProperty("userName").columnName("userName");
 
         // +---------+---------+---------+---------+
-        // |    id   |   pid   |  category   |   manem |
+        // Log
         // +---------+---------+---------+---------+
         //  @table Log
         Entity log = schema.addEntity("Log");

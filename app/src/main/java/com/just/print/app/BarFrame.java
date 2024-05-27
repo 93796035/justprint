@@ -533,23 +533,19 @@ public class BarFrame extends BaseFragmentActivity {
         }
 
         //if timeLeftStr is valid, then it has a chance to turn the timeLeft to be a number bigger than 0.
-        long timeLeft = 0;
-        String lastTimeLeft = Options.getCustomData(Options.number);               L.d("timeLeft(before deduct:", lastTimeLeft);
-        if(StringUtils.isBlank(lastTimeLeft)){
-            lastTimeLeft = "1";
-        }
+        long activateTimeLeft = BarOption.getActivateTimeLeft();//Number("number");               L.d("timeLeft(before deduct:", number);
         try {
             //the time left from last calculation, minus time passed. @note: we use abs, so is the time is negative, will still be minused!
-            timeLeft = Long.valueOf(lastTimeLeft) - Math.abs(timepassed);    L.d("timeLeft - timePassed:", timeLeft);
+            activateTimeLeft = activateTimeLeft - Math.abs(timepassed);    L.d("timeLeft - timePassed:", activateTimeLeft);
 
             //update the number and lastsuccess into local cache.
-            Options.putCustomData(Options.lastsuccessStr, String.valueOf(new Date().getTime()));
-            Options.putCustomData(Options.number, String.valueOf(timeLeft));              L.d("update new number with:", timeLeft);
+            BarOption.setLastSuccessStr(String.valueOf(new Date().getTime()));
+            BarOption.setActivateTimeLeft(String.valueOf(activateTimeLeft));  L.d("update new number with:", activateTimeLeft);
         }catch(Exception e){
             L.e("MainActivity", "the left time number can not be pasered into a long", e);
         }
 
-        return timeLeft;
+        return activateTimeLeft;
     }
 
     private boolean isOutOfWorkingTime(){
@@ -611,7 +607,7 @@ public class BarFrame extends BaseFragmentActivity {
         //create a bill for it. in case there will be something like order fee in future. this bill has no create time yet, so will not display minutes on buttom in counter mode.(counter
         //mode calculated created time, table mode calculates waited minutes by opentime.
         StringBuilder sql = new StringBuilder(
-                "INSERT INTO bill(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
+                "INSERT INTO bill(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
                 .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
                 .append(tableName).append("', '")	//table
                 .append(newBillIdx).append("', ")			//bill
@@ -898,7 +894,8 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public String getCurTable() {
-        return (String)cmbCurTable.getSelectedItem();
+        DiningTable diningTable = (DiningTable)cmbCurTable.getSelectedItem();
+        return diningTable == null ? "" : diningTable.getName();
     }
 
     /**

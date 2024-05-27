@@ -1290,7 +1290,7 @@ public class PrintService{
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
             	String tableName = DBUtil.getCursorString(rs,"tableName");
-            	String orderId = String.valueOf(DBUtil.getCursorString(rs, "id"));
+            	String orderId = String.valueOf(DBUtil.getCursorString(rs, "_id"));
             	content.append(orderId).append(BarUtil.generateString(12 - orderId.length() - (tableName == null ? 4 : tableName.length()), " ")).append(tableName);
             	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
             	totalSales += total;
@@ -2437,7 +2437,7 @@ public class PrintService{
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-            	String id = String.valueOf(DBUtil.getCursorInt(rs,"id"));
+            	String id = String.valueOf(DBUtil.getCursorInt(rs,"_id"));
             	content.append(id);
             	String tableName = DBUtil.getCursorString(rs,"tableName");
             	content.append(BarUtil.generateString(12 - id.length() - tableName.length(), " ")).append(tableName);

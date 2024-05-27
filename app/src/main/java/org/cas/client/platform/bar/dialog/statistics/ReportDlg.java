@@ -158,10 +158,10 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				curBatchIdx = "1";
 				while (rs.moveToNext()) {
 					if (LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
-						curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "id") + 1);
+						curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "_id") + 1);
 						break;
 					} else {
-						curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs, "id"))).concat(",");
+						curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs, "_id"))).concat(",");
 					}
 				}
 			} catch (Exception exp) {
@@ -354,8 +354,8 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	public static List<Bill> queryRelevantCompleteAndRefundBillList(String startTime, String endTimeStr, boolean showOnlyMine) {
-		StringBuilder sql = new StringBuilder("select * from bill, USER where createTime >= '").append(startTime)
-				.append("' and createTime <= '").append(endTimeStr)
+		StringBuilder sql = new StringBuilder("select * from bill, USER where createdTime >= '").append(startTime)
+				.append("' and createdTime <= '").append(endTimeStr)
 				.append("' and bill.userId = employee._id ")
 				.append(" and (bill.status < ").append(DBConsts.ORIGINAL)
 				.append(" or bill.status = ").append(DBConsts.COMPLETED).append(")");
@@ -369,7 +369,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			while (rs.moveToNext()) {
 				Bill bill = new Bill();
-				bill.setId(DBUtil.getCursorLong(rs, "id"));
+				bill.setId(DBUtil.getCursorLong(rs, "_id"));
 				bill.setCreatedTime(DBUtil.getCursorString(rs, "createTime"));
 				bill.setTableName(DBUtil.getCursorString(rs, "tableName"));
 				bill.setCustomerNumber(DBUtil.getCursorString(rs, "billIndex"));

@@ -28,7 +28,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
         public final static Property Signatransm = new Property(2, String.class, "signatransm", false, "SIGNATRANSM");
         public final static Property EmprCertifSev = new Property(3, String.class, "emprCertifSev", false, "emprCertifSev");
         public final static Property StrUrlQRCode = new Property(4, String.class, "strUrlQRCode", false, "strUrlQRCode");
-        public final static Property EmployeeId = new Property(5, Integer.class, "employeeId", false, "employeeId");
+        public final static Property UserId = new Property(5, Integer.class, "userId", false, "userId");
         public final static Property Status = new Property(6, Integer.class, "status", false, "STATUS");
         public final static Property Version = new Property(7, Integer.class, "version", false, "VERSION");
     };
@@ -54,7 +54,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
                 "'SIGNATRANSM' TEXT," + // 2: signatransm
                 "'emprCertifSev' TEXT," + // 3: emprCertifSev
                 "'strUrlQRCode' TEXT," + // 4: strUrlQRCode
-                "'userId' INTEGER," + // 5: employeeId
+                "'userId' INTEGER," + // 5: userId
                 "'STATUS' INTEGER," + // 6: status
                 "'VERSION' INTEGER);"); // 7: version
     }
@@ -95,9 +95,9 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
             stmt.bindString(5, strUrlQRCode);
         }
  
-        Integer employeeId = entity.getEmployeeId();
-        if (employeeId != null) {
-            stmt.bindLong(6, employeeId);
+        Integer userId = entity.getUserId();
+        if (userId != null) {
+            stmt.bindLong(6, userId);
         }
  
         Integer status = entity.getStatus();
@@ -132,7 +132,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // signatransm
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // emprCertifSev
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // strUrlQRCode
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // employeeId
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // userId
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // status
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7) // version
         );
@@ -147,7 +147,7 @@ public class WebsrmBatchDao extends AbstractDao<WebsrmBatch, Long> {
         entity.setSignatransm(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setEmprCertifSev(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setStrUrlQRCode(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setEmployeeId(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setUserId(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setStatus(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setVersion(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
      }

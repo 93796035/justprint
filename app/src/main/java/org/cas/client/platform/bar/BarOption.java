@@ -418,7 +418,7 @@ public class BarOption {
     }
     
     public static boolean isSingleUser() {
-    	return "true".equals(CustOpts.custOps.getValue("SingleUserMode")) || isCounterMode();	//if it's counter mode, then it must be single user mode.
+    	return !"false".equals(CustOpts.custOps.getValue("SingleUserMode")) || isCounterMode();	//if it's counter mode, then it must be single user mode.
     }
     public static void setSingleUser(String is) {
     	CustOpts.custOps.setKeyAndValue("SingleUserMode", is);

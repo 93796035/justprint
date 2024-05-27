@@ -50,7 +50,7 @@ public class Cmd_CombineAll implements SamActionListener {
 //			try {
 //				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //	            while (rs.moveToNext()) {
-//	                idxMap.put(DBUtil.getCursorInt(rs,"id"), DBUtil.getCursorInt(rs,"billIndex"));
+//	                idxMap.put(DBUtil.getCursorInt(rs,"_id"), DBUtil.getCursorInt(rs,"billIndex"));
 //	            }
 //			}catch(Exception exp) {
 //				L.e("BillListPanel", "exception when change output back to original bill" + sql, exp);

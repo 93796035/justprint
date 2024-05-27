@@ -235,7 +235,7 @@ public class CreateNewOrderAction implements SamActionListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
         	if(rs.moveToNext()) {
         		
-        		int billId = DBUtil.getCursorInt(rs, "id");
+        		int billId = DBUtil.getCursorInt(rs, "_id");
         		int status = DBUtil.getCursorInt(rs, "status");
         		int price = DBUtil.getCursorInt(rs, "total");
         		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
@@ -266,7 +266,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
         	if(rs.moveToNext()) {
-        		return DBUtil.getCursorInt(rs, "id");
+        		return DBUtil.getCursorInt(rs, "_id");
         	}
         }catch(Exception exp) {
         	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
@@ -295,7 +295,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		   	sql = new StringBuilder("Select id from bill where createtime = '").append(createtime).append("' and billIndex = '").append(billIndex).append("'");
 		    Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		    rs.moveToNext();
-            return DBUtil.getCursorInt(rs, "id");
+            return DBUtil.getCursorInt(rs, "_id");
 		 }catch(Exception exp) {
 			ErrorUtil.write(exp);
 			return -1;
@@ -543,7 +543,7 @@ public class CreateNewOrderAction implements SamActionListener {
 			if(rs.moveToNext()) {
             	//check if the properties are all same, if not, update local to make sure local are same with server.
         		String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
-            	return new Dish(DBUtil.getCursorInt(rs, "id"),
+            	return new Dish(DBUtil.getCursorInt(rs, "_id"),
 						category,
 						menuName,
 						DBUtil.getCursorString(rs, "MNEMONIC"),
@@ -567,7 +567,7 @@ public class CreateNewOrderAction implements SamActionListener {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{category, menuName, menuName, menuName});
             if(rs.moveToNext()) {//check if the properties are all same, if not, update local to make sure local are same with server.
         		//TODO: consider later  String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
-            	return new Dish(DBUtil.getCursorInt(rs,"id"),
+            	return new Dish(DBUtil.getCursorInt(rs,"_id"),
 						category,
 						menuName,
 						DBUtil.getCursorString(rs,"MNEMONIC"),
@@ -658,7 +658,7 @@ public class CreateNewOrderAction implements SamActionListener {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{name1, category});
             
             rs.moveToNext();
-            return new Dish(DBUtil.getCursorInt(rs,"id"), category, name1, name2, name3, seletedPrinterIdStr);
+            return new Dish(DBUtil.getCursorInt(rs,"_id"), category, name1, name2, name3, seletedPrinterIdStr);
         }catch(Exception exp) {
         	L.e("RequestNewOrderAction", "exception when creating new Dish.", exp);
         }
@@ -687,7 +687,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	        sql = new StringBuilder("Select id from product where CODE = ? and category = ?");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{menuName, category});
             rs.moveToNext();
-            return new Dish(DBUtil.getCursorInt(rs,"id"), category, menuName, menuName, menuName, "");
+            return new Dish(DBUtil.getCursorInt(rs,"_id"), category, menuName, menuName, menuName, "");
         }catch(Exception exp) {
         	L.e("RequestNewOrderAction", "exception when creating new Dish.", exp);
         }

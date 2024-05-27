@@ -359,7 +359,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                 JSONObject mainOrder = mainOrders.getJSONObject(i);
                 String phone = mainOrder.getString("sampleRequirement");
                 if(phone != null && phone.length() > 0){
-                    int id = mainOrder.getInt("id");
+                    int id = mainOrder.getInt("_id");
                     if(id > lastId){
                         lastId = id;
                     }

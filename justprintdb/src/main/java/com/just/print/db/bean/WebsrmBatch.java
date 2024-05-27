@@ -19,7 +19,7 @@ public class WebsrmBatch {
     private String signatransm;
     private String emprCertifSev;
     private String strUrlQRCode;
-    private Integer employeeId;
+    private Integer userId;
     private Integer status;
     private Integer version;
 
@@ -40,13 +40,13 @@ public class WebsrmBatch {
         this.id = id;
     }
 
-    public WebsrmBatch(Long id, String jsonToSend, String signatransm, String emprCertifSev, String strUrlQRCode, Integer employeeId, Integer status, Integer version) {
+    public WebsrmBatch(Long id, String jsonToSend, String signatransm, String emprCertifSev, String strUrlQRCode, Integer userId, Integer status, Integer version) {
         this.id = id;
         this.jsonToSend = jsonToSend;
         this.signatransm = signatransm;
         this.emprCertifSev = emprCertifSev;
         this.strUrlQRCode = strUrlQRCode;
-        this.employeeId = employeeId;
+        this.userId = userId;
         this.status = status;
         this.version = version;
     }
@@ -97,12 +97,12 @@ public class WebsrmBatch {
         this.strUrlQRCode = strUrlQRCode;
     }
 
-    public Integer getEmployeeId() {
-        return employeeId;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setEmployeeId(Integer employeeId) {
-        this.employeeId = employeeId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public Integer getStatus() {

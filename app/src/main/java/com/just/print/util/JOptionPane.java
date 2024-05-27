@@ -16,10 +16,10 @@ import java.util.concurrent.CountDownLatch;
 public class JOptionPane {
     public static final int YES_NO_OPTION = 0;
 
-    public static void showMessageDialog(String atLeastTwoTableShouldBeSelected) {
+    public static void showMessageDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance); // 使用当前Activity的上下文创建Builder
         builder.setTitle("Notice"); // 设置对话框标题
-        builder.setMessage(BarFrame.consts.AtLeastTwoTableShouldBeSelected()); // 设置对话框显示的消息
+        builder.setMessage(message); // 设置对话框显示的消息
 
         // 设置确认按钮
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

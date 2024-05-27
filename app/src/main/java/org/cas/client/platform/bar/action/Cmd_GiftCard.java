@@ -56,7 +56,7 @@ public class Cmd_GiftCard implements SamActionListener {
             	//get out every field of first matching record.
                 tmpPos = 0;
                 rs.moveToNext();
-                int id = DBUtil.getCursorInt(rs,"id");
+                int id = DBUtil.getCursorInt(rs,"_id");
                 int category = DBUtil.getCursorInt(rs,"style");
                 String productCode = DBUtil.getCursorString(rs,"IP");
                 int value = DBUtil.getCursorInt(rs,"langType");

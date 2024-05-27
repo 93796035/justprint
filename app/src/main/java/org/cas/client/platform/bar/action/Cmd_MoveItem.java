@@ -82,7 +82,7 @@ public class Cmd_MoveItem implements SamActionListener {
 //				try {
 //					Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //		        	if(rs.moveToNext()) {
-//		        		billId = DBUtil.getCursorInt(rs,"id");
+//		        		billId = DBUtil.getCursorInt(rs,"_id");
 //		        		int status = DBUtil.getCursorInt(rs,"status");
 //		        		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
 ////	        				if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConvertClosedBillBack(), BarFrame.consts.Operator(),

@@ -54,6 +54,7 @@ public class LoginDlg extends DialogFragment {
 
     public boolean noRefresh;
     private EditText passwordField; // 添加成员变量
+    private Dialog dialog; // 保存Dialog实例的引用
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -84,9 +85,11 @@ public class LoginDlg extends DialogFragment {
             String inputPassword = passwordField.getText().toString();
             attemptLogin(inputPassword);
         });
+
         initContent();
         builder.setView(view);
-        return builder.create();
+        dialog = builder.create(); // 保存Dialog实例的引用
+        return dialog;
     }
 
     private void attemptLogin(String inputPassword) {
@@ -97,6 +100,7 @@ public class LoginDlg extends DialogFragment {
             USERNAME = "superAdmin";
             ((BarFrame) getActivity()).switchFragment(TablesPanel.getInstance());
             BarFrame.instance.resetInactivityTimer();
+            dialog.dismiss(); // 关闭对话框
             return;
         }
 
@@ -105,7 +109,8 @@ public class LoginDlg extends DialogFragment {
         if (user == null) {
             if ("9".equals(inputPassword)) {//for internal testing time saving.
                 matchingWithExistingPassword("2222");
-                ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
+                ((BarFrame) getActivity()).switchFragment(TablesPanel.getInstance());
+                dialog.dismiss(); // 关闭对话框
             } else {
                 Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
             }
@@ -177,10 +182,10 @@ public class LoginDlg extends DialogFragment {
                         //if didn't found any batch, means never print yet, set current batchIdx to 1
                         while(rs.moveToNext()) {
                             if(LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
-                                curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "id") + 1);
+                                curBatchIdx = String.valueOf(DBUtil.getCursorInt(rs, "_id") + 1);
                                 break;
                             }else {	// if it's super admin, then no need to show "next" batch number.
-                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs,"id"))).concat(",");
+                                curBatchIdx = curBatchIdx.concat(String.valueOf(DBUtil.getCursorInt(rs,"_id"))).concat(",");
                             }
                         }
                     }catch(Exception exp) {
@@ -219,6 +224,7 @@ public class LoginDlg extends DialogFragment {
             }
 
             BarFrame.instance.resetInactivityTimer();
+            dialog.dismiss(); // 关闭对话框
             return;
         }
 

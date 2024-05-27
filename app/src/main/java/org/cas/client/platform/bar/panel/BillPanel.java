@@ -186,7 +186,7 @@ public class BillPanel extends BaseFragment
 		   			.append("' and billIndex = '").append(customerNumber).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            return DBUtil.getCursorInt(rs, "id");
+            return DBUtil.getCursorInt(rs, "_id");
 		 }catch(Exception e) {
 			L.e("BillPanel", "exception when cloning current bill record:" + sql,e);
 			return -1;
@@ -234,7 +234,7 @@ public class BillPanel extends BaseFragment
                 	.append(" and CATEGORY = '").append(currentTime).append("'");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 while (rs.moveToNext()) {
-                	dish.setOutputID(DBUtil.getCursorInt(rs, "id"));
+                	dish.setOutputID(DBUtil.getCursorInt(rs, "_id"));
                 	dish.setOrderedTime(DBUtil.getCursorString(rs, "time"));
                 }
 		    }
@@ -1106,7 +1106,7 @@ public class BillPanel extends BaseFragment
 		    }
 		    totalOnBill = DBUtil.getCursorInt(rs, "total");
 		    createTime = DBUtil.getCursorString(rs, "createTime");
-		    billID = DBUtil.getCursorInt(rs, "id");
+		    billID = DBUtil.getCursorInt(rs, "_id");
 		}
 	}
 

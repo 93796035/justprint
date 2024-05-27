@@ -62,7 +62,7 @@ public class Cmd_ChangeTable implements SamActionListener {
 				ArrayList<Integer> billIDs = new ArrayList<Integer>();
 
 				while(rs.moveToNext()) {
-					billIDs.add(DBUtil.getCursorInt(rs, "id"));
+					billIDs.add(DBUtil.getCursorInt(rs, "_id"));
 				}
 				if(billIDs.size() == 0) {
 					JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.nothingToMove());
