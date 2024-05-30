@@ -141,14 +141,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Operator:"
-            android:textColor="#FFFFFF"
+            android:textColor="#888888"
             android:layout_gravity="center_vertical" />
 
         <TextView
             android:id="@+id/valOperator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="#888888"
             android:layout_gravity="center_vertical" />
 
         <TextView
@@ -157,7 +157,7 @@
             android:layout_height="wrap_content"
             android:text="powered by ShareTheGoodOnes.com V003.030.0616"
             android:layout_marginStart="16dp"
-            android:textColor="#FFFFFF" />
+            android:textColor="#888888" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.uibeans;
 
+import static org.cas.client.platform.bar.BarOption.getBK;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -21,9 +23,8 @@ public class FunctionToggleButton extends ToggleButton implements ISButton{
 	public FunctionToggleButton(String title) {
 		super(BarFrame.instance);
 		this.title = title;
-//		String bgColor = getBK(title);
-//		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
-		setText(title);
+		String bgColor = getBK(title);
+		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
 
 		textPaint = new TextPaint();
 		textPaint.setColor(Color.WHITE); // 设置文本颜色

@@ -1,7 +1,12 @@
 package org.cas.client.platform.bar.uibeans;
 
+import static org.cas.client.platform.bar.BarOption.getBK;
+
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.text.TextPaint;
 import android.view.View;
 import android.widget.Button;
 
@@ -14,19 +19,22 @@ public class FunctionButton extends Button implements ISButton{
 	
 	String title;
 	SamActionListener actionListener;
+	private TextPaint textPaint;
+	private Paint backgroundPaint;
 	
 	public FunctionButton(String title) {
 		super(BarFrame.instance);
 		this.title = title;
-		initButton();
-	}
-
-	private void initButton() {
 		String bgColor = getBK(title);
 		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
 		setText(title);
-		//setTypeface(BarOption.getCmdCustFont()); // 设置默认字体，可以修改为自定义字体
-		// Android没有直接的边框设置方法，通常通过背景Drawable或其他视图属性来实现
+
+		textPaint = new TextPaint();
+		textPaint.setColor(Color.WHITE); // 设置文本颜色
+		textPaint.setTextSize(30); // 设置文本大小
+		textPaint.setTextAlign(Paint.Align.CENTER);
+		backgroundPaint = new Paint();
+		backgroundPaint.setStyle(Paint.Style.FILL);
 	}
 
 	private String getBK(String title) {
@@ -65,6 +73,26 @@ public class FunctionButton extends Button implements ISButton{
 		actionListener.setSourceBtn(this);
 	}
 
+	protected void onDraw(Canvas canvas) {
+		super.onDraw(canvas);
+
+		int w = getWidth();
+		int h = getHeight();
+
+		if (this.isSelected()) {
+			backgroundPaint.setColor(Color.BLUE); // 选中状态的背景颜色
+		} else {
+			backgroundPaint.setColor(Color.GRAY); // 非选中状态的背景颜色
+		}
+
+		canvas.drawRect(0, 0, w, h, backgroundPaint);
+
+		// 计算绘制文本的位置，使其水平和垂直居中
+		float x = w / 2f;
+		float y = (h / 2f) - ((textPaint.descent() + textPaint.ascent()) / 2f);
+
+		canvas.drawText(title, x, y, textPaint);
+	}
 
 	@Override
 	public void setText(String text) {

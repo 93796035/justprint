@@ -48,6 +48,7 @@ import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.panel.CustomerFrame;
 import org.cas.client.platform.bar.panel.MenuPanel;
+import org.cas.client.platform.bar.uibeans.TableButton;
 import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
@@ -82,7 +83,7 @@ public class BarFrame extends BaseFragmentActivity {
     public static BarFrame instance;
     public static BarDlgConst consts;
 
-//    public static CustomerFrame customerFrame;
+    //    public static CustomerFrame customerFrame;
     private static User currentUser;
     public Dish curDish;
     public int curPanelIdx;
@@ -92,7 +93,7 @@ public class BarFrame extends BaseFragmentActivity {
     private boolean isShowingAnExpiredBill;
 
     public static MenuPanel menuPanel;
-//    private DefaultComboBoxModel<String> tableNames = new DefaultComboBoxModel<String>(new String[] {""});//there's an empty item for tableMode, when no table selected.
+    //    private DefaultComboBoxModel<String> tableNames = new DefaultComboBoxModel<String>(new String[] {""});//there's an empty item for tableMode, when no table selected.
     public boolean ignoreLogin;
     public static NumberPanelDlg numberPanelDlg;
     public static DiscountDlg discountDlg;
@@ -703,85 +704,220 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public int switchMode(int index) {
-//        if(curPanelIdx == 3) {	//if it's switching from setting panel, then ask to do a login.
-//            if(ignoreLogin == false) {
-//                if(BarOption.isSingleUser()) {
-//                    instance.setVisible(false);
-//                    new LoginDlg(this).setVisible(true);
-//                    if(!LoginDlg.PASSED) {
-//                        CASControl.ctrl.exitSystem();
+//        if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
+//            if (ignoreLogin == false) {
+//                if (BarOption.isSingleUser()) {
+//                    LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+//                    if (!LoginDlg.PASSED) {
+//                        return -1;
 //                    }
-//                    instance.setVisible(true);
 //                    valOperator.setText(LoginDlg.USERNAME);
 //                }
-//            }else {
+//            } else {
 //                ignoreLogin = false;
 //            }
 //        }
 //        curDish = null;
 //        setStatusMes("");
-//        if (index == 3) {		//setting
+//        if (index == 3) {  // setting
 //            if (!superAdminAuthentication())
 //                return -1;
-//            //shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
-//        }else if(LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
+//            // shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
+//        } else if (LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
 //            index = 3;
-//        }else if(index == 2) {	//sale
+//        } else if (index == 2) {  // sale
 //            initSalesPanel();
-//        }else if(index == 1) {	//bill
-//            ((BillListPanel)panels[1]).initContent();
-//        }else if(index == 0) {	//table
+//        } else if (index == 1) {  // bill
+//            ((BillListPanel) panels[1]).initContent();
+//        } else if (index == 0) {  // table
 //            resetStatus();
-//            ((TablesPanel)panels[0]).initContent();
+//            ((TablesPanel) panels[0]).initContent();
 //        }
 //
-//        for (JComponent panel : panels) {
-//            panel.setVisible(false);
+//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//
+//        for (BaseFragment panel : panels) {
+//            transaction.hide(panel);
 //        }
 //
-//        reLayout();	//recalculate the panel size---because if it's counter mode, need to display tablespane and salesPane together,
-//        //and when back to tablespane, it also need to relayout, otherwise, will display blank.
-//        panels[index].setVisible(true);
+////        reLayout();  // recalculate the panel size---because if it's counter mode, need to display tablespane and salesPane together,
+//        // and when back to tablespane, it also need to relayout, otherwise, will display blank.
+//        transaction.show(panels[index]);
 //
-//        if(BarOption.isCounterMode()) {
-//            if(index == 1 || index == 2) {
-//                panels[0].setVisible(true);// this line not necessary, because in layout, will decide if panels[0] visible or not base on there's multi table or not.
+//        if (BarOption.isCounterMode()) {
+//            if (index == 1 || index == 2) {
+//                transaction.show(panels[0]);  // this line not necessary, because in layout, will decide if panels[0] visible or not base on there's multi table or not.
 //                String tableName = String.valueOf(cmbCurTable.getSelectedItem());
-//                ((TablesPanel)panels[0]).initContent();// might be switched from temperal table mode.(in counter mode, user can switch to table mode, to select a preset table)
+//                int selection = cmbCurTable.getSelectedItemPosition();
+//                ((TablesPanel) panels[0]).initContent();  // might be switched from temperal table mode.(in counter mode, user can switch to table mode, to select a preset table)
 //                ignoreItemChange = true;
-//                BarFrame.instance.cmbCurTable.getModel().setSelectedItem(tableName);	//? why use .getModel() instead of directly cmbCurTable.setSelectedItem(tableName)?
-//                TableButton tableButton = ((TablesPanel)BarFrame.instance.panels[0]).getTableButtonByName(tableName);
-//                if(tableButton != null) {
+//                BarFrame.instance.cmbCurTable.setSelection(selection);  // ? why use .getModel() instead of directly cmbCurTable.setSelectedItem(tableName)?
+//                TableButton tableButton = ((TablesPanel) BarFrame.instance.panels[0]).getTableButtonByName(tableName);
+//                if (tableButton != null) {
 //                    BarFrame.instance.valOpenTime.setText(tableButton.getOpenTime());
 //                }
 //            }
 //        }
 //
-//        curPanelIdx = index;
-//        if(index > 1) {	//salespanel and setting pannel need menu panel on it.
-//            //it's x, y might have been changed if user clicked menu command on tablePenal
-//            BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
+//        transaction.commit();
+
+        curPanelIdx = index;
+//        if (index > 1) {  // salespanel and setting pannel need menu panel on it.
+//            // it's x, y might have been changed if user clicked menu command on tablePenal
+//            BillPanel billPanel = ((SalesPanel) BarFrame.instance.panels[2]).billPanel;
 //            int xMenuArea = billPanel.getX() + billPanel.getWidth() + CustOpts.HOR_GAP / 2;
 //            menuPanel.setLocation(xMenuArea, billPanel.getY());
-//
+
 //            menuPanel.reInitCategoryAndMenuBtns();
 //            menuPanel.reLayout();
 //            panels[index].add(menuPanel);
 //        }
-//
+
 //        panels[index].requestFocus();
 
         return 0;
     }
 
+    private void initSalesPanel() {
+        ((SalesPanel)panels[2]).billPanel.initContent();
+
+        cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
+        initMoneyDisplay();
+//        if(BarFrame.secondScreen != null) {
+//            BarFrame.customerFrame.refresh();
+//        }
+    }
+
+    private void initMoneyDisplay() {
+
+        String billIndex = getCurBillIndex();
+        //used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
+        String tableName = (String)cmbCurTable.getSelectedItem();
+        String openTime = valOpenTime.getText().toString();
+
+        StringBuilder sql = new StringBuilder("select * from bill ");
+        if(isShowingAnExpiredBill) {
+            sql.append("where _id = " + String.valueOf(BarFrame.instance.getCurBillID()));
+        }else {
+            sql.append("where customerNumber = '").append(billIndex).append("' and tableName = '").append(tableName).append("'")
+                    .append(" and openTime = '").append(openTime).append("'");
+        }
+
+        try {
+            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+            if(rs.moveToNext()) {
+                //save old values
+                int oldTotal = DBUtil.getCursorInt(rs,"Total");
+                int oldCashReceived =DBUtil.getCursorInt(rs,"cashReceived");
+                int oldDebitReceived = DBUtil.getCursorInt(rs,"debitReceived");
+                int oldVisaReceived = DBUtil.getCursorInt(rs,"visaReceived");
+                int oldMasterReceived = DBUtil.getCursorInt(rs,"masterReceived");
+                String oldOtherReceived = DBUtil.getCursorString(rs,"otherReceived");
+
+                int oldCashback = DBUtil.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
+                int oldTip = DBUtil.getCursorInt(rs,"tip");
+                int oldStatus = DBUtil.getCursorInt(rs,"status");
+                //cashReceived
+                int onSrcCashReceived = oldCashReceived + oldCashback;
+                if(oldStatus < DBConsts.ORIGINAL) {
+                    if(onSrcCashReceived + oldStatus > 0) {
+                        onSrcCashReceived += oldStatus;
+                        oldStatus = 0;
+                    }else {
+                        oldStatus += onSrcCashReceived;
+                        onSrcCashReceived = 0;
+                    }
+                }
+
+                //if the tip is not 0, there must be one receive(debit, visa or master) which is bigger than tip.
+                //@No need to consider the case that status is negative, because if it's refund, when reopenit, a new bill will be generated.
+                //and the payDlg will display of payDlg is base on the new bill.
+                int onSrcDebitReceived = oldDebitReceived;
+                int onSrcVisaReceived = oldVisaReceived;
+                int onSrcMasterReceived = oldMasterReceived;
+                String onSrcOtherReceived = oldOtherReceived;
+                if(oldTip > 0) {
+                    //couldn't be cash, if it was cash, will not present in bill record in db.
+
+                    //debitReceived
+                    if(oldDebitReceived > oldTip) {
+                        onSrcDebitReceived -= oldTip;
+                    }
+
+                    //visaReceived
+                    if(onSrcVisaReceived > oldTip) {
+                        onSrcVisaReceived -= oldTip;
+                    }
+
+                    //masterReceived
+                    if(onSrcMasterReceived > oldTip) {
+                        onSrcMasterReceived -= oldTip;
+                    }
+
+                    //otherReceived will be string like uber, skip....so not posssible to be otherReceived....
+                }
+                //total
+                int total = oldTotal;
+                //left
+                int left = onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 ? 0 : total - onSrcCashReceived - onSrcDebitReceived - onSrcVisaReceived - onSrcMasterReceived;
+
+                //set the status message value.
+                StringBuilder sb = new StringBuilder(" Payment status:");
+                if(onSrcCashReceived > 0) {
+                    sb.append(" Cash/").append(BarUtil.formatMoney(onSrcCashReceived / 100.0));
+                }
+                if(onSrcDebitReceived > 0) {
+                    sb.append(" Debit/").append(BarUtil.formatMoney(onSrcDebitReceived / 100.0));
+                }
+                if(onSrcVisaReceived > 0) {
+                    sb.append(" Visa/").append(BarUtil.formatMoney(onSrcVisaReceived / 100.0));
+                }
+                if(onSrcMasterReceived > 0) {
+                    sb.append(" Master/").append(BarUtil.formatMoney(onSrcMasterReceived / 100.0));
+                }
+                if(onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 ) {
+                    sb.append(" Paid from ").append(onSrcOtherReceived);
+                }
+
+                setStatusMes(lblStatus.getText() + sb.toString());
+            }
+        }catch(Exception e) {
+            L.e("BarFrame", "Unexpected exception in initMoneyDisplay() ", e);
+        }
+    }
+
+    private void resetStatus() {
+        if (!BarOption.isSingleUser()) {
+            valOperator.setText("");
+        }
+        //tableNames must be always non-empty. the first one must be empty string"";
+        ignoreItemChange = true;
+        cmbCurTable.setSelection(-1);
+
+        valCurBillIdx.setText("");
+        valOpenTime.setText("");
+    }
+
+    public boolean superAdminAuthentication() {
+        LoginDlg loginDlg = LoginDlg.getInstance();
+        loginDlg.noRefresh = true;
+        loginDlg.show(getSupportFragmentManager(), "login_dialog");
+        if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) { // 如果用户选择了确定按钮。
+            valOperator.setText(LoginDlg.USERNAME);
+            setStatusMes(consts.ADMIN_MODE());
+            // @TODO: might need to do some modification on the interface.
+//            revalidate();
+            return true;
+        }
+        return false;
+    }
+
     public static void singleUserLoginProcess() {
 //        BarFrame.instance.switchFragment(null);
-//        LoginDialogFragment.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
+//        LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
 //        if (LoginDlg.PASSED == true) { // 如果用户选择了确定按钮。
-//            instance.setVisible(true);
 //            checkSignIn();
 //        }else {	//the case that user clicked X button.
-//            Cas
 //        }
     }
     public String getCurBillIndex() {
@@ -822,7 +958,7 @@ public class BarFrame extends BaseFragmentActivity {
 //                if(BarOption.isCounterMode()) {
 //                    tablesPanel.switchToOtherTable();
 //                }else {
-                    switchMode(0);
+                switchMode(0);
 //                }
 
             } else {	//if there's other bill in this table, then view other bills.

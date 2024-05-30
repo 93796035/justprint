@@ -2,18 +2,22 @@ package org.cas.client.platform.bar.uibeans;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.just.print.app.BarFrame;
-import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.dialog.TableDlg;
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.casutil.L;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -45,8 +49,7 @@ public class TableButton extends Button {
 
     public void open() {
         setStatus(1);
-        int resId = getResources().getIdentifier("t".concat(String.valueOf(type).concat("s")).concat(".png"),
-                "drawable", getContext().getPackageName());
+        int resId = prepareIcon(type,1);
         if (resId != 0) {
             setBackgroundResource(resId);
         }
@@ -84,56 +87,78 @@ public class TableButton extends Button {
 
     //these properties are better to be set together. because they need each other to determine the behavior.
     public RelativeLayout.LayoutParams setTypeStatusAndName(String openTime, String startTime, int type, int status, String tableName) {
-        if(status > this.status) {
+        if (status > this.status) {
             this.setStatus(status);
-        }else {
-            status = this.status; 	//if status from bill is 0, while the button's status is opened, then make the status opened, to make the icon and color right.
+        } else {
+            status = this.status; // if status from bill is 0, while the button's status is opened, then make the status opened, to make the icon and color right.
         }
         this.setTableName(tableName);
         this.setOpenTime(openTime);
         this.setStartTime(startTime);
         this.type = type;
 
-        String formatStart = "<p style = \"margin:0px\"><font style=\"line-height:0.5;\" size=\"";
-        String formatEnd = "</font></p>";
-
+        SpannableString spannableString;
         RelativeLayout.LayoutParams params = null;
-        //3 type of tables:logo, customized icon, out of box icon
-        if(type == DBConsts.LOGO_TYPE) {			//logo button case==========================
+
+        // 3 types of tables: logo, customized icon, out of box icon
+        if (type == DBConsts.LOGO_TYPE) { // logo button case==========================
             setBackgroundResource(prepareIcon(type, status));
             params = setSize(60, 60);
-        }else if(type > DBConsts.LOGO_TYPE) {		//user customized icon case==========================
-            if (status == 0 || BarOption.isCounterMode()) {			//not openned or in counter mode.
+        } else if (type > DBConsts.LOGO_TYPE) { // user customized icon case==========================
+            if (status == 0 || BarOption.isCounterMode()) { // not opened or in counter mode.
                 setText(tableName);
                 params = setSize(DEFALTSIZE, DEFALTSIZE);
                 setTextSize(24);
                 setTypeface(null, Typeface.NORMAL);
                 setAlpha(1.0f);
-                setBackgroundResource(prepareIcon(type, status));	//counter mode all chair will not be displaying.
-            }else {													//openned
+                setBackgroundResource(prepareIcon(type, status)); // counter mode all chair will not be displaying.
+            } else { // opened
                 long minute = 0;
                 try {
-                    minute = (openTime == null || openTime.length() == 0) ? 0l : (new Date().getTime() - BarUtil.df.parse(openTime).getTime())/1000/60;
-                }catch(Exception e) {
+                    minute = (openTime == null || openTime.length() == 0) ? 0L : (new Date().getTime() - BarUtil.df.parse(openTime).getTime()) / 1000 / 60;
+                } catch (Exception e) {
                     L.e("TableButton ", "exception when parser openTime which is :" + openTime, e);
                 }
-                StringBuilder sb = new StringBuilder("<html><center>");
-                sb.append(formatStart).append(BarOption.getTableNameFontSize()).append("\">").append(tableName).append(formatEnd);
 
-                if(BarOption.showWaiterOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getWaiterOnTableFontSize()).append("\">").append(waiterName).append(formatEnd);
+                String tableInfo = tableName;
+                if (BarOption.showWaiterOnOpennedTable()) {
+                    tableInfo += "\n" + waiterName;
+                }
+                if (BarOption.showTimeOnOpennedTable()) {
+                    tableInfo += "\n" + minute + "m";
+                }
+                if (BarOption.showMoneyOnOpennedTable()) {
+                    tableInfo += "\n" + BarOption.getMoneySign() + BarUtil.formatMoney(total / 100.0);
                 }
 
-                if(BarOption.showTimeOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getTimeOnTableFontSize()).append("\">").append(minute).append("m").append(formatEnd);
+                spannableString = new SpannableString(tableInfo);
+                // Set styles for each part of the text
+                int start = 0;
+                int end = tableName.length();
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                if (BarOption.showWaiterOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + waiterName.length();
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
-                if(BarOption.showMoneyOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getMoneyOnTableFontSize()).append("\">").append(BarOption.getMoneySign()).append(BarUtil.formatMoney(total/100.0)).append(formatEnd);
+                if (BarOption.showTimeOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + String.valueOf(minute).length() + 1; // include 'm'
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
-                sb.append("</center></html>");
-                setText(sb.toString());
 
+                if (BarOption.showMoneyOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + (BarOption.getMoneySign() + BarUtil.formatMoney(total / 100.0)).length();
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+
+                setText(spannableString);
                 setTextSize(14);
                 setTypeface(null, Typeface.BOLD);
                 params = setSize(DEFALTSIZE, DEFALTSIZE);
@@ -141,61 +166,86 @@ public class TableButton extends Button {
                 setBackgroundResource(prepareIcon(type, status));
                 setBackgroundColor(dicideColor(minute, status));
             }
-        }else {															//system tables==========================
+        } else { // system tables==========================
             if (type < 0)
                 type = 0 - type;
 
-            if (status == 0) {// || BarOption.isCounterMode()) {		//not opened or in counter mode， make the icon opaque.
+            if (status == 0) { // not opened or in counter mode， make the icon opaque.
                 setText(tableName);
                 setTextSize(14);
                 setTypeface(null, Typeface.BOLD);
                 setTextColor(Color.parseColor(BarOption.getTableFontColor()));
 
-                if(BarOption.isCounterMode()) {
+                if (BarOption.isCounterMode()) {
                     params = setSize(DEFALTSIZE, DEFALTSIZE);
                     setBackgroundResource(prepareIcon(0, status));
-                }else {
-                    int p = typeList.indexOf(Math.abs(type));		//which kind of table.
+                } else {
+                    int p = typeList.indexOf(Math.abs(type)); // which kind of table.
                     params = setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
                     setBackgroundResource(prepareIcon(type, status));
                 }
                 setAlpha(1.0f);
-            } else {											//if opened and in table mode, then the icon will be not opaque.
+            } else { // if opened and in table mode, then the icon will be not opaque.
                 long minute = 0;
-                startTime = BarOption.isCounterMode() ? startTime : openTime; //table mode use opentime to calculate the waited time.
+                startTime = BarOption.isCounterMode() ? startTime : openTime; // table mode use opentime to calculate the waited time.
                 try {
-                    minute = (startTime == null || startTime.length() == 0 || total == 0 )  ? 0l : (new Date().getTime() - BarUtil.df.parse(startTime).getTime())/1000/60;
-                }catch(Exception e) {
-                    L.e("TableButton ", "exceptio when parser startTime which is :" + startTime, e);
+                    minute = (startTime == null || startTime.length() == 0 || total == 0) ? 0L : (new Date().getTime() - BarUtil.df.parse(startTime).getTime()) / 1000 / 60;
+                } catch (Exception e) {
+                    L.e("TableButton ", "exception when parser startTime which is :" + startTime, e);
                 }
 
-                StringBuilder sb = new StringBuilder("<html><center>");
-                if(BarOption.showNumberOnTable()) {
-                    sb.append(formatStart).append(BarOption.getTableNameFontSize()).append("\">").append(tableName).append(formatEnd);
+                String tableInfo = tableName;
+                if (BarOption.showNumberOnTable()) {
+                    tableInfo += "\n" + tableName;
                 }
-                if(BarOption.showWaiterOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getWaiterOnTableFontSize()).append("\">").append(waiterName).append(formatEnd);
+                if (BarOption.showWaiterOnOpennedTable()) {
+                    tableInfo += "\n" + waiterName;
                 }
-
-                if(BarOption.showTimeOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getTimeOnTableFontSize()).append("\">").append(minute).append("m").append(formatEnd);
+                if (BarOption.showTimeOnOpennedTable()) {
+                    tableInfo += "\n" + minute + "m";
                 }
-
-                if(BarOption.showMoneyOnOpennedTable()) {
-                    sb.append(formatStart).append(BarOption.getMoneyOnTableFontSize()).append("\">").append(BarOption.getMoneySign()).append(BarUtil.formatMoney(total/100.0)).append(formatEnd);
+                if (BarOption.showMoneyOnOpennedTable()) {
+                    tableInfo += "\n" + BarOption.getMoneySign() + BarUtil.formatMoney(total / 100.0);
                 }
 
-                sb.append("</center></html>");
-                setText(sb.toString());
+                spannableString = new SpannableString(tableInfo);
+                // Set styles for each part of the text
+                int start = 0;
+                int end = tableName.length();
+                if (BarOption.showNumberOnTable()) {
+                    spannableString.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
 
+                if (BarOption.showWaiterOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + waiterName.length();
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+
+                if (BarOption.showTimeOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + String.valueOf(minute).length() + 1; // include 'm'
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+
+                if (BarOption.showMoneyOnOpennedTable()) {
+                    start = end + 1;
+                    end = start + (BarOption.getMoneySign() + BarUtil.formatMoney(total / 100.0)).length();
+                    spannableString.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new StyleSpan(Typeface.NORMAL), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+
+                setText(spannableString);
                 setTextSize(14);
                 setTypeface(null, Typeface.BOLD);
                 setTextColor(Color.parseColor(BarOption.getOpenTableFontColor()));
 
-                int p = typeList.indexOf(Math.abs(type));		//which kind of table.
+                int p = typeList.indexOf(Math.abs(type)); // which kind of table.
                 params = setSize(TableDlg.widthAry[p], TableDlg.heightAry[p]);
-                if((BarOption.showWaiterOnOpennedTable() || BarOption.showTimeOnOpennedTable() || BarOption.showMoneyOnOpennedTable())
-                        && TableDlg.heightAry[p] < DEFALTSIZE) {	//if the height is not enough, make it bigger.
+                if ((BarOption.showWaiterOnOpennedTable() || BarOption.showTimeOnOpennedTable() || BarOption.showMoneyOnOpennedTable())
+                        && TableDlg.heightAry[p] < DEFALTSIZE) { // if the height is not enough, make it bigger.
                     params = setSize(TableDlg.widthAry[p], DEFALTSIZE);
                 }
                 setAlpha(0.5f);
@@ -204,18 +254,18 @@ public class TableButton extends Button {
             }
         }
 
-        //final adjustment of the icon, if the table name starts from HDFUX, will use spacial icons.
-        if(tableName != null && tableName.length() > 0) {
+        // final adjustment of the icon, if the table name starts from HDFUX, will use special icons.
+        if (tableName != null && tableName.length() > 0) {
             char firstLetter = tableName.toUpperCase().charAt(0);
-            if(firstLetter >= 'A' && firstLetter <= 'Z'){
+            if (firstLetter >= 'A' && firstLetter <= 'Z') {
                 String path = "t".concat(String.valueOf(firstLetter));
-                int resId = getResources().getIdentifier(path.concat(".png"),"drawable", getContext().getPackageName());
-                if(resId < 0){
+                int resId = getResources().getIdentifier(path.concat(".png"), "drawable", getContext().getPackageName());
+                if (resId < 0) {
                     path = "t0";
-                    if(status > 0) {
+                    if (status > 0) {
                         path = path.concat("s");
                     }
-                    resId = getResources().getIdentifier(path.concat(".png"),"drawable", getContext().getPackageName());
+                    resId = getResources().getIdentifier(path.concat(".png"), "drawable", getContext().getPackageName());
                 }
                 setBackgroundResource(resId);
                 params = setSize(DEFALTSIZE, DEFALTSIZE);
@@ -223,6 +273,7 @@ public class TableButton extends Button {
         }
         return params;
     }
+
 
     private RelativeLayout.LayoutParams setSize(int width, int height) {
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(

@@ -5,18 +5,21 @@ import android.view.View;
 import org.cas.client.platform.bar.action.SamActionListener;
 
 public interface ISButton {
-   ISButton  clone();
-   void addActionListener(SamActionListener actionListener);
-   
-   //for satisfy JToogleButton interfaces
-   void setSelected(boolean b);
-   boolean isSelected();
-   
-   //for satisfy JButton
-   String getText();
-   void setText(String text);
+    ISButton clone();
 
-   void setBounds(int i, int i1, int btnWidth, int btnHeight);
+    void addActionListener(SamActionListener actionListener);
 
-   void setEnabled(boolean b);
+    //for satisfy JToogleButton interfaces
+    void setSelected(boolean b);
+
+    boolean isSelected();
+
+    //for satisfy JButton
+    String getText();
+
+    void setText(String text);
+
+    void setBounds(int i, int i1, int btnWidth, int btnHeight);
+
+    void setEnabled(boolean b);
 }

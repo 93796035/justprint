@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.just.print.R;
@@ -19,9 +20,11 @@ import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
+import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.casutil.L;
 import com.stupid.method.reflect.StupidReflect;
 
@@ -42,7 +45,7 @@ import java.util.HashSet;
 public class TablesPanel extends PicturePane implements View.OnClickListener, View.OnTouchListener{
 
     private static final String TAG = "TableFragment";
-//    RelativeLayout  layout;
+    //    RelativeLayout  layout;
     public static ArrayList<TableButton> btnTables = new ArrayList<TableButton>();
 
     private FunctionButton btnSwitchToTableMode;
@@ -61,15 +64,64 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        mRoot = inflater.inflate(getLayoutId(), container, false);
         initContent();
-        //this thread will start a request thread every 10 seconds to fetch new order from server..
-        //also will trigger a refresh of tableivew for the waiting time.
+        // this thread will start a request thread every 10 seconds to fetch new order from server.
+        // also will trigger a refresh of tableivew for the waiting time.
         new BackGroundTimerThread().start();
+
+        MAX_CMDBTN_QT = 10;
+        layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[0], MAX_CMDBTN_QT);
         return mRoot;
     }
+
+    public static void layoutCommandButtons(View view, ArrayList<ISButton> buttons, int maxCombineQT) {
+        if(buttons == null)
+            return;
+
+        LinearLayout buttonBar = view.findViewById(R.id.buttonBar);
+        buttonBar.removeAllViews();
+
+        int panelWidth = view.getContext().getResources().getDisplayMetrics().widthPixels;
+        int panelHeight = view.getContext().getResources().getDisplayMetrics().heightPixels;
+
+        int buttonQT = buttons.size();
+
+        int row;
+        int col;
+        if(buttonQT <= 0) {
+            row = 0;
+            col = 0;
+        } else if(buttonQT <= 10) {
+            row = 1;
+            col = buttonQT;
+        } else {
+            row = 2;
+            col = 10;
+        }
+
+        int gap = CustOpts.HOR_GAP / 2;
+        int v_gap = CustOpts.VER_GAP / 2;
+        int tBtnWidth = col == 0 ? 100 : (panelWidth - gap * (col + 1)) / col;
+        int tBtnHeight = (panelHeight - 80) / 10;
+
+        int max = buttonQT > maxCombineQT ? maxCombineQT : buttonQT;
+        for(int i = 0; i < max; i++) {
+            ISButton button = buttons.get(i);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    tBtnWidth,
+                    tBtnHeight
+            );
+            params.setMargins(gap, v_gap, gap, v_gap);
+            // Assuming each ISButton implementation has a method that returns the underlying View.
+            buttonBar.addView(((View) button), params);
+        }
+    }
+
     @Override
     protected int getLayoutId() {
         return R.layout.fragment_tables_panel;
@@ -315,7 +367,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             BarFrame.instance.ignoreItemChange = true;
             BarFrame.instance.cmbCurTable.setSelection(btnTables.indexOf(tableToggle));
             //if before is not selected, then update the status
-            if(tableToggle.getStatus() == 0){
+            if(tableToggle.getStatus() == 0){ //TODO: seems not necessary, because when found out that there's no bill related to it, will do the open.
                 tableToggle.open();
             }
             //update ui's time field.
@@ -332,9 +384,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 //if it's table mode, will not be empty anymore, because whenever click a table, we will create a bill for it.
                 if (num == 0) {// if it's empty, means it's fastfood mode, and the previous bill was deleted (should not happen though). switch to sales panel
                     L.w("Warning:", "when open table, found no related bill in a open status table", null);
-                    tableToggle.open();
-                    BarFrame.instance.valOpenTime.setText(tableToggle.getOpenTime());
-                    BarFrame.instance.setCurBillIdx("");
+//                    tableToggle.open();
+//                    BarFrame.instance.valOpenTime.setText(tableToggle.getOpenTime());
+                    BarFrame.instance.setCurBillIdx("");    //TODO: why not set to 0?
                     BarFrame.instance.switchMode(2);
                 } else { // if it's not empty
                     if(num == 1 && CustOpts.custOps.getValue("FrobiddenQuickEnter") == null) {	// display the only bill

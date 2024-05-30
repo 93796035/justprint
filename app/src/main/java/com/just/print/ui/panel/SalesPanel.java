@@ -56,7 +56,7 @@ public class SalesPanel extends PicturePane{
     public boolean partialPaid;	//for indicating that money is partial paid, when leaving sales panel, will give a notice!
 
     public SalesPanel() {
-//        MAX_CMDBTN_QT = 20;
+        MAX_CMDBTN_QT = 20;
     }
 
     //used by discCountCoupon, will be deleted to use only the above method with same name.
