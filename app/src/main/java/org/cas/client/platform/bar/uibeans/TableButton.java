@@ -1,15 +1,21 @@
 package org.cas.client.platform.bar.uibeans;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
+import com.just.print.R;
 import com.just.print.app.BarFrame;
 
 import org.cas.client.platform.bar.BarOption;
@@ -249,8 +255,7 @@ public class TableButton extends Button {
                     params = setSize(TableDlg.widthAry[p], DEFALTSIZE);
                 }
                 setAlpha(0.5f);
-                setBackgroundResource(prepareIcon(type, status));
-                setBackgroundColor(dicideColor(minute, status));
+                createLayeredBackground(prepareIcon(type, status), dicideColor(minute, status));
             }
         }
 
@@ -274,6 +279,25 @@ public class TableButton extends Button {
         return params;
     }
 
+    public void createLayeredBackground(int bkImage, int bkColor) {
+        // 加载背景图片
+        Drawable backgroundImage = BarFrame.instance.getResources().getDrawable(bkImage);
+
+        // 创建颜色Drawable，例如半透明黑色
+        int translucentColor = (128 << 24) | (bkColor & 0x00FFFFFF);
+        Drawable colorOverlay = new ColorDrawable(translucentColor);  // 半透明黑色
+
+        // 创建Drawable数组以放入LayerDrawable
+        Drawable[] layers = new Drawable[2];
+        layers[0] = backgroundImage;
+        layers[1] = colorOverlay;
+
+        // 创建LayerDrawable
+        LayerDrawable layerDrawable = new LayerDrawable(layers);
+
+        // 将LayerDrawable设置为视图背景
+        setBackground(layerDrawable);
+    }
 
     private RelativeLayout.LayoutParams setSize(int width, int height) {
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(

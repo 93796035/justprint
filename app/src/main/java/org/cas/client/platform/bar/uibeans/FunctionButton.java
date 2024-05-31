@@ -59,18 +59,29 @@ public class FunctionButton extends Button implements ISButton{
 		return null;
 	}
 
-	public FunctionButton clone() {
-		FunctionButton btn = new FunctionButton(title);
-		btn.addActionListener(actionListener);
-		actionListener.setSourceBtn(btn);
-		return btn;
-	}
 
 	@Override
 	public void addActionListener(SamActionListener actionListener) {
 		super.setOnClickListener(actionListener);
 		this.actionListener = actionListener;
 		actionListener.setSourceBtn(this);
+	}
+
+	@Override
+	public void setText(String text) {
+		this.title = text;
+	}
+
+	@Override
+	public String getText(){
+		return title;
+	}
+
+	public FunctionButton clone() {
+		FunctionButton btn = new FunctionButton(title);
+		btn.addActionListener(actionListener);
+		actionListener.setSourceBtn(btn);
+		return btn;
 	}
 
 	protected void onDraw(Canvas canvas) {
@@ -94,20 +105,10 @@ public class FunctionButton extends Button implements ISButton{
 		canvas.drawText(title, x, y, textPaint);
 	}
 
-	@Override
-	public void setText(String text) {
-		this.title = text;
-	}
-
-	@Override
-	public String getText(){
-		return title;
-	}
-
     public void setVisible(boolean b) {
 		setVisibility(b ? View.VISIBLE : View.GONE);
     }
 
-    public void setBounds(int i, int i1, int tBtnWidht, int tBtnHeight) {
-    }
+	@Override
+    public void setBounds(int i, int i1, int tBtnWidht, int tBtnHeight) {}
 }

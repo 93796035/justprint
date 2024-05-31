@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ToggleButton;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
@@ -80,8 +81,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     }
 
     public static void layoutCommandButtons(View view, ArrayList<ISButton> buttons, int maxCombineQT) {
-        if(buttons == null)
+        if (buttons == null || buttons.isEmpty()) {
             return;
+        }
 
         LinearLayout buttonBar = view.findViewById(R.id.buttonBar);
         buttonBar.removeAllViews();
@@ -93,10 +95,10 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
 
         int row;
         int col;
-        if(buttonQT <= 0) {
+        if (buttonQT <= 0) {
             row = 0;
             col = 0;
-        } else if(buttonQT <= 10) {
+        } else if (buttonQT <= 10) {
             row = 1;
             col = buttonQT;
         } else {
@@ -110,15 +112,17 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         int tBtnHeight = (panelHeight - 80) / 10;
 
         int max = buttonQT > maxCombineQT ? maxCombineQT : buttonQT;
-        for(int i = 0; i < max; i++) {
+        for (int i = 0; i < max; i++) {
             ISButton button = buttons.get(i);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    tBtnWidth,
-                    tBtnHeight
-            );
-            params.setMargins(gap, v_gap, gap, v_gap);
-            // Assuming each ISButton implementation has a method that returns the underlying View.
-            buttonBar.addView(((View) button), params);
+            // Since all ISButton implementations are subclasses of Button
+            if (button instanceof View) {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        tBtnWidth,
+                        tBtnHeight
+                );
+                params.setMargins(gap, button instanceof ToggleButton ? v_gap - 8 : v_gap, gap, v_gap);
+                buttonBar.addView((View) button, params);
+            }
         }
     }
 

@@ -48,11 +48,6 @@ public class FunctionToggleButton extends ToggleButton implements ISButton{
 	}
 
 	@Override
-	public void setBounds(int i, int i1, int btnWidth, int btnHeight) {
-
-	}
-
-	@Override
 	public String getText(){
 		return title;
 	}
@@ -88,4 +83,7 @@ public class FunctionToggleButton extends ToggleButton implements ISButton{
 
 		canvas.drawText(title, x, y, textPaint);
 	}
+
+	@Override
+	public void setBounds(int i, int i1, int btnWidth, int btnHeight) {}
 }
