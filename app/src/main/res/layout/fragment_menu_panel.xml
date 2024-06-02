@@ -1,0 +1,45 @@
+<!-- res/layout/fragment_menu_panel.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/menuPanelRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Category Buttons Container -->
+    <RelativeLayout
+        android:id="@+id/categoryContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+    </RelativeLayout>
+
+    <!-- Menu Buttons Container -->
+    <RelativeLayout
+        android:id="@+id/menuContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/categoryContainer"
+        android:layout_marginTop="16dp">
+    </RelativeLayout>
+
+    <!-- Page Up/Down Buttons for Category -->
+    <RelativeLayout
+        android:id="@+id/categoryPageControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/menuContainer"
+        android:layout_marginTop="16dp">
+        <!-- Add page up/down buttons dynamically -->
+    </RelativeLayout>
+
+    <!-- Page Up/Down Buttons for Menu -->
+    <RelativeLayout
+        android:id="@+id/menuPageControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/categoryPageControls"
+        android:layout_marginTop="16dp">
+        <!-- Add page up/down buttons dynamically -->
+    </RelativeLayout>
+
+</RelativeLayout>

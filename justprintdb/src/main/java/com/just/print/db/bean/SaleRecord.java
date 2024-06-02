@@ -16,7 +16,7 @@ public class SaleRecord {
 
     private Long id;
     private String tableName;
-    private String customerNumber;
+    private String billIndex;
     private String openTime;
     private Integer productId;
     private Float amount;
@@ -46,10 +46,10 @@ public class SaleRecord {
         this.id = id;
     }
 
-    public SaleRecord(Long id, String tableName, String customerNumber, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer status, Integer version) {
+    public SaleRecord(Long id, String tableName, String billIndex, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer status, Integer version) {
         this.id = id;
         this.tableName = tableName;
-        this.customerNumber = customerNumber;
+        this.billIndex = billIndex;
         this.openTime = openTime;
         this.productId = productId;
         this.amount = amount;
@@ -85,12 +85,12 @@ public class SaleRecord {
         this.tableName = tableName;
     }
 
-    public String getCustomerNumber() {
-        return customerNumber;
+    public String getBillIndex() {
+        return billIndex;
     }
 
-    public void setCustomerNumber(String customerNumber) {
-        this.customerNumber = customerNumber;
+    public void setBillIndex(String billIndex) {
+        this.billIndex = billIndex;
     }
 
     public String getOpenTime() {

@@ -13,15 +13,13 @@ import com.just.print.app.BaseFragment;
 public class PicturePane extends BaseFragment //implements LayoutManager2
 {
 	public int MAX_CMDBTN_QT;
-	Image image;
-//    public PicturePane(Image image) {
-//        if (image != null) {// 如果传入的图片不是空，则用它初始化picture对象。
-//        	this.image = image;
-//            preparePicture();
-//        }
-//        setDoubleBuffered(true);
-//        setLayout(this); // 改变布局管理器。
-//    }
+    String image;
+    public PicturePane(String image) {
+        if (image != null) {// 如果传入的图片不是空，则用它初始化picture对象。
+        	this.image = image;
+            preparePicture();
+        }
+    }
 
     public void preparePicture() {
     	preparePicture(this.image);
@@ -33,7 +31,7 @@ public class PicturePane extends BaseFragment //implements LayoutManager2
      *            传入的图片
      * @called by: emo.pim.pimview.CoverPane;
      */
-    public void preparePicture(Image image) {
+    public void preparePicture(String image) {
 //    	int width = getWidth();
 //    	int height = getHeight();
 //    	if(width == 0 || height == 0) {

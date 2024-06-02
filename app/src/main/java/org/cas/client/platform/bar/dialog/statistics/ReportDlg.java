@@ -372,7 +372,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				bill.setId(DBUtil.getCursorLong(rs, "_id"));
 				bill.setCreatedTime(DBUtil.getCursorString(rs, "createTime"));
 				bill.setTableName(DBUtil.getCursorString(rs, "tableName"));
-				bill.setCustomerNumber(DBUtil.getCursorString(rs, "billIndex"));
+				bill.setBillIndex(DBUtil.getCursorString(rs, "billIndex"));
 				bill.setTotal(DBUtil.getCursorInt(rs, "total"));
 				bill.setDiscount(DBUtil.getCursorInt(rs, "discount"));
 				bill.setCashReceived(DBUtil.getCursorInt(rs, "cashReceived"));

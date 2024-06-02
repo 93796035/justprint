@@ -25,7 +25,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property TableName = new Property(1, String.class, "tableName", false, "tableName");
-        public final static Property CustomerNumber = new Property(2, String.class, "customerNumber", false, "customerNumber");
+        public final static Property BillIndex = new Property(2, String.class, "billIndex", false, "billIndex");
         public final static Property OpenTime = new Property(3, String.class, "openTime", false, "openTime");
         public final static Property ProductId = new Property(4, Integer.class, "productId", false, "productId");
         public final static Property Amount = new Property(5, Float.class, "amount", false, "AMOUNT");
@@ -57,7 +57,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'SALE_RECORD' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'tableName' TEXT," + // 1: tableName
-                "'customerNumber' TEXT," + // 2: customerNumber
+                "'billIndex' TEXT," + // 2: billIndex
                 "'openTime' TEXT," + // 3: openTime
                 "'productId' INTEGER," + // 4: productId
                 "'AMOUNT' REAL," + // 5: amount
@@ -92,9 +92,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
             stmt.bindString(2, tableName);
         }
  
-        String customerNumber = entity.getCustomerNumber();
-        if (customerNumber != null) {
-            stmt.bindString(3, customerNumber);
+        String billIndex = entity.getBillIndex();
+        if (billIndex != null) {
+            stmt.bindString(3, billIndex);
         }
  
         String openTime = entity.getOpenTime();
@@ -171,7 +171,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         SaleRecord entity = new SaleRecord( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // tableName
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // customerNumber
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // billIndex
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // openTime
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // productId
             cursor.isNull(offset + 5) ? null : cursor.getFloat(offset + 5), // amount
@@ -192,7 +192,7 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
     public void readEntity(Cursor cursor, SaleRecord entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setTableName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setCustomerNumber(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setBillIndex(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setOpenTime(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setProductId(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
         entity.setAmount(cursor.isNull(offset + 5) ? null : cursor.getFloat(offset + 5));

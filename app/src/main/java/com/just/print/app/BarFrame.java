@@ -1,12 +1,14 @@
 package com.just.print.app;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -157,12 +159,8 @@ public class BarFrame extends BaseFragmentActivity {
 //            switchFragment(new ActivateFragment());
         }
 
-        panels[0] = new TablesPanel();
-        panels[1] = new BillListPanel();
-        panels[2] = new SalesPanel();
-        panels[3] = new SettingPanel();
         //==========================================================
-        menuPanel = new MenuPanel();	//have to be after initModel, before new BarFrame().
+        menuPanel = new MenuPanel(null);	//have to be after initModel, before new BarFrame().
         switch (CustOpts.custOps.getUserLang()){//before login, the system language is the last change of userLanguage, (depends on who logged in last time.
             case 0:
                 consts = new BarDlgConst0();
@@ -183,6 +181,10 @@ public class BarFrame extends BaseFragmentActivity {
         discountDlg = new DiscountDlg();
         payDlg = new PayDlg();
 
+        panels[0] = new TablesPanel();
+        panels[1] = new BillListPanel();
+        panels[2] = new SalesPanel();
+        panels[3] = new SettingPanel();
 
         //single user or not, display login dialog or mainInterface.
         if(BarOption.isSingleUser()) {
@@ -284,7 +286,7 @@ public class BarFrame extends BaseFragmentActivity {
             }
             //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
             //different Appareil ID, so they know the data is from which machine.
-            if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")
+            if(BarOption.getCertifiedDeviceId() != null //means it's webmev.
                     && BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
                 existingIdApprlCheck();
             }else {
@@ -704,36 +706,44 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public int switchMode(int index) {
-//        if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
-//            if (ignoreLogin == false) {
-//                if (BarOption.isSingleUser()) {
-//                    LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
-//                    if (!LoginDlg.PASSED) {
-//                        return -1;
-//                    }
-//                    valOperator.setText(LoginDlg.USERNAME);
-//                }
-//            } else {
-//                ignoreLogin = false;
-//            }
-//        }
-//        curDish = null;
-//        setStatusMes("");
-//        if (index == 3) {  // setting
-//            if (!superAdminAuthentication())
-//                return -1;
-//            // shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
-//        } else if (LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
-//            index = 3;
-//        } else if (index == 2) {  // sale
-//            initSalesPanel();
-//        } else if (index == 1) {  // bill
-//            ((BillListPanel) panels[1]).initContent();
-//        } else if (index == 0) {  // table
-//            resetStatus();
-//            ((TablesPanel) panels[0]).initContent();
-//        }
-//
+        if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
+            if (ignoreLogin == false) {
+                if (BarOption.isSingleUser()) {
+                    LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+                    if (!LoginDlg.PASSED) {
+                        return -1;
+                    }
+                    valOperator.setText(LoginDlg.USERNAME);
+                }
+            } else {
+                ignoreLogin = false;
+            }
+        }
+        curDish = null;
+        setStatusMes("");
+        if (index == 3) {  // setting
+            if (!superAdminAuthentication())
+                return -1;
+            // shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
+        } else if (LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
+            index = 3;
+            topBar.setVisibility(View.GONE);
+        } else if (index == 2) {  // sale
+            topBar.setVisibility(View.VISIBLE);
+            topBar.setBackgroundColor(Color.GRAY);
+            cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
+            initMoneyDisplay();
+            switchFragment(panels[2]);
+        } else if (index == 1) {  // bill
+            topBar.setVisibility(View.VISIBLE);
+            topBar.setBackgroundColor(Color.DKGRAY);
+            ((BillListPanel) panels[1]).initContent();
+        } else if (index == 0) {  // table
+            topBar.setVisibility(View.GONE);
+            resetStatus();
+            ((TablesPanel) panels[0]).initContent();
+        }
+
 //        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //
 //        for (BaseFragment panel : panels) {
@@ -778,28 +788,18 @@ public class BarFrame extends BaseFragmentActivity {
         return 0;
     }
 
-    private void initSalesPanel() {
-        ((SalesPanel)panels[2]).billPanel.initContent();
-
-        cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
-        initMoneyDisplay();
-//        if(BarFrame.secondScreen != null) {
-//            BarFrame.customerFrame.refresh();
-//        }
-    }
-
     private void initMoneyDisplay() {
 
         String billIndex = getCurBillIndex();
         //used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
-        String tableName = (String)cmbCurTable.getSelectedItem();
+        String tableName = (String)cmbCurTable.getSelectedItem().toString();
         String openTime = valOpenTime.getText().toString();
 
         StringBuilder sql = new StringBuilder("select * from bill ");
         if(isShowingAnExpiredBill) {
             sql.append("where _id = " + String.valueOf(BarFrame.instance.getCurBillID()));
         }else {
-            sql.append("where customerNumber = '").append(billIndex).append("' and tableName = '").append(tableName).append("'")
+            sql.append("where billIndex = '").append(billIndex).append("' and tableName = '").append(tableName).append("'")
                     .append(" and openTime = '").append(openTime).append("'");
         }
 
@@ -1064,7 +1064,8 @@ public class BarFrame extends BaseFragmentActivity {
             }
         }
     }
-
+    @XViewByID(R.id.topBar)
+    public LinearLayout topBar;
     @XViewByID(R.id.cmbCurTable)
     public Spinner cmbCurTable;
     public ArrayAdapter<DiningTable> adapter;

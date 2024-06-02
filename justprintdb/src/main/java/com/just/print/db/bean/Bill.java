@@ -17,7 +17,7 @@ public class Bill {
     private Long id;
     private String createdTime;
     private String tableName;
-    private String customerNumber;
+    private String billIndex;
     private String openTime;
     private Integer Total;
     private Integer discount;
@@ -52,11 +52,11 @@ public class Bill {
         this.id = id;
     }
 
-    public Bill(Long id, String createdTime, String tableName, String customerNumber, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer cashReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer status, Integer version) {
+    public Bill(Long id, String createdTime, String tableName, String billIndex, String openTime, Integer Total, Integer discount, Integer serviceFee, Integer cashReceived, Integer debitReceived, Integer visaReceived, Integer masterReceived, String otherReceived, Integer tip, Integer cashback, Integer userId, String comment, Integer invoiceId, Integer status, Integer version) {
         this.id = id;
         this.createdTime = createdTime;
         this.tableName = tableName;
-        this.customerNumber = customerNumber;
+        this.billIndex = billIndex;
         this.openTime = openTime;
         this.Total = Total;
         this.discount = discount;
@@ -105,12 +105,12 @@ public class Bill {
         this.tableName = tableName;
     }
 
-    public String getCustomerNumber() {
-        return customerNumber;
+    public String getBillIndex() {
+        return billIndex;
     }
 
-    public void setCustomerNumber(String customerNumber) {
-        this.customerNumber = customerNumber;
+    public void setBillIndex(String billIndex) {
+        this.billIndex = billIndex;
     }
 
     public String getOpenTime() {

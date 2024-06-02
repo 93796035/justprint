@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.just.print.R;
@@ -18,6 +20,7 @@ import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
+import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
 import org.cas.client.platform.bar.BarOption;
@@ -88,9 +91,9 @@ public class BillPanel extends BaseFragment
 	public BillPanel(SalesPanel salesPanel) {
 		this.salesPanel = salesPanel;
 	}
-	public BillPanel(CustomerFrame parent, BarDlgConst langConsts) {
-		this.customerFrame = parent;
-	}
+//	public BillPanel(CustomerFrame parent, BarDlgConst langConsts) {
+//		this.customerFrame = parent;
+//	}
 
 	public BillPanel(BillListPanel billListPanel, FunctionToggleButton billButton) {
 		this.billListPanel = billListPanel;
@@ -104,7 +107,21 @@ public class BillPanel extends BaseFragment
 
 	@Override
 	public void onCreated(Bundle savedInstanceState) {
+		new StupidReflect(this, getView()).init();
 		initComponent();
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		// 在视图创建后进行注解绑定
+		new StupidReflect(this, getView()).init();
+		initComponent();  // 初始化组件逻辑
+		onComponentsReady();  // 组件已准备就绪
+	}
+	private void onComponentsReady() {
+		// 通知其他类组件已就绪或开始处理依赖于组件的逻辑
+		initContent();  // 如果这里调用initContent，确保组件已经就绪
 	}
 	//find the new (not saved) items, then send then to kitchen, save then to db. send to server...
 	public boolean unsavedItemsCheck() {
@@ -134,7 +151,7 @@ public class BillPanel extends BaseFragment
 	}
 
 	//if the tableId is null, then use the sameID of original bill.
-	public int cloneCurrentBillRecord(String tableName, String customerNumber, int total) {
+	public int cloneCurrentBillRecord(String tableName, String billIndex, int total) {
 		if(total < 0) {
 			total = Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100);
 		}
@@ -164,7 +181,7 @@ public class BillPanel extends BaseFragment
 	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
 				.append(createtime).append("', '")
 	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table
-	            .append(customerNumber == null ? DBUtil.getCursorString(rs, "BillIndex") : customerNumber).append("', ")	//bill
+	            .append(billIndex == null ? DBUtil.getCursorString(rs, "BillIndex") : billIndex).append("', ")	//bill
 	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
 	            .append(discount).append(", ")
 	            .append(tip).append(", ")
@@ -183,7 +200,7 @@ public class BillPanel extends BaseFragment
 			AikaPos.db.execSQL(sql.toString());
 			
 		   	sql = new StringBuilder("Select id from bill where createtime = '").append(createtime)
-		   			.append("' and billIndex = '").append(customerNumber).append("'");
+		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
             return DBUtil.getCursorInt(rs, "_id");
@@ -1571,10 +1588,9 @@ public class BillPanel extends BaseFragment
 	@XViewByID(R.id.valTotlePrice)
     public TextView valTotlePrice;
 	@XViewByID(R.id.moreButton)
-    
-    private ArrowButton moreButton;
+    private Button moreButton;
 	@XViewByID(R.id.lessButton)
-    private ArrowButton lessButton;
+    private Button lessButton;
     
 	public String[] header;
 

@@ -26,7 +26,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property CreatedTime = new Property(1, String.class, "createdTime", false, "createdTime");
         public final static Property TableName = new Property(2, String.class, "tableName", false, "tableName");
-        public final static Property CustomerNumber = new Property(3, String.class, "customerNumber", false, "customerNumber");
+        public final static Property BillIndex = new Property(3, String.class, "billIndex", false, "billIndex");
         public final static Property OpenTime = new Property(4, String.class, "openTime", false, "openTime");
         public final static Property Total = new Property(5, Integer.class, "Total", false, "TOTAL");
         public final static Property Discount = new Property(6, Integer.class, "discount", false, "DISCOUNT");
@@ -64,7 +64,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'createdTime' TEXT," + // 1: createdTime
                 "'tableName' TEXT," + // 2: tableName
-                "'customerNumber' TEXT," + // 3: customerNumber
+                "'billIndex' TEXT," + // 3: billIndex
                 "'openTime' TEXT," + // 4: openTime
                 "'TOTAL' INTEGER," + // 5: Total
                 "'DISCOUNT' INTEGER," + // 6: discount
@@ -109,9 +109,9 @@ public class BillDao extends AbstractDao<Bill, Long> {
             stmt.bindString(3, tableName);
         }
  
-        String customerNumber = entity.getCustomerNumber();
-        if (customerNumber != null) {
-            stmt.bindString(4, customerNumber);
+        String billIndex = entity.getBillIndex();
+        if (billIndex != null) {
+            stmt.bindString(4, billIndex);
         }
  
         String openTime = entity.getOpenTime();
@@ -214,7 +214,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // createdTime
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // tableName
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // customerNumber
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // billIndex
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // openTime
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // Total
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // discount
@@ -241,7 +241,7 @@ public class BillDao extends AbstractDao<Bill, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setCreatedTime(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setTableName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setCustomerNumber(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setBillIndex(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setOpenTime(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setTotal(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setDiscount(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));

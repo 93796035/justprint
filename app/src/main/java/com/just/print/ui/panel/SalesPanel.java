@@ -4,17 +4,24 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
+import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Dish;
 import com.stupid.method.reflect.StupidReflect;
+import com.stupid.method.reflect.annotation.XViewByID;
 
+import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.model.DBConsts;
+import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.cascustomize.CustOpts;
 
@@ -30,10 +37,23 @@ public class SalesPanel extends PicturePane{
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        mRoot = inflater.inflate(getLayoutId(), container, false);
         initComponent();
+        BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2], MAX_CMDBTN_QT);
+
+        if (savedInstanceState == null) {
+            // Load the child fragment
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.billPanelContainer, billPanel)
+                    .replace(R.id.menuPanelContainer, BarFrame.menuPanel)
+                    .commit();
+        }
+
+        reLayout();
         return mRoot;
     }
     @Override
@@ -41,13 +61,6 @@ public class SalesPanel extends PicturePane{
         return R.layout.fragment_sales_panel;
     }
 
-    private static SalesPanel instance = null;
-    public static SalesPanel getInstance(){
-        if(instance == null){
-            instance = new SalesPanel();
-        }
-        return instance;
-    }
     //for print
     public static String SUCCESS = "0";
     public static String ERROR = "2";
@@ -56,7 +69,9 @@ public class SalesPanel extends PicturePane{
     public boolean partialPaid;	//for indicating that money is partial paid, when leaving sales panel, will give a notice!
 
     public SalesPanel() {
+        super(BarOption.getSalePanelBK());
         MAX_CMDBTN_QT = 20;
+        initComponent();
     }
 
     //used by discCountCoupon, will be deleted to use only the above method with same name.
@@ -125,26 +140,47 @@ public class SalesPanel extends PicturePane{
 
     void reLayout() {
         // command buttons--------------
-        int top = BarUtil.layoutCommandButtons(this, CmdBtnsManagerDlg.groupedButtons[2]);
-        if(top < 0) {
-            return;
-        }
-        int v_gat = CustOpts.VER_GAP / 2;
-        int h_gap = CustOpts.HOR_GAP / 2;
-        // TOP part============================
-        int topAreaHeight = top - 3 * v_gat;
+//        int top = BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2]);
+//        if(top < 0) {
+//            return;
+//        }
+//        int v_gat = CustOpts.VER_GAP / 2;
+//        int h_gap = CustOpts.HOR_GAP / 2;
+//        // TOP part============================
+//        int topAreaHeight = top - 3 * v_gat;
+//
+////        billPanel.setBounds(h_gap/2, v_gat,
+////                (int) (getWidth() * (1 - BarOption.getMenuAreaPortion())), topAreaHeight);
+//
+//        // menu area--------------
+////        int xMenuArea = billPanel.getX() + billPanel.getWidth() + h_gap;
+////        int widthMenuArea = getWidth() - billPanel.getWidth() - h_gap - CustOpts.SIZE_EDGE;
+//
+////        BarFrame.menuPanel.setBounds(xMenuArea, billPanel.getY(), widthMenuArea, topAreaHeight + 4);
+//        BarFrame.menuPanel.reLayout();
+//
+//        billPanel.resetColWidth();
+        float billPanelWeight = BarOption.getMenuAreaPortion();
+        float menuPanelWeight = 1.0f - billPanelWeight;
 
-//        billPanel.setBounds(h_gap/2, v_gat,
-//                (int) (getWidth() * (1 - BarOption.getMenuAreaPortion())), topAreaHeight);
+        FrameLayout billPanelContainer = mRoot.findViewById(R.id.billPanelContainer);
+        FrameLayout menuPanelContainer = mRoot.findViewById(R.id.menuPanelContainer);
 
-        // menu area--------------
-//        int xMenuArea = billPanel.getX() + billPanel.getWidth() + h_gap;
-//        int widthMenuArea = getWidth() - billPanel.getWidth() - h_gap - CustOpts.SIZE_EDGE;
+        // 设置 BillPanel 的布局权重
+        LinearLayout.LayoutParams billPanelParams = (LinearLayout.LayoutParams) billPanelContainer.getLayoutParams();
+        billPanelParams.weight = billPanelWeight;
+        billPanelContainer.setLayoutParams(billPanelParams);
 
-//        BarFrame.menuPanel.setBounds(xMenuArea, billPanel.getY(), widthMenuArea, topAreaHeight + 4);
-        BarFrame.menuPanel.reLayout();
+        // 设置 MenuPanel 的布局权重
+        LinearLayout.LayoutParams menuPanelParams = (LinearLayout.LayoutParams) menuPanelContainer.getLayoutParams();
+        menuPanelParams.weight = menuPanelWeight;
+        menuPanelContainer.setLayoutParams(menuPanelParams);
 
-        billPanel.resetColWidth();
+        // 加载 BillPanel 和 MenuPanel
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.billPanelContainer, billPanel);
+        transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
+        transaction.commit();
     }
 
     public void initComponent() {
@@ -161,16 +197,8 @@ public class SalesPanel extends PicturePane{
 
         // built
         BarUtil.addFunctionButtons(this, CmdBtnsManagerDlg.groupedButtons[2]);
-
-//        add(billPanel);
-        // add listener
-//        addComponentListener(this);
-//        addKeyListener(this);
-        // 因为考虑到条码经常由扫描仪输入，不一定是靠键盘，所以专门为他加了DocumentListener，通过监视内容变化来自动识别输入完成，光标跳转。
-        // tfdProdNumber.getDocument().addDocumentListener(this); // 而其它组件如实收金额框不这样做为了节约（一个KeyListener接口全搞定）
-        reLayout();
     }
-
+    @XViewByID(R.id.billPanelContainer)
     public BillPanel billPanel;
     private String keyboardInput = "";
 

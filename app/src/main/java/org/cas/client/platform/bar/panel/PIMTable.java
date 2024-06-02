@@ -1,6 +1,7 @@
 package org.cas.client.platform.bar.panel;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.widget.ListView;
 
 import com.just.print.ui.adapter.MyAdapter;
@@ -10,6 +11,13 @@ public class PIMTable extends ListView {
         super(context);
     }
 
+    public PIMTable(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public PIMTable(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
     public void setSelectedRow(int i) {
         setSelection(i);
     }

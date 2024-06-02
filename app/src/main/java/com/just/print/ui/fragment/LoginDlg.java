@@ -108,11 +108,8 @@ public class LoginDlg extends DialogFragment {
         User user = matchingWithExistingPassword(inputPassword);
         if (user == null) {
             if ("9".equals(inputPassword)) {//for internal testing time saving.
-                matchingWithExistingPassword("2222");
-                ((BarFrame) getActivity()).switchFragment(TablesPanel.getInstance());
-                dialog.dismiss(); // 关闭对话框
-            } else {
-                Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
+                attemptLogin("2222"); // 关闭对话框
+                return;
             }
         } else {
             BarFrame.instance.setCurrentUser(user);

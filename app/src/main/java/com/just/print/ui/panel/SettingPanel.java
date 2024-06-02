@@ -60,7 +60,9 @@ public class SettingPanel extends PicturePane implements View.OnClickListener, V
     private Button bkMenu, restoreMenu, bkConfig, restoreConfig, moreOptions;
 
     public SettingPanel() {
-        // Default constructor
+        super(BarOption.getSettingPanelBK());
+        MAX_CMDBTN_QT = 10;
+//        initComponent();
     }
 
     @Nullable

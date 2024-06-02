@@ -1174,7 +1174,7 @@ public class PrintService{
   		  		
   		for (Bill bill : list) {
   			BillPanel bp = new BillPanel(null);
-    		bp.initContent(null, bill.getCustomerNumber(), bill.getTableName(), bill.getOpenTime(), true);
+    		bp.initContent(null, bill.getBillIndex(), bill.getTableName(), bill.getOpenTime(), true);
     		for (Dish dish : bp.getOrderedDishAry()) {
     			String dishName = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
     			int num = dish.getNum();
@@ -1780,7 +1780,7 @@ public class PrintService{
   		
   		for (Bill bill : list) {
   			BillPanel bp = new BillPanel(null);
-    		bp.initContent(null, bill.getCustomerNumber(), bill.getTableName(), bill.getOpenTime(), true);
+    		bp.initContent(null, bill.getBillIndex(), bill.getTableName(), bill.getOpenTime(), true);
     		
     		subTotal += bp.subTotal;		//the sub total included the refund ones. why when it's refund, the subtotal here is 0,is it correct?
     		GST += bp.totalGst;

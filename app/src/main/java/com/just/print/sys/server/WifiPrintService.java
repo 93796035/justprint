@@ -374,7 +374,7 @@ public class WifiPrintService implements Runnable{
         }else{
             bill = new Bill();
             bill.setId(Long.valueOf(curBillIdx));
-            bill.setCustomerNumber(CustomerSelection.getInstance().getTableName());
+            bill.setBillIndex(CustomerSelection.getInstance().getTableName());
             bill.setTotal((int)(priceOfBill * 100));
             bill.setOpenTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             //statue field is not used for now.
@@ -553,7 +553,7 @@ public class WifiPrintService implements Runnable{
             HashMap<String, Float> sub = new HashMap<>();
             List<Bill> bills = AikaPos.daoSession.getBillDao().loadAll();
             for(Bill bill : bills) {
-                String tableName = bill.getCustomerNumber().toString();
+                String tableName = bill.getBillIndex().toString();
                 if(!billsNotCount.contains(bill.getId())
                     && (tableToCalculate.contains("," + tableName + ","))){
                     names.add(tableName);

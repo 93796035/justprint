@@ -47,8 +47,8 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
     int curPageNum;
 
     public BillListPanel() {
-//        super(BarOption.getBillPanelBK());
-//        MAX_CMDBTN_QT = 10;
+        super(BarOption.getBillPanelBK());
+        MAX_CMDBTN_QT = 10;
         initComponent();
     }
 

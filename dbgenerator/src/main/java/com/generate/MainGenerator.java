@@ -145,7 +145,7 @@ public class MainGenerator {
         Entity saleRecord = schema.addEntity("SaleRecord");
         saleRecord.addIdProperty();
         saleRecord.addStringProperty("tableName").columnName("tableName");
-        saleRecord.addStringProperty("customerNumber").columnName("customerNumber");
+        saleRecord.addStringProperty("billIndex").columnName("billIndex");
         saleRecord.addStringProperty("openTime").columnName("openTime");
 
         saleRecord.addIntProperty("productId").columnName("productId");
@@ -176,7 +176,7 @@ public class MainGenerator {
         bill.addIdProperty();
         bill.addStringProperty("createdTime").columnName("createdTime");
         bill.addStringProperty("tableName").columnName("tableName");
-        bill.addStringProperty("customerNumber").columnName("customerNumber");
+        bill.addStringProperty("billIndex").columnName("billIndex");
         bill.addStringProperty("openTime").columnName("openTime");
         bill.addIntProperty("Total");
         bill.addIntProperty("discount");

@@ -1,15 +1,29 @@
 package org.cas.client.platform.bar.panel;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.database.Cursor;
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+
+import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
+import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.CustomizedRule;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.Printer;
+import com.just.print.ui.panel.PicturePane;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
 
@@ -29,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MenuPanel extends View implements View.OnClickListener {
+public class MenuPanel extends PicturePane implements View.OnClickListener {
 	
     private int curCategoryPage = 0;
     private int categoryQtPerPage = 0;
@@ -57,22 +71,45 @@ public class MenuPanel extends View implements View.OnClickListener {
     private List<Dish> classifiedDishAry;
     ArrayList<Dish> selectdDishAry = new ArrayList<Dish>();
 	private int classifiedMenuIndex;
-	public MenuPanel() {
-        super(BarFrame.instance);
+
+	public MenuPanel(String image) {
+		super(image);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		mRoot = inflater.inflate(getLayoutId(), container, false);
 		initComponent();
+
+		// 添加 OnGlobalLayoutListener
+		mRoot.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				// 确保只调用一次
+				mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+				reLayout();
+			}
+		});
+
+		return mRoot;
+	}
+
+	@Override
+	protected int getLayoutId() {
+		return R.layout.fragment_menu_panel;
 	}
 
 	public void initComponent() {
-	    categoryRow = BarOption.getCategoryRow();
-	    categoryColumn = BarOption.getCategoryCol();
-	    menuRow = BarOption.getDishRow();
-	    menuColumn = BarOption.getDishCol();
-	    
+		categoryRow = BarOption.getCategoryRow();
+		categoryColumn = BarOption.getCategoryCol();
+		menuRow = BarOption.getDishRow();
+		menuColumn = BarOption.getDishCol();
+
 		btnPageUpCategory = new ArrowButton("↑");
-        btnPageDownCategory = new ArrowButton("↓");
-        btnPageUpMenu = new ArrowButton("↑");
-        btnPageDownMenu = new ArrowButton("↓");
-        
+		btnPageDownCategory = new ArrowButton("↓");
+		btnPageUpMenu = new ArrowButton("↑");
+		btnPageDownMenu = new ArrowButton("↓");
+
 //        btnPageUpCategory.setMargin(new Insets(0,0,0,0));
 //        btnPageDownCategory.setMargin(btnPageUpCategory.getInsets());
 //        btnPageUpMenu.setMargin(btnPageUpCategory.getInsets());
@@ -90,14 +127,72 @@ public class MenuPanel extends View implements View.OnClickListener {
 //
 //        setLayout(null);
 //        setOpaque(false);
-        initPrinters();
+		initPrinters();
 		initCategoryAndDishes();
 		initRules();
-		reLayout();
-//		validate();
-//		repaint();
 	}
-	
+
+	public void reLayout() {
+		// 获取宽度和高度
+		int width = getView().getWidth();
+		int height = getView().getHeight();
+
+		// category area--------------
+		Float categoryHeight = BarOption.getCategoryAreaPortion();
+		int h_gap = CustOpts.HOR_GAP / 2;
+		int v_gap = CustOpts.VER_GAP / 2;
+		int categeryBtnWidth = (width - h_gap * (categoryColumn - 1)) / categoryColumn;
+
+		if (btnPageDownCategory.getVisibility() == VISIBLE || btnPageUpCategory.getVisibility() == VISIBLE) {
+			categeryBtnWidth = (width - h_gap * categoryColumn - BarFrame.consts.SCROLLBAR_WIDTH) / categoryColumn;
+		}
+		int categeryBtnHeight = (int) ((height * categoryHeight - v_gap * (categoryRow - 1)) / categoryRow);
+
+		for (int r = 0; r < categoryRow; r++) {
+			if (r == onSrcCategoryTgbMatrix.size()) {
+				return;
+			}
+			for (int c = 0; c < categoryColumn; c++) {
+				if (c == onSrcCategoryTgbMatrix.get(r).size()) {
+					return;
+				}
+				ToggleButton toggleButton = onSrcCategoryTgbMatrix.get(r).get(c);
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(categeryBtnWidth, categeryBtnHeight);
+				params.leftMargin = (categeryBtnWidth + h_gap) * c;
+				params.topMargin = (categeryBtnHeight + v_gap) * r;
+				toggleButton.setLayoutParams(params);
+			}
+		}
+
+		// menu area--------------
+		if (onSrcMenuBtnMatrix.size() == 0) {
+			return;
+		}
+		int menuY = (categeryBtnHeight + v_gap) * categoryRow + v_gap;
+		int menuBtnWidth = (width - h_gap * (menuColumn - 1)) / menuColumn;
+
+		if (btnPageUpMenu.getVisibility() == VISIBLE || btnPageDownMenu.getVisibility() == VISIBLE) {
+			menuBtnWidth = (width - h_gap * menuColumn - BarFrame.consts.SCROLLBAR_WIDTH) / menuColumn;
+		}
+		int menuBtnHeight = (int) ((height * (1 - categoryHeight) - v_gap * (menuRow + 1)) / menuRow);
+
+		for (int r = 0; r < menuRow; r++) {
+			if (r == onSrcMenuBtnMatrix.size()) {
+				return;
+			}
+			for (int c = 0; c < menuColumn; c++) {
+				if (c == onSrcMenuBtnMatrix.get(r).size()) {
+					return;
+				}
+				MenuButton menuButton = onSrcMenuBtnMatrix.get(r).get(c);
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(menuBtnWidth, menuBtnHeight);
+				params.leftMargin = (menuBtnWidth + h_gap) * c;
+				params.topMargin = menuY + (menuBtnHeight + v_gap) * r;
+				menuButton.setLayoutParams(params);
+			}
+		}
+	}
+
     public void initRules() {
 		int tmpPos;
 		//load all printers--------------------------
@@ -402,66 +497,66 @@ public class MenuPanel extends View implements View.OnClickListener {
         }
 	}
 
-    public void reLayout() {
-        // category area--------------
-        Float categoryHeight = BarOption.getCategoryAreaPortion();
-        int h_gap = CustOpts.HOR_GAP / 2;
-        int v_gat = CustOpts.VER_GAP / 2;
-        int categeryBtnWidth = (getWidth() - h_gap * (categoryColumn - 1)) / categoryColumn;
-        if(btnPageDownCategory.getVisibility() == View.VISIBLE|| btnPageUpCategory.getVisibility() == View.VISIBLE) {
-        	categeryBtnWidth = (getWidth() - h_gap * categoryColumn - BarFrame.consts.SCROLLBAR_WIDTH) / categoryColumn;
-        }
-        int categeryBtnHeight =
-                (int) ((getHeight() * categoryHeight - v_gat * (categoryRow - 1)) / categoryRow);
-
-        for (int r = 0; r < categoryRow; r++) {
-        	if(r == onSrcCategoryTgbMatrix.size()) {
-        		return;
-        	}
-            for (int c = 0; c < categoryColumn; c++) {
-            	if(c == onSrcCategoryTgbMatrix.get(r).size()) {
-            		return;
-            	}
-                ToggleButton toggleButton = onSrcCategoryTgbMatrix.get(r).get(c);
-//                toggleButton.setBounds((categeryBtnWidth + h_gap) * c,
-//                        (categeryBtnHeight + v_gat) * r, categeryBtnWidth, categeryBtnHeight);
-            }
-        }
-//        btnPageUpCategory.setBounds((categeryBtnWidth + h_gap) * categoryColumn, 0,
-//        	BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
-//        btnPageDownCategory.setBounds(btnPageUpCategory.getX(),
-//                btnPageUpCategory.getY() + btnPageUpCategory.getHeight() + v_gat,
-//                BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
-
-        // menu area--------------
-        if(onSrcMenuBtnMatrix.size() == 0) {
-        	return;
-        }
-        int menuY = (categeryBtnHeight + v_gat) * categoryRow + v_gat;
-        int menuBtnWidth = (getWidth() - h_gap * (menuColumn - 1)) / menuColumn;
-        if(btnPageUpMenu.getVisibility() == View.VISIBLE|| btnPageDownMenu.getVisibility() == View.VISIBLE) {
-        	menuBtnWidth = (getWidth() - h_gap * menuColumn - BarFrame.consts.SCROLLBAR_WIDTH) / menuColumn;
-        }
-        int menuBtnHeight = (int) ((getHeight() * (1 - categoryHeight) - v_gat * (menuRow + 1)) / menuRow);
-        for (int r = 0; r < menuRow; r++) {
-        	if(r == onSrcMenuBtnMatrix.size()) {
-        		return;
-        	}
-            for (int c = 0; c < menuColumn; c++) {
-            	if(c == onSrcMenuBtnMatrix.get(r).size()) {
-            		return;
-            	}
-//                onSrcMenuBtnMatrix.get(r).get(c).setBounds((menuBtnWidth + h_gap) * c, menuY + (menuBtnHeight + v_gat) * r, menuBtnWidth, menuBtnHeight);
-            }
-        }
-//        btnPageUpMenu.setBounds((menuBtnWidth + h_gap) * menuColumn,
-//        		getHeight() - BarFrame.consts.SCROLLBAR_WIDTH * 4 - v_gat,
-//                BarFrame.consts.SCROLLBAR_WIDTH,
-//                BarFrame.consts.SCROLLBAR_WIDTH * 2);
-//        btnPageDownMenu.setBounds(btnPageUpMenu.getX(), btnPageUpMenu.getY() + btnPageUpMenu.getHeight()
-//                + v_gat, BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
-
-    }
+//    public void reLayout() {
+//        // category area--------------
+//        Float categoryHeight = BarOption.getCategoryAreaPortion();
+//        int h_gap = CustOpts.HOR_GAP / 2;
+//        int v_gat = CustOpts.VER_GAP / 2;
+//        int categeryBtnWidth = (getWidth() - h_gap * (categoryColumn - 1)) / categoryColumn;
+//        if(btnPageDownCategory.getVisibility() == View.VISIBLE|| btnPageUpCategory.getVisibility() == View.VISIBLE) {
+//        	categeryBtnWidth = (getWidth() - h_gap * categoryColumn - BarFrame.consts.SCROLLBAR_WIDTH) / categoryColumn;
+//        }
+//        int categeryBtnHeight =
+//                (int) ((getHeight() * categoryHeight - v_gat * (categoryRow - 1)) / categoryRow);
+//
+//        for (int r = 0; r < categoryRow; r++) {
+//        	if(r == onSrcCategoryTgbMatrix.size()) {
+//        		return;
+//        	}
+//            for (int c = 0; c < categoryColumn; c++) {
+//            	if(c == onSrcCategoryTgbMatrix.get(r).size()) {
+//            		return;
+//            	}
+//                ToggleButton toggleButton = onSrcCategoryTgbMatrix.get(r).get(c);
+////                toggleButton.setBounds((categeryBtnWidth + h_gap) * c,
+////                        (categeryBtnHeight + v_gat) * r, categeryBtnWidth, categeryBtnHeight);
+//            }
+//        }
+////        btnPageUpCategory.setBounds((categeryBtnWidth + h_gap) * categoryColumn, 0,
+////        	BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
+////        btnPageDownCategory.setBounds(btnPageUpCategory.getX(),
+////                btnPageUpCategory.getY() + btnPageUpCategory.getHeight() + v_gat,
+////                BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
+//
+//        // menu area--------------
+//        if(onSrcMenuBtnMatrix.size() == 0) {
+//        	return;
+//        }
+//        int menuY = (categeryBtnHeight + v_gat) * categoryRow + v_gat;
+//        int menuBtnWidth = (getWidth() - h_gap * (menuColumn - 1)) / menuColumn;
+//        if(btnPageUpMenu.getVisibility() == View.VISIBLE|| btnPageDownMenu.getVisibility() == View.VISIBLE) {
+//        	menuBtnWidth = (getWidth() - h_gap * menuColumn - BarFrame.consts.SCROLLBAR_WIDTH) / menuColumn;
+//        }
+//        int menuBtnHeight = (int) ((getHeight() * (1 - categoryHeight) - v_gat * (menuRow + 1)) / menuRow);
+//        for (int r = 0; r < menuRow; r++) {
+//        	if(r == onSrcMenuBtnMatrix.size()) {
+//        		return;
+//        	}
+//            for (int c = 0; c < menuColumn; c++) {
+//            	if(c == onSrcMenuBtnMatrix.get(r).size()) {
+//            		return;
+//            	}
+////                onSrcMenuBtnMatrix.get(r).get(c).setBounds((menuBtnWidth + h_gap) * c, menuY + (menuBtnHeight + v_gat) * r, menuBtnWidth, menuBtnHeight);
+//            }
+//        }
+////        btnPageUpMenu.setBounds((menuBtnWidth + h_gap) * menuColumn,
+////        		getHeight() - BarFrame.consts.SCROLLBAR_WIDTH * 4 - v_gat,
+////                BarFrame.consts.SCROLLBAR_WIDTH,
+////                BarFrame.consts.SCROLLBAR_WIDTH * 2);
+////        btnPageDownMenu.setBounds(btnPageUpMenu.getX(), btnPageUpMenu.getY() + btnPageUpMenu.getHeight()
+////                + v_gat, BarFrame.consts.SCROLLBAR_WIDTH, BarFrame.consts.SCROLLBAR_WIDTH * 2);
+//
+//    }
     
 	@Override
     public void onClick(View o) {
@@ -558,6 +653,15 @@ public class MenuPanel extends View implements View.OnClickListener {
 	        }
         }
 	}
+
+	public Fragment getParent() {
+		Fragment parentFragment = getParentFragment();
+		if (parentFragment != null) {
+			return parentFragment;
+		}
+		return BarFrame.instance.panels[2];
+	}
+
 
 	public void addIntoBillPane(Dish comboDish) {
 		BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;

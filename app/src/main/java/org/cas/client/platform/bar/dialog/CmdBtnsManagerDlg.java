@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.dialog;
 
+import android.annotation.SuppressLint;
+
 import androidx.fragment.app.DialogFragment;
 
 import com.just.print.app.BarFrame;
@@ -583,7 +585,8 @@ public class CmdBtnsManagerDlg extends DialogFragment
         groupButtons();
 	}
     
-    private static void groupButtons() {
+    @SuppressLint("SuspiciousIndentation")
+	private static void groupButtons() {
     	//get current customization
 		Object strTableCmds = CustOpts.custOps.getValue(KEY_TABLE_CMD);
 		Object strBillCmd = CustOpts.custOps.getValue(KEY_BILL_CMD);

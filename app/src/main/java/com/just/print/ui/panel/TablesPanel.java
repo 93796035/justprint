@@ -61,6 +61,12 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     public static String SUCCESS = "0";
     public static String ERROR = "2";
 
+    public TablesPanel() {
+        super(BarOption.getTablePanelBK());
+        MAX_CMDBTN_QT = 10;
+    }
+
+
     @Override
     public void onCreated(Bundle savedInstanceState) {
         new StupidReflect(this, getView()).init();
@@ -75,55 +81,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         // also will trigger a refresh of tableivew for the waiting time.
         new BackGroundTimerThread().start();
 
-        MAX_CMDBTN_QT = 10;
-        layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[0], MAX_CMDBTN_QT);
+        BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[0], MAX_CMDBTN_QT);
         return mRoot;
-    }
-
-    public static void layoutCommandButtons(View view, ArrayList<ISButton> buttons, int maxCombineQT) {
-        if (buttons == null || buttons.isEmpty()) {
-            return;
-        }
-
-        LinearLayout buttonBar = view.findViewById(R.id.buttonBar);
-        buttonBar.removeAllViews();
-
-        int panelWidth = view.getContext().getResources().getDisplayMetrics().widthPixels;
-        int panelHeight = view.getContext().getResources().getDisplayMetrics().heightPixels;
-
-        int buttonQT = buttons.size();
-
-        int row;
-        int col;
-        if (buttonQT <= 0) {
-            row = 0;
-            col = 0;
-        } else if (buttonQT <= 10) {
-            row = 1;
-            col = buttonQT;
-        } else {
-            row = 2;
-            col = 10;
-        }
-
-        int gap = CustOpts.HOR_GAP / 2;
-        int v_gap = CustOpts.VER_GAP / 2;
-        int tBtnWidth = col == 0 ? 100 : (panelWidth - gap * (col + 1)) / col;
-        int tBtnHeight = (panelHeight - 80) / 10;
-
-        int max = buttonQT > maxCombineQT ? maxCombineQT : buttonQT;
-        for (int i = 0; i < max; i++) {
-            ISButton button = buttons.get(i);
-            // Since all ISButton implementations are subclasses of Button
-            if (button instanceof View) {
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        tBtnWidth,
-                        tBtnHeight
-                );
-                params.setMargins(gap, button instanceof ToggleButton ? v_gap - 8 : v_gap, gap, v_gap);
-                buttonBar.addView((View) button, params);
-            }
-        }
     }
 
     @Override
@@ -384,7 +343,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                         .append(" and status >= ").append(DBConsts.ORIGINAL).append(")");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 int num = rs.getCount();
-
+                rs.moveToFirst();
                 //if it's table mode, will not be empty anymore, because whenever click a table, we will create a bill for it.
                 if (num == 0) {// if it's empty, means it's fastfood mode, and the previous bill was deleted (should not happen though). switch to sales panel
                     L.w("Warning:", "when open table, found no related bill in a open status table", null);
@@ -394,7 +353,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     BarFrame.instance.switchMode(2);
                 } else { // if it's not empty
                     if(num == 1 && CustOpts.custOps.getValue("FrobiddenQuickEnter") == null) {	// display the only bill
-                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs, "customerNumber"));
+                        BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs, "billIndex"));
                         BarFrame.instance.setCurBillID(DBUtil.getCursorInt(rs, "_id"));
                         BarFrame.instance.hideBillIdx(true);
                         BarFrame.instance.switchMode(2);

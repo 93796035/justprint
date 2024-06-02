@@ -1,7 +1,14 @@
 package org.cas.client.platform.bar;
 
 import android.database.Cursor;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.ToggleButton;
 
+import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.PicturePane;
@@ -406,76 +413,93 @@ public class BarUtil {
 //        return buttons != null && buttons.size() > 0 ? buttons.get(0).getY() : BarFrame.instance.getHeight() - 83;
 //    }
 //
+    public static int layoutCommandButtons(View view, ArrayList<ISButton> buttons, int maxCombineQT) {
+        if (buttons == null || buttons.isEmpty()) {
+            return -1;
+        }
+
+        ViewGroup buttonBar = (ViewGroup) view.findViewById(R.id.buttonBar);
+        buttonBar.removeAllViews();
+
+        int panelWidth = view.getContext().getResources().getDisplayMetrics().widthPixels;
+        int panelHeight = view.getContext().getResources().getDisplayMetrics().heightPixels;
+
+        int buttonQT = buttons.size();
+        int col = buttonQT <= 10 ? buttonQT : 10;
+        int row = (int) Math.ceil((double) buttonQT / col);
+
+        int gap = CustOpts.HOR_GAP / 2;
+        int v_gap = CustOpts.VER_GAP / 2;
+        int tBtnWidth = col == 0 ? 100 : (panelWidth - gap * (col + 1)) / col;
+        int tBtnHeight = (panelHeight - 80) / 10;
+
+        if (buttonBar instanceof GridLayout) {
+            ((GridLayout) buttonBar).setRowCount(row);
+            ((GridLayout) buttonBar).setColumnCount(col);
+        }
+
+        int max = buttonQT > maxCombineQT ? maxCombineQT : buttonQT;
+        for (int i = 0; i < max; i++) {
+            ISButton button = buttons.get(i);
+            if (button instanceof View) {
+                ViewGroup oldParent = (ViewGroup) ((View)button).getParent();
+                if (oldParent != null) {
+                    oldParent.removeView((View)button); // 从旧的父布局中移除视图
+                }
+                ViewGroup.LayoutParams params;
+                if (buttonBar instanceof GridLayout) {
+                    params = new GridLayout.LayoutParams(
+                            GridLayout.spec(GridLayout.UNDEFINED, 1),
+                            GridLayout.spec(GridLayout.UNDEFINED, 1)
+                    );
+                    ((GridLayout.LayoutParams) params).setMargins(gap, v_gap, gap, v_gap);
+                    params.width = tBtnWidth;
+                    params.height = tBtnHeight;
+                } else { // Assume LinearLayout
+                    params = new LinearLayout.LayoutParams(tBtnWidth, tBtnHeight);
+                    ((LinearLayout.LayoutParams) params).setMargins(gap, v_gap, gap, v_gap);
+                }
+                buttonBar.addView((View) button, params);
+            }
+        }
+        return row;
+    }
+
+
     public static int layoutCommandButtons(PicturePane panel, ArrayList<ISButton> buttons) {
-        if(buttons == null)
+        if (buttons == null || buttons.size() == 0)
             return -1;
 
-        int panelWidth = panel.getContext().getResources().getDisplayMetrics().widthPixels;
-        int panelHeight = panel.getContext().getResources().getDisplayMetrics().heightPixels;
+        int panelWidth = BarFrame.instance.getResources().getDisplayMetrics().widthPixels;
+        int panelHeight = BarFrame.instance.getResources().getDisplayMetrics().heightPixels;
+        int buttonQT = buttons.size();
 
-        // command buttons--------------
-        int butonQT = buttons.size();
 
-        int row;
-        int col;
-        if(butonQT <= 0) {
-            row = 0;
-            col = 0;
-        }else if(butonQT <= 10) {
-            row = 1;
-            col = butonQT;
-        }else {
-            row = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
-            if(butonQT >= panel.MAX_CMDBTN_QT){
-                col = 10;
+        // Determine rows and columns
+        int buttonCount = buttons.size();
+        int rows, cols;
+        if(buttonCount <= 0) {
+            rows = 0;
+            cols = 0;
+        }if (buttonCount <= 10) {
+            rows = 1;
+            cols = buttonCount;
+        } else {
+            rows = 2;
+            cols = Math.min(10, buttonCount);
+            rows = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
+            if(buttonCount >= panel.MAX_CMDBTN_QT){
+                cols = 10;
             }else{
-                col = butonQT%2 + butonQT/2;
+                cols = buttonQT%2 + buttonQT/2;
             }
         }
         int gap = CustOpts.HOR_GAP / 2;
         int v_gap = CustOpts.VER_GAP / 2;
-        int tBtnWidht = col == 0? 100 : (panelWidth - gap * (col + 1)) / (col);
-        int tBtnHeight = (panelHeight - 80) / 10;
+        int buttonWidth = cols == 0 ? 100 : (panelWidth - gap * (cols + 1)) / cols;
+        int buttonHeight = (panelHeight - 80) / 10;
 
-        int max = butonQT > panel.MAX_CMDBTN_QT ? panel.MAX_CMDBTN_QT : butonQT;
-//        for(int i = 0; i < max; i++) {
-//            buttons.get(i).setBounds(gap + tBtnWidht * (i < col ? i : i - col) + gap * (i < col ? i : i - col),
-//                    panelHeight - tBtnHeight * (i < col && max > col ? 2 : 1) - v_gap * (i < col && max > col ? 2 : 1),
-//                    tBtnWidht, tBtnHeight);
-//        }
-//        return buttons != null && buttons.size() > 0 ? (int)(buttons.get(0).getY()) : panelHeight - 83;
-        return panelHeight - 83;
-    }
-//    public int layoutCommandButtons(PicturePane panel, ArrayList<Button> buttons) {
-//        if (buttons == null || buttons.size() == 0)
-//            return -1;
-//
-//        int panelWidth = panel.getWidth();
-//
-//        // Determine rows and columns
-//        int buttonCount = buttons.size();
-//        int rows, cols;
-//        if(buttonCount <= 0) {
-//            rows = 0;
-//            cols = 0;
-//        }if (buttonCount <= 10) {
-//            rows = 1;
-//            cols = buttonCount;
-//        } else {
-//            rows = 2;
-//            cols = Math.min(10, buttonCount);
-//            rows = panel.MAX_CMDBTN_QT > 10 ? 2 : 1;
-//            if(buttonCount >= panel.MAX_CMDBTN_QT){
-//                cols = 10;
-//            }else{
-//                cols = butonQT%2 + butonQT/2;
-//            }
-//        }
-//
-//        int buttonWidth = panelWidth / cols;
-//        int buttonHeight = BarFrame.instance.getResources().getDimensionPixelSize(R.dimen.button_height); // define in dimens.xml
-//
-//        panel.removeAllViews();
+//        panel.getRootView().removeAllViews();
 //        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(buttonWidth, buttonHeight);
 //        params.setMargins(5, 5, 5, 5); // margins in pixels
 //
@@ -484,7 +508,8 @@ public class BarUtil {
 //            button.setLayoutParams(params);
 //            panel.addView(button);
 //        }
-//    }
+        return -1;
+    }
 
     public static boolean empty(String content) {
         return content == null || content.trim().length() == 0;
