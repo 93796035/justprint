@@ -91,9 +91,6 @@ public class BillPanel extends BaseFragment
 	public BillPanel(SalesPanel salesPanel) {
 		this.salesPanel = salesPanel;
 	}
-//	public BillPanel(CustomerFrame parent, BarDlgConst langConsts) {
-//		this.customerFrame = parent;
-//	}
 
 	public BillPanel(BillListPanel billListPanel, FunctionToggleButton billButton) {
 		this.billListPanel = billListPanel;
@@ -108,21 +105,16 @@ public class BillPanel extends BaseFragment
 	@Override
 	public void onCreated(Bundle savedInstanceState) {
 		new StupidReflect(this, getView()).init();
-		initComponent();
 	}
 
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		// 在视图创建后进行注解绑定
 		new StupidReflect(this, getView()).init();
 		initComponent();  // 初始化组件逻辑
-		onComponentsReady();  // 组件已准备就绪
+		initContent();
 	}
-	private void onComponentsReady() {
-		// 通知其他类组件已就绪或开始处理依赖于组件的逻辑
-		initContent();  // 如果这里调用initContent，确保组件已经就绪
-	}
+
 	//find the new (not saved) items, then send then to kitchen, save then to db. send to server...
 	public boolean unsavedItemsCheck() {
 		//if there's any new bill, send it to kitchen first, and this also made the output generated.
