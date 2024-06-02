@@ -1,6 +1,7 @@
 package org.cas.client.platform.bar.uibeans;
 
 import android.graphics.Color;
+import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
 import com.just.print.app.BarFrame;
@@ -24,6 +25,15 @@ public class CategoryToggleButton extends ToggleButton {
 //		setFont(BarOption.getMenuCustFont());
         this.index = index;
     }
+
+	public void setMargin(int left, int top, int right, int bottom) {
+		RelativeLayout.LayoutParams categoryParams = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT
+		);
+		categoryParams.setMargins(left, top, right, bottom);  // 设置边距
+		setLayoutParams(categoryParams);
+	}
 
     public int getIndex() {
         return index;

@@ -738,10 +738,12 @@ public class BarFrame extends BaseFragmentActivity {
             topBar.setVisibility(View.VISIBLE);
             topBar.setBackgroundColor(Color.DKGRAY);
             ((BillListPanel) panels[1]).initContent();
+            switchFragment(panels[1]);
         } else if (index == 0) {  // table
             topBar.setVisibility(View.GONE);
             resetStatus();
             ((TablesPanel) panels[0]).initContent();
+            switchFragment(panels[0]);
         }
 
 //        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

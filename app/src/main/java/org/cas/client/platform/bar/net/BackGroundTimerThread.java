@@ -41,7 +41,12 @@ public class BackGroundTimerThread extends Thread{
 			if (counterForTableRefresh >= 6) {
 				counterForTableRefresh = 0;
 				if (BarFrame.instance.curPanelIdx == 0 && !Cmd_ChangeTable.getInstance().getSourceBtn().isSelected()) {
-					((TablesPanel) BarFrame.instance.panels[0]).initContent();
+					BarFrame.instance.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							((TablesPanel)BarFrame.instance.panels[0]).initContent();
+						}
+					});
 				}
 			}
 

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#EEE"
+        android:background="#D0D0D0"
         android:layout_alignParentTop="true">
 
         <TextView
@@ -79,15 +79,16 @@
 
                 <TextView
                     android:id="@+id/lblDiscount"
-                    android:layout_width="wrap_content"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Serv: $20.00"
                     android:textSize="18sp"
                     android:textColor="#000000" />
 
                 <TextView
                     android:id="@+id/lblTPS"
-                    android:layout_width="wrap_content"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:text="TPS: $1.50"
                     android:textSize="18sp"
@@ -102,15 +103,16 @@
 
                 <TextView
                     android:id="@+id/lblServiceFee"
-                    android:layout_width="wrap_content"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Serv: $20.00"
                     android:textSize="18sp"
                     android:textColor="#000000" />
 
                 <TextView
                     android:id="@+id/lblTVQ"
-                    android:layout_width="wrap_content"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:text="TVQ: $2.99"
                     android:textSize="18sp"
@@ -127,19 +129,6 @@
                 android:textColor="#000000" />
         </LinearLayout>
 
-        <!-- 总金额显示区域 -->
-        <TextView
-            android:id="@+id/valTotlePrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/operationLayout"
-            android:layout_toRightOf="@+id/footerLayout"
-            android:text="54.50"
-            android:textSize="48sp"
-            android:textStyle="bold"
-            android:textColor="#4CAF50"
-            android:gravity="center_horizontal" />
-
         <!-- 操作按钮容器 -->
         <LinearLayout
             android:id="@+id/operationLayout"
@@ -152,23 +141,36 @@
 
             <Button
                 android:id="@+id/lessButton"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/circle_red"
                 android:text="-"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="4dp"/>
 
             <Button
                 android:id="@+id/moreButton"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/circle_green"
                 android:text="+"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="4dp"/>
         </LinearLayout>
+
+        <!-- 总金额显示区域 -->
+        <TextView
+            android:id="@+id/valTotlePrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/operationLayout"
+            android:layout_toRightOf="@+id/footerLayout"
+            android:text="54.50"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:gravity="right|center_vertical" />
     </RelativeLayout>
 </RelativeLayout>
