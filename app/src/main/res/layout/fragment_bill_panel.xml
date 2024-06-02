@@ -130,9 +130,10 @@
         <!-- 总金额显示区域 -->
         <TextView
             android:id="@+id/valTotlePrice"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_toLeftOf="@+id/operationLayout"
+            android:layout_toRightOf="@+id/footerLayout"
             android:text="54.50"
             android:textSize="48sp"
             android:textStyle="bold"
@@ -144,8 +145,8 @@
             android:id="@+id/operationLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_alignParentRight="true"
+            android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="8dp">
 
