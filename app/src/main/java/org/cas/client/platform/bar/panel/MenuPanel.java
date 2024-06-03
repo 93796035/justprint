@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.GridLayout;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
@@ -110,21 +111,21 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		btnPageUpMenu = new ArrowButton("↑");
 		btnPageDownMenu = new ArrowButton("↓");
 
-//        btnPageUpCategory.setMargin(new Insets(0,0,0,0));
-//        btnPageDownCategory.setMargin(btnPageUpCategory.getInsets());
-//        btnPageUpMenu.setMargin(btnPageUpCategory.getInsets());
-//        btnPageDownMenu.setMargin(btnPageUpCategory.getInsets());
-//
-//        btnPageUpCategory.setVisibility(GONE);
-//        btnPageDownCategory.setVisibility(GONE);
-//        btnPageUpMenu.setVisibility(GONE);
-//        btnPageDownMenu.setVisibility(GONE);
-//
-//        btnPageUpCategory.addActionListener(this);
-//        btnPageDownCategory.addActionListener(this);
-//        btnPageUpMenu.addActionListener(this);
-//        btnPageDownMenu.addActionListener(this);
-//
+        btnPageUpCategory.setMargin(0,0,0,0);
+        btnPageDownCategory.setMargin(0,0,0,0);
+        btnPageUpMenu.setMargin(0,0,0,0);
+        btnPageDownMenu.setMargin(0,0,0,0);
+
+        btnPageUpCategory.setVisibility(GONE);
+        btnPageDownCategory.setVisibility(GONE);
+        btnPageUpMenu.setVisibility(GONE);
+        btnPageDownMenu.setVisibility(GONE);
+
+        btnPageUpCategory.setOnClickListener(this);
+        btnPageDownCategory.setOnClickListener(this);
+        btnPageUpMenu.setOnClickListener(this);
+        btnPageDownMenu.setOnClickListener(this);
+
 //        setLayout(null);
 //        setOpaque(false);
 		initPrinters();
@@ -157,7 +158,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					return;
 				}
 				ToggleButton toggleButton = onSrcCategoryTgbMatrix.get(r).get(c);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(categeryBtnWidth, categeryBtnHeight);
+				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
 				params.leftMargin = (categeryBtnWidth + h_gap) * c;
 				params.topMargin = (categeryBtnHeight + v_gap) * r;
 				toggleButton.setLayoutParams(params);
@@ -345,6 +346,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		onSrcMenuBtnMatrix.clear();
 
 		// create new buttons and add onto the screen (no layout yet)------------
+		GridLayout categoryButtonContainer = (GridLayout)findViewById(R.id.categoryContainer);
 		int globleCategoryIdxOfCurCategory = curCategoryPage * categoryQtPerPage;
 		for (int r = 0; r < categoryRow; r++) {
 			ArrayList<CategoryToggleButton> btnCategoryArry = new ArrayList<CategoryToggleButton>();
@@ -352,6 +354,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 				CategoryToggleButton btnCategory = new CategoryToggleButton(globleCategoryIdxOfCurCategory + 1);
 				btnCategory.setMargin(0, 0, 0, 0);
+				categoryButtonContainer.addView(btnCategory);
 				btnCategory.setOnClickListener(this);
 				btnCategoryArry.add(btnCategory);
 
@@ -390,6 +393,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		classifiedDishNameMetrix = new String[3][dishNameMetrix[0].length];
 		classifiedDishAry = new ArrayList<Dish>();
 		classifiedMenuIndex = 0;
+
+		GridLayout dishButtonContainer = (GridLayout)findViewById(R.id.dishContainer);
 		for (int i = 0; i < dishAry.length; i++) {
 			if(dishAry[i].getCategory().equals(tgbActiveCategory.getLang1Text())) {
 
@@ -422,6 +427,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			for (int c = 0; c < menuColumn; c++) {
 				MenuButton btnMenu = new MenuButton(globleMenuIdxOfCurCategory + 1);
 				btnMenu.setMargin(0, 0, 0, 0);
+				dishButtonContainer.addView(btnMenu);
 				btnMenu.setOnClickListener(this);
 				btnMenuArry.add(btnMenu);
 				if (globleMenuIdxOfCurCategory < classifiedMenuIndex) {    //the last page could be not full page.

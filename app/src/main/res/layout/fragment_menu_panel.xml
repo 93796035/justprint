@@ -1,45 +1,78 @@
-<!-- res/layout/fragment_menu_panel.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/menuPanelRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Category Buttons Container -->
+    <!-- Category Buttons and Page Controls Container -->
     <RelativeLayout
-        android:id="@+id/categoryContainer"
+        android:id="@+id/categoryContainerWrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true">
+
+        <!-- Left Arrow Button for Category -->
+        <Button
+            android:id="@+id/categoryPageUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:layout_alignParentStart="true" />
+
+        <!-- Category Buttons Container -->
+        <GridLayout
+            android:id="@+id/categoryContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/categoryPageUp"
+            android:layout_toStartOf="@id/categoryPageDown"
+            android:columnCount="3"
+            android:orientation="horizontal" />
+
+        <!-- Right Arrow Button for Category -->
+        <Button
+            android:id="@+id/categoryPageDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→"
+            android:layout_alignParentEnd="true" />
+
     </RelativeLayout>
 
-    <!-- Menu Buttons Container -->
+    <!-- Menu Buttons and Page Controls Container -->
     <RelativeLayout
-        android:id="@+id/menuContainer"
+        android:id="@+id/menuContainerWrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/categoryContainer"
+        android:layout_below="@id/categoryContainerWrapper"
         android:layout_marginTop="16dp">
-    </RelativeLayout>
 
-    <!-- Page Up/Down Buttons for Category -->
-    <RelativeLayout
-        android:id="@+id/categoryPageControls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/menuContainer"
-        android:layout_marginTop="16dp">
-        <!-- Add page up/down buttons dynamically -->
-    </RelativeLayout>
+        <!-- Left Arrow Button for Menu -->
+        <Button
+            android:id="@+id/menuPageUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:layout_alignParentStart="true" />
 
-    <!-- Page Up/Down Buttons for Menu -->
-    <RelativeLayout
-        android:id="@+id/menuPageControls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/categoryPageControls"
-        android:layout_marginTop="16dp">
-        <!-- Add page up/down buttons dynamically -->
+        <!-- Menu Buttons Container -->
+        <GridLayout
+            android:id="@+id/dishContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/menuPageUp"
+            android:layout_toStartOf="@id/menuPageDown"
+            android:columnCount="3"
+            android:orientation="horizontal" />
+
+        <!-- Right Arrow Button for Menu -->
+        <Button
+            android:id="@+id/menuPageDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→"
+            android:layout_alignParentEnd="true" />
+
     </RelativeLayout>
 
 </RelativeLayout>
