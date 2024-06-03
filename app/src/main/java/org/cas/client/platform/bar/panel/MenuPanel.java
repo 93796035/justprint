@@ -82,12 +82,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		mRoot = inflater.inflate(getLayoutId(), container, false);
 		initComponent();
 
-		// 添加 OnGlobalLayoutListener
-		mRoot.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+		mRoot.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {// 添加 OnGlobalLayoutListener
 			@Override
 			public void onGlobalLayout() {
-				// 确保只调用一次
-				mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+				mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);// 确保只调用一次
 				reLayout();
 			}
 		});
@@ -348,6 +346,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 		// create new buttons and add onto the screen (no layout yet)------------
 		GridLayout categoryButtonContainer = mRoot.findViewById(R.id.categoryContainer);
+		categoryButtonContainer.setColumnCount(categoryColumn);
+		categoryButtonContainer.setRowCount(categoryRow);
 		categoryButtonContainer.removeAllViews();
 		int globleCategoryIdxOfCurCategory = curCategoryPage * categoryQtPerPage;
 		for (int r = 0; r < categoryRow; r++) {
@@ -396,8 +396,6 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		classifiedDishAry = new ArrayList<>();
 		classifiedMenuIndex = 0;
 
-		GridLayout dishButtonContainer = mRoot.findViewById(R.id.dishContainer);
-		dishButtonContainer.removeAllViews();
 		for (int i = 0; i < dishAry.length; i++) {
 			if (dishAry[i].getCategory().equals(tgbActiveCategory.getLang1Text())) {
 
@@ -424,6 +422,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			}
 		}
 
+		GridLayout dishButtonContainer = mRoot.findViewById(R.id.dishContainer);
+		dishButtonContainer.setRowCount(menuRow);
+		dishButtonContainer.setColumnCount(menuColumn);
+		dishButtonContainer.removeAllViews();
 		int globleMenuIdxOfCurCategory = curMenuPage * menuQTPerPage;    //the ones which will be on current page.
 		for (int r = 0; r < menuRow; r++) {
 			ArrayList<MenuButton> btnMenuArry = new ArrayList<>();
