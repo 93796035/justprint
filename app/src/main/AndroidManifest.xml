@@ -22,6 +22,7 @@
 
         <activity android:name="com.just.print.app.BarFrame"
             android:exported="true"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleTask">
             <intent-filter>

@@ -421,8 +421,8 @@ public class BarUtil {
         ViewGroup buttonBar = (ViewGroup) view.findViewById(R.id.buttonBar);
         buttonBar.removeAllViews();
 
-        int panelWidth = view.getContext().getResources().getDisplayMetrics().widthPixels;
-        int panelHeight = view.getContext().getResources().getDisplayMetrics().heightPixels;
+        int panelWidth = BarFrame.instance.getResources().getDisplayMetrics().widthPixels;
+        int panelHeight = BarFrame.instance.getResources().getDisplayMetrics().heightPixels;
 
         int buttonQT = buttons.size();
         int col = buttonQT <= 10 ? buttonQT : 10;

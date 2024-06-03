@@ -120,12 +120,14 @@ public class BarFrame extends BaseFragmentActivity {
         BarFrame.instance.valOperator.setText(currentUser.getNickName());
     }
 
+    private FragmentManager fragmentManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         new StupidReflect(this).init();
         instance = this;
+        fragmentManager = getSupportFragmentManager();
         //this block should be useless, because dubug is already set value.-----no, it's static, so give a init here.
         // or maybe onCreate method could be called more than one time? so every time switch back to this page,
         // the oncreate will be called again? so we can update the debug setting without restart app?
@@ -241,7 +243,7 @@ public class BarFrame extends BaseFragmentActivity {
 
         //activation check
         validateActivation();
-        LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+        LoginDlg.getInstance().show(fragmentManager, "login_dialog");
         //this line is kind of slow, and because the frame is no decoration by default, so
         //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
 //        SwingUtilities.invokeLater(new Runnable() {
@@ -580,25 +582,33 @@ public class BarFrame extends BaseFragmentActivity {
         return false;
     }
 
-    public void switchFragment(Fragment fragment) {
+    private Fragment currentFragment;
+
+    public void switchFragment(Fragment targetFragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.panel_container);
+
         if (currentFragment != null) {
             transaction.hide(currentFragment);
         }
-        if(fragment != null) {  //if the parameter is null, only hide existing one, don't show any new one.
-            Fragment existingFragment = fragmentManager.findFragmentByTag(fragment.getClass().getSimpleName());
-            if (existingFragment == null) {
-                // Fragment 不在 fragmentManager 的列表中，添加它
-                transaction.add(R.id.panel_container, fragment, fragment.getClass().getSimpleName());
-            } else {
-                // Fragment 已经存在，只需显示它
-                transaction.show(existingFragment);
-            }
+
+        // 使用 Fragment 的类名作为 tag
+        String tag = targetFragment.getClass().getSimpleName();
+        Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
+
+        if (existingFragment == null) {
+            // 如果 Fragment 不存在于 FragmentManager 中，添加它
+            transaction.add(R.id.panel_container, targetFragment, tag);
+            currentFragment = targetFragment;
+        } else {
+            // 如果 Fragment 已存在，显示它
+            transaction.show(existingFragment);
+            currentFragment = existingFragment;
         }
+
         transaction.commit();
     }
+
 
     public int createAnEmptyBill(String tableName, String openTime, int newBillIdx, int status){
         //validate parameters
@@ -666,7 +676,7 @@ public class BarFrame extends BaseFragmentActivity {
 //            BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
         }else {	//for multi user case, when sign out button clicked, if user inputted right pw, then do the signout.
             BarFrame.instance.switchFragment(null);
-            LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+            LoginDlg.getInstance().show(fragmentManager, "login_dialog");
             if (LoginDlg.PASSED == true) {
                 CheckInOutListDlg.updateCheckInRecord();
                 //@note: lowdown a little the level, to enable the admin do sales work.
@@ -689,7 +699,7 @@ public class BarFrame extends BaseFragmentActivity {
         String oldUserName = LoginDlg.USERNAME;
 
         LoginDlg.getInstance().noRefresh = true;
-        LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+        LoginDlg.getInstance().show(fragmentManager, "login_dialog");
         if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) { // 如果用户选择了确定按钮。
 //Let's change to everything keep the same after the admin authentication.
 //        	valOperator.setText(LoginDlg.USERNAME);
@@ -709,7 +719,7 @@ public class BarFrame extends BaseFragmentActivity {
         if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
             if (ignoreLogin == false) {
                 if (BarOption.isSingleUser()) {
-                    LoginDlg.getInstance().show(getSupportFragmentManager(), "login_dialog");
+                    LoginDlg.getInstance().show(fragmentManager, "login_dialog");
                     if (!LoginDlg.PASSED) {
                         return -1;
                     }
@@ -746,7 +756,7 @@ public class BarFrame extends BaseFragmentActivity {
             switchFragment(panels[0]);
         }
 
-//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//        FragmentTransaction transaction = fragmentManager.beginTransaction();
 //
 //        for (BaseFragment panel : panels) {
 //            transaction.hide(panel);
@@ -794,8 +804,8 @@ public class BarFrame extends BaseFragmentActivity {
 
         String billIndex = getCurBillIndex();
         //used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
-        String tableName = (String)cmbCurTable.getSelectedItem().toString();
-        String openTime = valOpenTime.getText().toString();
+        String tableName = String.valueOf(cmbCurTable.getSelectedItem());
+        String openTime = String.valueOf(valOpenTime.getText());
 
         StringBuilder sql = new StringBuilder("select * from bill ");
         if(isShowingAnExpiredBill) {
@@ -903,7 +913,7 @@ public class BarFrame extends BaseFragmentActivity {
     public boolean superAdminAuthentication() {
         LoginDlg loginDlg = LoginDlg.getInstance();
         loginDlg.noRefresh = true;
-        loginDlg.show(getSupportFragmentManager(), "login_dialog");
+        loginDlg.show(fragmentManager, "login_dialog");
         if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) { // 如果用户选择了确定按钮。
             valOperator.setText(LoginDlg.USERNAME);
             setStatusMes(consts.ADMIN_MODE());
