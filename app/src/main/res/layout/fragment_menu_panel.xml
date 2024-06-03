@@ -14,31 +14,46 @@
         <!-- Left Arrow Button for Category -->
         <Button
             android:id="@+id/categoryPageUp"
-            android:layout_width="14dp"
+            android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_left"
-            android:visibility="invisible"
+            android:visibility="gone"
+            android:layout_alignParentStart="true" />
+
+        <!-- Left Arrow Placeholder -->
+        <View
+            android:id="@+id/categoryPageUpPlaceholder"
+            android:layout_width="2dp"
+            android:layout_height="4dp"
+            android:visibility="visible"
             android:layout_alignParentStart="true" />
 
         <!-- Category Buttons Container -->
         <GridLayout
             android:id="@+id/categoryContainer"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/categoryPageUp"
-            android:layout_toStartOf="@id/categoryPageDown"
+            android:layout_toEndOf="@id/categoryPageUpPlaceholder"
+            android:layout_toStartOf="@id/categoryPageDownPlaceholder"
             android:columnCount="3"
             android:orientation="horizontal" />
 
         <!-- Right Arrow Button for Category -->
         <Button
             android:id="@+id/categoryPageDown"
-            android:layout_width="14dp"
+            android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_right"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_alignParentEnd="true" />
 
+        <!-- Right Arrow Placeholder -->
+        <View
+            android:id="@+id/categoryPageDownPlaceholder"
+            android:layout_width="2dp"
+            android:layout_height="4dp"
+            android:visibility="visible"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
     <!-- Menu Buttons and Page Controls Container -->
@@ -47,36 +62,50 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/categoryContainerWrapper"
-        android:layout_marginTop="4dp">
+        android:layout_marginTop="8dp">
 
         <!-- Left Arrow Button for Menu -->
         <Button
             android:id="@+id/menuPageUp"
-            android:layout_width="14dp"
+            android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_left"
-            android:visibility="invisible"
+            android:visibility="gone"
+            android:layout_alignParentStart="true" />
+
+        <!-- Left Arrow Placeholder -->
+        <View
+            android:id="@+id/menuPageUpPlaceholder"
+            android:layout_width="4dp"
+            android:layout_height="2dp"
+            android:visibility="visible"
             android:layout_alignParentStart="true" />
 
         <!-- Menu Buttons Container -->
         <GridLayout
             android:id="@+id/dishContainer"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/menuPageUp"
-            android:layout_toStartOf="@id/menuPageDown"
+            android:layout_toEndOf="@id/menuPageUpPlaceholder"
+            android:layout_toStartOf="@id/menuPageDownPlaceholder"
             android:columnCount="3"
             android:orientation="horizontal" />
 
         <!-- Right Arrow Button for Menu -->
         <Button
             android:id="@+id/menuPageDown"
-            android:layout_width="14dp"
+            android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_right"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_alignParentEnd="true" />
 
+        <!-- Right Arrow Placeholder -->
+        <View
+            android:id="@+id/menuPageDownPlaceholder"
+            android:layout_width="4dp"
+            android:layout_height="2dp"
+            android:visibility="visible"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
-
 </RelativeLayout>
