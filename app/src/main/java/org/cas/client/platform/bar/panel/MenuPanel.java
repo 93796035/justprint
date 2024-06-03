@@ -58,19 +58,19 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	Integer menuRow;
 
 	public String[][] categoryNameMetrix;
-	public ArrayList<ArrayList<CategoryToggleButton>> onSrcCategoryTgbMatrix = new ArrayList<ArrayList<CategoryToggleButton>>();
+	public ArrayList<ArrayList<CategoryToggleButton>> onSrcCategoryTgbMatrix = new ArrayList<>();
 	public CategoryToggleButton tgbActiveCategory;
 
 	// Dish is more complicated than category, it's divided by category first, then divided by page.
 	public String[][] dishNameMetrix; // the structure must be [3][index]. it's more convenient than [index][3]
 	public String[][] classifiedDishNameMetrix; // it's sub set of all menuNameMetrix
-	private ArrayList<ArrayList<MenuButton>> onSrcMenuBtnMatrix = new ArrayList<ArrayList<MenuButton>>();
+	private ArrayList<ArrayList<MenuButton>> onSrcMenuBtnMatrix = new ArrayList<>();
 
 	private Printer[] printers;
 	private CustomizedRule[] rules;
 	private Dish[] dishAry;
 	private List<Dish> classifiedDishAry;
-	ArrayList<Dish> selectdDishAry = new ArrayList<Dish>();
+	ArrayList<Dish> selectdDishAry = new ArrayList<>();
 	private int classifiedMenuIndex;
 
 	public MenuPanel(String image) {
@@ -111,23 +111,21 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		btnPageUpMenu = new ArrowButton("↑");
 		btnPageDownMenu = new ArrowButton("↓");
 
-        btnPageUpCategory.setMargin(0,0,0,0);
-        btnPageDownCategory.setMargin(0,0,0,0);
-        btnPageUpMenu.setMargin(0,0,0,0);
-        btnPageDownMenu.setMargin(0,0,0,0);
+		btnPageUpCategory.setMargin(0, 0, 0, 0);
+		btnPageDownCategory.setMargin(0, 0, 0, 0);
+		btnPageUpMenu.setMargin(0, 0, 0, 0);
+		btnPageDownMenu.setMargin(0, 0, 0, 0);
 
-        btnPageUpCategory.setVisibility(GONE);
-        btnPageDownCategory.setVisibility(GONE);
-        btnPageUpMenu.setVisibility(GONE);
-        btnPageDownMenu.setVisibility(GONE);
+		btnPageUpCategory.setVisibility(GONE);
+		btnPageDownCategory.setVisibility(GONE);
+		btnPageUpMenu.setVisibility(GONE);
+		btnPageDownMenu.setVisibility(GONE);
 
-        btnPageUpCategory.setOnClickListener(this);
-        btnPageDownCategory.setOnClickListener(this);
-        btnPageUpMenu.setOnClickListener(this);
-        btnPageDownMenu.setOnClickListener(this);
+		btnPageUpCategory.setOnClickListener(this);
+		btnPageDownCategory.setOnClickListener(this);
+		btnPageUpMenu.setOnClickListener(this);
+		btnPageDownMenu.setOnClickListener(this);
 
-//        setLayout(null);
-//        setOpaque(false);
 		initPrinters();
 		initCategoryAndDishes();
 		initRules();
@@ -159,8 +157,9 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				}
 				ToggleButton toggleButton = onSrcCategoryTgbMatrix.get(r).get(c);
 				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-				params.leftMargin = (categeryBtnWidth + h_gap) * c;
-				params.topMargin = (categeryBtnHeight + v_gap) * r;
+				params.width = categeryBtnWidth;
+				params.height = categeryBtnHeight;
+				params.setMargins(h_gap / 2, v_gap / 2, h_gap / 2, v_gap / 2);
 				toggleButton.setLayoutParams(params);
 			}
 		}
@@ -186,9 +185,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					return;
 				}
 				MenuButton menuButton = onSrcMenuBtnMatrix.get(r).get(c);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(menuBtnWidth, menuBtnHeight);
-				params.leftMargin = (menuBtnWidth + h_gap) * c;
-				params.topMargin = menuY + (menuBtnHeight + v_gap) * r;
+				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+				params.width = menuBtnWidth;
+				params.height = menuBtnHeight;
+				params.setMargins(h_gap / 2, v_gap / 2, h_gap / 2, v_gap / 2);
 				menuButton.setLayoutParams(params);
 			}
 		}
@@ -199,7 +199,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		//load all printers--------------------------
 		String sql = "select * from Customized_Rule where status != -100 order by disp_Idx";
 		try {
-			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			tmpPos = rs.getCount();
 			setRules(new CustomizedRule[tmpPos]);
 			tmpPos = 0;
@@ -208,12 +208,12 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				rules[tmpPos].setId(Long.valueOf(DBUtil.getCursorInt(rs, "_id")));
 				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "ruleName"));
 				rules[tmpPos].setContent(DBUtil.getCursorString(rs, "content"));
-				rules[tmpPos].setAction(DBUtil.getCursorInt(rs,"action")); // discount price( it's an int formatted)
-				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs,"dspIdx"));
+				rules[tmpPos].setAction(DBUtil.getCursorInt(rs, "action")); // discount price( it's an int formatted)
+				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs, "dspIdx"));
 				tmpPos++;
 			}
 			rs.close();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			L.e("MenuPanel", "exception when initPrinters", e);
 		}
 	}
@@ -238,8 +238,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				categoryNameMetrix[1][tmpPos] = DBUtil.getCursorString(rs, "name2");
 				categoryNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "name3");
 
-				PrintService.allCategory[tmpPos] =  new Category();
-				PrintService.allCategory[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
+				PrintService.allCategory[tmpPos] = new Category();
+				PrintService.allCategory[tmpPos].setId(DBUtil.getCursorLong(rs, "_id"));
 				PrintService.allCategory[tmpPos].setDisplayIdx(tmpPos);
 				PrintService.allCategory[tmpPos].setLanguage(new String[]{categoryNameMetrix[0][tmpPos],
 						categoryNameMetrix[1][tmpPos], categoryNameMetrix[2][tmpPos]});
@@ -275,14 +275,14 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				}
 
 				dishAry[tmpPos] = new Dish();
-				dishAry[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
+				dishAry[tmpPos].setId(DBUtil.getCursorLong(rs, "_id"));
 				dishAry[tmpPos].setLanguage(0, dishNameMetrix[0][tmpPos]);
 				dishAry[tmpPos].setLanguage(1, dishNameMetrix[1][tmpPos]);
 				dishAry[tmpPos].setLanguage(2, dishNameMetrix[2][tmpPos]);
-				dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs,"PRICE")/100.0f);
-				dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs,"gst"));
-				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs,"qst"));
-				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs,"size"));
+				dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs, "PRICE") / 100.0f);
+				dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs, "gst"));
+				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs, "qst"));
+				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs, "size"));
 				dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "printerids"));
 				dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "CATEGORY"));
 				dishAry[tmpPos].setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "pricePomp")));
@@ -299,6 +299,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	}
 
 	public void initPrinters() {
+
 		int tmpPos;
 		//load all printers--------------------------
 		String sql = "select * from Printer where category = 0 order by _id";
@@ -309,23 +310,23 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			tmpPos = 0;
 			while (rs.moveToNext()) {
 				printers[tmpPos] = new Printer();
-				printers[tmpPos].setId(DBUtil.getCursorLong(rs,"_id"));
-				printers[tmpPos].setName(DBUtil.getCursorString(rs,"NAME"));
-				printers[tmpPos].setIp(DBUtil.getCursorString(rs,"IP"));
-				printers[tmpPos].setStyle(DBUtil.getCursorInt(rs,"STYLE")); // index p1, p2.....
-				printers[tmpPos].setCategory(DBUtil.getCursorInt(rs,"langType"));
-				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs,"STATUS"));
+				printers[tmpPos].setId(DBUtil.getCursorLong(rs, "_id"));
+				printers[tmpPos].setName(DBUtil.getCursorString(rs, "NAME"));
+				printers[tmpPos].setIp(DBUtil.getCursorString(rs, "IP"));
+				printers[tmpPos].setStyle(DBUtil.getCursorInt(rs, "STYLE")); // index p1, p2.....
+				printers[tmpPos].setCategory(DBUtil.getCursorInt(rs, "langType"));
+				printers[tmpPos].setStatus(DBUtil.getCursorInt(rs, "STATUS"));
 				tmpPos++;
 			}
 			rs.close();
 
 			// rearrange into map
-			for(Printer printer : printers){
-				if(printer.getIp().trim().length() > 0) {
-					PrintService.ipPrinterMap.put(printer.getIp().trim(),printer);
+			for (Printer printer : printers) {
+				if (printer.getIp().trim().length() > 0) {
+					PrintService.ipPrinterMap.put(printer.getIp().trim(), printer);
 				}
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			L.e("MenuPanel", "exception when initPrinters", e);
 		}
 	}
@@ -346,10 +347,11 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		onSrcMenuBtnMatrix.clear();
 
 		// create new buttons and add onto the screen (no layout yet)------------
-		GridLayout categoryButtonContainer = (GridLayout)findViewById(R.id.categoryContainer);
+		GridLayout categoryButtonContainer = mRoot.findViewById(R.id.categoryContainer);
+		categoryButtonContainer.removeAllViews();
 		int globleCategoryIdxOfCurCategory = curCategoryPage * categoryQtPerPage;
 		for (int r = 0; r < categoryRow; r++) {
-			ArrayList<CategoryToggleButton> btnCategoryArry = new ArrayList<CategoryToggleButton>();
+			ArrayList<CategoryToggleButton> btnCategoryArry = new ArrayList<>();
 			for (int c = 0; c < categoryColumn; c++) {
 
 				CategoryToggleButton btnCategory = new CategoryToggleButton(globleCategoryIdxOfCurCategory + 1);
@@ -361,17 +363,17 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				if (globleCategoryIdxOfCurCategory < categoryNameMetrix[0].length) {
 					String defaultText = categoryNameMetrix[0][globleCategoryIdxOfCurCategory];
 					int lang = CustOpts.custOps.getUserLang();
-					if(lang > categoryNameMetrix.length - 1)
+					if (lang > categoryNameMetrix.length - 1)
 						lang = categoryNameMetrix.length - 1;
 					String text = categoryNameMetrix[lang][globleCategoryIdxOfCurCategory];
 					btnCategory.setText(BarUtil.empty(text) ? defaultText : text);
 					btnCategory.setLang1Text(defaultText);
 					if (tgbActiveCategory != null) {
 						String categoryString = categoryNameMetrix[lang][globleCategoryIdxOfCurCategory];
-						if(categoryString == null || categoryString.length() == 0) {
+						if (categoryString == null || categoryString.length() == 0) {
 							categoryString = categoryNameMetrix[0][globleCategoryIdxOfCurCategory];
 						}
-						if(categoryString.equalsIgnoreCase(tgbActiveCategory.getText().toString())) {
+						if (categoryString.equalsIgnoreCase(tgbActiveCategory.getText().toString())) {
 							btnCategory.setSelected(true);
 						}
 					}
@@ -391,12 +393,13 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		// initialize on screen menus===============================================================
 		//find out menus matching to current category and current lang
 		classifiedDishNameMetrix = new String[3][dishNameMetrix[0].length];
-		classifiedDishAry = new ArrayList<Dish>();
+		classifiedDishAry = new ArrayList<>();
 		classifiedMenuIndex = 0;
 
-		GridLayout dishButtonContainer = (GridLayout)findViewById(R.id.dishContainer);
+		GridLayout dishButtonContainer = mRoot.findViewById(R.id.dishContainer);
+		dishButtonContainer.removeAllViews();
 		for (int i = 0; i < dishAry.length; i++) {
-			if(dishAry[i].getCategory().equals(tgbActiveCategory.getLang1Text())) {
+			if (dishAry[i].getCategory().equals(tgbActiveCategory.getLang1Text())) {
 
 				classifiedDishNameMetrix[0][classifiedMenuIndex] = dishNameMetrix[0][i];
 				classifiedDishNameMetrix[1][classifiedMenuIndex] = dishNameMetrix[1][i];
@@ -404,14 +407,14 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 				classifiedDishAry.add(dishAry[i]);
 				//make sure the display index are lined
-				if(dishAry[i].getDisplayIdx() != classifiedMenuIndex + 1) {
+				if (dishAry[i].getDisplayIdx() != classifiedMenuIndex + 1) {
 					try {
 
 						StringBuilder sql = new StringBuilder("UPDATE product SET INDEX = ").append(classifiedMenuIndex + 1)
 								.append(" where ID = ").append(dishAry[i].getId());
 						AikaPos.db.execSQL(sql.toString());
 						BarOption.updateLastModifiyTime();
-					}catch(Exception exp) {
+					} catch (Exception exp) {
 						exp.printStackTrace();
 					}
 					dishAry[i].setDisplayIdx(classifiedMenuIndex + 1);
@@ -423,7 +426,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 		int globleMenuIdxOfCurCategory = curMenuPage * menuQTPerPage;    //the ones which will be on current page.
 		for (int r = 0; r < menuRow; r++) {
-			ArrayList<MenuButton> btnMenuArry = new ArrayList<MenuButton>();
+			ArrayList<MenuButton> btnMenuArry = new ArrayList<>();
 			for (int c = 0; c < menuColumn; c++) {
 				MenuButton btnMenu = new MenuButton(globleMenuIdxOfCurCategory + 1);
 				btnMenu.setMargin(0, 0, 0, 0);
@@ -434,17 +437,17 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					Dish dish = classifiedDishAry.get(globleMenuIdxOfCurCategory);
 					btnMenu.setDish(dish);
 					int lang = CustOpts.custOps.getUserLang();
-					if(lang > classifiedDishNameMetrix.length - 1)
+					if (lang > classifiedDishNameMetrix.length - 1)
 						lang = classifiedDishNameMetrix.length - 1;
 					String text = classifiedDishNameMetrix[lang][globleMenuIdxOfCurCategory];
-					if(BarOption.showPriceOnMenu()) {
-						if(text.endsWith("</center></html>")) {
+					if (BarOption.showPriceOnMenu()) {
+						if (text.endsWith("</center></html>")) {
 							text = text.substring(0, text.length() - 16);
 						}
 						text += "<br>";
 						text += BarUtil.formatMoney(dish.getPrice() / 100.0);
 						text += "</center></html>";
-						if(!text.startsWith("<html><center>")) {
+						if (!text.startsWith("<html><center>")) {
 							text = "<html><center>" + text;
 						}
 					}
@@ -460,36 +463,36 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 	private void adjustPageArrowStatus(int globleCategoryIdxOfCurCategory, int globleMenuIdxOfCurCategory) {
 		//for category panel page up
-		if(globleCategoryIdxOfCurCategory <= categoryQtPerPage && curCategoryPage == 0) {        //the last displayed category is less than categoryQtPerPage, means
-			btnPageUpCategory.setCursorVisible(false);                            // now it's on first page. no need to display up arrow.
-		}else {
-			btnPageUpCategory.setCursorVisible(true);            //as long as not the first page, page up should display.
+		if (globleCategoryIdxOfCurCategory <= categoryQtPerPage && curCategoryPage == 0) {        //the last displayed category is less than categoryQtPerPage, means
+			btnPageUpCategory.setVisibility(GONE);                            // now it's on first page. no need to display up arrow.
+		} else {
+			btnPageUpCategory.setVisibility(VISIBLE);            //as long as not the first page, page up should display.
 		}
 		//for category panel page down
 		int lastCateIdx = categoryRow * categoryColumn * (curCategoryPage + 1);
-		if(lastCateIdx > categoryNameMetrix[0].length) {//if is the last page, and not full of last page, then should not display page down arrow.
-			btnPageDownCategory.setCursorVisible(false);
-		}else if(BarFrame.instance == null ||(lastCateIdx == categoryNameMetrix[0].length && BarFrame.instance.curPanelIdx != 3)) {//if full of page, but is sales page, then hide.
-			btnPageDownCategory.setCursorVisible(false);
-		}else {    // if there's more than one page to display, and currently it's not last page then show it.
-			btnPageDownCategory.setCursorVisible(true);
+		if (lastCateIdx > categoryNameMetrix[0].length) {//if is the last page, and not full of last page, then should not display page down arrow.
+			btnPageDownCategory.setVisibility(GONE);
+		} else if (BarFrame.instance == null || (lastCateIdx == categoryNameMetrix[0].length && BarFrame.instance.curPanelIdx != 3)) {//if full of page, but is sales page, then hide.
+			btnPageDownCategory.setVisibility(GONE);
+		} else {    // if there's more than one page to display, and currently it's not last page then show it.
+			btnPageDownCategory.setVisibility(VISIBLE);
 		}
 
 		//for menu panel page up
-		if(globleMenuIdxOfCurCategory <= menuQTPerPage && curMenuPage == 0) {        //the last displayed menu is less than curMenuPerPage, means
-			btnPageUpMenu.setCursorVisible(false);                    // now it's on first page. no need to display up arrow.
-		}else {
-			btnPageUpMenu.setCursorVisible(true);            //as long as not the first page, page up should display.
+		if (globleMenuIdxOfCurCategory <= menuQTPerPage && curMenuPage == 0) {        //the last displayed menu is less than curMenuPerPage, means
+			btnPageUpMenu.setVisibility(GONE);                    // now it's on first page. no need to display up arrow.
+		} else {
+			btnPageUpMenu.setVisibility(VISIBLE);            //as long as not the first page, page up should display.
 		}
 		//for menu panel page down
 		int lastIdx = menuRow * menuColumn * (curMenuPage + 1);
-		if(lastIdx > classifiedMenuIndex) {//if is the last page, and not full of last page, then should not display page down arrow.
-			btnPageDownMenu.setCursorVisible(false);
-		}else if(BarFrame.instance == null //ignore the case when app not finished start and the BarFrame is still null.
-				|| (lastIdx == classifiedMenuIndex  && BarFrame.instance.curPanelIdx != 3)) {//if it's full of page, but is not in setting page then hide!
-			btnPageDownMenu.setCursorVisible(false);
-		}else {    // if there's more than one page to display, and currently it's not last page then show it.
-			btnPageDownMenu.setCursorVisible(true);
+		if (lastIdx > classifiedMenuIndex) {//if is the last page, and not full of last page, then should not display page down arrow.
+			btnPageDownMenu.setVisibility(GONE);
+		} else if (BarFrame.instance == null //ignore the case when app not finished start and the BarFrame is still null.
+				|| (lastIdx == classifiedMenuIndex && BarFrame.instance.curPanelIdx != 3)) {//if it's full of page, but is not in setting page then hide!
+			btnPageDownMenu.setVisibility(GONE);
+		} else {    // if there's more than one page to display, and currently it's not last page then show it.
+			btnPageDownMenu.setVisibility(VISIBLE);
 		}
 	}
 
@@ -529,7 +532,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			String text = menuButton.getText().toString();
 			if (text == null || text.length() == 0) { // check if it's empty
 				if (getParent() == BarFrame.instance.panels[3]) { // and it's setting panel, add a Category.
-					if(tgbActiveCategory == null || tgbActiveCategory.getText() == null || tgbActiveCategory.getText().length() < 1) {
+					if (tgbActiveCategory == null || tgbActiveCategory.getText() == null || tgbActiveCategory.getText().length() < 1) {
 						JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.SetCatogoryFirst());
 						return;
 					}
@@ -538,7 +541,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			} else { // if it's not empty
 				if (getParent() == BarFrame.instance.panels[3]) {
 					new DishDlg(menuButton.getDish()).show(BarFrame.instance.getSupportFragmentManager(), "DishDialog");
-				} else if (getParent() == BarFrame.instance.panels[2]){
+				} else if (getParent() == BarFrame.instance.panels[2]) {
 					// add into selection.
 					Dish dish = menuButton.getDish();
 					addIntoBillPane(dish);
@@ -548,8 +551,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			}
 		}
 		// arrow buttons-------------------------------------------------------------------------------------------------------
-		else if(o instanceof ArrowButton) {
-			if(o == btnPageUpCategory) {
+		else if (o instanceof ArrowButton) {
+			if (o == btnPageUpCategory) {
 				curCategoryPage--;
 				// adjust status
 				btnPageDownCategory.setVisibility(VISIBLE);
@@ -598,15 +601,15 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	}
 
 	public void addIntoBillPane(Dish comboDish) {
-		BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
-		if(!billPanel.notTooLateToChangeStatus()) {
+		BillPanel billPanel = ((SalesPanel) BarFrame.instance.panels[2]).billPanel;
+		if (!billPanel.notTooLateToChangeStatus()) {
 			return;
 		}
 		//if it's counter mode and this is the first dish adding to the bill Panel, then update the openTime to now.
 		//because the bill is created when last bill saved, and the open time generated at that time point does not make sense
 		//while the time when the first dish added will make more sense (more importantly, it will make the SEV time in MEV machine more close
 		//to the MEV time in mev machine, we believe it will make the mev log info looks more normal.)
-		if(BarOption.isCounterMode() && billPanel.getOrderedDishAry().size() == 0) {
+		if (BarOption.isCounterMode() && billPanel.getOrderedDishAry().size() == 0) {
 			//update the openTime.
 			String timeStr = BarUtil.df.format(new Date());
 			StringBuilder sql = new StringBuilder("update bill set openTime = '").append(timeStr)
@@ -624,19 +627,19 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			}
 
 		}
-		if(comboDish.getPrice() < 0) {    //if it's comboDish.
+		if (comboDish.getPrice() < 0) {    //if it's comboDish.
 			//match a rule, to get the relevant dishes
 			CustomizedRule[] rules = BarFrame.menuPanel.getRules();
 			for (CustomizedRule rule : rules) {
-				if(rule.getRulename().equals(comboDish.getLanguage(0))
-						||rule.getRulename().equals(comboDish.getLanguage(1))
-						||rule.getRulename().equals(comboDish.getLanguage(2))) {
+				if (rule.getRulename().equals(comboDish.getLanguage(0))
+						|| rule.getRulename().equals(comboDish.getLanguage(1))
+						|| rule.getRulename().equals(comboDish.getLanguage(2))) {
 					//get the string from rule
-					ArrayList<String> dishStrs = new ArrayList<String>();
+					ArrayList<String> dishStrs = new ArrayList<>();
 					String[] disIds = rule.getContent().split(",");
 					for (String disId : disIds) {
 						for (Dish dish : dishAry) {
-							if(String.valueOf(dish.getId()).equals(disId)) {
+							if (String.valueOf(dish.getId()).equals(disId)) {
 								billPanel.addContentToList(dish);
 								break;
 							}
@@ -645,7 +648,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					break;
 				}
 			}
-		}else {
+		} else {
 			billPanel.addContentToList(comboDish);
 		}
 	}

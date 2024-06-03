@@ -584,32 +584,6 @@ public class BarFrame extends BaseFragmentActivity {
 
     private Fragment currentFragment;
 
-    public void switchFragment(Fragment targetFragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        if (currentFragment != null) {
-            transaction.hide(currentFragment);
-        }
-
-        // 使用 Fragment 的类名作为 tag
-        String tag = targetFragment.getClass().getSimpleName();
-        Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
-
-        if (existingFragment == null) {
-            // 如果 Fragment 不存在于 FragmentManager 中，添加它
-            transaction.add(R.id.panel_container, targetFragment, tag);
-            currentFragment = targetFragment;
-        } else {
-            // 如果 Fragment 已存在，显示它
-            transaction.show(existingFragment);
-            currentFragment = existingFragment;
-        }
-
-        transaction.commit();
-    }
-
-
     public int createAnEmptyBill(String tableName, String openTime, int newBillIdx, int status){
         //validate parameters
         tableName = BarUtil.empty(tableName) ? cmbCurTable.getSelectedItem().toString() : tableName;
@@ -798,6 +772,31 @@ public class BarFrame extends BaseFragmentActivity {
 //        panels[index].requestFocus();
 
         return 0;
+    }
+
+    public void switchFragment(Fragment targetFragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        if (currentFragment != null) {
+            transaction.hide(currentFragment);
+        }
+
+        // 使用 Fragment 的类名作为 tag
+        String tag = targetFragment.getClass().getSimpleName();
+        Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
+
+        if (existingFragment == null) {
+            // 如果 Fragment 不存在于 FragmentManager 中，添加它
+            transaction.add(R.id.panel_container, targetFragment, tag);
+            currentFragment = targetFragment;
+        } else {
+            // 如果 Fragment 已存在，显示它
+            transaction.show(existingFragment);
+            currentFragment = existingFragment;
+        }
+
+        transaction.commit();
     }
 
     private void initMoneyDisplay() {

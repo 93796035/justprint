@@ -146,8 +146,8 @@
                 android:background="@drawable/circle_red"
                 android:text="-"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:layout_marginEnd="4dp"/>
+                android:textSize="40sp"
+                android:layout_marginEnd="3dp"/>
 
             <Button
                 android:id="@+id/moreButton"
@@ -156,8 +156,8 @@
                 android:background="@drawable/circle_green"
                 android:text="+"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:layout_marginStart="4dp"/>
+                android:textSize="40sp"
+                android:layout_marginStart="3dp"/>
         </LinearLayout>
 
         <!-- 总金额显示区域 -->
