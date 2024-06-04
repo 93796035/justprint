@@ -243,7 +243,6 @@ public class BarFrame extends BaseFragmentActivity {
 
         //activation check
         validateActivation();
-        LoginDlg.getInstance().show(fragmentManager, "login_dialog");
         //this line is kind of slow, and because the frame is no decoration by default, so
         //comment it for now. instance.setExtendedState(BarOption.getDefaultWindowStatus());
 //        SwingUtilities.invokeLater(new Runnable() {
@@ -638,16 +637,9 @@ public class BarFrame extends BaseFragmentActivity {
         MevUtils.flushBatchWithCurTransaction();
 
         if(BarOption.isSingleUser()) {
-//            CheckInOutListDlg.updateCheckInRecord();
-//            Window[] windows = Window.getWindows();
-//            for (Window window : windows) {
-//                if (window.isVisible() && window instanceof JDialog) {
-//                    window.setVisible(false);
-//                }
-//            }
-//            instance.setVisible(false);
-//            singleUserLoginProcess();
-//            BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
+            CheckInOutListDlg.updateCheckInRecord();
+            singleUserLoginProcess();
+            BarFrame.instance.switchMode(BarOption.isCounterMode() ? 2 : 0);
         }else {	//for multi user case, when sign out button clicked, if user inputted right pw, then do the signout.
             BarFrame.instance.switchFragment(null);
             LoginDlg.getInstance().show(fragmentManager, "login_dialog");
@@ -709,6 +701,8 @@ public class BarFrame extends BaseFragmentActivity {
             if (!superAdminAuthentication())
                 return -1;
             // shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
+            topBar.setVisibility(View.GONE);
+            switchFragment(panels[3]);
         } else if (LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
             index = 3;
             topBar.setVisibility(View.GONE);
@@ -924,12 +918,11 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public static void singleUserLoginProcess() {
-//        BarFrame.instance.switchFragment(null);
-//        LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
-//        if (LoginDlg.PASSED == true) { // 如果用户选择了确定按钮。
-//            checkSignIn();
-//        }else {	//the case that user clicked X button.
-//        }
+        LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
+        if (LoginDlg.PASSED == true) { // 如果用户选择了确定按钮。
+            checkSignIn();
+        }else {	//the case that user clicked X button.
+        }
     }
     public String getCurBillIndex() {
         String curBillIndex = valCurBillIdx.getText().toString();

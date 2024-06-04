@@ -121,7 +121,7 @@ public class LoginDlg extends DialogFragment {
             USERLANG = user.getLang();
             CustOpts.custOps.setUserLang(USERLANG);//next start up will use it as default interface language.
 
-            ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
+//            ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
 
             //if it's not for temparal manager login(like discount bill), then need to re-init the interfaces
             if(!noRefresh) {
