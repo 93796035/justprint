@@ -46,11 +46,9 @@ import org.cas.client.platform.bar.i18n.BarDlgConst1;
 import org.cas.client.platform.bar.i18n.BarDlgConst2;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.panel.CustomerFrame;
 import org.cas.client.platform.bar.panel.MenuPanel;
-import org.cas.client.platform.bar.uibeans.TableButton;
 import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
@@ -667,12 +665,7 @@ public class BarFrame extends BaseFragmentActivity {
         LoginDlg.getInstance().noRefresh = true;
         LoginDlg.getInstance().show(fragmentManager, "login_dialog");
         if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) { // 如果用户选择了确定按钮。
-//Let's change to everything keep the same after the admin authentication.
-//        	valOperator.setText(LoginDlg.USERNAME);
-//            setStatusMes(consts.ADMIN_MODE());
-//the interface will be changed to yellow color for warning.
-//            revalidate();
-            LoginDlg.setUSERTYPE(oldUserType);
+            LoginDlg.setUSERTYPE(oldUserType);//the interface will be changed to yellow color for warning.
             LoginDlg.USERID = oldID;
             LoginDlg.USERLANG = oldUserLang;
             LoginDlg.USERNAME = oldUserName;
@@ -681,31 +674,39 @@ public class BarFrame extends BaseFragmentActivity {
         return false;
     }
 
-    public int switchMode(int index) {
-        if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
-            if (ignoreLogin == false) {
-                if (BarOption.isSingleUser()) {
-                    LoginDlg.getInstance().show(fragmentManager, "login_dialog");
-                    if (!LoginDlg.PASSED) {
-                        return -1;
-                    }
-                    valOperator.setText(LoginDlg.USERNAME);
-                }
-            } else {
-                ignoreLogin = false;
-            }
-        }
+    public void switchMode(int index) {
+//        if (curPanelIdx == 3) {  // if it's switching from setting panel, then ask to do a login.
+//            if (ignoreLogin == false) {
+//                if (BarOption.isSingleUser()) {
+//                    LoginDlg loginDlg = LoginDlg.getInstance();
+//                    loginDlg.setLoginDialogListener(success -> {
+//                        if (success) {
+//                            topBar.setVisibility(View.GONE);
+//                            switchFragment(panels[3]);
+//                        } else {
+//                            // 处理登录失败
+//                        }
+//                    });
+//                    loginDlg.show(fragmentManager, "login_dialog");
+//                    if (!LoginDlg.PASSED) {
+//                        return;
+//                    }
+//                }
+//            } else {
+//                ignoreLogin = false;
+//            }
+//        }
         curDish = null;
         setStatusMes("");
         if (index == 3) {  // setting
-            if (!superAdminAuthentication())
-                return -1;
-            // shouldn't do this, when switch back, if there's no time, don't know where to continue.//resetStatus();
-            topBar.setVisibility(View.GONE);
-            switchFragment(panels[3]);
-        } else if (LoginDlg.getUSERTYPE() >= LoginDlg.SUPER_ADMIN) {
-            index = 3;
-            topBar.setVisibility(View.GONE);
+            superAdminAuthentication(success -> {
+                if (LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
+                    topBar.setVisibility(View.GONE);
+                    switchFragment(panels[3]);
+                } else {
+                    JOptionPane.showMessageDialog(BarFrame.instance, "Invalid Password");
+                }
+            });
         } else if (index == 2) {  // sale
             topBar.setVisibility(View.VISIBLE);
             topBar.setBackgroundColor(Color.GRAY);
@@ -764,8 +765,6 @@ public class BarFrame extends BaseFragmentActivity {
 //        }
 
 //        panels[index].requestFocus();
-
-        return 0;
     }
 
     public void switchFragment(Fragment targetFragment) {
@@ -903,18 +902,11 @@ public class BarFrame extends BaseFragmentActivity {
         valOpenTime.setText("");
     }
 
-    public boolean superAdminAuthentication() {
+    public void superAdminAuthentication(LoginDlg.LoginDialogListener listener) {
         LoginDlg loginDlg = LoginDlg.getInstance();
         loginDlg.noRefresh = true;
         loginDlg.show(fragmentManager, "login_dialog");
-        if (LoginDlg.PASSED == true && LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) { // 如果用户选择了确定按钮。
-            valOperator.setText(LoginDlg.USERNAME);
-            setStatusMes(consts.ADMIN_MODE());
-            // @TODO: might need to do some modification on the interface.
-//            revalidate();
-            return true;
-        }
-        return false;
+        loginDlg.setLoginDialogListener(listener);
     }
 
     public static void singleUserLoginProcess() {

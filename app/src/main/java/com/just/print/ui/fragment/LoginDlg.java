@@ -56,6 +56,16 @@ public class LoginDlg extends DialogFragment {
     private EditText passwordField; // 添加成员变量
     private Dialog dialog; // 保存Dialog实例的引用
 
+    public interface LoginDialogListener {
+        void onLoginResult(boolean success);
+    }
+
+    private LoginDialogListener listener;
+
+    public void setLoginDialogListener(LoginDialogListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -100,7 +110,13 @@ public class LoginDlg extends DialogFragment {
             USERNAME = "superAdmin";
             ((BarFrame) getActivity()).switchFragment(TablesPanel.getInstance());
             BarFrame.instance.resetInactivityTimer();
+            BarFrame.instance.valOperator.setText(LoginDlg.USERNAME);
+            BarFrame.instance.setStatusMes(BarFrame.instance.consts.ADMIN_MODE());
             dialog.dismiss(); // 关闭对话框
+            if(listener != null) {
+                listener.onLoginResult(true);
+                listener = null;
+            }
             return;
         }
 
@@ -221,7 +237,15 @@ public class LoginDlg extends DialogFragment {
             }
 
             BarFrame.instance.resetInactivityTimer();
+            BarFrame.instance.valOperator.setText(LoginDlg.USERNAME);
+            if(getUSERTYPE() == ADMIN_STATUS){
+                BarFrame.instance.setStatusMes(BarFrame.instance.consts.ADMIN_MODE());
+            }
             dialog.dismiss(); // 关闭对话框
+            if(listener != null) {
+                listener.onLoginResult(true);
+                listener = null;
+            }
             return;
         }
 
