@@ -66,12 +66,6 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         MAX_CMDBTN_QT = 10;
     }
 
-
-    @Override
-    public void onCreated(Bundle savedInstanceState) {
-        new StupidReflect(this, getView()).init();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);

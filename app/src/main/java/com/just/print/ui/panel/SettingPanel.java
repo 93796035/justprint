@@ -16,8 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.just.print.R;
+import com.just.print.app.BarFrame;
 
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 
 public class SettingPanel extends PicturePane {
 
@@ -31,19 +34,32 @@ public class SettingPanel extends PicturePane {
             lblPrinterMinReachTime, lblServerHost, lblDBHost, lblMevWaitTime, lblLogoutTime;
 
     public SettingPanel() {
-        super(BarOption.getSalePanelBK());
+        super(BarOption.getSettingPanelBK());
         MAX_CMDBTN_QT = 10;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_setting_panel, container, false);
-
-        initView(view);
+        super.onCreateView(inflater, container, savedInstanceState);
+        mRoot = inflater.inflate(getLayoutId(), container, false);
+        initView(mRoot);
         initListeners();
 
-        return view;
+        BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[3], MAX_CMDBTN_QT);
+
+        if (savedInstanceState == null) {
+            // Load the child fragment
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.menuPanelContainer, BarFrame.menuPanel)
+                    .commit();
+        }
+        return mRoot;
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.fragment_setting_panel;
     }
 
     private void initView(View view) {

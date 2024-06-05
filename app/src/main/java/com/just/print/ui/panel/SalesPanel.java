@@ -33,45 +33,26 @@ public class SalesPanel extends PicturePane{
 
     private boolean isDragged;
 
-    @Override
-    public void onCreated(Bundle savedInstanceState) {
-        new StupidReflect(this, getView()).init();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        mRoot = inflater.inflate(getLayoutId(), container, false);
-        initComponent();
-        BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2], MAX_CMDBTN_QT);
-
-        if (savedInstanceState == null) {
-            // Load the child fragment
-            getChildFragmentManager().beginTransaction()
-                    .replace(R.id.billPanelContainer, billPanel)
-                    .replace(R.id.menuPanelContainer, BarFrame.menuPanel)
-                    .commit();
-        }
-
-        reLayout();
-        return mRoot;
-    }
-    @Override
-    protected int getLayoutId() {
-        return R.layout.fragment_sales_panel;
-    }
-
-    //for print
-    public static String SUCCESS = "0";
-    public static String ERROR = "2";
-
     //temporal flags
     public boolean partialPaid;	//for indicating that money is partial paid, when leaving sales panel, will give a notice!
 
     public SalesPanel() {
         super(BarOption.getSalePanelBK());
         MAX_CMDBTN_QT = 20;
-        initComponent();
+        initComponent();//have to do it earlier, because before it displayed, we already need it's property like billPanel
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        mRoot = inflater.inflate(getLayoutId(), container, false);
+        reLayout();
+        BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2], MAX_CMDBTN_QT);
+        return mRoot;
+    }
+    @Override
+    protected int getLayoutId() {
+        return R.layout.fragment_sales_panel;
     }
 
     //used by discCountCoupon, will be deleted to use only the above method with same name.
