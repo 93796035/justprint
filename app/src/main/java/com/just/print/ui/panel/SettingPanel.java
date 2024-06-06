@@ -49,7 +49,12 @@ public class SettingPanel extends PicturePane {
         BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[3], MAX_CMDBTN_QT);
 
         if (savedInstanceState == null) {
-            // Load the child fragment
+            if (BarFrame.menuPanel.isAdded()) {
+                // Fragment 已添加到容器，可以安全地移除
+                BarFrame.instance.panels[2].getChildFragmentManager().beginTransaction()
+                        .remove(BarFrame.menuPanel)
+                        .commitNow();
+            }
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.menuPanelContainer, BarFrame.menuPanel)
                     .commit();

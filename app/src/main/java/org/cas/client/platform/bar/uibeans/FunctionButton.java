@@ -24,7 +24,7 @@ public class FunctionButton extends Button implements ISButton{
 	
 	public FunctionButton(String title) {
 		super(BarFrame.instance);
-		this.title = title;
+		//this.title = title;
 		String bgColor = getBK(title);
 		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
 		setText(title);
@@ -98,11 +98,20 @@ public class FunctionButton extends Button implements ISButton{
 
 		canvas.drawRect(0, 0, w, h, backgroundPaint);
 
-		// 计算绘制文本的位置，使其水平和垂直居中
-		float x = w / 2f;
-		float y = (h / 2f) - ((textPaint.descent() + textPaint.ascent()) / 2f);
+		// 拆分文本以处理换行
+		String[] lines = title.split("\n");
 
-		canvas.drawText(title, x, y, textPaint);
+		// 计算每行文本的位置，使其水平居中，同时垂直分布
+		float x = w / 2f;
+		float lineHeight = -(textPaint.ascent() + textPaint.descent()) + 15;
+		float totalTextHeight = lineHeight * lines.length;
+		float startY = (h - totalTextHeight) / 2 - textPaint.ascent();
+
+		for (String line : lines) {
+			canvas.drawText(line, x, startY, textPaint);
+			startY += lineHeight;
+		}
+
 	}
 
     public void setVisible(boolean b) {

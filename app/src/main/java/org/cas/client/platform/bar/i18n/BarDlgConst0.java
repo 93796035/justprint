@@ -17,7 +17,7 @@ public class BarDlgConst0 implements BarDlgConst{
     @Override
     public String AtLeastTwoTableShouldBeSelected() {return "Deux tableaux doivent être sélectionnés.";}
     @Override
-    public String ChangeTable() {return "<html><center>AUTRE<br>TABLE</center></html>";}
+    public String ChangeTable() {return "AUTRE\nTABLE";}
     @Override
     public String InvoiceIdx() {return "Invoice";}
     @Override
@@ -63,7 +63,7 @@ public class BarDlgConst0 implements BarDlgConst{
     @Override
 	public String Serv() {return "Serv";}
     @Override
-	public String SERVICEFEE() {return "<html><center>FRAIS DE  <br>SRIVICE</center></html>";}
+	public String SERVICEFEE() {return "FRAIS DE  \nSRIVICE";}
     
     @Override
 	public String ServiceFeeNotice() {return "Veuillez entrer la montant des frais de service";}
@@ -90,15 +90,15 @@ public class BarDlgConst0 implements BarDlgConst{
 	public String EnterOtherPayment() {return "Entrer à Un Autre Paiement";}
     
     @Override
-	public String ChangeMode() {return "<html><center>CHANGER<br>LE MODE</center></html>";}
+	public String ChangeMode() {return "CHANGER\nLE MODE";}
     @Override
 	public String AddTable() {return "AJOUTER";}
     @Override
-	public String BILLINGHISTORY() {return "<html><center>HISTORIQUE<br>DES FACTURES</center></html>";}
+	public String BILLINGHISTORY() {return "HISTORIQUE\nDES FACTURES";}
     @Override
-	public String OpenDrawer() {return "<html><center>OUVRIR<br>CAISSE</center></html>";}
+	public String OpenDrawer() {return "OUVRIR\nCAISSE";}
     @Override
-	public String VolumnDiscount() {return "<html><center>REMISE<br>FACTURE</center></html>";}
+	public String VolumnDiscount() {return "REMISE\nFACTURE";}
     @Override
 	public String DISCOUNT_BILL() {return "FACTURE DISCOUNT";}
     @Override
@@ -131,25 +131,25 @@ public class BarDlgConst0 implements BarDlgConst{
 	public String PRICE() {return "Prix";}
 
     @Override
-	public String EXACT_AMOUNT() {return "<html><center>MONTANT<br>EXACTE</center></html>";}
+	public String EXACT_AMOUNT() {return "MONTANT\nEXACTE";}
     @Override
 	public String CASH() {return "MONNAIE";}
     @Override
 	public String PAY() {return "PAYER";}
     @Override
-	public String REMOVEITEM() {return "<html><center>ENLEVER<br>ARTICLE</center></html>";}
+	public String REMOVEITEM() {return "ENLEVER\nARTICLE";}
     @Override
 	public String VOID_ITEM() {return "VIDER ARTICLE";}
     @Override
-	public String SPLIT_BILL() {return "<html><center>DIVISER<br>FACTURE</center></html>";}
+	public String SPLIT_BILL() {return "DIVISER\nFACTURE";}
     @Override
 	public String Modify() {return "Modifier";}
     @Override
-	public String BillInfo() {return "<html><center>FACTURE<br>PIED INFO</center></html>";}
+	public String BillInfo() {return "FACTURE\nPIED INFO";}
     @Override
 	public String BillFootInfo() {return "Info de Pied de Facture";}
     @Override
-	public String ChangePrice() {return "<html><center>CHANGER<br>PRIX</center></html>";}
+	public String ChangePrice() {return "CHANGER\nPRIX";}
     @Override
 	public String ChangePriceNotice() {return "Veuillez taper un prix different";}
     @Override
@@ -159,13 +159,13 @@ public class BarDlgConst0 implements BarDlgConst{
     @Override
 	public String QTYNOTICE() {return "Veuillez taper un nombre";}
     @Override
-	public String DISC_ITEM() {return "<html><center>REMISE<br>ARTICLE</center></html>";}
+	public String DISC_ITEM() {return "REMISE\nARTICLE";}
     @Override
 	public String DISCITEM() {return "REMISE ARTICLE";}
     @Override
 	public String DISC_ITEMNotice() {return "Il va remiser un article sélectionné";}
     @Override
-	public String TEMPORARY_BILL() {return "<html><center>FACTURE<br>TEMPORAIRE</center></html>";}
+	public String TEMPORARY_BILL() {return "FACTURE\nTEMPORAIRE";}
 
     @Override
 	public String DEBIT() {return "DÉBIT";}
@@ -176,9 +176,9 @@ public class BarDlgConst0 implements BarDlgConst{
     @Override
 	public String MASTER() {return "MASTER";}
     @Override
-	public String CANCEL_ALL() {return "<html><center>ANNULER<br>TOUS</center></html>";}
+	public String CANCEL_ALL() {return "ANNULER\nTOUS";}
     @Override
-	public String VOID_ORDER() {return "<html><center>VIDER<br>ORDRE</center></html>";}
+	public String VOID_ORDER() {return "VIDER\nORDRE";}
     @Override
 	public String SETTINGS() {return "RÉGLAGE";}
     @Override

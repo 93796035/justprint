@@ -21,7 +21,7 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
     public String AtLeastTwoTableShouldBeSelected() {return "Two tables should be selected.";}
     @Override
-    public String ChangeTable() {return "<html><center>CHANGE<br>TABLE</center></html>";}
+    public String ChangeTable() {return "CHANGE\nTABLE";}
     @Override
     public String InvoiceIdx() {return "Invoice";}
     @Override
@@ -67,7 +67,7 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
 	public String Serv() {return "Serv";}
     @Override
-	public String SERVICEFEE() {return "<html><center>SERVICE<br>FEE</center></html>";}
+	public String SERVICEFEE() {return "SERVICE\nFEE";}
     
     @Override
 	public String ServiceFeeNotice() {return "Please input price of service fee";}
@@ -94,15 +94,15 @@ public class BarDlgConst1 implements BarDlgConst{
 	public String EnterOtherPayment() {return "Enter Other Payment";}
     
     @Override
-	public String ChangeMode() {return "<html><center>CHANGE<br>MODE</center></html>";}
+	public String ChangeMode() {return "CHANGE\nMODE";}
     @Override
 	public String AddTable() {return "ADD";}
     @Override
-	public String BILLINGHISTORY() {return "<html><center>BILLING<br>HISTORY</center></html>";}
+	public String BILLINGHISTORY() {return "BILLING\nHISTORY";}
     @Override
-	public String OpenDrawer() {return "<html><center>OPEN<br>DRAWER</center></html>";}
+	public String OpenDrawer() {return "OPEN\nDRAWER";}
     @Override
-	public String VolumnDiscount() {return "<html><center>DISC<br>BILL</center></html>";}
+	public String VolumnDiscount() {return "DISC\nBILL";}
     @Override
 	public String DISCOUNT_BILL() {return "DISCOUNT BILL";}
     @Override
@@ -135,25 +135,25 @@ public class BarDlgConst1 implements BarDlgConst{
 	public String PRICE() {return "Price";}
 
     @Override
-	public String EXACT_AMOUNT() {return "<html><center>EXACT<br>AMOUNT</center></html>";}
+	public String EXACT_AMOUNT() {return "EXACT\nAMOUNT";}
     @Override
 	public String CASH() {return "CASH";}
     @Override
 	public String PAY() {return "PAY";}
     @Override
-	public String REMOVEITEM() {return "<html><center>REMOVE<br>ITEM</center></html>";}
+	public String REMOVEITEM() {return "REMOVE\nITEM";}
     @Override
 	public String VOID_ITEM() {return "VOID ITEM";}
     @Override
-	public String SPLIT_BILL() {return "<html><center>SPLIT<br>BILL</center></html>";}
+	public String SPLIT_BILL() {return "SPLIT\nBILL";}
     @Override
 	public String Modify() {return "Modify";}
     @Override
-	public String BillInfo() {return "<html><center>BILL<br>FOOT INFO</center></html>";}
+	public String BillInfo() {return "BILL\nFOOT INFO";}
     @Override
 	public String BillFootInfo() {return "Bill Foot Info";}
     @Override
-	public String ChangePrice() {return "<html><center>CHANGE<br>PRICE</center></html>";}
+	public String ChangePrice() {return "CHANGE\nPRICE";}
     @Override
 	public String ChangePriceNotice() {return "Please input a different price";}
     @Override
@@ -163,13 +163,13 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
 	public String QTYNOTICE() {return "Please input a number";}
     @Override
-	public String DISC_ITEM() {return "<html><center>DISC<br>ITEM</center></html>";}
+	public String DISC_ITEM() {return "DISC\nITEM";}
     @Override
 	public String DISCITEM() {return "DISCOUNT ITEM";}
     @Override
 	public String DISC_ITEMNotice() {return "will discount from selected item";}
     @Override
-	public String TEMPORARY_BILL() {return "<html><center>TEMPORARY<br>BILL</center></html>";}
+	public String TEMPORARY_BILL() {return "TEMPORARY\nBILL";}
 
     @Override
 	public String DEBIT() {return "DEBIT";}
@@ -180,9 +180,9 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
 	public String MASTER() {return "MASTER";}
     @Override
-	public String CANCEL_ALL() {return "<html><center>CANCEL<br>ALL</center></html>";}
+	public String CANCEL_ALL() {return "CANCEL\nALL";}
     @Override
-	public String VOID_ORDER() {return "<html><center>VOID<br>ORDER</center></html>";}
+	public String VOID_ORDER() {return "VOID\nORDER";}
     @Override
 	public String SETTINGS() {return "SETTINGS";}
     @Override
@@ -682,7 +682,7 @@ public class BarDlgConst1 implements BarDlgConst{
 	@Override
 	public String today() {return "TODAY";}
 	@Override
-	public String thisMonth() {return "<html>THIS<br>MONTH</html>";}
+	public String thisMonth() {return "<html>THIS\nMONTH</html>";}
 	@Override
 	public String SKIP() {return "SKIP";}
 	@Override
