@@ -25,6 +25,7 @@ public class FunctionToggleButton extends ToggleButton implements ISButton{
 		this.title = title;
 		String bgColor = getBK(title);
 		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
+		setPadding(16,10, 17, 17);
 
 		textPaint = new TextPaint();
 		textPaint.setColor(Color.WHITE); // 设置文本颜色
