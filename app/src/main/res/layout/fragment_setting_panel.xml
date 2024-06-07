@@ -12,25 +12,14 @@
         android:layout_alignParentTop="true"
         android:paddingLeft="4dp">
 
-        <!-- Vertical Separator -->
-        <View
-            android:id="@+id/verticalSeparator"
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#000"
-            android:layout_centerHorizontal="true" />
-
         <!-- Left Part of Top Section -->
         <RelativeLayout
             android:id="@+id/leftTopSection"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/verticalSeparator"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true">
 
-            <!-- GST Label and Text Field -->
-            <!-- GST and QST in one line -->
             <LinearLayout
                 android:id="@+id/gstAndQst"
                 android:layout_width="match_parent"
@@ -48,7 +37,14 @@
                     android:layout_width="0dp"
                     android:layout_height="31dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
 
                 <TextView
                     android:id="@+id/lblQST"
@@ -62,9 +58,15 @@
                     android:layout_width="0dp"
                     android:layout_height="31dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/billPageLayout"
                 android:layout_width="match_parent"
@@ -83,7 +85,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
 
                 <!-- Bill Page Col Label and Text Field -->
                 <TextView
@@ -97,10 +106,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
                     android:layout_weight="1"
+                    android:singleLine="true"
                     android:layout_toEndOf="@id/lblBillPageCol"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp"  />
             </LinearLayout>
-            <!-- Start Time of Day Label and Text Field -->
             <LinearLayout
                 android:id="@+id/startAndWaitTime"
                 android:layout_width="match_parent"
@@ -118,8 +133,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
                     android:layout_weight="1"
+                    android:singleLine="true"
                     android:layout_alignBaseline="@id/lblStartTimeOfDay"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
 
                 <!-- Printer Min Reach Time Label and Text Field -->
                 <TextView
@@ -132,8 +154,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
                     android:layout_weight="1"
+                    android:singleLine="true"
                     android:layout_alignBaseline="@id/lblPrinterMinReachTime"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
             </LinearLayout>
             <View
                 android:id="@+id/horizontalSeparator1"
@@ -143,86 +172,60 @@
                 android:layout_below="@id/startAndWaitTime"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"/>
-            <!-- Checkboxes -->
-            <LinearLayout
-                android:id="@+id/checkBoxAndButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+            <CheckBox
+                android:id="@+id/cbxIsTrainingMode"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
                 android:layout_below="@id/horizontalSeparator1"
-                android:orientation="horizontal">
-                <CheckBox
-                    android:id="@+id/cbxIsTrainingMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/horizontalSeparator1"
-                    android:text="Is Training Mode" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-                <Button
-                    android:id="@+id/moreOptions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="More Options"
-                    android:layout_gravity="end" />
-            </LinearLayout>
+                android:text="Is Training Mode" />
             <CheckBox
                 android:id="@+id/cbxIsSingleUserMode"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:layout_below="@id/checkBoxAndButton"
+                android:layout_below="@id/cbxIsTrainingMode"
                 android:text="Is Single User Mode" />
-
             <CheckBox
                 android:id="@+id/cbxIsBuffetMode"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsSingleUserMode"
                 android:text="Is Buffet Mode" />
-
             <CheckBox
                 android:id="@+id/cbxIsFastFoodMode"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsBuffetMode"
                 android:text="Is Fast Food Mode" />
-
             <CheckBox
                 android:id="@+id/cbxIsDiscoutAffectTax"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsFastFoodMode"
                 android:text="Is Discount Affect Tax" />
-
             <CheckBox
                 android:id="@+id/cbxIsServiceFeeAffectTax"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsDiscoutAffectTax"
                 android:text="Is Service Fee Affect Tax" />
-
             <CheckBox
                 android:id="@+id/cbxIsHideRecordFromOtherWaiter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsServiceFeeAffectTax"
                 android:text="Is Hide Record From Other Waiter" />
-
             <CheckBox
                 android:id="@+id/cbxIsWaiterAllowedToDiscount"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsHideRecordFromOtherWaiter"
                 android:text="Is Waiter Allowed To Discount" />
-
             <CheckBox
                 android:id="@+id/cbxIsWaiterAllowedToChangePrice"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/cbxIsWaiterAllowedToDiscount"
                 android:text="Is Waiter Allowed To Change Price" />
-
             <CheckBox
                 android:id="@+id/cbxShowCustomerFrame"
                 android:layout_width="wrap_content"
@@ -249,12 +252,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Server Host" />
-
                 <EditText
                     android:id="@+id/tfdServerHost"
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp"  />
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/DBHost"
@@ -268,13 +277,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="DB Host" />
-
                 <EditText
                     android:id="@+id/tfdDBHost"
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
                     android:layout_alignBaseline="@id/lblDBHost"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp"  />
             </LinearLayout>
             <!-- MEV Wait Time Label and Text Field -->
             <LinearLayout
@@ -288,32 +303,44 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="MEV Wait Time" />
-
                 <EditText
                     android:id="@+id/tfdMevWaitTime"
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
-                    android:layout_marginStart="8dp" />
+                    android:singleLine="true"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp" />
             </LinearLayout>
             <!-- Logout Time Label and Text Field -->
             <LinearLayout
                 android:id="@+id/LogoutTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/DBHost"
+                android:layout_below="@id/WaitTime"
                 android:orientation="horizontal">
                 <TextView
                     android:id="@+id/lblLogoutTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Logout Time" />
-
                 <EditText
                     android:id="@+id/tfdLogoutTime"
                     android:layout_width="match_parent"
                     android:layout_height="31dp"
+                    android:singleLine="true"
                     android:layout_alignBaseline="@id/lblLogoutTime"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:minHeight="0dp"  />
             </LinearLayout>
         </RelativeLayout>
 
@@ -321,8 +348,7 @@
         <RelativeLayout
             android:id="@+id/rightTopSection"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/verticalSeparator"
+            android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true">
 
@@ -330,7 +356,7 @@
             <FrameLayout
                 android:id="@+id/menuPanelContainer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
             </FrameLayout>
             <!-- Add additional menuPanel content here -->
             <LinearLayout
@@ -355,6 +381,16 @@
                     android:layout_below="@id/bkMenu"
                     android:layout_marginTop="8dp"
                     android:text="Restore Menu" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+                <Button
+                    android:id="@+id/moreOptions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="More Options"
+                    android:layout_gravity="end" />
             </LinearLayout>
         </RelativeLayout>
     </RelativeLayout>

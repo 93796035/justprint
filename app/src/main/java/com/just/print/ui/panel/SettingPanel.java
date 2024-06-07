@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
@@ -139,43 +140,6 @@ public class SettingPanel extends PicturePane {
         // Add similar listeners for other fields
     }
 
-    public void reLayout2() {
-        // command buttons
-        if (mRoot == null) {
-            return;
-        }
-        float billPanelWeight = BarOption.getMenuAreaPortion();
-        float menuPanelWeight = 1.0f - billPanelWeight;
-
-        RelativeLayout billPanelContainer = mRoot.findViewById(R.id.leftTopSection);
-        FrameLayout menuPanelContainer = mRoot.findViewById(R.id.menuPanelContainer);
-
-        // 获取屏幕宽度
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        BarFrame.instance.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
-
-        // 设置 BillPanel 的宽度
-        RelativeLayout.LayoutParams billPanelParams = (RelativeLayout.LayoutParams) billPanelContainer.getLayoutParams();
-        billPanelParams.width = (int) (width * billPanelWeight);
-        billPanelContainer.setLayoutParams(billPanelParams);
-
-        // 设置 MenuPanel 的宽度
-        RelativeLayout.LayoutParams menuPanelParams = (RelativeLayout.LayoutParams) menuPanelContainer.getLayoutParams();
-        menuPanelParams.width = (int) (width * menuPanelWeight);
-        menuPanelContainer.setLayoutParams(menuPanelParams);
-
-        if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
-            // Fragment 已添加到容器，可以安全地移除
-            BarFrame.instance.panels[2].getChildFragmentManager().beginTransaction()
-                    .remove(BarFrame.menuPanel)
-                    .commitNow();
-        }
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
-        transaction.commit();
-    }
-
     public void reLayout() {
         if (mRoot == null) {
             return;
@@ -183,12 +147,7 @@ public class SettingPanel extends PicturePane {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         BarFrame.instance.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
-
-
-        float billPanelWeight = BarOption.getMenuAreaPortion();
-        float menuPanelWeight = 1.0f - billPanelWeight;
-
-        int leftWidth = (int) (screenWidth * menuPanelWeight);
+        int leftWidth = (int) (screenWidth * BarOption.getMenuAreaPortion());
         int rightWidth = screenWidth - leftWidth; // 或使用 (int) (screenWidth * 0.6)
 
         RelativeLayout leftPanel = mRoot.findViewById(R.id.leftTopSection);
@@ -202,6 +161,18 @@ public class SettingPanel extends PicturePane {
         rightParams.width = rightWidth;
         rightParams.addRule(RelativeLayout.RIGHT_OF, R.id.leftTopSection);
         rightPanel.setLayoutParams(rightParams);
+
+        if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
+            FragmentManager fragmentManager = BarFrame.menuPanel.getFragmentManager();
+            if (fragmentManager != null) {
+                fragmentManager.beginTransaction()
+                        .remove(BarFrame.menuPanel)
+                        .commitNow();
+            }
+        }
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
+        transaction.commit();
     }
     private boolean isValidPercentage(String text) {
         try {

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
@@ -140,10 +141,12 @@ public class SalesPanel extends PicturePane{
         menuPanelContainer.setLayoutParams(menuPanelParams);
 
         if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
-            // Fragment 已添加到容器，可以安全地移除
-            BarFrame.instance.panels[3].getChildFragmentManager().beginTransaction()
-                    .remove(BarFrame.menuPanel)
-                    .commitNow();
+            FragmentManager fragmentManager = BarFrame.menuPanel.getFragmentManager();
+            if (fragmentManager != null) {
+                fragmentManager.beginTransaction()
+                        .remove(BarFrame.menuPanel)
+                        .commitNow();
+            }
         }
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.billPanelContainer, billPanel);
