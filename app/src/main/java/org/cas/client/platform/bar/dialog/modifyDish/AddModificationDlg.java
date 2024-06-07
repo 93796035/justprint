@@ -425,9 +425,9 @@ public class AddModificationDlg extends DialogFragment
 
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-            	StringBuilder sb = new StringBuilder(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "name1"))).append(BarDlgConst.semicolon);
-            	sb.append(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "name2"))).append(BarDlgConst.semicolon);
-            	sb.append(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "name3"))).append(BarDlgConst.semicolon);
+            	StringBuilder sb = new StringBuilder(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "NAME1"))).append(BarDlgConst.semicolon);
+            	sb.append(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "NAME2"))).append(BarDlgConst.semicolon);
+            	sb.append(BarUtil.removeHTMLTAG(DBUtil.getCursorString(rs, "NAME3"))).append(BarDlgConst.semicolon);
                 nameVec.add(sb.toString());
             }
             return nameVec;

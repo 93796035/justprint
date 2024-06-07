@@ -24,6 +24,8 @@ public class CategoryToggleButton extends ToggleButton {
 ////		setBorder(BorderFactory.createEtchedBorder());
 //		setFont(BarOption.getMenuCustFont());
         this.index = index;
+		setTextOff("");
+		setTextOn(getText());
 		setText("");//to avoid the not used button displaying an "OFF" or "关闭“ by default.
     }
 

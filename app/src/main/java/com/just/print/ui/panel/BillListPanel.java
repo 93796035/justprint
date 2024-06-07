@@ -7,25 +7,20 @@ import android.view.View;
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.app.BaseFragment;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.action.Cmd_CombineAll;
-import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintUtil;
 import org.cas.client.platform.bar.uibeans.ArrowButton;
 import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
-import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 
-import com.just.print.db.bean.Dish;
 import com.just.print.util.JOptionPane;
 import com.stupid.method.reflect.StupidReflect;
 
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 
 import java.util.ArrayList;

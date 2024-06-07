@@ -3,7 +3,7 @@
     android:id="@+id/BarFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#080808"
+    android:background="#aaaaaa"
     tools:context=".app.BarFrame">
 
     <!-- 顶部控件，如当前表格标签和选择器 -->

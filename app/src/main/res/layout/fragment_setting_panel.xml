@@ -98,7 +98,8 @@
                     android:id="@+id/lblBillPageCol"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bill Page Col" />
+                    android:text="Bill Page Col"
+                    android:layout_marginStart="16dp" />
 
                 <EditText
                     android:id="@+id/tfdBillPageCol"
@@ -147,7 +148,8 @@
                     android:id="@+id/lblPrinterMinReachTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Printer Min Reach Time" />
+                    android:text="Printer Min Reach Time"
+                    android:layout_marginStart="16dp"/>
                 <EditText
                     android:id="@+id/tfdPrinterMinReachTime"
                     android:layout_width="match_parent"

@@ -592,17 +592,17 @@ public class BarUtil {
 //        return sb.toString();
 //    }
     public static String addHTMLTAG(String text){
-        if(text != null && !text.toLowerCase().trim().startsWith("<html>")) { //not null, and not start with
-            int p = text.indexOf("_");
-            if(p > 0) {
-                StringBuilder text2 = new StringBuilder("<html><center>").append("");
-                text2.append(text.substring(0, p));
-                text2.append("<br>");
-                text2.append(text.substring(p + 1));
-                text2.append("</center></html>");
-                return text2.toString();
-            }
-        }
+//        if(text != null && !text.toLowerCase().trim().startsWith("<html>")) { //not null, and not start with
+//            int p = text.indexOf("_");
+//            if(p > 0) {
+//                StringBuilder text2 = new StringBuilder("<html><center>").append("");
+//                text2.append(text.substring(0, p));
+//                text2.append("<br>");
+//                text2.append(text.substring(p + 1));
+//                text2.append("</center></html>");
+//                return text2.toString();
+//            }
+//        }
         return text;
     }
 

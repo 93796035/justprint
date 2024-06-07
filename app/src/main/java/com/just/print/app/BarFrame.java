@@ -19,7 +19,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
 import com.just.print.db.bean.DiningTable;
-import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.User;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;

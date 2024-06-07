@@ -19,6 +19,7 @@ import com.just.print.app.AikaPos;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.panel.MenuPanel;
 import org.cas.client.platform.bar.uibeans.CategoryToggleButton;
+import org.cas.client.platform.casutil.L;
 
 public class CategoryDlg extends DialogFragment {
 
@@ -54,6 +55,13 @@ public class CategoryDlg extends DialogFragment {
         btnCancel.setOnClickListener(v -> dismiss());
         btnDelete.setOnClickListener(v -> onDeleteClick());
 
+        tfdDspIndex.setText(String.valueOf(dspIndex));
+        if (dspIndex <= menuPanel.categoryNameMetrix[0].length) {
+            tfdCategoryName1.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[0][dspIndex - 1]));
+            lang1 = menuPanel.categoryNameMetrix[0][dspIndex - 1];
+            tfdCategoryName2.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[1][dspIndex - 1]));
+            tfdCategoryName3.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[2][dspIndex - 1]));
+        }
         builder.setView(view);
         builder.setTitle("Category Editor");
 
@@ -63,16 +71,10 @@ public class CategoryDlg extends DialogFragment {
     public void setCategoryBtn(CategoryToggleButton btn) {
         this.sourceButton = btn;
         this.dspIndex = btn.getIndex();
-        tfdDspIndex.setText(String.valueOf(dspIndex));
-        if (dspIndex <= menuPanel.categoryNameMetrix[0].length) {
-            tfdCategoryName1.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[0][dspIndex - 1]));
-            lang1 = menuPanel.categoryNameMetrix[0][dspIndex - 1];
-            tfdCategoryName2.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[1][dspIndex - 1]));
-            tfdCategoryName3.setText(BarUtil.removeHTMLTAG(menuPanel.categoryNameMetrix[2][dspIndex - 1]));
-        }
     }
 
     private void onOkClick() {
+
         String text = BarUtil.addHTMLTAG(tfdCategoryName1.getText().toString());
 
         if (text == null || text.length() < 1) {
@@ -111,7 +113,7 @@ public class CategoryDlg extends DialogFragment {
 
             // Save to DB
             if (dspIndex <= menuPanel.categoryNameMetrix[0].length && menuPanel.categoryNameMetrix[0][dspIndex - 1] != null) {
-                String sql = "UPDATE Category SET LANG1 = ?, LANG2 = ?, LANG3 = ?, displayIdx = ? where LANG1 = ?";
+                String sql = "UPDATE Category SET NAME1 = ?, NAME2 = ?, NAME3 = ?, displayIdx = ? where NAME1 = ?";
                 AikaPos.db.execSQL(sql, new Object[]{
                         BarUtil.addHTMLTAG(tfdCategoryName1.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName2.getText().toString()),
@@ -124,7 +126,7 @@ public class CategoryDlg extends DialogFragment {
                     AikaPos.db.execSQL(sql, new Object[]{tfdCategoryName1.getText().toString()});
                 }
             } else {
-                String sql = "INSERT INTO Category(LANG1, LANG2, LANG3, displayIdx) VALUES(?,?,?,?)";
+                String sql = "INSERT INTO Category(NAME1, NAME2, NAME3, displayIdx) VALUES(?,?,?,?)";
                 AikaPos.db.execSQL(sql, new Object[]{BarUtil.addHTMLTAG(tfdCategoryName1.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName2.getText().toString()),
                         BarUtil.addHTMLTAG(tfdCategoryName3.getText().toString()),
@@ -135,7 +137,7 @@ public class CategoryDlg extends DialogFragment {
             menuPanel.initCategoryAndDishes();
             dismiss();
         } catch (Exception e) {
-            Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            L.e("CategoryDlg", "unexpected exception when saving category to db." + e.getMessage(), e);
         }
     }
 
@@ -151,7 +153,7 @@ public class CategoryDlg extends DialogFragment {
                         String sql = "delete from product where CATEGORY = ?";
                         AikaPos.db.execSQL(sql, new Object[]{category});
 
-                        sql = "delete from Category where LANG1 = ?";
+                        sql = "delete from Category where NAME1 = ?";
                         AikaPos.db.execSQL(sql, new Object[]{category});
 
                         menuPanel.initCategoryAndDishes();
