@@ -430,7 +430,7 @@ public class BarUtil {
 
         int gap = CustOpts.HOR_GAP / 2;
         int v_gap = CustOpts.VER_GAP / 2;
-        int tBtnWidth = col == 0 ? 100 : (panelWidth - gap * (col + 1)) / col;
+        int tBtnWidth = col == 0 ? 100 : (panelWidth - gap * 2 * col) / col;
         int tBtnHeight = (panelHeight - 80) / 10;
 
         if (buttonBar instanceof GridLayout) {

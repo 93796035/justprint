@@ -710,8 +710,7 @@ public class BarFrame extends BaseFragmentActivity {
         } else if (index == 2) {  // sale
             topBar.setVisibility(View.VISIBLE);
             topBar.setBackgroundColor(Color.GRAY);
-            cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
-            initMoneyDisplay();
+            initSalesPanel();
             switchFragment(panels[2]);
         } else if (index == 1) {  // bill
             topBar.setVisibility(View.VISIBLE);
@@ -790,6 +789,11 @@ public class BarFrame extends BaseFragmentActivity {
         }
 
         transaction.commit();
+    }
+    private void initSalesPanel() {
+        cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
+        ((SalesPanel)panels[2]).reLayout();
+        initMoneyDisplay();
     }
 
     private void initMoneyDisplay() {

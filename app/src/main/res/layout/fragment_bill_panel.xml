@@ -68,6 +68,7 @@
             android:id="@+id/footerLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
             android:layout_alignParentLeft="true"
             android:gravity="center_vertical">
@@ -79,7 +80,7 @@
 
                 <TextView
                     android:id="@+id/lblDiscount"
-                    android:layout_width="80dp"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Serv: $20.00"
@@ -88,7 +89,7 @@
 
                 <TextView
                     android:id="@+id/lblTPS"
-                    android:layout_width="80dp"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="TPS: $1.50"
                     android:textSize="18sp"
@@ -103,7 +104,7 @@
 
                 <TextView
                     android:id="@+id/lblServiceFee"
-                    android:layout_width="80dp"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Serv: $20.00"
@@ -112,7 +113,7 @@
 
                 <TextView
                     android:id="@+id/lblTVQ"
-                    android:layout_width="80dp"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="TVQ: $2.99"
                     android:textSize="18sp"
@@ -129,6 +130,19 @@
                 android:textColor="#000000" />
         </LinearLayout>
 
+        <!-- 总金额显示区域 -->
+        <TextView
+            android:id="@+id/valTotlePrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/operationLayout"
+            android:layout_toRightOf="@+id/footerLayout"
+            android:layout_weight="1"
+            android:text="54.50"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:gravity="right|center_vertical" />
         <!-- 操作按钮容器 -->
         <LinearLayout
             android:id="@+id/operationLayout"
@@ -160,17 +174,5 @@
                 android:layout_marginStart="3dp"/>
         </LinearLayout>
 
-        <!-- 总金额显示区域 -->
-        <TextView
-            android:id="@+id/valTotlePrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/operationLayout"
-            android:layout_toRightOf="@+id/footerLayout"
-            android:text="54.50"
-            android:textSize="48sp"
-            android:textStyle="bold"
-            android:textColor="#4CAF50"
-            android:gravity="right|center_vertical" />
     </RelativeLayout>
 </RelativeLayout>

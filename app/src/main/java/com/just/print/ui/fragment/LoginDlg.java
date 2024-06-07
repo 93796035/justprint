@@ -97,6 +97,7 @@ public class LoginDlg extends DialogFragment {
         });
 
         initContent();
+        setCancelable(false);
         builder.setView(view);
         dialog = builder.create(); // 保存Dialog实例的引用
         return dialog;

@@ -119,28 +119,10 @@ public class SalesPanel extends PicturePane{
 //    	}
 //    }
 
-    void reLayout() {
-        // command buttons--------------
-//        int top = BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2]);
-//        if(top < 0) {
-//            return;
-//        }
-//        int v_gat = CustOpts.VER_GAP / 2;
-//        int h_gap = CustOpts.HOR_GAP / 2;
-//        // TOP part============================
-//        int topAreaHeight = top - 3 * v_gat;
-//
-////        billPanel.setBounds(h_gap/2, v_gat,
-////                (int) (getWidth() * (1 - BarOption.getMenuAreaPortion())), topAreaHeight);
-//
-//        // menu area--------------
-////        int xMenuArea = billPanel.getX() + billPanel.getWidth() + h_gap;
-////        int widthMenuArea = getWidth() - billPanel.getWidth() - h_gap - CustOpts.SIZE_EDGE;
-//
-////        BarFrame.menuPanel.setBounds(xMenuArea, billPanel.getY(), widthMenuArea, topAreaHeight + 4);
-//        BarFrame.menuPanel.reLayout();
-//
-//        billPanel.resetColWidth();
+    public void reLayout() {
+        if(mRoot == null){
+            return;
+        }
         float billPanelWeight = BarOption.getMenuAreaPortion();
         float menuPanelWeight = 1.0f - billPanelWeight;
 
@@ -157,7 +139,12 @@ public class SalesPanel extends PicturePane{
         menuPanelParams.weight = menuPanelWeight;
         menuPanelContainer.setLayoutParams(menuPanelParams);
 
-        // 加载 BillPanel 和 MenuPanel
+        if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
+            // Fragment 已添加到容器，可以安全地移除
+            BarFrame.instance.panels[3].getChildFragmentManager().beginTransaction()
+                    .remove(BarFrame.menuPanel)
+                    .commitNow();
+        }
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.billPanelContainer, billPanel);
         transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
@@ -165,8 +152,6 @@ public class SalesPanel extends PicturePane{
     }
 
     public void initComponent() {
-//        removeAll();	//when it's called by setting panel(changed colors...), it will be called to refresh.
-
         billPanel = new BillPanel(this);
         // properties
 //        Color bg = BarOption.getBK("Sales");
@@ -175,110 +160,7 @@ public class SalesPanel extends PicturePane{
 //        }
 //        setBackground(bg);
 //        setLayout(null);
-
-        // built
-        BarUtil.addFunctionButtons(this, CmdBtnsManagerDlg.groupedButtons[2]);
     }
     @XViewByID(R.id.billPanelContainer)
     public BillPanel billPanel;
-    private String keyboardInput = "";
-
-//    @Override
-//    public void keyTyped(KeyEvent e) {
-//        char key = e.getKeyChar();
-//        if (key == 10) {		//when "enter" is hit, start to process(match a menu and add to selection.
-//            int idx = keyboardInput.indexOf(".");//first get the inputted category and menu.
-//            String category = idx > 0 ? keyboardInput.substring(0, idx) : BarFrame.menuPanel.categoryNameMetrix[0][0];
-//            String menu = keyboardInput.substring(idx + 1);
-//            //find out category index
-//            int categoryIdx = 0;
-//            int menuIdx = 0;
-//            if(idx > 0) {	//if it contains the ".", and not in 0 position means user inputted category index of name
-//                try {
-//                    categoryIdx = Integer.valueOf(category) - 1;
-//                    category = BarFrame.instance.menuPanel.categoryNameMetrix[0][categoryIdx];
-//                }catch(Exception exp) {
-//                    boolean matched = false;
-//                    //not a number, then match to a String.
-//                    for (int i = 0; i < BarFrame.menuPanel.categoryNameMetrix.length; i++) {
-//                        for(int j = 0; j < BarFrame.menuPanel.categoryNameMetrix[i].length; j++) {
-//                            if(category.equalsIgnoreCase(BarFrame.menuPanel.categoryNameMetrix[i][j])) {
-//                                categoryIdx = j;
-//                                category = BarFrame.menuPanel.categoryNameMetrix[0][categoryIdx];
-//                                matched = true;
-//                                break;
-//                            }
-//                        }
-//                        if(matched) {
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//
-//            //find out menu index
-//            try {
-//                menuIdx = Integer.valueOf(menu) - 1;
-//                Dish[] dishes = BarFrame.menuPanel.getDishAry();
-//                int j = 0;
-//                for(int i = 0; i < dishes.length; i++) {
-//                    if(dishes[i].getCATEGORY().equalsIgnoreCase(category)) {
-//                        if(menuIdx == j) {
-//                            menu = dishes[i].getLanguage(0);
-//                            break;
-//                        }
-//                        j++;
-//                    }
-//                }
-//            }catch(Exception exp) {
-//                boolean matched = false;
-//                //not a number, then match to a String.
-//                for (int i = 0; i < BarFrame.menuPanel.dishNameMetrix.length; i++) {
-//                    for(int j = 0; j < BarFrame.menuPanel.dishNameMetrix[i].length; j++) {
-//                        if(menu.equalsIgnoreCase(BarFrame.menuPanel.dishNameMetrix[i][j])) {
-//                            menuIdx = j;
-//                            menu = BarFrame.menuPanel.dishNameMetrix[0][menuIdx];
-//                            matched = true;
-//                            break;
-//                        }
-//                    }
-//                    if(matched) {
-//                        break;
-//                    }
-//                }
-//            }
-//            //trigger the menuSelect event
-//            BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
-//            if(!billPanel.notTooLateToChangeStatus()) {
-//                return;
-//            }
-//            // add into table. @note, here can not use menuButton, because the menu button might not exist.
-//            // how to find the dish by menu name.
-//            Dish[] dishes = BarFrame.menuPanel.getDishAry();
-//            Dish dish = null;
-//            for(int i = 0; i < dishes.length; i++) {
-//                if(dishes[i].getLanguage(0).equals(menu)) {// && ) {
-//                    dish = dishes[i];
-//                    if(dishes[i].getCATEGORY().equals(category)) {
-//                        dish = null;
-//                        BarFrame.menuPanel.addIntoBillPane(dishes[i]);
-//                        break;
-//                    }
-//                }
-//            }
-//            if(dish != null) {
-//                BarFrame.menuPanel.addIntoBillPane(dish);
-//            }
-//            keyboardInput = "";
-//        } else {
-//            keyboardInput = keyboardInput + String.valueOf(key);
-//        }
-//        BarFrame.setStatusMes(keyboardInput);
-//    }
-//
-//    @Override
-//    public void keyPressed(KeyEvent e) {}
-//
-//    @Override
-//    public void keyReleased(KeyEvent e) {}
 }

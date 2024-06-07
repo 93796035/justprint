@@ -2,18 +2,23 @@ package com.just.print.ui.panel;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
 import com.just.print.app.BarFrame;
@@ -45,9 +50,8 @@ public class SettingPanel extends PicturePane {
         mRoot = inflater.inflate(getLayoutId(), container, false);
         initView(mRoot);
         initListeners();
-
         BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[3], MAX_CMDBTN_QT);
-
+        reLayout();
         if (savedInstanceState == null) {
             if (BarFrame.menuPanel.isAdded()) {
                 // Fragment 已添加到容器，可以安全地移除
@@ -135,6 +139,70 @@ public class SettingPanel extends PicturePane {
         // Add similar listeners for other fields
     }
 
+    public void reLayout2() {
+        // command buttons
+        if (mRoot == null) {
+            return;
+        }
+        float billPanelWeight = BarOption.getMenuAreaPortion();
+        float menuPanelWeight = 1.0f - billPanelWeight;
+
+        RelativeLayout billPanelContainer = mRoot.findViewById(R.id.leftTopSection);
+        FrameLayout menuPanelContainer = mRoot.findViewById(R.id.menuPanelContainer);
+
+        // 获取屏幕宽度
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        BarFrame.instance.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+
+        // 设置 BillPanel 的宽度
+        RelativeLayout.LayoutParams billPanelParams = (RelativeLayout.LayoutParams) billPanelContainer.getLayoutParams();
+        billPanelParams.width = (int) (width * billPanelWeight);
+        billPanelContainer.setLayoutParams(billPanelParams);
+
+        // 设置 MenuPanel 的宽度
+        RelativeLayout.LayoutParams menuPanelParams = (RelativeLayout.LayoutParams) menuPanelContainer.getLayoutParams();
+        menuPanelParams.width = (int) (width * menuPanelWeight);
+        menuPanelContainer.setLayoutParams(menuPanelParams);
+
+        if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
+            // Fragment 已添加到容器，可以安全地移除
+            BarFrame.instance.panels[2].getChildFragmentManager().beginTransaction()
+                    .remove(BarFrame.menuPanel)
+                    .commitNow();
+        }
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
+        transaction.commit();
+    }
+
+    public void reLayout() {
+        if (mRoot == null) {
+            return;
+        }
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        BarFrame.instance.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+
+
+        float billPanelWeight = BarOption.getMenuAreaPortion();
+        float menuPanelWeight = 1.0f - billPanelWeight;
+
+        int leftWidth = (int) (screenWidth * menuPanelWeight);
+        int rightWidth = screenWidth - leftWidth; // 或使用 (int) (screenWidth * 0.6)
+
+        RelativeLayout leftPanel = mRoot.findViewById(R.id.leftTopSection);
+        RelativeLayout rightPanel = mRoot.findViewById(R.id.rightTopSection);
+
+        RelativeLayout.LayoutParams leftParams = (RelativeLayout.LayoutParams) leftPanel.getLayoutParams();
+        leftParams.width = leftWidth;
+        leftPanel.setLayoutParams(leftParams);
+
+        RelativeLayout.LayoutParams rightParams = (RelativeLayout.LayoutParams) rightPanel.getLayoutParams();
+        rightParams.width = rightWidth;
+        rightParams.addRule(RelativeLayout.RIGHT_OF, R.id.leftTopSection);
+        rightPanel.setLayoutParams(rightParams);
+    }
     private boolean isValidPercentage(String text) {
         try {
             float num = Float.parseFloat(text);
