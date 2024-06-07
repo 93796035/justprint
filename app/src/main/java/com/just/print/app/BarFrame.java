@@ -702,6 +702,7 @@ public class BarFrame extends BaseFragmentActivity {
             superAdminAuthentication(success -> {
                 if (LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
                     topBar.setVisibility(View.GONE);
+                    ((SettingPanel)panels[3]).reLayout();
                     switchFragment(panels[3]);
                 } else {
                     JOptionPane.showMessageDialog(BarFrame.instance, "Invalid Password");
@@ -790,6 +791,7 @@ public class BarFrame extends BaseFragmentActivity {
 
         transaction.commit();
     }
+
     private void initSalesPanel() {
         cmbCurTable.setEnabled(((SalesPanel)panels[2]).billPanel.getStatus() < DBConsts.COMPLETED);
         ((SalesPanel)panels[2]).reLayout();

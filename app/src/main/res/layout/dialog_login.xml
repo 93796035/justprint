@@ -45,6 +45,10 @@
         android:background="@android:color/holo_green_light"
         android:textColor="@android:color/white"
         android:textSize="24sp"
+        android:layout_marginTop="1dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginBottom="6dp"
         android:layout_gravity="fill"/>
 
     <Button

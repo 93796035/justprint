@@ -93,7 +93,7 @@ public class FunctionButton extends Button implements ISButton{
 		if (this.isSelected()) {
 			backgroundPaint.setColor(Color.BLUE); // 选中状态的背景颜色
 		} else {
-			backgroundPaint.setColor(Color.GRAY); // 非选中状态的背景颜色
+			backgroundPaint.setColor(getDrawingCacheBackgroundColor()); // 非选中状态的背景颜色
 		}
 
 		canvas.drawRect(0, 0, w, h, backgroundPaint);

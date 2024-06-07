@@ -1,15 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragmentSettingRoot"
+    android:id="@+id/gridLayoutTables"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="4dp">
-
     <!-- Top Section -->
     <RelativeLayout
         android:id="@+id/topSection"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_height="match_parent"
+        android:layout_above="@id/buttonBar"
         android:paddingLeft="4dp">
 
         <!-- Left Part of Top Section -->
@@ -347,51 +346,47 @@
         <!-- Right Part of Top Section -->
         <RelativeLayout
             android:id="@+id/rightTopSection"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true">
 
-            <!-- Menu Panel Content -->
-            <FrameLayout
-                android:id="@+id/menuPanelContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
-            </FrameLayout>
-            <!-- Add additional menuPanel content here -->
+            <!-- Command Buttons Container -->
             <LinearLayout
                 android:id="@+id/commandButtonsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/menuPanelContainer"
+                android:layout_alignParentBottom="true"
                 android:orientation="horizontal"
                 android:layout_marginTop="16dp">
                 <Button
                     android:id="@+id/bkMenu"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/moreOptions"
-                    android:layout_marginTop="8dp"
                     android:text="Backup Menu" />
-
-                <Button
-                    android:id="@+id/restoreMenu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/bkMenu"
-                    android:layout_marginTop="8dp"
-                    android:text="Restore Menu" />
                 <View
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_weight="1" />
                 <Button
+                    android:id="@+id/restoreMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Restore Menu" />
+                <Button
                     android:id="@+id/moreOptions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="More Options"
-                    android:layout_gravity="end" />
+                    android:text="More Options" />
             </LinearLayout>
+
+            <!-- Menu Panel Content -->
+            <FrameLayout
+                android:id="@+id/menuPanelContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/commandButtonsContainer">
+            </FrameLayout>
         </RelativeLayout>
     </RelativeLayout>
 
