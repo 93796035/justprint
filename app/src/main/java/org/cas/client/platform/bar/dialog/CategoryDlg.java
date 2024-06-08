@@ -122,7 +122,7 @@ public class CategoryDlg extends DialogFragment {
                         menuPanel.categoryNameMetrix[0][dspIndex - 1]});
 
                 if (!tfdCategoryName1.getText().toString().equals(lang1)) {
-                    sql = "update Product set category = ? where category = '" + lang1 + "'";
+                    sql = "update DISH set category = ? where category = '" + lang1 + "'";
                     AikaPos.db.execSQL(sql, new Object[]{tfdCategoryName1.getText().toString()});
                 }
             } else {

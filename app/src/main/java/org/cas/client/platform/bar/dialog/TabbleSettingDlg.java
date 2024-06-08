@@ -241,7 +241,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //        			h = 99;
 //        		}
 //        		tableToggleButton.setBounds(x, y, w, h);
-//            	tableToggleButton.setTypeStatusAndName("", "", DBUtil.getCursorInt(rs,"type"), 0, DBUtil.getCursorString(rs,"Name"));		//it's rectanglee or round?
+//            	tableToggleButton.setTypeStatusAndName("", "", DBUtil.getCursorInt(rs,"type"), 0, DBUtil.getCursorString(rs,"NAME"));		//it's rectanglee or round?
 //            	//tableToggleButton.setMargin(new Insets(0, 0, 0, 0));
 //    			tableToggleButton.addActionListener(this);
 //    			tableToggleButton.addMouseMotionListener(new MouseMotionListener(){

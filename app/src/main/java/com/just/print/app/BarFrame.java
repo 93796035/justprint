@@ -497,6 +497,12 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        resetInactivityTimer();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         isActive = false;

@@ -133,7 +133,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 //check if it's already created and added into tableAry.
                 //because a table contains split bills, then there will be more than one records, and the TOTAL should counts the TOTAL on all the bills.
                 if(tableIds.contains(id)) {
-                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs, "name"));
+                    tableToggleButton = getTableButtonByName(DBUtil.getCursorString(rs, "NAME"));
                     tableToggleButton.setTotal(tableToggleButton.getTotal() + DBUtil.getCursorInt(rs, "TOTAL"));
 
                     tableToggleButton.setTypeStatusAndName(
@@ -141,7 +141,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                             DBUtil.getCursorString(rs, "createdTime"),
                             type,
                             DBUtil.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
-                            DBUtil.getCursorString(rs, "name"));
+                            DBUtil.getCursorString(rs, "NAME"));
                     //THIS ROUND STOP HERE!!!!!!!!
                     continue;
                 }else {

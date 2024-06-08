@@ -226,15 +226,15 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	private void loadAllCategorys() {
 		try {
 			// load all the categorys---------------------------
-			Cursor rs = AikaPos.db.rawQuery("select _ID, name1, name2, name3 from CATEGORY  where displayIdx >= 0 order by displayIdx", null);
+			Cursor rs = AikaPos.db.rawQuery("select _ID, name1, name2, name3 from CATEGORY where displayIdx >= 0 order by displayIdx", null);
 			int tmpPos = rs.getCount();
 			categoryNameMetrix = new String[3][tmpPos];
 			PrintService.allCategory = new Category[tmpPos];
 			tmpPos = 0;
 			while (rs.moveToNext()) {
-				categoryNameMetrix[0][tmpPos] = DBUtil.getCursorString(rs, "name1");
-				categoryNameMetrix[1][tmpPos] = DBUtil.getCursorString(rs, "name2");
-				categoryNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "name3");
+				categoryNameMetrix[0][tmpPos] = DBUtil.getCursorString(rs, "NAME1");
+				categoryNameMetrix[1][tmpPos] = DBUtil.getCursorString(rs, "NAME2");
+				categoryNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "NAME3");
 
 				PrintService.allCategory[tmpPos] = new Category();
 				PrintService.allCategory[tmpPos].setId(DBUtil.getCursorLong(rs, "_id"));

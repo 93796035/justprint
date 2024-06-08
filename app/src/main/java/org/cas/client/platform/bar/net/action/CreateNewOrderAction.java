@@ -498,9 +498,9 @@ public class CreateNewOrderAction implements SamActionListener {
 		name2 = name2 == null ? "" : name2;
 		name3 = name3 == null ? "" : name3;
 		//values in local
-		String lName1 = DBUtil.getCursorString(rs, "Name1");
-		String lName2 = DBUtil.getCursorString(rs, "Name2");
-		String lName3 = DBUtil.getCursorString(rs, "Name3");
+		String lName1 = DBUtil.getCursorString(rs, "NAME1");
+		String lName2 = DBUtil.getCursorString(rs, "NAME2");
+		String lName3 = DBUtil.getCursorString(rs, "NAME3");
 		
 		if(!name1.equals(lName1) || !name2.equals(lName2) || !name3.equals(lName3)) {
 			StringBuilder sql = new StringBuilder("Update category set LANG1 = ?, LANG2 = ?, LANG3 = ? where displayIdx = ").append(subMenuIdx);

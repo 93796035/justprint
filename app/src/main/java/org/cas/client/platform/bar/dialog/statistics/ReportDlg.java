@@ -450,7 +450,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 				if (rs.moveToNext()) {
-					String name = DBUtil.getCursorString(rs,"Name") + " " + DBUtil.getCursorString(rs,"FName");
+					String name = DBUtil.getCursorString(rs,"NAME") + " " + DBUtil.getCursorString(rs,"FName");
 					String taxAccount1 = DBUtil.getCursorString(rs,"BANKNUMBER");
 					String taxAccount2 = DBUtil.getCursorString(rs,"SSCNumber");
 					String address = DBUtil.getCursorString(rs,"ADDRESS");
