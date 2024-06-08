@@ -94,7 +94,7 @@ public class PrintUtil {
 			    defaultService = (PrintManager) BarFrame.instance.getSystemService(Context.PRINT_SERVICE);
 
 				if (defaultService == null) {
-					JOptionPane.showMessageDialog(BarFrame.instance,"Please install printer first.");
+					JOptionPane.showMessageDialog("Please install printer first.");
 					L.e("PrintUtil", "Please install printer first.", null);
 				}
 		    }
@@ -617,7 +617,7 @@ public class PrintUtil {
 			outputStream.close();
 			return "OK";
 		} catch (Exception exp) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.PrinterError());
+			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
 			ErrorUtil.write(exp);
 			L.e(ip, "Error when printing content to socket", exp);
 			return null;
@@ -672,7 +672,7 @@ public class PrintUtil {
 			socket.close();
 			return "OK";
 		} catch (Exception exp) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.PrinterError());
+			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
 			ErrorUtil.write(exp);
 			L.e(ip, "Error when printing content to socket", exp);
 			return null;

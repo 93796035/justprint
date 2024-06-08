@@ -31,18 +31,18 @@ public class Cmd_Modify implements SamActionListener {
 	@Override
 	public void onClick(View v) {
 		if(BarFrame.instance.curDish == null) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.AtLeastOneShouldBeSelected());
 			return;
 		}
 		//if already send, then do not allow to modify the marks.
 		if(BarFrame.instance.curDish.getOutputID() > 0) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.SendItemCanNotModify());
+			JOptionPane.showMessageDialog(BarFrame.consts.SendItemCanNotModify());
 			return;
 		}
 		
 		//if there's a curDish?
 		if(BarFrame.instance.curDish == null) {//check if there's an item selected.
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			return;
 		}
 

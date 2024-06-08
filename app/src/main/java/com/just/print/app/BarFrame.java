@@ -265,7 +265,7 @@ public class BarFrame extends BaseFragmentActivity {
                 @Override
                 public void onInputReceived(String input) {
                     if (input == null || input.length() != 6 && !input.equals("9")) {
-                        JOptionPane.showMessageDialog(null, "Please input correct license code");
+                        JOptionPane.showMessageDialog("Please input correct license code");
                         return;
                     }
                     BarOption.setLicense(input.equals("9") ? "ER0001" : input);
@@ -281,7 +281,7 @@ public class BarFrame extends BaseFragmentActivity {
         }else {	//already started and timeLeft > 0
             L.d("bill info is:", BarOption.getBillHeadInfo());
             if (timeLeft < 3024000000l) {   //3024000000L == 35days
-                JOptionPane.showMessageDialog(null, "Application is about to expire! Please re-activate it!");
+                JOptionPane.showMessageDialog("Application is about to expire! Please re-activate it!");
             }
             //Guess Revenue Quebec want his data record keep insistant, so they don't want the app to use a
             //different Appareil ID, so they know the data is from which machine.
@@ -354,7 +354,7 @@ public class BarFrame extends BaseFragmentActivity {
                         });
                         // if the input idApprl not valid, will end up not saved, when getting this configuration will get "0000-0000-0000".
                         if (BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())) {
-                            JOptionPane.showMessageDialog(null, "inputted idApprl is not in valid format.");
+                            JOptionPane.showMessageDialog("inputted idApprl is not in valid format.");
                             existingIdApprlCheck();
                         }
                     }
@@ -437,8 +437,7 @@ public class BarFrame extends BaseFragmentActivity {
             // LoginDlg, and stuck there.
             setStatusMes("Application is activated successfully!");
         } else {
-            JOptionPane.showMessageDialog(null,
-                    "Software expired, please contact us at info@ShareTheGoodOnes.com");
+            JOptionPane.showMessageDialog("Software expired, please contact us at info@ShareTheGoodOnes.com");
         }
     }
 
@@ -711,7 +710,7 @@ public class BarFrame extends BaseFragmentActivity {
                     ((SettingPanel)panels[3]).reLayout();
                     switchFragment(panels[3]);
                 } else {
-                    JOptionPane.showMessageDialog(BarFrame.instance, "Invalid Password");
+                    JOptionPane.showMessageDialog("Invalid Password");
                 }
             });
         } else if (index == 2) {  // sale

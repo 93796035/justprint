@@ -33,8 +33,23 @@ public class JOptionPane {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    public static void showMessageDialog(Object o,  String atLeastTwoTableShouldBeSelected) {
-        showMessageDialog(atLeastTwoTableShouldBeSelected);
+    public static void showMessageDialog(String message, ConfirmDialogCallback callback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance); // 使用当前Activity的上下文创建Builder
+        builder.setTitle("Notice"); // 设置对话框标题
+        builder.setMessage(message); // 设置对话框显示的消息
+
+        // 设置确认按钮
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss(); // 关闭对话框
+                callback.onResult(true);
+            }
+        });
+
+        // 创建AlertDialog对象并显示
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public static void showConfirmDialog(Object instance, String content, String title, ConfirmDialogCallback callback){

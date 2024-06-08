@@ -234,7 +234,7 @@ public class DiscountDlg extends DialogFragment
 			confirmed = true;
 //			this.setVisible(false);
 		}catch(Exception exp) {
-		    JOptionPane.showMessageDialog(this, BarFrame.consts.FORMATERROR());
+		    JOptionPane.showMessageDialog(BarFrame.consts.FORMATERROR());
 		}
 	}
 

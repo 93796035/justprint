@@ -167,7 +167,7 @@ public class MevUtils {
 	public static void askWebMevToSignTheCertificates(String modif) {
 		if(ValuePossible.Modif.REM.equals(modif)) {
 			if(BarOption.getCertificateSerialNumberSRS() == null || BarOption.getCertificateSerialNumberSRS().length() == 0) {
-				JOptionPane.showMessageDialog(BarFrame.instance, "No local certificate to update, please restart the application to apply for a new certificate first!");
+				JOptionPane.showMessageDialog("No local certificate to update, please restart the application to apply for a new certificate first!");
 				return;
 			}
 		}
@@ -287,7 +287,7 @@ public class MevUtils {
 		}else if(responseString.contains( "listErr" )){
 			L.e("MevUtils", responseString, null);
 			//BarOption.setCertifiedDeviceId("");//remove the user inputed known old idapprl. why? if noe deleted successful on server, in local should not change anything, right?
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.exceptionWhenSendingOutRequestForSignatureDigitalCertificate());
+			JOptionPane.showMessageDialog(BarFrame.consts.exceptionWhenSendingOutRequestForSignatureDigitalCertificate());
 		} else if(responseString.toLowerCase().contains("error") || responseString.contains( "délai d'attente" ) || responseString.contains( "la connexion sous-jacente a été fermée")){
 			L.e("MevUtils", responseString, null);
 			BarOption.setCertifiedDeviceId("");//remove the user inputed known old idapprl.
@@ -301,7 +301,7 @@ public class MevUtils {
 					BarOption.setCertificateSerialNumberSRS(null);
 					BarOption.setCertificateSerialNumberWebSRM(null);
 					deleteLocalCertificate();
-					JOptionPane.showMessageDialog(BarFrame.instance, "Certificate deleted! New certificate will be appllied when restarting AikaPos.");
+					JOptionPane.showMessageDialog("Certificate deleted! New certificate will be appllied when restarting AikaPos.");
 					return;
 				}
 				// save device identifier
@@ -324,7 +324,7 @@ public class MevUtils {
 //                	serialNum = "0" + serialNum;
 //                }
                 BarOption.setCertificateSerialNumberWebSRM(serialNum);
-                JOptionPane.showMessageDialog(BarFrame.instance, ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
+                JOptionPane.showMessageDialog(ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
             } catch (Exception exp) {
                 L.e("MevUtils", "exception when processing received cetificate from server.", exp);
             }
@@ -1110,7 +1110,7 @@ public class MevUtils {
 			 X509Certificate certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberSRS());
 			 if(certificate == null) {
 				L.e("MevUtils", " Can not find certificate with serialNumber:" + BarOption.getCertificateSerialNumberSRS() , null);
-				JOptionPane.showMessageDialog(null, "certificate not found! Aikapos will automatically register a new one! ");
+				JOptionPane.showMessageDialog("certificate not found! Aikapos will automatically register a new one! ");
 				MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
 				return;
 			 }
@@ -1120,7 +1120,7 @@ public class MevUtils {
 			 certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberWebSRM());
 			 if(certificate == null) {
 					L.e("MevUtils", " Can not find certificate with serialNumberWebSRM:" + String.valueOf(BarOption.getCertificateSerialNumberSRS()) , null);
-					JOptionPane.showMessageDialog(null, "WEBSRM certificate not found! Please contact Aikapos customer support! ");
+					JOptionPane.showMessageDialog("WEBSRM certificate not found! Please contact Aikapos customer support! ");
 					MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
 					return;
 				 }

@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -355,7 +356,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			for (int c = 0; c < categoryColumn; c++) {
 
 				CategoryToggleButton btnCategory = new CategoryToggleButton(globleCategoryIdxOfCurCategory + 1);
-				btnCategory.setMargin(0, 0, 0, 0);
+				btnCategory.setGravity(Gravity.CENTER);
+				btnCategory.setPadding(8, 8, 8, 8);
 				categoryButtonContainer.addView(btnCategory);
 				btnCategory.setOnClickListener(this);
 				btnCategoryArry.add(btnCategory);
@@ -366,7 +368,11 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					if (lang > categoryNameMetrix.length - 1)
 						lang = categoryNameMetrix.length - 1;
 					String text = categoryNameMetrix[lang][globleCategoryIdxOfCurCategory];
+
 					btnCategory.setText(BarUtil.empty(text) ? defaultText : text);
+					btnCategory.setTextOn(btnCategory.getText());
+					btnCategory.setTextOff(btnCategory.getText());
+
 					btnCategory.setLang1Text(defaultText);
 					if (tgbActiveCategory != null) {
 						String categoryString = categoryNameMetrix[lang][globleCategoryIdxOfCurCategory];
@@ -535,7 +541,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			if (text == null || text.length() == 0) { // check if it's empty
 				if (getParent() == BarFrame.instance.panels[3]) { // and it's setting panel, add a Category.
 					if (tgbActiveCategory == null || tgbActiveCategory.getText() == null || tgbActiveCategory.getText().length() < 1) {
-						JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.SetCatogoryFirst());
+						JOptionPane.showMessageDialog(BarFrame.consts.SetCatogoryFirst());
 						return;
 					}
 					new DishDlg(menuButton.getDspIndex()).show(BarFrame.instance.getSupportFragmentManager(), "DishDialog");

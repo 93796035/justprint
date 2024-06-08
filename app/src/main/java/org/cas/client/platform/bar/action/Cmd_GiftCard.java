@@ -50,7 +50,7 @@ public class Cmd_GiftCard implements SamActionListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             int tmpPos = rs.getCount();
             if(tmpPos == 0) {	//if there's no this coupon number in database, then warning and return.
-            	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidCoupon());
+            	JOptionPane.showMessageDialog(BarFrame.consts.InvalidCoupon());
             	return;
             }else {			//if the number is OK.
             	//get out every field of first matching record.
@@ -61,7 +61,7 @@ public class Cmd_GiftCard implements SamActionListener {
                 String productCode = DBUtil.getCursorString(rs,"IP");
                 int value = DBUtil.getCursorInt(rs,"langType");
                 if(value <=0) {
-                    JOptionPane.showMessageDialog(null, BarFrame.consts.InvalidCoupon());
+                    JOptionPane.showMessageDialog(BarFrame.consts.InvalidCoupon());
                     return;
                 }
                 //show up the payDialog, waiting for user to input money, after confirm, the money should be deduct from the account of this card

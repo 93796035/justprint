@@ -252,7 +252,7 @@ public class CreateNewOrderAction implements SamActionListener {
         	}
         	       	
         }catch(Exception exp) {
-        	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
+        	JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
         	return -1;
         }
 		
@@ -269,7 +269,7 @@ public class CreateNewOrderAction implements SamActionListener {
         		return DBUtil.getCursorInt(rs, "_id");
         	}
         }catch(Exception exp) {
-        	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
+        	JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
         	return -1;
         }
 		return 0;

@@ -30,13 +30,13 @@ public class Cmd_DiscItem implements SamActionListener {
 	@Override
 	public void onClick(View sourceBtn) {
 		if(BarFrame.instance.curDish == null) {//check if there's an item selected.
- 			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+ 			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
  			return;
  		}
  		
  		if(!BarOption.isWaiterAllowedToDiscount()) {
     		if (!BarFrame.instance.adminAuthentication()) {
-    			JOptionPane.showMessageDialog(BarFrame.instance, org.cas.client.resources.international.DlgConst.InvalidPassword);
+    			JOptionPane.showMessageDialog(org.cas.client.resources.international.DlgConst.InvalidPassword);
     			Cmd_DiscItem.getInstance().getSourceBtn().setSelected(false);
 				return;
     		}

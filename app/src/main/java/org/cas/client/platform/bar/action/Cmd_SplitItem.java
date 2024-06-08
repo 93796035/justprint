@@ -40,7 +40,7 @@ public class Cmd_SplitItem implements SamActionListener {
 		if(sourceBtn.isSelected()) {//select
 			//check if there's one item selected.
 			if(BarFrame.instance.curDish == null) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+				JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 				sourceBtn.setSelected(false);
 			}
 		}else {
@@ -56,7 +56,7 @@ public class Cmd_SplitItem implements SamActionListener {
 				}
 			}
 			if(selectedPanels.size() == 0) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.NoBillSeleted());
+				JOptionPane.showMessageDialog(BarFrame.consts.NoBillSeleted());
 				return;
 			}
 			DBUtil.splitOutput(BarFrame.instance.curDish, selectedPanels.size() + 1, null); // update the num and totalprice of curDish

@@ -247,7 +247,7 @@ public class BillPanel extends BaseFragment
                 }
 		    }
 		}catch(Exception exp) {
-			JOptionPane.showMessageDialog(BarFrame.instance, FORMATERROR);
+			JOptionPane.showMessageDialog(FORMATERROR);
 		    L.e("BillPanel", "Exception when sendingDishes to DB", exp);
 		}
 	}
@@ -324,7 +324,7 @@ public class BillPanel extends BaseFragment
 			updateTotalArea(false);
         }else if(o == billButton){		//when bill button on top are clicked.
         	if(status >= DBConsts.COMPLETED || status < DBConsts.ORIGINAL) {	//@Note mess the order of each money.) {
-        		JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.ActionNotAllowed());
+        		JOptionPane.showMessageDialog(BarFrame.consts.ActionNotAllowed());
         		billButton.setSelected(false);
         		return;
         	}
@@ -367,7 +367,7 @@ public class BillPanel extends BaseFragment
 		Dish curDish = BarFrame.instance.curDish;
 		
 		if(curDish == null) {//check if there's an item selected.
-			JOptionPane.showMessageDialog(this, BarFrame.consts.OnlyOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			return;
 		}
 		int outputId = curDish.getOutputID();
@@ -1170,7 +1170,7 @@ public class BillPanel extends BaseFragment
     	
 		int tValidRowCount = getUsedRowCount(); // get the used RowCount
     	if(selectedRow < 0 || selectedRow > tValidRowCount - 1) {
-    		JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+    		JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
     		L.e("BillPanel", "Unexpected row number when calling removeAtSelection : " + selectedRow, null);
     		return;
     	}
@@ -1212,7 +1212,7 @@ public class BillPanel extends BaseFragment
     //make sure it's not too late to change, return true means still OK, move on, return false means the bill is too old to move on.
 	public boolean notTooLateToChangeStatus() {
 		if(status >= DBConsts.COMPLETED || status < DBConsts.ORIGINAL) {//check if the bill is already completed.
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.ActionNotAllowed());
+			JOptionPane.showMessageDialog(BarFrame.consts.ActionNotAllowed());
 		    return false;
 		}
 		return true;

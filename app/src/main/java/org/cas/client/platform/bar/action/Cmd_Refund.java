@@ -44,7 +44,7 @@ public class Cmd_Refund implements SamActionListener {
 		
 		//check if it's already paid.
     	if(billPanel.getStatus() != DBConsts.COMPLETED) {
-    		JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.NotPayYet());
+    		JOptionPane.showMessageDialog(BarFrame.consts.NotPayYet());
     		return;
     	}
     	

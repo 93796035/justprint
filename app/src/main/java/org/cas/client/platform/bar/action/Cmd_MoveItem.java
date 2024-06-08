@@ -34,13 +34,13 @@ public class Cmd_MoveItem implements SamActionListener {
 		BillListPanel billListPanel = (BillListPanel)BarFrame.instance.panels[1];
 		
 		if(BarFrame.instance.curDish == null) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			sourceBtn.setSelected(false);
 			return;
 		}
 		BillPanel panel = billListPanel.getCurBillPanel();
 		if(panel == null) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			sourceBtn.setSelected(false);
 			return;
 		}

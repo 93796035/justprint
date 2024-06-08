@@ -136,13 +136,13 @@ public class PrintService{
 		flushNotPrintedContentAndInitEmptyMap();
 
 		if(BarFrame.menuPanel.getPrinters().length == 0) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AddPrinterFirst());
+			JOptionPane.showMessageDialog(BarFrame.consts.AddPrinterFirst());
 			return;
 		}
 		
         String printerIP = BarFrame.menuPanel.getPrinters()[0].getIp();
 		if("".equals(printerIP)) {
-        	JOptionPane.showMessageDialog(null, BarFrame.consts.PrinterSettingError());
+        	JOptionPane.showMessageDialog(BarFrame.consts.PrinterSettingError());
         	return;
         }
         if(ipContentMap.get(printerIP) == null)
@@ -305,13 +305,13 @@ public class PrintService{
      	flushNotPrintedContentAndInitEmptyMap();
      	//the checks------
  		if(BarFrame.menuPanel.getPrinters().length == 0) {
- 			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AddPrinterFirst());
+ 			JOptionPane.showMessageDialog(BarFrame.consts.AddPrinterFirst());
  			throw new RuntimeException(BarFrame.consts.AddPrinterFirst());
  		}
          //there's a case that we don't print invoice: when printer is not mev print, and bill printed, and the flag of saving paper is on.
          String printerIP = BarFrame.menuPanel.getPrinters()[0].getIp();
          if("".equals(printerIP)) {
-         	JOptionPane.showMessageDialog(null, BarFrame.consts.PrinterSettingError());
+         	JOptionPane.showMessageDialog(BarFrame.consts.PrinterSettingError());
          	throw new RuntimeException(BarFrame.consts.PrinterSettingError());
          }
          
@@ -505,7 +505,7 @@ public class PrintService{
 //        			}
              		
          			//or if didn't print well, add to error list, because USER never want to fix the printer...they always call boss.
-         			JOptionPane.showMessageDialog(BarFrame.instance, entry.getKey() + BarFrame.consts.PrinterSettingError());
+         			JOptionPane.showMessageDialog(entry.getKey() + BarFrame.consts.PrinterSettingError());
          			PrintUtil.errorPrinterList.add(entry.getKey());
          			BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);
                     errorsAmount ++;
@@ -765,7 +765,7 @@ public class PrintService{
 				//PrintUtil.printThroughOSdriver(path1, qrcodeImg, path2, CustOpts.custOps.getDeleteOriginalTransaction());
 
 		if(key == null) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.PrinterError());
+			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
 		}
 
 		return key; //note:returning only the key part of the the whole file path.

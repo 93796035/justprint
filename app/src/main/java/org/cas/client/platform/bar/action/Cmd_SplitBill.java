@@ -41,14 +41,14 @@ public class Cmd_SplitBill implements  SamActionListener {
 		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		if(billPanel.getOrderedDishAry().size() == 0) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.ActionNotAllowed());
+			JOptionPane.showMessageDialog(BarFrame.consts.ActionNotAllowed());
 			return;
 		}
 		List<Dish> newDishes = billPanel.getNewDishes();
 		if(newDishes.size() > 0) {
 			for (Dish dish : newDishes) {
 				if(dish.getPrinterIds() != null && dish.getPrinterIds().length() > 1) {		//if has been set a printer, then means the new added dish need to be print first.
-        			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.UnSendRecordFound());
+        			JOptionPane.showMessageDialog(BarFrame.consts.UnSendRecordFound());
         			return;
 				}
 			}

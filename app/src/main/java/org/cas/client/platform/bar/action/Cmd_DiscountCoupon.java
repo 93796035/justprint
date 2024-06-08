@@ -54,7 +54,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             int tmpPos = rs.getCount();
             if(tmpPos == 0) {	//if there's no this coupon number in database, then warning and return.
-            	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidCoupon());
+            	JOptionPane.showMessageDialog(BarFrame.consts.InvalidCoupon());
             	return;
             }else {			//if the number is OK.
             	//get out every field of first matching record.
@@ -72,7 +72,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
                 ArrayList<Dish> matchedDishesOnBill = getMatchedItem(dishesOnBill, nameAry, langIdx);
                 //@NOTE: if nameAry and matchedDishesOnBill are null, mean apply to whole bill.
                 if(matchedDishesOnBill != null && matchedDishesOnBill.size() == 0) {
-                	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.couponNotApplyToBill());
+                	JOptionPane.showMessageDialog(BarFrame.consts.couponNotApplyToBill());
                 	return;
                 }
                 

@@ -38,7 +38,7 @@ public class Cmd_OpenDrawer implements SamActionListener {
 	public void onClick(View v) {
 
 		if(BarFrame.menuPanel.getPrinters().length == 0) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AddPrinterFirst());
+			JOptionPane.showMessageDialog(BarFrame.consts.AddPrinterFirst());
 			return;
 		}
 		String key = BarFrame.menuPanel.getPrinters()[0].getIp();

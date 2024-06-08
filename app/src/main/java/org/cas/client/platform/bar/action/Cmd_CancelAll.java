@@ -45,7 +45,7 @@ public class Cmd_CancelAll implements SamActionListener {
 			int notBilledDishQT = billPanel.getNotBilledDishes().size();
 
 			if(notBilledDishQT == 0) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.ActionNotAllowed());
+				JOptionPane.showMessageDialog(BarFrame.consts.ActionNotAllowed());
 				return;
 			}
 			

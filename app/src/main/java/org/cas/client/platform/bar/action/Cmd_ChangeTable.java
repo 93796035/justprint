@@ -43,12 +43,12 @@ public class Cmd_ChangeTable implements SamActionListener {
 	public void onClick(View v) {
 
 		if(selectedTables.size() == 1){
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastTwoTableShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.AtLeastTwoTableShouldBeSelected());
 			selectedTables = new ArrayList<TableButton>();
 			BarFrame.instance.switchMode(0);
 		}else if(selectedTables.size() == 2) {
 			if(selectedTables.get(0).getBackground() == null) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.nothingToMove());
+				JOptionPane.showMessageDialog(BarFrame.consts.nothingToMove());
 				selectedTables = new ArrayList<TableButton>();
 				return;
 			}
@@ -65,7 +65,7 @@ public class Cmd_ChangeTable implements SamActionListener {
 					billIDs.add(DBUtil.getCursorInt(rs, "_id"));
 				}
 				if(billIDs.size() == 0) {
-					JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.nothingToMove());
+					JOptionPane.showMessageDialog(BarFrame.consts.nothingToMove());
 					selectedTables = new ArrayList<TableButton>();
 					return;
 				}
@@ -100,7 +100,7 @@ public class Cmd_ChangeTable implements SamActionListener {
            	BarFrame.instance.switchMode(0);//maybe need this to refresh the display of the tables
 			
 		}else if(selectedTables.size() > 2) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastTwoTableShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.AtLeastTwoTableShouldBeSelected());
 			for (TableButton tableButton : selectedTables) {
 				tableButton.setAlpha(1.0f);
 				tableButton.setBackground(null);

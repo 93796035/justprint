@@ -49,7 +49,7 @@ public class Cmd_PrintAll implements SamActionListener {
 			//add the check here because event the button is disabled, client can also call this methods from single instance.
 			//didn't check bill has no item in it case, because when it's empty, it might because of all printed item was removed.
 			if(billPanel.getStatus() >= DBConsts.VOIDED || billPanel.getStatus() < DBConsts.ORIGINAL) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.ActionNotAllowed());
+				JOptionPane.showMessageDialog(BarFrame.consts.ActionNotAllowed());
 				return;
 			}
 			

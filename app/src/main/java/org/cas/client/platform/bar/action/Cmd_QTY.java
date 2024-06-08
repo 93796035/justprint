@@ -53,7 +53,7 @@ public class Cmd_QTY implements SamActionListener {
             	billPanel.getOrderedDishAry().get(row).setNum(tQTY);
             	billPanel.updateTotalArea(true);
         	}catch(Exception exp) {
-            	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.FORMATERROR());
+            	JOptionPane.showMessageDialog(BarFrame.consts.FORMATERROR());
         		return;
         	}
 		}

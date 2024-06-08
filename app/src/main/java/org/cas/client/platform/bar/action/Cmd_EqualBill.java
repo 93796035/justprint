@@ -45,7 +45,7 @@ public class Cmd_EqualBill implements SamActionListener {
 		
 		BillPanel panel = billListPanel.getCurBillPanel();
 		if(panel == null) {
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			o.setSelected(false);
 			return;
 		}
@@ -59,7 +59,7 @@ public class Cmd_EqualBill implements SamActionListener {
 		if(NumberPanelDlg.confirmed) {
 			int num = Integer.valueOf(NumberPanelDlg.curContent);
 			if(num < 2) {
-				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
+				JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
 				return;
 			}
 			

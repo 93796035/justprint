@@ -31,6 +31,7 @@ import org.cas.client.platform.bar.i18n.BarDlgConst1;
 import org.cas.client.platform.bar.i18n.BarDlgConst2;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 
@@ -231,7 +232,7 @@ public class LoginDlg extends DialogFragment {
                     }
 
                     ReportDlg.updateLastPrintTime(endTime);
-                    JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.BatchClosedSuccefully());
+                    JOptionPane.showMessageDialog(BarFrame.consts.BatchClosedSuccefully());
                     CustOpts.custOps.setKeyAndValue("NextIdx", 0);//reset invoice number to 0.
                     CustOpts.custOps.saveData();
                 }
@@ -254,7 +255,12 @@ public class LoginDlg extends DialogFragment {
             L.e("LoginSecurity", "suspecious try of password more than 3 times", null);
             LoginDlg.failedTimes = 0;
         }else {
-            JOptionPane.showMessageDialog(BarFrame.instance, "Invalid Password");
+            JOptionPane.showMessageDialog("Invalid Password", new JOptionPane.ConfirmDialogCallback() {
+                @Override
+                public void onResult(boolean confirmed) {
+                    passwordField.setText("");
+                }
+            });
         }
         LoginDlg.failedTimes++;
         passwordField.selectAll(); // 使用已经初始化的 passwordField 实例

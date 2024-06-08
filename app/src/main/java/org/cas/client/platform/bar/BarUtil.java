@@ -714,7 +714,7 @@ public class BarUtil {
         SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
         BillPanel billPanel = salesPanel.billPanel;
         if(billPanel.getOrderedDishAry().size() == 0) {
-            JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.AtLeastOneShouldBeSelected());
+            JOptionPane.showMessageDialog(BarFrame.consts.AtLeastOneShouldBeSelected());
             return false;
         }
 

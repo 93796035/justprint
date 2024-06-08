@@ -60,7 +60,7 @@ public class Cmd_Report implements SamActionListener {
     		            rs = AikaPos.db.rawQuery(sql.toString(), null);
     		            int tmpPos = rs.getCount();
     		            if(tmpPos > 0) {
-    		            	JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.CloseBatchFirst());
+    		            	JOptionPane.showMessageDialog(BarFrame.consts.CloseBatchFirst());
     		            	return;
     		            }
     				}catch (Exception exp) {

@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.uibeans;
 
+import static android.view.Gravity.CENTER;
+
 import android.graphics.Color;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
@@ -25,8 +27,10 @@ public class CategoryToggleButton extends ToggleButton {
 //		setFont(BarOption.getMenuCustFont());
         this.index = index;
 		setTextOff("");
-		setTextOn(getText());
+		setTextOn("");
 		setText("");//to avoid the not used button displaying an "OFF" or "关闭“ by default.
+		setGravity(CENTER);
+		setPadding(8, 8, 8, 8);
     }
 
 	public void setMargin(int left, int top, int right, int bottom) {

@@ -29,12 +29,12 @@ public class Cmd_ChangePrice implements SamActionListener {
 	public void onClick(View sourceBtn) {
 
 		if(BarFrame.instance.curDish == null) {//check if there's an item selected.
-  			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.OnlyOneShouldBeSelected());
+  			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
   			return;
   		}
     	if(!BarOption.isWaiterAllowedToChangePrice()) {
     		if (!BarFrame.instance.adminAuthentication()) {
-    			JOptionPane.showMessageDialog(BarFrame.instance, org.cas.client.resources.international.DlgConst.InvalidPassword);
+    			JOptionPane.showMessageDialog(org.cas.client.resources.international.DlgConst.InvalidPassword);
     			Cmd_ChangePrice.getInstance().getSourceBtn().setSelected(false);
 				return;
     		}
@@ -60,7 +60,7 @@ public class Cmd_ChangePrice implements SamActionListener {
 			changePrice(curContent, BarFrame.discountDlg.isPercentage);
      		
      	}catch(Exception exp) {
-         	JOptionPane.showMessageDialog(BarFrame.discountDlg, org.cas.client.resources.international.DlgConst.FORMATERROR);
+         	JOptionPane.showMessageDialog(org.cas.client.resources.international.DlgConst.FORMATERROR);
      		return;
      	}
 	}

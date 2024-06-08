@@ -57,7 +57,7 @@ public class Cmd_Lang implements SamActionListener {
     	try {
     		AikaPos.db.execSQL(sb);
     		//this.setVisible(false);
-			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.RestartNeeded());
+			JOptionPane.showMessageDialog(BarFrame.consts.RestartNeeded());
     	}catch(Exception exp) {
     		ErrorUtil.write(exp);
     	}

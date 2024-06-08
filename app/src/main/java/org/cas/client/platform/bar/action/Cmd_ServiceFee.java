@@ -63,7 +63,7 @@ public class Cmd_ServiceFee implements SamActionListener {
      		billPanel.updateTotalArea(true);
      		
      	}catch(Exception exp) {
-         	JOptionPane.showMessageDialog(BarFrame.numberPanelDlg, org.cas.client.resources.international.DlgConst.FORMATERROR);
+         	JOptionPane.showMessageDialog(org.cas.client.resources.international.DlgConst.FORMATERROR);
      		return;
      	}
 		
