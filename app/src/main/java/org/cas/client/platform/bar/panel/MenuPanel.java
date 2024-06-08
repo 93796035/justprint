@@ -82,15 +82,6 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		mRoot = inflater.inflate(getLayoutId(), container, false);
 		initComponent();
-
-		mRoot.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {// 添加 OnGlobalLayoutListener
-			@Override
-			public void onGlobalLayout() {
-				mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);// 确保只调用一次
-				reLayout();
-			}
-		});
-
 		return mRoot;
 	}
 
@@ -467,6 +458,14 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		}
 
 		adjustPageArrowStatus(globleCategoryIdxOfCurCategory, globleMenuIdxOfCurCategory);
+
+		mRoot.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {// 添加 OnGlobalLayoutListener
+			@Override
+			public void onGlobalLayout() {
+				mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);// 确保只调用一次
+				reLayout();
+			}
+		});
 	}
 
 	private void adjustPageArrowStatus(int globleCategoryIdxOfCurCategory, int globleMenuIdxOfCurCategory) {
