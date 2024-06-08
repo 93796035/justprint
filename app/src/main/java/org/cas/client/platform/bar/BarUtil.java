@@ -105,7 +105,7 @@ public class BarUtil {
 //
 //    // 先检查是否存在尚未输入完整信息的产品，如果检查到存在这种产品，方法中会自动弹出对话盒要求用户填写详细信息。
 //    public static void checkUnCompProdInfo() {
-//        String sql = "select * from product where subject = '' and DELETED != true"; // 是否存在上没有名字的产品？
+//        String sql = "select * from Dish where subject = '' and DELETED != true"; // 是否存在上没有名字的产品？
 //        try {
 //            ResultSet rs = AikaStyle.db.execSQL(sql);
 //            rs.afterLast();
@@ -645,7 +645,7 @@ public class BarUtil {
 //    }
 //
 //    public static String changeLangForMenu(String aValue, int customerFrameLang) {
-//        StringBuilder sql = new StringBuilder("select * from product where code = ? or mnemonic = ? or subject = ?");
+//        StringBuilder sql = new StringBuilder("select * from Dish where code = ? or mnemonic = ? or subject = ?");
 //
 //        try {
 //            PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());

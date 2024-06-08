@@ -150,7 +150,7 @@ public class CategoryDlg extends DialogFragment {
                 .setMessage("Are you sure you want to delete this category?")
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     try {
-                        String sql = "delete from product where CATEGORY = ?";
+                        String sql = "delete from Dish where CATEGORY = ?";
                         AikaPos.db.execSQL(sql, new Object[]{category});
 
                         sql = "delete from Category where NAME1 = ?";

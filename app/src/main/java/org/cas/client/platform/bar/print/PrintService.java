@@ -1189,7 +1189,7 @@ public class PrintService{
 					dishTotalMap.put(dishName, (int)(num * dish.getPrice() * 100));
 				}
 				
-				StringBuilder sql = new StringBuilder("select category from product where deleted != true and CODE = 0");
+				StringBuilder sql = new StringBuilder("select category from Dish where deleted != true and CODE = 0");
 
 		        try {
 		            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

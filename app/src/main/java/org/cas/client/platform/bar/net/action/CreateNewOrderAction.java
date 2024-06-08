@@ -536,7 +536,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	//the dencity must be a null or $1
 	private Dish makeSureDishExist(String category, String location, int menuIdx, String menuName, int price, String seletedPrinterIdStr) {
 		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
-		StringBuilder sql = new StringBuilder("select * from product where deleted != true and index = ").append(menuIdx).append(" and category = ?");
+		StringBuilder sql = new StringBuilder("select * from Dish where deleted != true and index = ").append(menuIdx).append(" and category = ?");
         
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{category});
@@ -561,7 +561,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	//process reqeust from pad.
 	public Dish makeSureDishExist(String category, String menuName, int price) {
 		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
-		StringBuilder sql = new StringBuilder("select * from product where status = 0 and category = ? and (name1 = ? or name2 = ? or name3 = ?)");
+		StringBuilder sql = new StringBuilder("select * from Dish where status = 0 and category = ? and (name1 = ? or name2 = ? or name3 = ?)");
 
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{category, menuName, menuName, menuName});
@@ -654,7 +654,7 @@ public class CreateNewOrderAction implements SamActionListener {
             
 	        BarFrame.menuPanel.initComponent();
 	        
-	        sql = new StringBuilder("Select id from product where CODE = ? and category = ?");
+	        sql = new StringBuilder("Select id from Dish where CODE = ? and category = ?");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{name1, category});
             
             rs.moveToNext();
@@ -684,7 +684,7 @@ public class CreateNewOrderAction implements SamActionListener {
             AikaPos.db.execSQL(sql.toString(), new String[]{menuName,menuName,menuName,category});
 	        BarFrame.menuPanel.initComponent();
 	        
-	        sql = new StringBuilder("Select id from product where CODE = ? and category = ?");
+	        sql = new StringBuilder("Select id from Dish where CODE = ? and category = ?");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{menuName, category});
             rs.moveToNext();
             return new Dish(DBUtil.getCursorInt(rs,"_id"), category, menuName, menuName, menuName, "");

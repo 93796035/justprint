@@ -254,7 +254,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		try {
 			// load all the dishes----------------------------
 			Cursor rs = AikaPos.db.rawQuery(
-					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from dish where status == 0 order by displayIdx",
+					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from Dish where status == 0 order by displayIdx",
 					null);
 			int tmpPos = rs.getCount();
 			dishNameMetrix = new String[3][tmpPos];

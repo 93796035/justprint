@@ -166,7 +166,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
                     SQLiteDatabase db = AikaPos.db;
                     db.beginTransaction();
                     try {
-                        String sql = "DELETE FROM Product WHERE ID = ?";
+                        String sql = "DELETE FROM Dish WHERE ID = ?";
                         db.execSQL(sql, new Object[]{prodID});
                         db.setTransactionSuccessful();
                         Toast.makeText(getActivity(), "Dish deleted", Toast.LENGTH_SHORT).show();
