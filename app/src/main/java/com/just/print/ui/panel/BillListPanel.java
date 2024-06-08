@@ -17,6 +17,7 @@ import org.cas.client.platform.bar.uibeans.ArrowButton;
 import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
 import org.cas.client.platform.casutil.L;
 
+import com.just.print.db.bean.Dish;
 import com.just.print.util.JOptionPane;
 import com.stupid.method.reflect.StupidReflect;
 

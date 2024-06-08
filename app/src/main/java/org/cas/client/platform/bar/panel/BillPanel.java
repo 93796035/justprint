@@ -13,6 +13,7 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.CustomizedRule;
+import com.just.print.db.bean.Dish;
 import com.just.print.ui.adapter.MyAdapter;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;
