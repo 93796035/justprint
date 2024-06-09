@@ -13,7 +13,7 @@
         android:paddingBottom="8dp">
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
             <!-- Language Group -->
@@ -90,7 +90,7 @@
         <!-- Price Group -->
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
             <LinearLayout
@@ -149,7 +149,7 @@
         android:paddingBottom="8dp">
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
             <!-- Size Section -->
@@ -166,47 +166,63 @@
 
             <RadioGroup
                 android:id="@+id/rgSizes"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#ffffff"
-                android:orientation="horizontal">
-                <RadioButton
-                    android:id="@+id/rdbSize1"
-                    android:layout_width="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Size 1" />
-                <RadioButton
-                    android:id="@+id/rdbSize2"
-                    android:layout_width="wrap_content"
+                    android:layout_weight="1">
+                    <RadioButton
+                        android:id="@+id/rdbSize1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 1" />
+                    <RadioButton
+                        android:id="@+id/rdbSize2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 2" />
+                    <RadioButton
+                        android:id="@+id/rdbSize3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 3" />
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Size 2" />
-                <RadioButton
-                    android:id="@+id/rdbSize3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Size 3" />
-                <RadioButton
-                    android:id="@+id/rdbSize4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Size 4" />
-                <RadioButton
-                    android:id="@+id/rdbSize5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Size 5" />
-                <RadioButton
-                    android:id="@+id/rdbSize6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Size 6" />
+                    android:layout_weight="1">
+                    <RadioButton
+                        android:id="@+id/rdbSize4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 4" />
+                    <RadioButton
+                        android:id="@+id/rdbSize5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 5" />
+                    <RadioButton
+                        android:id="@+id/rdbSize6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="Size 6" />
+                </LinearLayout>
             </RadioGroup>
         </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
             <!-- Printer Support Section -->
@@ -325,7 +341,7 @@
                     android:textSize="18sp"/>
                 <EditText
                     android:id="@+id/tfdDspIndex"
-                    android:layout_width="0dp"
+                    android:layout_width="10dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Index" />
