@@ -37,7 +37,7 @@
                     android:paddingTop="0dp"
                     android:paddingBottom="0dp"
                     android:paddingStart="2dp"
-                    android:paddingEnd="2dp"/>
+                    android:paddingEnd="2dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -50,7 +50,7 @@
                     android:text="Dish Name 2"/>
                 <EditText
                     android:id="@+id/tfdLanguage2"
-                    android:layout_width="match_parent"
+                    android:layout_width="300dp"
                     android:layout_height="60dp"
                     android:layout_weight="1"
                     android:inputType="textMultiLine"
@@ -73,7 +73,7 @@
                     android:text="Dish Name 3"/>
                 <EditText
                     android:id="@+id/tfdLanguage3"
-                    android:layout_width="match_parent"
+                    android:layout_width="300dp"
                     android:layout_height="60dp"
                     android:layout_weight="1"
                     android:inputType="textMultiLine"
@@ -97,20 +97,14 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content">
                 <TextView
-                    android:id="@+id/sptPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#ffffff"
-                    android:text="Price"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"/>
-
+                    android:text="Price"/>
                 <EditText
                     android:id="@+id/tfdPrice"
-                    android:layout_width="300dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="170dp"
+                    android:layout_height="60dp"
                     android:layout_weight="1"
                     android:maxLines="1"
                     android:inputType="number"
@@ -120,18 +114,12 @@
                     android:paddingBottom="0dp"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_gravity="end">
                 <CheckBox
                     android:id="@+id/cbxGST"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#ffffff"
                     android:text="GST" />
-
                 <CheckBox
                     android:id="@+id/cbxQST"
                     android:layout_width="wrap_content"
@@ -139,146 +127,162 @@
                     android:textColor="#ffffff"
                     android:text="QST" />
             </LinearLayout>
+
+            <!-- Display Index Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#ffffff"
+                    android:text="Display Index"/>
+                <EditText
+                    android:id="@+id/tfdDspIndex"
+                    android:layout_width="80dp"
+                    android:layout_height="60dp"
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:layout_marginStart="8dp"
+                    android:textSize="16sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp" />
+            </LinearLayout>
+            <!-- Category Section -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#ffffff"
+                    android:layout_gravity="center"
+                    android:text="Category"/>
+                <Spinner
+                    android:id="@+id/cmbCategory"
+                    android:layout_width="300dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:textColor="#FFFFFF"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp">
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
+        <!-- Size Section -->
+        <TextView
+            android:id="@+id/sptSize"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <!-- Size Section -->
-            <TextView
-                android:id="@+id/sptSize"
+            android:textColor="#ffffff"
+            android:text="Size"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgSizes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rdbSize1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:text="Size"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
-
-            <RadioGroup
-                android:id="@+id/rgSizes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-                    <RadioButton
-                        android:id="@+id/rdbSize1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 1" />
-                    <RadioButton
-                        android:id="@+id/rdbSize2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 2" />
-                    <RadioButton
-                        android:id="@+id/rdbSize3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 3" />
-                </LinearLayout>
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-                    <RadioButton
-                        android:id="@+id/rdbSize4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 4" />
-                    <RadioButton
-                        android:id="@+id/rdbSize5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 5" />
-                    <RadioButton
-                        android:id="@+id/rdbSize6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#ffffff"
-                        android:text="Size 6" />
-                </LinearLayout>
-            </RadioGroup>
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <!-- Printer Support Section -->
-            <TextView
-                android:id="@+id/sptPrinter"
+                android:text="Size 1" />
+            <RadioButton
+                android:id="@+id/rdbSize2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:text="Printer Support"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
-
-            <GridLayout
-                android:layout_width="match_parent"
+                android:text="Size 2" />
+            <RadioButton
+                android:id="@+id/rdbSize3"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:columnCount="3">
-                <CheckBox
-                    android:id="@+id/cbxPrinter1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 1" />
-                <CheckBox
-                    android:id="@+id/cbxPrinter2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 2" />
-                <CheckBox
-                    android:id="@+id/cbxPrinter3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 3" />
-                <CheckBox
-                    android:id="@+id/cbxPrinter4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 4" />
-                <CheckBox
-                    android:id="@+id/cbxPrinter5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 5" />
-                <CheckBox
-                    android:id="@+id/cbxPrinter6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:text="Printer 6" />
-            </GridLayout>
-        </LinearLayout>
+                android:textColor="#ffffff"
+                android:text="Size 3" />
+            <RadioButton
+                android:id="@+id/rdbSize4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Size 4" />
+            <RadioButton
+                android:id="@+id/rdbSize5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Size 5" />
+            <RadioButton
+                android:id="@+id/rdbSize6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Size 6" />
+        </RadioGroup>
+        <!-- Printer Support Section -->
+        <TextView
+            android:id="@+id/sptPrinter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:text="Printer Support"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="6">
+            <CheckBox
+                android:id="@+id/cbxPrinter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 1" />
+            <CheckBox
+                android:id="@+id/cbxPrinter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 2" />
+            <CheckBox
+                android:id="@+id/cbxPrinter3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 3" />
+            <CheckBox
+                android:id="@+id/cbxPrinter4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 4" />
+            <CheckBox
+                android:id="@+id/cbxPrinter5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 5" />
+            <CheckBox
+                android:id="@+id/cbxPrinter6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="Printer 6" />
+        </GridLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -302,50 +306,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1">
-
-            <!-- Category Section -->
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp">
-                <TextView
-                    android:id="@+id/lblCategory"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="#ffffff"
-                    android:text="Category"
-                    android:textSize="18sp"/>
-                <EditText
-                    android:id="@+id/cmbCategory"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Category" />
-            </LinearLayout>
-
-            <!-- Display Index Section -->
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp">
-                <TextView
-                    android:id="@+id/lblDspIndex"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="#ffffff"
-                    android:text="Display Index"
-                    android:textSize="18sp"/>
-                <EditText
-                    android:id="@+id/tfdDspIndex"
-                    android:layout_width="10dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Index" />
-            </LinearLayout>
             <CheckBox
                 android:id="@+id/cbxPricePomp"
                 android:layout_width="wrap_content"
