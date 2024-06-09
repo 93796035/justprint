@@ -40,7 +40,7 @@ public class CategoryDlg extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_category_dialog, null);
+        View view = inflater.inflate(R.layout.dialog_category, null);
 
         tfdDspIndex = view.findViewById(R.id.tfdDspIndexCategory);
         tfdCategoryName1 = view.findViewById(R.id.tfdCategoryName1);
