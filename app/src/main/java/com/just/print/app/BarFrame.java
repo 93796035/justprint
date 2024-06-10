@@ -611,7 +611,7 @@ public class BarFrame extends BaseFragmentActivity {
                 .append(status).append(")");				//content
         try {
             AikaPos.db.execSQL(sql.toString());
-            sql = new StringBuilder("Select id from bill where opentime = '").append(openTime)
+            sql = new StringBuilder("Select _id from bill where opentime = '").append(openTime)
                     .append("' and tableName = '").append(tableName)
                     .append("' and BillIndex = '").append(newBillIdx).append("'");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

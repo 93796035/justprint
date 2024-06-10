@@ -20,9 +20,6 @@ public class MenuButton extends Button {
     		bg = "#ccff66";
     	}
     	setBackgroundColor(Color.parseColor(bg));
-
-//		setBorder(BorderFactory.createRaisedBevelBorder());
-//		setFont(BarOption.getMenuCustFont());
         this.dspIndex = dspIndex;
     }
 

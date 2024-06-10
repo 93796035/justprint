@@ -104,7 +104,7 @@ public class SalesPanel extends PicturePane{
 //            //if there's an output was deleted from this bill, this bill is still considered as empty.
 //            //if there's an output was completed 10
 ////            sql = new StringBuilder("update bill set status = ").append(DBConsts.deleted)
-////            		.append(" WHERE bill._id IN ( SELECT id FROM bill WHERE tableName = ").append(BarFrame.instance.valCurTable.getText())
+////            		.append(" WHERE bill._id IN ( SELECT _id FROM bill WHERE tableName = ").append(BarFrame.instance.valCurTable.getText())
 ////    				.append(" and OPENTIME = '").append(BarFrame.instance.valStartTime.getText())
 ////    				.append("' and status IS NULL OR status = ").append(DBConsts.original)
 ////    				.append(") AND NOT EXISTS (SELECT category FROM OUTPUT WHERE (deleted IS null or deleted = ").append(DBConsts.completed)

@@ -53,7 +53,7 @@ public class Cmd_ChangeTable implements SamActionListener {
 				return;
 			}
 			try {
-				StringBuilder sql = new StringBuilder("select id from bill where tableId = '").append(selectedTables.get(0).getTableName()).append("'")
+				StringBuilder sql = new StringBuilder("select _id from bill where tableId = '").append(selectedTables.get(0).getTableName()).append("'")
 						.append(" and opentime = '").append(selectedTables.get(0).getOpenTime()).append("'")
 						.append(" and (status is null or status < ").append(DBConsts.COMPLETED)
 						.append(" and status >= ").append(DBConsts.ORIGINAL).append(")");

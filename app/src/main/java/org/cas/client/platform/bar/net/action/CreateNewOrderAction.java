@@ -262,7 +262,7 @@ public class CreateNewOrderAction implements SamActionListener {
 
 	private int findEmployeeId(String waiter) {
 		StringBuilder sql;
-		sql = new StringBuilder("select id from USER where nickName = '").append(waiter).append("'");
+		sql = new StringBuilder("select _id from USER where nickName = '").append(waiter).append("'");
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
         	if(rs.moveToNext()) {
@@ -292,7 +292,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		        .append(createtime).append("')");				//opentime
 		try {
 			AikaPos.db.execSQL(sql.toString());
-		   	sql = new StringBuilder("Select id from bill where createtime = '").append(createtime).append("' and billIndex = '").append(billIndex).append("'");
+		   	sql = new StringBuilder("Select _id from bill where createtime = '").append(createtime).append("' and billIndex = '").append(billIndex).append("'");
 		    Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		    rs.moveToNext();
             return DBUtil.getCursorInt(rs, "_id");
@@ -654,7 +654,7 @@ public class CreateNewOrderAction implements SamActionListener {
             
 	        BarFrame.menuPanel.initComponent();
 	        
-	        sql = new StringBuilder("Select id from Dish where CODE = ? and category = ?");
+	        sql = new StringBuilder("Select _id from Dish where CODE = ? and category = ?");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{name1, category});
             
             rs.moveToNext();
@@ -684,7 +684,7 @@ public class CreateNewOrderAction implements SamActionListener {
             AikaPos.db.execSQL(sql.toString(), new String[]{menuName,menuName,menuName,category});
 	        BarFrame.menuPanel.initComponent();
 	        
-	        sql = new StringBuilder("Select id from Dish where CODE = ? and category = ?");
+	        sql = new StringBuilder("Select _id from Dish where CODE = ? and category = ?");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{menuName, category});
             rs.moveToNext();
             return new Dish(DBUtil.getCursorInt(rs,"_id"), category, menuName, menuName, menuName, "");

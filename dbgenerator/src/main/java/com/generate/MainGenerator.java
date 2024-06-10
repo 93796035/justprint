@@ -156,6 +156,7 @@ public class MainGenerator {
         saleRecord.addIntProperty("userId").columnName("userId");
         saleRecord.addIntProperty("billId").columnName("billId");
         saleRecord.addStringProperty("createdTime").columnName("createdTime");
+        saleRecord.addStringProperty("modifiedTime").columnName("modifiedTime");
 
         // +---------+---------+---------+---------+
         // M2M_SaleRecordMark

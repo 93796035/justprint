@@ -246,7 +246,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		try {
 			// load all the dishes----------------------------
 			Cursor rs = AikaPos.db.rawQuery(
-					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from Dish where status == 0 order by displayIdx",
+					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from Dish where status == 0 or status is null order by displayIdx",
 					null);
 			int tmpPos = rs.getCount();
 			dishNameMetrix = new String[3][tmpPos];
@@ -254,12 +254,12 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			//compose the record into dish objects--------------
 			tmpPos = 0;
 			while (rs.moveToNext()) { // @NOTE: don't load all the content, because menu can be many
-				dishNameMetrix[0][tmpPos] = DBUtil.getCursorString(rs, "CODE");
-				dishNameMetrix[1][tmpPos] = DBUtil.getCursorString(rs, "MNEMONIC");
+				dishNameMetrix[0][tmpPos] = DBUtil.getCursorString(rs, "NAME1");
+				dishNameMetrix[1][tmpPos] = DBUtil.getCursorString(rs, "NAME2");
 				if (dishNameMetrix[1][tmpPos] == null || dishNameMetrix[1][tmpPos].trim().length() == 0) {
 					dishNameMetrix[1][tmpPos] = dishNameMetrix[0][tmpPos];
 				}
-				dishNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "SUBJECT");
+				dishNameMetrix[2][tmpPos] = DBUtil.getCursorString(rs, "NAME3");
 				if (dishNameMetrix[2][tmpPos] == null || dishNameMetrix[2][tmpPos].trim().length() == 0) {
 					dishNameMetrix[2][tmpPos] = dishNameMetrix[0][tmpPos];
 				}
@@ -270,14 +270,14 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				dishAry[tmpPos].setLanguage(1, dishNameMetrix[1][tmpPos]);
 				dishAry[tmpPos].setLanguage(2, dishNameMetrix[2][tmpPos]);
 				dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs, "PRICE") / 100.0f);
-				dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs, "gst"));
-				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs, "qst"));
-				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs, "size"));
-				dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "printerids"));
-				dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "CATEGORY"));
+				dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs, "GST"));
+				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs, "QST"));
+				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs, "SIZE"));
+				dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "printerIds"));
+				dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "category"));
 				dishAry[tmpPos].setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "pricePomp")));
 				dishAry[tmpPos].setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "menuPomp")));
-				dishAry[tmpPos].setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "modifyPomp")));
+				dishAry[tmpPos].setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "ModifyPomp")));
 				dishAry[tmpPos].setDisplayIdx(DBUtil.getCursorInt(rs, "displayIdx"));
 				tmpPos++;
 			}
@@ -440,15 +440,8 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 						lang = classifiedDishNameMetrix.length - 1;
 					String text = classifiedDishNameMetrix[lang][globleMenuIdxOfCurCategory];
 					if (BarOption.showPriceOnMenu()) {
-						if (text.endsWith("</center></html>")) {
-							text = text.substring(0, text.length() - 16);
-						}
-						text += "<br>";
+						text += "\n";
 						text += BarUtil.formatMoney(dish.getPrice() / 100.0);
-						text += "</center></html>";
-						if (!text.startsWith("<html><center>")) {
-							text = "<html><center>" + text;
-						}
 					}
 					btnMenu.setText(BarUtil.empty(text) ? classifiedDishNameMetrix[0][globleMenuIdxOfCurCategory] : text);
 					globleMenuIdxOfCurCategory++;

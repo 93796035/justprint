@@ -190,7 +190,7 @@ public class BillPanel extends BaseFragment
 		
 			AikaPos.db.execSQL(sql.toString());
 			
-		   	sql = new StringBuilder("Select id from bill where createtime = '").append(createtime)
+		   	sql = new StringBuilder("Select _id from bill where createtime = '").append(createtime)
 		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -995,20 +995,20 @@ public class BillPanel extends BaseFragment
 		}
 
     	ArrayList<Dish> dishAry = new ArrayList<Dish>();
-    	StringBuilder sql = new StringBuilder("select * from OUTPUT, PRODUCT where OUTPUT.SUBJECT = '")
+    	StringBuilder sql = new StringBuilder("select * from SALE_RECORD, DISH where SALE_RECORD.tableName = '")
     		.append(tableName)
-    		.append("' and CONTACTID = ").append(billIndex)
-    		.append(" AND OUTPUT.PRODUCTID = PRODUCT._id and output.time = '").append(openTime).append("'");
+    		.append("' and billIndex = ").append(billIndex)
+    		.append(" AND SALE_RECORD.productId = DISH._id and SALE_RECORD.openTime = '").append(openTime).append("'");
 
 		//if no billId given, means to display the latest bill(should there be also some expired ones), it must be the last completed bill or a not completed bill (might be billPrinted, but not a closed one,
 		//Only if we select bill from checkOrderDlg, and selected an expired one, there will be a billID).
     	if (billId != null && billId.length() > 0) {
-    		sql.append(" and output.category <= '").append(createTime).append("'") //remove all output created after the bill
-    		   .append(" and (deleted is null or deleted < ").append(DBConsts.DELETED)		//remove the deleted bills
+    		sql.append(" and SALE_RECORD.createdTime <= '").append(createTime).append("'") //remove all output created after the bill
+    		   .append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.DELETED)		//remove the deleted bills
     		    	//.append(" or(output.arrearage is not null and CAST(output.arrearage AS DATETIME) > (select createTime from bill where id = ").append(billId).append("))")
     		    	.append(")");
     	} else {
-    		sql.append(" and (deleted is null or deleted < ").append(DBConsts.VOIDED).append(")");
+    		sql.append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.VOIDED).append(")");
     	}
 
     	Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -1016,36 +1016,36 @@ public class BillPanel extends BaseFragment
 		List<String[]> datas = new ArrayList<>();
 		String[] tValues = new String[4];
 		while (rs.moveToNext()) {
-			int modifiedTime = DBUtil.getCursorInt(rs, "OUTPUT.ARREARAGE");
-			int deleted = DBUtil.getCursorInt(rs, "OUTPUT.DELETED");
+			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD.modifiedTime");
+			int deleted = DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS");
 			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
 				continue;
 			//BarUtil.df.parse(tableName)
 			}
 			Dish dish = new Dish();
-			dish.setCategory(DBUtil.getCursorString(rs, "PRODUCT.CATEGORY"));
-			dish.setDiscount(DBUtil.getCursorInt(rs, "OUTPUT.discount"));//
-			dish.setDiscount(Integer.valueOf(DBUtil.getCursorInt(rs, "PRODUCT.INDEX")));
-			dish.setGst(DBUtil.getCursorInt(rs, "PRODUCT.FOLDERID"));
-			dish.setId(DBUtil.getCursorLong(rs, "PRODUCT.ID"));
-			dish.setName1(DBUtil.getCursorString(rs, "PRODUCT.CODE"));
-			dish.setName2(DBUtil.getCursorString(rs, "PRODUCT.MNEMONIC"));
-			dish.setName3(DBUtil.getCursorString(rs, "PRODUCT.SUBJECT"));
-			dish.setModification(DBUtil.getCursorString(rs, "OUTPUT.CONTENT"));//
-			dish.setNum(DBUtil.getCursorInt(rs, "OUTPUT.AMOUNT"));//
-			dish.setOutputID(DBUtil.getCursorInt(rs, "OUTPUT.ID"));//
-			dish.setPrice(DBUtil.getCursorInt(rs, "PRODUCT.PRICE") / 100.0f);
-			dish.setPrinterIds(DBUtil.getCursorString(rs, "PRODUCT.BRAND"));
-			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.UNIT")));
-			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.PRODUCAREA")));
-			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "PRODUCT.CONTENT")));
-			dish.setQst(DBUtil.getCursorInt(rs, "PRODUCT.STORE"));
-			dish.setSize(DBUtil.getCursorInt(rs, "PRODUCT.COST"));
+			dish.setCategory(DBUtil.getCursorString(rs, "DISH.category"));
+			dish.setDiscount(DBUtil.getCursorInt(rs, "SALE_RECORD.DISCOUNT"));//
+			dish.setDisplayIdx(Integer.valueOf(DBUtil.getCursorInt(rs, "DISH.displayIdx")));
+			dish.setGst(DBUtil.getCursorInt(rs, "DISH.GST"));
+			dish.setId(DBUtil.getCursorLong(rs, "DISH._id"));
+			dish.setName1(DBUtil.getCursorString(rs, "DISH.NAME1"));
+			dish.setName2(DBUtil.getCursorString(rs, "DISH.NAME2"));
+			dish.setName3(DBUtil.getCursorString(rs, "DISH.NAME3"));
+			dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD.MODIFICATIONS"));//
+			dish.setNum(DBUtil.getCursorInt(rs, "SALE_RECORD.AMOUNT"));//
+			dish.setOutputID(DBUtil.getCursorInt(rs, "SALE_RECORD._id"));//
+			dish.setPrice(DBUtil.getCursorInt(rs, "DISH.PRICE") / 100.0f);
+			dish.setPrinterIds(DBUtil.getCursorString(rs, "DISH.printerIds"));
+			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.menuPomp")));
+			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.ModifyPomp")));
+			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.pricePomp")));
+			dish.setQst(DBUtil.getCursorInt(rs, "DISH.QST"));
+			dish.setSize(DBUtil.getCursorInt(rs, "DISH.SIZE"));
 			dish.setCustomerIndex(billIndex);
-			dish.setOrderedTime(DBUtil.getCursorString(rs, "OUTPUT.TIME"));	//output time is table's open time. no need to remember output created time.
-			dish.setBillID(DBUtil.getCursorInt(rs, "OUTPUT.FOLDERID"));
-			dish.setTotalPrice(DBUtil.getCursorInt(rs, "OUTPUT.TOLTALPRICE"));
-			dish.setStatus(DBUtil.getCursorInt(rs, "OUTPUT.DELETED"));
+			dish.setOrderedTime(DBUtil.getCursorString(rs, "SALE_RECORD.createdTime"));	//output time is table's open time. no need to remember output created time.
+			dish.setBillID(DBUtil.getCursorInt(rs, "SALE_RECORD.billId"));
+			dish.setTotalPrice(DBUtil.getCursorInt(rs, "SALE_RECORD.totalPrice"));
+			dish.setStatus(DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS"));
 			dishAry.add(dish);
 			
 			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
@@ -1090,7 +1090,7 @@ public class BillPanel extends BaseFragment
 
 	private void initBillProperties(String billId, String billIdx, String tableName, String openTime) throws SQLException {
 		StringBuilder sql = billId != null && billId.length() > 0 ? 
-				new StringBuilder("select * from Bill where id = ").append(billId)
+				new StringBuilder("select * from Bill where _id = ").append(billId)
 				: new StringBuilder("select * from Bill where billIndex = '").append(billIdx).append("'")
 				.append(" and tableName = '").append(tableName).append("'")
 				.append(" and opentime = '").append(openTime).append("'")
@@ -1098,12 +1098,12 @@ public class BillPanel extends BaseFragment
 
 		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		if(rs.moveToNext()) {
-		    discount = DBUtil.getCursorInt(rs, "discount");
+		    discount = DBUtil.getCursorInt(rs, "DISCOUNT");
 		    serviceFee = DBUtil.getCursorInt(rs, "serviceFee");
-		    tip = DBUtil.getCursorInt(rs, "tip");
-		    cashback = DBUtil.getCursorInt(rs, "cashback");
-		    status = DBUtil.getCursorInt(rs, "status");
-		    comment = DBUtil.getCursorString(rs, "comment");
+		    tip = DBUtil.getCursorInt(rs, "serviceFee");
+		    cashback = DBUtil.getCursorInt(rs, "CASHBACK");
+		    status = DBUtil.getCursorInt(rs, "STATUS");
+		    comment = DBUtil.getCursorString(rs, "COMMENT");
 		    int pSF = comment.lastIndexOf(SERVICEFEE);
 		    int pDB = comment.lastIndexOf(DISCBILL);
 		    if(pSF > -1) {
@@ -1112,8 +1112,8 @@ public class BillPanel extends BaseFragment
 		    if(pDB > -1) {
 		    	discount = Integer.valueOf(comment.substring(pDB + 9, comment.indexOf("@", pDB)));
 		    }
-		    totalOnBill = DBUtil.getCursorInt(rs, "total");
-		    createTime = DBUtil.getCursorString(rs, "createTime");
+		    totalOnBill = DBUtil.getCursorInt(rs, "TOTAL");
+		    createTime = DBUtil.getCursorString(rs, "createdTime");
 		    billID = DBUtil.getCursorInt(rs, "_id");
 		}
 	}
