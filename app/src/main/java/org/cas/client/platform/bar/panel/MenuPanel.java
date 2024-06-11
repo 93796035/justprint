@@ -543,7 +543,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		// menu buttons------------------------------------------------------------------------------------------
 		else if (o instanceof MenuButton) {
 			MenuButton menuButton = (MenuButton) o;
-			String text = menuButton.getText().toString();
+			String text = menuButton.getText().toString().trim();
 			if (text == null || text.length() == 0) { // check if it's empty
 				if (getParent() == BarFrame.instance.panels[3]) { // and it's setting panel, add a Category.
 					if (tgbActiveCategory == null || tgbActiveCategory.getText() == null || tgbActiveCategory.getText().length() < 1) {
