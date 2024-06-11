@@ -315,7 +315,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		    	Integer num = qtMap.get(material.portionName + (material.remark == null ? "" : material.remark));	//@NOTE we supposed the dish name should not duplicate.
 		    	int price = material.dencity == null ? 0 : Math.round(Float.valueOf(material.dencity.substring(1).trim()) * 100);
 		    	
-		    	//make sure product and marexist.
+		    	//make sure dish and marexist.
 		    	Dish dish = synchronizeToLocalDB(location, portionName, price, material.menFu);
 		    	
 		    	dish.setNum(num);
@@ -610,7 +610,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		if(!name1.equals(lName1) || !name2.equals(lName2) || !name3.equals(lName3) 
 				|| price != lPrice || !menFu.equals(lPrinter)) {
 			String categorySQL = DBUtil.getCursorString(rs, "CATEGORY");
-			StringBuilder sql = new StringBuilder("Update Product set CODE = ?, MNEMONIC = ?, SUBJECT = ?, PRICE = ").append(price)
+			StringBuilder sql = new StringBuilder("Update DISH set NAME1 = ?, NAME2 = ?, NAME3 = ?, PRICE = ").append(price)
 					.append(", BRAND = '").append(menFu)
 					.append("' where deleted != true and index = ").append(DBUtil.getCursorInt(rs,"INDEX")).append(" and category = ?");
             AikaPos.db.execSQL(sql.toString(), new String[]{"1", name1, name2, name3, categorySQL});

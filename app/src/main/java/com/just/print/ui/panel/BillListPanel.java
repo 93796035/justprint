@@ -413,7 +413,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                int num = DBUtil.getCursorInt(rs,"OUTPUT.AMOUNT");
+                int num = DBUtil.getCursorInt(rs,"SALE_RECORDh.AMOUNT");
                 if(num < BarOption.MaxQTY) {
                     continue;
                 }
@@ -421,13 +421,13 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 dish.setNum(num);
                 dish.setDiscount(DBUtil.getCursorInt(rs,"discount"));//
                 dish.setId((long)DBUtil.getCursorInt(rs,"PRODUCTID"));
-                dish.setModification(DBUtil.getCursorString(rs, "OUTPUT.CONTENT"));//
-                dish.setOutputID(DBUtil.getCursorInt(rs,"OUTPUT._ID"));//
-                dish.setTotalPrice(DBUtil.getCursorInt(rs,"OUTPUT.TOLTALPRICE"));
+                dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD.CONTENT"));//
+                dish.setOutputID(DBUtil.getCursorInt(rs,"SALE_RECORD._ID"));//
+                dish.setTotalPrice(DBUtil.getCursorInt(rs,"SALE_RECORD.TOLTALPRICE"));
                 dishes.add(dish);
             }
         }catch(Exception exp) {
-            L.e("BillList ","exception when combine outputs:" + sql, exp);
+            L.e("BillList ","exception when combine SALE_RECORD:" + sql, exp);
         }
 
         HashMap map = new HashMap();
@@ -449,7 +449,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
 
             if(map.containsKey(key)) {//if map already contains this key, then delete this output
 
-                sql = new StringBuilder("update output set deleted = ").append(DBConsts.DELETED)
+                sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.DELETED)
                         .append(" where _id = ").append(dish.getOutputID());
                 try {
                     AikaPos.db.execSQL(sql.toString());
@@ -470,14 +470,14 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 if(value == 1) {	//@NOTE： it's not necessarily equals to 1,  because if some of the splitted bill already paid, then it will never reach 1.
                     map.remove(key);
                     int newNum = pK > 1 ? pS * BarOption.MaxQTY + num : num;
-                    sql = new StringBuilder("update output set AMOUNT = ").append(newNum)
-                            .append(", discount = ").append(tD.getDiscount())
-                            .append(", TOLTALPRICE = ").append(tD.getTotalPrice())
+                    sql = new StringBuilder("update SALE_RECORD set AMOUNT = ").append(newNum)
+                            .append(", DISCOUNT = ").append(tD.getDiscount())
+                            .append(", totalPrice = ").append(tD.getTotalPrice())
                             .append(" where _id = ").append(tD.getOutputID());
                     try {
                         AikaPos.db.execSQL(sql.toString());
                     }catch(Exception e) {
-                        L.e("combineOutputs", "update output set amount = " + newNum + " where _id = " + dish.getOutputID(), e);
+                        L.e("combineOutputs", "update SALE_RECORD set AMOUNT = " + newNum + " where _id = " + dish.getOutputID(), e);
                     }
                 }
             }else {//如果发现map中没有这个key，那么创建一个key存入map。PK为value，如果PK不存在，或者为1，或者为0，那么用PS为value。
@@ -497,11 +497,11 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
 
         int num = 0;
         try {
-            StringBuilder sql = new StringBuilder("select billIndex from bill where tableId = '").append(tableName).append("'")
+            StringBuilder sql = new StringBuilder("select billIndex from BILL where tableName = '").append(tableName).append("'")
                     .append(" and opentime = '").append(openTime).append("'");
             //TBD:the status curently used "expired", means void and completed bills will all be included, to ensure the new customer number
             //number not duplicated with existing one.
-            sql.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(" and status >= 0)");
+            sql.append(" and (STATUS is null or STATUS < ").append(DBConsts.EXPIRED).append(" and STATUS >= 0)");
             sql.append(" order by _id");//if order by billIndex, then "9" will be the last one. so should order by _id
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if (rs != null && rs.moveToFirst()) {

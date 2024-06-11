@@ -181,9 +181,9 @@ public class PayDlg extends DialogFragment
         	oldMasterReceived = DBUtil.getCursorInt(rs,"masterReceived");
         	oldOtherReceived = DBUtil.getCursorString(rs,"otherReceived");
         	
-        	oldCashback = DBUtil.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
-        	oldTip = DBUtil.getCursorInt(rs,"tip");
-        	oldStatus = DBUtil.getCursorInt(rs,"status");
+        	oldCashback = DBUtil.getCursorInt(rs,"CASHBACK"); //cash back is negative in db. so use "+" instead of "-"
+        	oldTip = DBUtil.getCursorInt(rs,"TIP");
+        	oldStatus = DBUtil.getCursorInt(rs,"STATUS");
         	//cashReceived
         	onSrcCashReceived = oldCashReceived + oldCashback;
         	if(oldStatus < DBConsts.ORIGINAL) {

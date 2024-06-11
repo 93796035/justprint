@@ -117,7 +117,7 @@ public class Cmd_Refund implements SamActionListener {
         billPanel.expireAndReGenerateBill(null);
     		    		
 		//update the new bill's status in db to be the refund amount, (if we support multi-time refund, next time refund will base on this number).
-		DBUtil.updateBill(billPanel.getBillID(), "status", refundedLifeTime);
+		DBUtil.updateBill(billPanel.getBillID(), "STATUS", refundedLifeTime);
 		
 		//prepare infomation for customer (bill)
 		PrintService.printRefund(billPanel, - Math.round(toRefundThisTime * 100), BarFrame.instance.getCurBillIndex(), false);

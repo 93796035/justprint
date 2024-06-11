@@ -354,14 +354,14 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	public static List<Bill> queryRelevantCompleteAndRefundBillList(String startTime, String endTimeStr, boolean showOnlyMine) {
-		StringBuilder sql = new StringBuilder("select * from bill, USER where createdTime >= '").append(startTime)
+		StringBuilder sql = new StringBuilder("select * from BILL, USER where createdTime >= '").append(startTime)
 				.append("' and createdTime <= '").append(endTimeStr)
-				.append("' and bill.userId = employee._id ")
-				.append(" and (bill.status < ").append(DBConsts.ORIGINAL)
-				.append(" or bill.status = ").append(DBConsts.COMPLETED).append(")");
+				.append("' and BILL.userId = USER._id ")
+				.append(" and (BILL.STATUS < ").append(DBConsts.ORIGINAL)
+				.append(" or BILL.STATUS = ").append(DBConsts.COMPLETED).append(")");
 		if ((LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS && !BarOption.showRecordFromOtherWaiter())
 				|| showOnlyMine) {
-			sql.append(" and employee._id = ").append(LoginDlg.USERID);
+			sql.append(" and USER._id = ").append(LoginDlg.USERID);
 		}
 
 		List<Bill> salesAndRefunds = new ArrayList<>();
@@ -380,11 +380,11 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				bill.setVisaReceived(DBUtil.getCursorInt(rs, "visaReceived"));
 				bill.setMasterReceived(DBUtil.getCursorInt(rs, "masterReceived"));
 				bill.setOtherReceived(DBUtil.getCursorString(rs, "otherReceived"));
-				bill.setTip(DBUtil.getCursorInt(rs, "tip"));
-				bill.setCashback(DBUtil.getCursorInt(rs, "cashback"));
-				bill.setStatus(DBUtil.getCursorInt(rs, "status"));
-				bill.setUserId(DBUtil.getCursorInt(rs, "employee.nName"));
-				bill.setComment(DBUtil.getCursorString(rs, "Comment"));
+				bill.setTip(DBUtil.getCursorInt(rs, "TIP"));
+				bill.setCashback(DBUtil.getCursorInt(rs, "CASHBACK"));
+				bill.setStatus(DBUtil.getCursorInt(rs, "STATUS"));
+				bill.setUserId(DBUtil.getCursorInt(rs, "USER.nName"));
+				bill.setComment(DBUtil.getCursorString(rs, "COMMENT"));
 				bill.setOpenTime(DBUtil.getCursorString(rs, "OpenTime"));
 				salesAndRefunds.add(bill);
 			}
@@ -515,7 +515,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 //			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //			rs.moveToNext();
 //			docRUT.setDF(DBUtil.getCursorString(rs,"value"));
-//			docRUT.setNO(DBUtil.getCursorString(rs,"status"));
+//			docRUT.setNO(DBUtil.getCursorString(rs,"STATUS"));
 //			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
 //		} catch (SQLException e1) {
 //			L.e("BarOption", "Unexpected exception when getting next order id from db with:" + sql, e1);

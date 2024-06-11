@@ -51,7 +51,7 @@ public class Cmd_Report implements SamActionListener {
 	            }
 
     			if(LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
-    				StringBuilder sql = new StringBuilder("select * from systeminfo order by id desc limit 1");
+    				StringBuilder sql = new StringBuilder("select * from systeminfo order by _id desc limit 1");
     				try {//get the relevant print Time base on batchID and the previous batchID
     					Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
     		            rs.moveToNext();

@@ -1276,12 +1276,12 @@ public class PrintService{
 
 		content.append("Inv#   Table#      Total").append("\n");
 		
-        StringBuilder sql = new StringBuilder("select * from bill, USER where bill.userId = employee._id ")
+        StringBuilder sql = new StringBuilder("select * from BILL, USER where BILL.userId = USER._id ")
         		.append(" and createTime >= '").append(startTime)
         		.append("' and createTime <= '").append(endTime)
-        		.append("' and bill.status = ").append(DBConsts.COMPLETED);
+        		.append("' and BILL.STATUS = ").append(DBConsts.COMPLETED);
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
-        	sql.append(" and employee._id = ").append(LoginDlg.USERID);
+        	sql.append(" and USER._id = ").append(LoginDlg.USERID);
         }
         sql.append(" order by _id");
         
@@ -1292,7 +1292,7 @@ public class PrintService{
             	String tableName = DBUtil.getCursorString(rs,"tableName");
             	String orderId = String.valueOf(DBUtil.getCursorString(rs, "_id"));
             	content.append(orderId).append(BarUtil.generateString(12 - orderId.length() - (tableName == null ? 4 : tableName.length()), " ")).append(tableName);
-            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
+            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"TOTAL") / 100.0));
             	totalSales += total;
             	String totalStr = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - totalStr.length(), " ")).append(totalStr).append("    ");
@@ -2361,10 +2361,10 @@ public class PrintService{
 		content.append("Bill#     Time   Table  Dish       Qt   Price").append("\n");
 		content.append(BarUtil.getSeperatorLine(0, width)).append("\n");
 
-		StringBuilder sql = new StringBuilder("Select * from Output, product, bill where bill.status != ").append(DBConsts.VOIDED)
-				.append(" and output.deleted = ").append(DBConsts.VOIDED)
-				.append(" and time >= '").append(startDateStr).append("' and time <= '").append(endDateStr)
-				.append("' and output.productID = product._id and output.folderId = bill._id");
+		StringBuilder sql = new StringBuilder("Select * from SALE_RECORD, DISH, BILL where BILL.STATUS != ").append(DBConsts.VOIDED)
+				.append(" and SALE_RECORD.STATUS = ").append(DBConsts.VOIDED)
+				.append(" and createdTime >= '").append(startDateStr).append("' and createdTime <= '").append(endDateStr)
+				.append("' and SALE_RECORD.productId = DISH._id and SALE_RECORD.billId = bill._id");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
         	sql.append(" and userId = ").append(LoginDlg.USERID);
         }
@@ -2373,16 +2373,16 @@ public class PrintService{
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             float totalSales = 0f;
             while (rs.moveToNext()) {
-            	String billId = DBUtil.getCursorString(rs,"Output.id");
+            	String billId = DBUtil.getCursorString(rs,"SALE_RECORD._id");
                 content.append(billId);	//remove the year to make it shorter.
                 
-                String time = DBUtil.getCursorString(rs,"Output.time");
+                String time = DBUtil.getCursorString(rs,"SALE_RECORD.createdTime");
                 content.append(BarUtil.generateString(6 - billId.toString().length(), " ")).append(time.substring(5, 16));	//remove the year to make it shorter.
                 
-                String table = DBUtil.getCursorString(rs,"Output.subject");
+                String table = DBUtil.getCursorString(rs,"SALE_RECORD.tableName");
                 content.append(BarUtil.generateString(4 - table.length(), " ")).append(table);
         		
-                String product = DBUtil.getCursorString(rs,"product.mnemonic");
+                String product = DBUtil.getCursorString(rs,"DISH.NAME1");
                 if(product.length() > 12) {
                 	product = product.substring(0, 10) + "..";
                 }else {
@@ -2390,11 +2390,11 @@ public class PrintService{
                 }
                 content.append("  ").append(product);
                 
-                int i = DBUtil.getCursorInt(rs,"Output.amount");
+                int i = DBUtil.getCursorInt(rs,"SALE_RECORD.AMOUNT");
                 String displayableNum = DBUtil.getDisplayableNum(i).toString();
                 content.append(BarUtil.generateString(3 - displayableNum.length(), " ")).append(displayableNum);
                 
-                float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"Output.toltalPrice") / 100.0));
+                float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"SALE_RECORD.toltalPrice") / 100.0));
                 String money = BarUtil.formatMoney(f);
                 content.append(BarUtil.generateString(width - 38 - money.length(), " ")).append(money).append("\n");
                 totalSales += f;
@@ -2424,13 +2424,13 @@ public class PrintService{
 
 		content.append("Inv#   Table#      Total").append("\n");
 		
-        StringBuilder sql = new StringBuilder("select * from bill, USER where bill.userId = employee._id ")
+        StringBuilder sql = new StringBuilder("select * from BILL, USER where BILL.userId = USER._id ")
         		//.append(" and createTime >= '").append(startTime)
         		//.append("' and createTime <= '").append(endTime)
-        		.append(" and (bill.status is null or (bill.status >= ").append(DBConsts.ORIGINAL)
-        		.append(" and bill.status < ").append(DBConsts.COMPLETED).append("))");
+        		.append(" and (BILL.STATUS is null or (BILL.STATUS >= ").append(DBConsts.ORIGINAL)
+        		.append(" and BILL.STATUS < ").append(DBConsts.COMPLETED).append("))");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
-        	sql.append(" and employee._id = ").append(LoginDlg.USERID);
+        	sql.append(" and USER._id = ").append(LoginDlg.USERID);
         }
 
         float totalSales = 0.0f;
@@ -2441,7 +2441,7 @@ public class PrintService{
             	content.append(id);
             	String tableName = DBUtil.getCursorString(rs,"tableName");
             	content.append(BarUtil.generateString(12 - id.length() - tableName.length(), " ")).append(tableName);
-            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"total") / 100.0));
+            	float total = Float.valueOf((float) (DBUtil.getCursorInt(rs,"TOTAL") / 100.0));
             	totalSales += total;
             	String formattedTotal = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - formattedTotal.length(), " ")).append(formattedTotal);

@@ -29,7 +29,7 @@ import org.cas.client.platform.bar.panel.BillPanel;
 public class DBUtil {
 
 	public static void updateTableStatusInDB(String tableName, String openTime) {
-		StringBuilder sql = new StringBuilder("update dining_Table set status = ").append(DBConsts.OPENNED)
+		StringBuilder sql = new StringBuilder("update dining_Table set STATUS = ").append(DBConsts.OPENNED)
 				.append(", opentime = '").append(openTime)
 				.append("' WHERE name = '").append(tableName).append("'");
 		try {
@@ -191,17 +191,17 @@ public class DBUtil {
 	public static void closeTableAndBillInDB(String tableName, String openTime) {
 		//all the bill should already completed when table closed except those was generated while has no output on it.
 		//this is the designed time to clean those bills.
-		StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
+		StringBuilder sql = new StringBuilder("update BILL set STATUS = ").append(DBConsts.DELETED)
 				.append(" WHERE tableName = '").append(tableName)
 				.append("' and OPENTIME = '").append(openTime)
-				.append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
+				.append("' and (STATUS IS NULL OR STATUS <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
 		try {
 			AikaPos.db.execSQL(sql.toString());
 			if(BarOption.isDeleteTableWhenClose()) {
 				sql = new StringBuilder("delete from dining_Table WHERE name = '").append(tableName).append("'");
 			}else {
-				sql = new StringBuilder("update dining_Table set status = ").append(DBConsts.ORIGINAL)
-						.append(", opentime = '' WHERE name = '").append(tableName).append("'");
+				sql = new StringBuilder("update dining_Table set STATUS = ").append(DBConsts.ORIGINAL)
+						.append(", openTime = '' WHERE name = '").append(tableName).append("'");
 			}
 			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {
@@ -213,9 +213,9 @@ public class DBUtil {
 		StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText().toString()) * 100))
 				.append(", discount = ").append(Math.round(billPanel.discount))
 				.append(", serviceFee = ").append(billPanel.serviceFee)
-				.append(", comment = ' ").append(billPanel.getComment()).append("'");
+				.append(", COMMENT = ' ").append(billPanel.getComment()).append("'");
 		if(status != 0) {
-			sql.append(", status = ").append(status);
+			sql.append(", STATUS = ").append(status);
 		}
 		if(createTime != null) {
 			sql.append(", createTime = '").append(createTime).append("'");
@@ -265,11 +265,11 @@ public class DBUtil {
 			comment = comment.substring(0, pTransacOnly) + comment.substring(end + 1);
 		}
 
-		DBUtil.updateBill(billPanel.getBillID(), "comment", comment);
+		DBUtil.updateBill(billPanel.getBillID(), "COMMENT", comment);
 
 		//update the bill with new createTime and new comment
 	    //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system),
-		DBUtil.updateBill(billPanel.getBillID(), "status", DBConsts.BILL_PRINTED);
+		DBUtil.updateBill(billPanel.getBillID(), "STATUS", DBConsts.BILL_PRINTED);
 
 		//NOTE: if some thing goes wrong for original bill printing, then we will have trouble (btw, it's hard to know if there's problem when printing
 		//because action will prepare the content and send to the q
@@ -313,7 +313,7 @@ public class DBUtil {
 		}
 		dish.setStatus(status);
 
-		StringBuilder sql = new StringBuilder("update output set deleted = ").append(status)
+		StringBuilder sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(status)
 				.append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000))
 				.append(" where _id = ").append(dish.getOutputID());
 		try {
@@ -329,7 +329,7 @@ public class DBUtil {
 	public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {
 		// 使用PreparedStatement替代Statement以提高性能和安全性
 
-		StringBuilder sql = new StringBuilder("INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES (")
+		StringBuilder sql = new StringBuilder("INSERT INTO SALE_RECORD(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES (")
 				.append("'").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("',") // SUBJECT
 				.append("'").append(billIndex).append("',") // CONTACTID
 				.append(dish.getId()).append(",") // PRODUCTID

@@ -188,7 +188,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	public void initRules() {
 		int tmpPos;
 		//load all printers--------------------------
-		String sql = "select * from Customized_Rule where status != -100 order by disp_Idx";
+		String sql = "select * from Customized_Rule where STATUS != -100 order by disp_Idx";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			tmpPos = rs.getCount();
@@ -197,10 +197,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			while (rs.moveToNext()) {
 				rules[tmpPos] = new CustomizedRule();
 				rules[tmpPos].setId(Long.valueOf(DBUtil.getCursorInt(rs, "_id")));
-				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "ruleName"));
-				rules[tmpPos].setContent(DBUtil.getCursorString(rs, "content"));
-				rules[tmpPos].setAction(DBUtil.getCursorInt(rs, "action")); // discount price( it's an int formatted)
-				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs, "dspIdx"));
+				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "RULENAME"));
+				rules[tmpPos].setContent(DBUtil.getCursorString(rs, "CONTENT"));
+				rules[tmpPos].setAction(DBUtil.getCursorInt(rs, "ACTION")); // discount price( it's an int formatted)
+				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs, "DISP_IDX"));
 				tmpPos++;
 			}
 			rs.close();
@@ -247,7 +247,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		try {
 			// load all the dishes----------------------------
 			Cursor rs = AikaPos.db.rawQuery(
-					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from Dish where status == 0 or status is null order by displayIdx",
+					"select _id, name1, name2, name3, PRICE, gst, qst,  size, printerIds, CATEGORY, pricePomp, menuPomp, ModifyPomp, displayIdx from Dish where STATUS == 0 or STATUS is null order by displayIdx",
 					null);
 			int tmpPos = rs.getCount();
 			dishNameMetrix = new String[3][tmpPos];
@@ -410,7 +410,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				if (dishAry[i].getDisplayIdx() != classifiedMenuIndex + 1) {
 					try {
 
-						StringBuilder sql = new StringBuilder("UPDATE product SET INDEX = ").append(classifiedMenuIndex + 1)
+						StringBuilder sql = new StringBuilder("UPDATE DISH SET displayIdx = ").append(classifiedMenuIndex + 1)
 								.append(" where _id = ").append(dishAry[i].getId());
 						AikaPos.db.execSQL(sql.toString());
 						BarOption.updateLastModifiyTime();

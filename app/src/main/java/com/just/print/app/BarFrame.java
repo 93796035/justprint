@@ -596,7 +596,7 @@ public class BarFrame extends BaseFragmentActivity {
         //create a bill for it. in case there will be something like order fee in future. this bill has no create time yet, so will not display minutes on buttom in counter mode.(counter
         //mode calculated created time, table mode calculates waited minutes by opentime.
         StringBuilder sql = new StringBuilder(
-                "INSERT INTO bill(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
+                "INSERT INTO BILL(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, STATUS) VALUES ('")
                 .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
                 .append(tableName).append("', '")	//table
                 .append(newBillIdx).append("', ")			//bill
@@ -822,16 +822,16 @@ public class BarFrame extends BaseFragmentActivity {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if(rs.moveToNext()) {
                 //save old values
-                int oldTotal = DBUtil.getCursorInt(rs,"Total");
+                int oldTotal = DBUtil.getCursorInt(rs,"TOTAL");
                 int oldCashReceived =DBUtil.getCursorInt(rs,"cashReceived");
                 int oldDebitReceived = DBUtil.getCursorInt(rs,"debitReceived");
                 int oldVisaReceived = DBUtil.getCursorInt(rs,"visaReceived");
                 int oldMasterReceived = DBUtil.getCursorInt(rs,"masterReceived");
                 String oldOtherReceived = DBUtil.getCursorString(rs,"otherReceived");
 
-                int oldCashback = DBUtil.getCursorInt(rs,"cashback"); //cash back is negative in db. so use "+" instead of "-"
-                int oldTip = DBUtil.getCursorInt(rs,"tip");
-                int oldStatus = DBUtil.getCursorInt(rs,"status");
+                int oldCashback = DBUtil.getCursorInt(rs,"CASHBACK"); //cash back is negative in db. so use "+" instead of "-"
+                int oldTip = DBUtil.getCursorInt(rs,"TIP");
+                int oldStatus = DBUtil.getCursorInt(rs,"STATUS");
                 //cashReceived
                 int onSrcCashReceived = oldCashReceived + oldCashback;
                 if(oldStatus < DBConsts.ORIGINAL) {
@@ -977,17 +977,17 @@ public class BarFrame extends BaseFragmentActivity {
     public void closeTableAndBillInDB(String tableName, String openTime) {
         //all the bill should already completed when table closed except those was generated while has no output on it.
         //this is the designed time to clean those bills.
-        StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
+        StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED)
                 .append(" WHERE tableName = '").append(tableName)
                 .append("' and OPENTIME = '").append(openTime)
-                .append("' and (status IS NULL OR status <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
+                .append("' and (STATUS IS NULL OR STATUS <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
         try {
             AikaPos.db.execSQL(sql.toString());
             if(BarOption.isDeleteTableWhenClose()) {
                 sql = new StringBuilder("delete from dining_Table WHERE name = '").append(tableName).append("'");
             }else {
-                sql = new StringBuilder("update dining_Table set status = ").append(DBConsts.ORIGINAL)
-                        .append(", opentime = '' WHERE name = '").append(tableName).append("'");
+                sql = new StringBuilder("update dining_Table set STATUS = ").append(DBConsts.ORIGINAL)
+                        .append(", openTime = '' WHERE name = '").append(tableName).append("'");
             }
             AikaPos.db.execSQL(sql.toString());
         }catch(Exception exp) {

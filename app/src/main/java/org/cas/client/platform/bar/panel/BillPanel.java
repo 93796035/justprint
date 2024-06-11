@@ -161,14 +161,14 @@ public class BillPanel extends BaseFragment
             if(otherreceived == null) {
             	otherreceived = "";
             }
-        	int cashBack = DBUtil.getCursorInt(rs, "cashback");
-            int tip = DBUtil.getCursorInt(rs, "tip");
-            int status = DBUtil.getCursorInt(rs, "status");
+        	int cashBack = DBUtil.getCursorInt(rs, "CASHBACK");
+            int tip = DBUtil.getCursorInt(rs, "TIP");
+            int status = DBUtil.getCursorInt(rs, "STATUS");
         
 			//generate a bill in db and update the output with the new bill id
 			String createtime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
-	            "INSERT INTO bill(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
+	            "INSERT INTO BILL(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
 	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
 				.append(createtime).append("', '")
 	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table
@@ -190,7 +190,7 @@ public class BillPanel extends BaseFragment
 		
 			AikaPos.db.execSQL(sql.toString());
 			
-		   	sql = new StringBuilder("Select _id from bill where createtime = '").append(createtime)
+		   	sql = new StringBuilder("Select _id from BILL where createTime = '").append(createtime)
 		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -1005,7 +1005,7 @@ public class BillPanel extends BaseFragment
     	if (billId != null && billId.length() > 0) {
     		sql.append(" and SALE_RECORD.createdTime <= '").append(createTime).append("'") //remove all output created after the bill
     		   .append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.DELETED)		//remove the deleted bills
-    		    	//.append(" or(output.arrearage is not null and CAST(output.arrearage AS DATETIME) > (select createTime from bill where _id = ").append(billId).append("))")
+    		    	//.append(" or(SALE_RECORD.arrearage is not null and CAST(SALE_RECORD.arrearage AS DATETIME) > (select createTime from bill where _id = ").append(billId).append("))")
     		    	.append(")");
     	} else {
     		sql.append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.VOIDED).append(")");
@@ -1378,7 +1378,7 @@ public class BillPanel extends BaseFragment
     				newMasterReceived = 0;
     			}
  	            
- 	            sql = new StringBuilder("update bill set tip = 0, cashback = 0, status = ").append(status).append(", cashReceived = ").append(newCashReceived)
+ 	            sql = new StringBuilder("update bill set TIP = 0, CASHBACK = 0, STATUS = ").append(status).append(", cashReceived = ").append(newCashReceived)
  	            		.append(", debitReceived = ").append(newDebitReceived)
  	            		.append(", visaReceived = ").append(newVisaReceived)
  	            		.append(", masterReceived = ").append(newMasterReceived)
@@ -1387,7 +1387,7 @@ public class BillPanel extends BaseFragment
  		 	    status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
 	 		}else if(status < DBConsts.COMPLETED){
 	 			//when splitting a bill in billPrinted status. new generated bill should be changed to saved status 
-	 			DBUtil.updateBill(newBillID, "status", DBConsts.SAVED);
+	 			DBUtil.updateBill(newBillID, "STATUS", DBConsts.SAVED);
 	 		}
 	 		//NOTE:following changing will not affect the interface when reopenning a completed bill from SaleRecordDlg.
    			//tip must be able to set to 0.

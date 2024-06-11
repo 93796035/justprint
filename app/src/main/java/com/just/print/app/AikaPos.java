@@ -137,7 +137,7 @@ public class AikaPos extends Application {
                 "ID INTEGER PRIMARY KEY, createtime TEXT, tableName TEXT, BillIndex TEXT, " +
                 "total INTEGER, discount INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
                 "debitReceived INTEGER, visaReceived INTEGER, masterReceived INTEGER, " +
-                "otherReceived TEXT, tip INTEGER, cashback INTEGER, status INTEGER, " +
+                "otherReceived TEXT, tip INTEGER, cashback INTEGER, STATUS INTEGER, " +
                 "userId INTEGER, Comment TEXT, opentime TEXT, invoiceId INTEGER);";
         db.execSQL(sql);
     }

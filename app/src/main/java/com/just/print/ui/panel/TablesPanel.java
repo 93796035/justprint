@@ -117,9 +117,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             // load all the tables ---------------------------
             //have to fetch the bill by outputs, because there's some table might have no output one it, it exist just in case user want to undo the split......
             StringBuilder sql = new StringBuilder("select t._id, t.openTime, t.STATUS as s1, t.posX, t.posY, t.WIDTH, t.HEIGHT, t.displayIdx, t.name, ")
-                    .append("t.TYPE, e.nickName, b.createdTime, b.TOTAL, b.status as s2")
+                    .append("t.TYPE, e.nickName, b.createdTime, b.TOTAL, b.STATUS as s2")
                     .append(" from dining_Table as t left join bill as b on t.name = b.tableName and t.opentime = b.opentime")
-                    .append(" and (b.status is null or b.status < ").append(DBConsts.COMPLETED).append(")")
+                    .append(" and (b.STATUS is null or b.STATUS < ").append(DBConsts.COMPLETED).append(")")
                     .append(" left join USER as e on b.userId = e._id");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             int yPos = 0;
@@ -331,10 +331,10 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             BarFrame.instance.valOpenTime.setText(tableToggle.getOpenTime());
 
             try {
-                StringBuilder sql = new StringBuilder("select * from Bill where tableName = '").append(tableToggle.getTableName()).append("'")
+                StringBuilder sql = new StringBuilder("select * from BILL where tableName = '").append(tableToggle.getTableName()).append("'")
                         .append(" and openTime = '").append(tableToggle.getOpenTime()).append("'")
-                        .append(" and (status is null or status < ").append(DBConsts.COMPLETED)
-                        .append(" and status >= ").append(DBConsts.ORIGINAL).append(")");
+                        .append(" and (STATUS is null or STATUS < ").append(DBConsts.COMPLETED)
+                        .append(" and STATUS >= ").append(DBConsts.ORIGINAL).append(")");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 int num = rs.getCount();
                 rs.moveToFirst();
