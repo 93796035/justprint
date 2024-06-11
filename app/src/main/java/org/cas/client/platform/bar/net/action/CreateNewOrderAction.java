@@ -752,7 +752,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		StringBuilder sql = new StringBuilder("Update Hardware set name = '").append(name)
 				.append("', category = ").append(category).append(", langType = ").append(langType)
 				.append(", ip = '").append(ip).append("', style = ").append(style).append(", status = ").append(status)
-				.append(" where id = ").append(id);
+				.append(" where _id = ").append(id);
 		try {
 			AikaPos.db.execSQL(sql.toString());
     		BarOption.updateLastModifiyTime();

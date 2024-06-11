@@ -137,7 +137,7 @@ public class Cmd_Refund implements SamActionListener {
 	// refundIntegerFormat should be negative
 	private static void popupMoneyBoxCheck(int newBillID, int refundAmount) {
 		//to check if we need to pop up money box.
- 		StringBuilder sb = new StringBuilder("select * from bill where id = " + newBillID);
+ 		StringBuilder sb = new StringBuilder("select * from bill where _id = " + newBillID);
  		try {
  			Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
  		    rs.moveToNext();

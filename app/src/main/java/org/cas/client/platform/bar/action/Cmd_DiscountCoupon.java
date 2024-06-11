@@ -111,7 +111,7 @@ public class Cmd_DiscountCoupon implements SamActionListener {
                 }
                 
             	//update the status of the coupon.
-            	sql = new StringBuilder("update hardware set status = 1 where id = ").append(id);
+            	sql = new StringBuilder("update hardware set status = 1 where _id = ").append(id);
             	AikaPos.db.execSQL(sql.toString());
             }
 		}catch(Exception exp) {

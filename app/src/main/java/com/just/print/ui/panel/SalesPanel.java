@@ -89,7 +89,7 @@ public class SalesPanel extends PicturePane{
         if(outputID >= 0) {
             StringBuilder sql = new StringBuilder("update output set discount = ").append(value)
                     .append(", toltalprice = ").append(Math.round(mostExpensiveDish.getPrice() - value))
-                    .append(" where id = ").append(outputID);
+                    .append(" where _id = ").append(outputID);
             AikaPos.db.execSQL(sql.toString());
         }
 

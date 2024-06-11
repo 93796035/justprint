@@ -67,7 +67,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //        		for (TableButton tableButton : btnTables) {
 //					if (!tableButton.getBackground().equals(bg) && tableButton.getType() != DBConsts.LOGO_TYPE) {
 //						int id = tableButton.getId();
-//						String sql = "delete from DINING_TABLE where id = " + id;
+//						String sql = "delete from DINING_TABLE where _id = " + id;
 //						try {
 //							smt.execute(sql);
 //						}catch(Exception exp) {
@@ -348,7 +348,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //			if(btnPressed != null && isDragged) {
 //				TableButton btn = (TableButton)o;
 //				//updateDB;
-//				String sql = "Update DINING_TABLE set posX = " + (btn.getX() + e.getX() - xGap) + ", posY = " + (btn.getY() + e.getY()-yGap) + " where id = " + btn.getId();
+//				String sql = "Update DINING_TABLE set posX = " + (btn.getX() + e.getX() - xGap) + ", posY = " + (btn.getY() + e.getY()-yGap) + " where _id = " + btn.getId();
 //	        	try {
 //	        		PIMDBModel.getStatement().execute(sql);
 //	                initContent();

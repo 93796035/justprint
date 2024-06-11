@@ -105,7 +105,7 @@ public class Cmd_MoveItem implements SamActionListener {
 //		        		}
 //		        		sql.append(PrintUtil.DATE_REF).append(originalBillPanel.getZippedCreateTime());
 //		        		sql.append(PrintUtil.OLD_SUBTOTAL).append(BarUtil.formatMoney(originalBillPanel.subTotal / 100.0))
-//		        		.append(" where id = ").append(billId);
+//		        		.append(" where _id = ").append(billId);
 //
 //		        		try {
 //				        	PIMDBModel.getStatement().executeUpdate(sql.toString());
@@ -121,7 +121,7 @@ public class Cmd_MoveItem implements SamActionListener {
 //				// the selected output to this bill.
 //				sql = new StringBuilder("update output set contactID = ").append(targetBillIdx)
 //						.append(", category = ").append(billId)
-//						.append(" where id = ").append(BarFrame.instance.curDish.getOutputID());
+//						.append(" where _id = ").append(BarFrame.instance.curDish.getOutputID());
 //		        try {
 //		        	PIMDBModel.getStatement().executeUpdate(sql.toString());
 //		        }catch(Exception exp) {

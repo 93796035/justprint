@@ -77,7 +77,7 @@ public class Cmd_EqualBill implements SamActionListener {
 					StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(panel.valTotlePrice.getText().toString()) * 100)/num)
 							.append(", discount = discount/").append(num)
 							.append(", serviceFee = serviceFee/").append(num)
-					.append(" where id = ").append(curBillId);
+					.append(" where _id = ").append(curBillId);
 					AikaPos.db.execSQL(sql.toString());
 					
 					panel.discount /= num;

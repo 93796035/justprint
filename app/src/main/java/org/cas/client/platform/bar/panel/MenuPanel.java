@@ -411,7 +411,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					try {
 
 						StringBuilder sql = new StringBuilder("UPDATE product SET INDEX = ").append(classifiedMenuIndex + 1)
-								.append(" where ID = ").append(dishAry[i].getId());
+								.append(" where _id = ").append(dishAry[i].getId());
 						AikaPos.db.execSQL(sql.toString());
 						BarOption.updateLastModifiyTime();
 					} catch (Exception exp) {
@@ -627,7 +627,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			//update the openTime.
 			String timeStr = BarUtil.df.format(new Date());
 			StringBuilder sql = new StringBuilder("update bill set openTime = '").append(timeStr)
-					.append("' where id = ").append(billPanel.getBillID());
+					.append("' where _id = ").append(billPanel.getBillID());
 			try {
 				AikaPos.db.execSQL(sql.toString());
 				//updating the open time of the table--------for counter mode, this step is necessary, because user might need to switch between the

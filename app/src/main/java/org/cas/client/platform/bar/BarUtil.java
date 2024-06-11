@@ -223,7 +223,7 @@ public class BarUtil {
 //    }
 //
 ////	private void setRefInfoComment(int billId) {
-////		StringBuilder sb = new StringBuilder("update bill set comment = '").append(PrintUtil.REF_TO + billId).append("' where id = ").append(billId);
+////		StringBuilder sb = new StringBuilder("update bill set comment = '").append(PrintUtil.REF_TO + billId).append("' where _id = ").append(billId);
 ////		try {
 ////			PIMDBModel.getStatement().executeUpdate(sb.toString());
 ////		}catch(Exception exp) {

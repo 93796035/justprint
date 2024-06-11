@@ -160,7 +160,7 @@ public class TableDlg// extends JDialog implements ICASDialog, ActionListener, C
 //			}
 //
 //			sql.append(", type = ").append(cmbCategory.getSelectedItem())
-//			.append(" where id = ").append(id);
+//			.append(" where _id = ").append(id);
 //		}
 //
 //		try {

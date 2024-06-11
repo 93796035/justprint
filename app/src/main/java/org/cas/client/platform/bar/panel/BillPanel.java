@@ -148,7 +148,7 @@ public class BillPanel extends BaseFragment
 		}
 		
 		//get other field out from db:
-		StringBuilder sql = new StringBuilder("select * from bill where id = " + getBillID());
+		StringBuilder sql = new StringBuilder("select * from bill where _id = " + getBillID());
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -910,7 +910,7 @@ public class BillPanel extends BaseFragment
     
     public void initContent(String billId, String billIndex, String tableName, String openTime, boolean skipSavingToDB) {
     	this.customerIndex = billIndex; //in case someone call this from outside.
-    	if((billId == null || "".equals(billId)) && (openTime == null || "".equals(openTime))) {//we can find bill by id, if no id, then openTime is a "must have" to locate a sigle bill.
+    	if((billId == null || "".equals(billId)) && (openTime == null || "".equals(openTime))) {//we can find bill by _id, if no id, then openTime is a "must have" to locate a sigle bill.
     		//when returned from panel1, then login, then if it's counter mode, will switch to panel[2], in this case, there no start time displayed.
     		//because no table has been clicked. all we have is tableName and Bill Idx. (wait, who called BarFrame.instance.setCurBillID()? why not set vlStartTime also.) 
     		//
@@ -1005,7 +1005,7 @@ public class BillPanel extends BaseFragment
     	if (billId != null && billId.length() > 0) {
     		sql.append(" and SALE_RECORD.createdTime <= '").append(createTime).append("'") //remove all output created after the bill
     		   .append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.DELETED)		//remove the deleted bills
-    		    	//.append(" or(output.arrearage is not null and CAST(output.arrearage AS DATETIME) > (select createTime from bill where id = ").append(billId).append("))")
+    		    	//.append(" or(output.arrearage is not null and CAST(output.arrearage AS DATETIME) > (select createTime from bill where _id = ").append(billId).append("))")
     		    	.append(")");
     	} else {
     		sql.append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.VOIDED).append(")");
@@ -1236,23 +1236,23 @@ public class BillPanel extends BaseFragment
 							.append(", discount = ").append(originalDish.getDiscount())
 							.append(", deleted = ").append(status)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
-							.append("' where id = ").append(newOutputId);
+							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 					//create ouput records specially for the decreased items, make them status as voided, so they can appear in the report.
 					newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
-							.append("' where id = ").append(newOutputId);
+							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 				}else {
 					int newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
 					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
 							.append(", category = '").append(BarUtil.df.format(new Date()))
-							.append("' where id = ").append(newOutputId);
+							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 				}
 				sql = new StringBuilder("update output set deleted = ").append(DBConsts.EXPIRED)
-						.append(" where id = ").append(dish.getOutputID());
+						.append(" where _id = ").append(dish.getOutputID());
 				AikaPos.db.execSQL(sql.toString());
 				//TODO: if the 
 				//TODO: and the bill cash values, bill status
@@ -1312,13 +1312,13 @@ public class BillPanel extends BaseFragment
 	 		
 			//expire the old bill
 			StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.EXPIRED)
-	 				.append(" where id = ").append(getBillID());
+	 				.append(" where _id = ").append(getBillID());
 			AikaPos.db.execSQL(sql.toString());
 	 		//================================================================================================
 	 		
 	        //when we reopen a refunded bill, we create a new bill which is a original bill, so we must clean the received money with the refund count.
 	 		if(status < DBConsts.ORIGINAL){	//save the old money numbers, in case the old status is negative(means have returned some/not all money).
-	 			StringBuilder sb = new StringBuilder("select * from bill where id = " + newBillID);
+	 			StringBuilder sb = new StringBuilder("select * from bill where _id = " + newBillID);
 
  	    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
  	            rs.moveToNext();
@@ -1382,7 +1382,7 @@ public class BillPanel extends BaseFragment
  	            		.append(", debitReceived = ").append(newDebitReceived)
  	            		.append(", visaReceived = ").append(newVisaReceived)
  	            		.append(", masterReceived = ").append(newMasterReceived)
- 	            		.append(" where id = ").append(newBillID);
+ 	            		.append(" where _id = ").append(newBillID);
 				AikaPos.db.execSQL(sql.toString());
  		 	    status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
 	 		}else if(status < DBConsts.COMPLETED){

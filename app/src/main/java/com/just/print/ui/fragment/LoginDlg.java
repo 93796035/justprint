@@ -172,7 +172,7 @@ public class LoginDlg extends DialogFragment {
                 //check if there's unclosed bill
                 String endTime = BarUtil.df.format(new Date()).substring(0, 11) + BarOption.getStartTime();
                 String lastPrintTime = "";
-                StringBuilder sqlBuilder = new StringBuilder("select ANNIVERSARY from USER where id = ").append(LoginDlg.USERID);
+                StringBuilder sqlBuilder = new StringBuilder("select ANNIVERSARY from USER where _id = ").append(LoginDlg.USERID);
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sqlBuilder.toString(), null);
                     if(rs.moveToNext()) {
@@ -191,7 +191,7 @@ public class LoginDlg extends DialogFragment {
                 if (salesAndRefunds.size() > 0) {
                     String curBatchIdx = "1";
                     //get current batchIdx
-                    String sql = new StringBuilder("select * from systeminfo where version >= '").append(endTime).append("' order by id desc").toString();
+                    String sql = new StringBuilder("select * from systeminfo where version >= '").append(endTime).append("' order by _id desc").toString();
                     try {
                         Cursor rs = AikaPos.db.rawQuery(sql, null);
                         //if didn't found any batch, means never print yet, set current batchIdx to 1

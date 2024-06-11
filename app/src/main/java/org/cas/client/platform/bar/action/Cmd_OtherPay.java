@@ -62,7 +62,7 @@ public class Cmd_OtherPay implements SamActionListener {
     	
 		int billId = billPanel.getBillID();
 		int oldTotal = 0;
-		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
+		StringBuilder sb = new StringBuilder("select * from bill where _id = " + billId);
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
@@ -86,7 +86,7 @@ public class Cmd_OtherPay implements SamActionListener {
 	   	    	.append("', otherReceived = '").append(((FunctionButton)v).getText())
 	   	    	.append("', status = ").append(DBConsts.COMPLETED)
 	   	    	.append(", userId = ").append(LoginDlg.USERID)
-	   	    	.append(" where id = ").append(billId);
+	   	    	.append(" where _id = ").append(billId);
 			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.
 			sql = new StringBuilder("update output set deleted = ").append(DBConsts.COMPLETED)

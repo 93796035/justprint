@@ -65,7 +65,7 @@ public class Cmd_Return implements SamActionListener {
     				//check if the otehr receivement is not null, add back to gift card.
     				//clean partial input
 	            	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
-	            	sql.append(" where id = ").append(billPanel.getBillID());
+	            	sql.append(" where _id = ").append(billPanel.getBillID());
 	            	try {
 	        			AikaPos.db.execSQL(sql.toString());
 	        			salesPanel.partialPaid = false;
@@ -98,7 +98,7 @@ public class Cmd_Return implements SamActionListener {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		    if(rs.getCount() == 0) {			//if still empty
 		    	//no related output, then don't record this bill in db at all.
-		    	sql = new StringBuilder("delete from bill where id = ").append(billID);
+		    	sql = new StringBuilder("delete from bill where _id = ").append(billID);
 		    	AikaPos.db.execSQL(sql.toString());
 		    }
 		}catch(Exception exp) {

@@ -1283,7 +1283,7 @@ public class PrintService{
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
         	sql.append(" and employee._id = ").append(LoginDlg.USERID);
         }
-        sql.append(" order by id");
+        sql.append(" order by _id");
         
         float totalSales = 0.0f;
         try {
@@ -1656,7 +1656,7 @@ public class PrintService{
 		StringBuilder content = new StringBuilder("\n");
 		int billId = billPanel.getBillID();
 		
-    	StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
+    	StringBuilder sb = new StringBuilder("select * from bill where _id = " + billId);
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
@@ -2510,7 +2510,7 @@ public class PrintService{
 
     //get the number which start to count since batch start.
 	private static String getOrderNoOfBill(String billId) {
-		StringBuilder sql = new StringBuilder("select * from bill where id = ").append(billId);
+		StringBuilder sql = new StringBuilder("select * from bill where _id = ").append(billId);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -2525,7 +2525,7 @@ public class PrintService{
 	}
 
 	private static void updateOrderNoOnBillId(String nextIdx, String billId) {
-		StringBuilder sql = new StringBuilder("update bill set invoiceId = ").append(nextIdx).append(" where id = ").append(billId);
+		StringBuilder sql = new StringBuilder("update bill set invoiceId = ").append(nextIdx).append(" where _id = ").append(billId);
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {

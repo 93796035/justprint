@@ -62,7 +62,7 @@ public class DBUtil {
 		sql = new StringBuilder("update bill set tableName = '").append(newTable)
 				.append("', BillIndex = '").append(billIdx)
 				.append("' , opentime = '").append(openTime)
-				.append("' where id = ").append(billID);
+				.append("' where _id = ").append(billID);
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {
@@ -76,7 +76,7 @@ public class DBUtil {
 		int clientIdx = 0;
 		long createTime = 0;
 
-		String sql = "select * from bill where id = " + billId;  // 直接使用字符串连接
+		String sql = "select * from bill where _id = " + billId;  // 直接使用字符串连接
 		Cursor cursor = AikaPos.db.rawQuery(sql, null);
 		try {
 			if (cursor != null && cursor.moveToFirst()) {
@@ -114,8 +114,8 @@ public class DBUtil {
 			sql = new StringBuilder("SELECT createdTime FROM bill WHERE tableId = '").append(tableId)
 			.append("' AND openTime = '").append(openTime)
 			.append("' AND billIndex = ").append(clientIdx)
-			.append(" AND id < ").append(billId)
-			.append(" ORDER BY id DESC LIMIT 1;").toString();
+			.append(" AND _id < ").append(billId)
+			.append(" ORDER BY _id DESC LIMIT 1;").toString();
 			cursor = AikaPos.db.rawQuery(sql.toString(), null);
 			try {
 				if (cursor != null && cursor.moveToFirst()) {
@@ -162,7 +162,7 @@ public class DBUtil {
 	}
 
 	public static void updateOutput(int outputId, String fieldName, int value) {
-		StringBuilder sb = new StringBuilder("update output set ").append(fieldName).append(" = ").append(value).append(" where id = ").append(outputId);
+		StringBuilder sb = new StringBuilder("update output set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(outputId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
 		}catch(Exception e) {
@@ -171,7 +171,7 @@ public class DBUtil {
 	}
 
 	public static void updateBill(int billId, String fieldName, int value) {
-		StringBuilder sb = new StringBuilder("update bill set ").append(fieldName).append(" = ").append(value).append(" where id = ").append(billId);
+		StringBuilder sb = new StringBuilder("update bill set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(billId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
 		}catch(Exception e) {
@@ -181,7 +181,7 @@ public class DBUtil {
 	
 	public static void updateBill(int billId, String fieldName, String value) {
 		StringBuilder sb = new StringBuilder("update bill set ").append(fieldName)
-				.append(" = '").append(value).append("' where id = ").append(billId);
+				.append(" = '").append(value).append("' where _id = ").append(billId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
 		}catch(Exception e) {
@@ -220,7 +220,7 @@ public class DBUtil {
 		if(createTime != null) {
 			sql.append(", createTime = '").append(createTime).append("'");
 		}
-		sql.append(" where id = ").append(billPanel.getBillID());
+		sql.append(" where _id = ").append(billPanel.getBillID());
 
 		try {
 			AikaPos.db.execSQL(sql.toString());
@@ -237,7 +237,7 @@ public class DBUtil {
 //				.append(", discount = ").append(billPanel.discount)
 //				.append(", serviceFee = ").append(billPanel.serviceFee)
 //				.append(", comment = ' ").append(billPanel.getComment()).append("'")
-//				.append(" where id = ").append(billPanel.getBillID());
+//				.append(" where _id = ").append(billPanel.getBillID());
 //		try {
 //			AikaStyle.db.execSQL(sql.toString());
 //		}catch(Exception e) {
@@ -315,7 +315,7 @@ public class DBUtil {
 
 		StringBuilder sql = new StringBuilder("update output set deleted = ").append(status)
 				.append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000))
-				.append(" where id = ").append(dish.getOutputID());
+				.append(" where _id = ").append(dish.getOutputID());
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		} catch (Exception exp) {
@@ -412,7 +412,7 @@ public class DBUtil {
 					.append(", category = ").append(dish.getBillID())
 					.append(", TOLTALPRICE = ").append(dish.getTotalPrice() * splitRate)
 					.append(", discount = ").append(dish.getDiscount() * splitRate)
-					.append(" where id = ").append(dish.getOutputID());
+					.append(" where _id = ").append(dish.getOutputID());
 			try {
 				AikaPos.db.execSQL(sql.toString());
 			} catch (Exception exp) {

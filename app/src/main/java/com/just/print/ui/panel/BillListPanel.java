@@ -236,7 +236,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                             .append(PrintUtil.REF_TO).append(getCurBillPanel().getBillID()).append("'")
                             .append(PrintUtil.DATE_REF).append(getCurBillPanel().getZippedCreateTime())
                             .append(PrintUtil.OLD_SUBTOTAL).append(BarUtil.formatMoney(getCurBillPanel().subTotal/100.0))
-                            .append(" where id = ").append(targetBillPanel.getBillID());
+                            .append(" where _id = ").append(targetBillPanel.getBillID());
                     try {
                         AikaPos.db.execSQL(sql.toString());
                     }catch(Exception e) {
@@ -250,7 +250,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         try {
             //get the output price of the moving dish, it will be used to adjust the total of two bill.
             int outputTotalPrice = 0;
-            StringBuilder sql = new StringBuilder("select toltalprice from output where id = ").append(BarFrame.instance.curDish.getOutputID());
+            StringBuilder sql = new StringBuilder("select toltalprice from output where _id = ").append(BarFrame.instance.curDish.getOutputID());
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
                 outputTotalPrice = DBUtil.getCursorInt(rs, "toltalprice");
@@ -262,7 +262,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             if(originalBillId > 0) {
                 sql = new StringBuilder("update bill set total = total - ")
                         .append(outputTotalPrice)
-                        .append(" where id = ").append(originalBillId);
+                        .append(" where _id = ").append(originalBillId);
                 AikaPos.db.execSQL(sql.toString());
             }
 
@@ -271,7 +271,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 //update the total price of the target bill
                 sql = new StringBuilder("update bill set total = total + ")
                         .append(outputTotalPrice)
-                        .append(" where id = ").append(targetBillId);
+                        .append(" where _id = ").append(targetBillId);
                 AikaPos.db.execSQL(sql.toString());
             }else {
                 targetBillId = BarFrame.instance.createAnEmptyBill(
@@ -280,7 +280,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                         Integer.valueOf(targetBillPanel.billButton.getText()), 1);
                 sql = new StringBuilder("update bill set total = ")
                         .append(outputTotalPrice)
-                        .append(" where id = ").append(targetBillId);
+                        .append(" where _id = ").append(targetBillId);
                 AikaPos.db.execSQL(sql.toString());
             }
             BarFrame.instance.curDish.setBillID(targetBillId);	//might not necessary, just in case the billPanel will not updated before it's used anywhere.
@@ -288,7 +288,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             // Update the output to belongs to the new ContactID (contactID is bill Index,not  bill id)
             sql = new StringBuilder("update output set CONTACTID = ").append(targetBillPanel.billButton.getText())
                     .append(", category = " + targetBillId)
-                    .append(" where id = ").append(BarFrame.instance.curDish.getOutputID());
+                    .append(" where _id = ").append(BarFrame.instance.curDish.getOutputID());
             AikaPos.db.execSQL(sql.toString());
 
         }catch(Exception exp) {
@@ -365,7 +365,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         sql = new StringBuilder("update bill set discount = ").append(combinedDiscount)
                 .append(", serviceFee = ").append(combinedServiceFee)
                 .append(", comment = '").append(combinedComment).append("'")
-                .append(" where id = ").append(billPanel.getBillID());	//billPanel's billID will be a new bill Id if it's regenerated.
+                .append(" where _id = ").append(billPanel.getBillID());	//billPanel's billID will be a new bill Id if it's regenerated.
 
         try {
             AikaPos.db.execSQL(sql.toString());
@@ -409,7 +409,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         StringBuilder sql = new StringBuilder("select * from output where SUBJECT = '").append(tableName)
                 .append("' and time = '").append(startTime)
                 .append("' and contactID = ").append(billIdx)
-                .append(" and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(") order by id");
+                .append(" and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(") order by _id");
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
@@ -450,7 +450,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             if(map.containsKey(key)) {//if map already contains this key, then delete this output
 
                 sql = new StringBuilder("update output set deleted = ").append(DBConsts.DELETED)
-                        .append(" where id = ").append(dish.getOutputID());
+                        .append(" where _id = ").append(dish.getOutputID());
                 try {
                     AikaPos.db.execSQL(sql.toString());
                 }catch(Exception e) {
@@ -473,11 +473,11 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                     sql = new StringBuilder("update output set AMOUNT = ").append(newNum)
                             .append(", discount = ").append(tD.getDiscount())
                             .append(", TOLTALPRICE = ").append(tD.getTotalPrice())
-                            .append(" where id = ").append(tD.getOutputID());
+                            .append(" where _id = ").append(tD.getOutputID());
                     try {
                         AikaPos.db.execSQL(sql.toString());
                     }catch(Exception e) {
-                        L.e("combineOutputs", "update output set amount = " + newNum + " where id = " + dish.getOutputID(), e);
+                        L.e("combineOutputs", "update output set amount = " + newNum + " where _id = " + dish.getOutputID(), e);
                     }
                 }
             }else {//如果发现map中没有这个key，那么创建一个key存入map。PK为value，如果PK不存在，或者为1，或者为0，那么用PS为value。
@@ -502,7 +502,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             //TBD:the status curently used "expired", means void and completed bills will all be included, to ensure the new customer number
             //number not duplicated with existing one.
             sql.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(" and status >= 0)");
-            sql.append(" order by id");//if order by billIndex, then "9" will be the last one. so should order by id
+            sql.append(" order by _id");//if order by billIndex, then "9" will be the last one. so should order by _id
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if (rs != null && rs.moveToFirst()) {
                 num = DBUtil.getCursorInt(rs, "billIndex");

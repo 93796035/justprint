@@ -51,7 +51,7 @@ public class Cmd_VoidOrder implements SamActionListener {
 //			rs.last();
 //
 //		    if(rs.getRow() == 0) {			//if didn't find any saved output, means either empty, or all new.
-//		    	sql = new StringBuilder("delete from bill where id = ").append(billID);
+//		    	sql = new StringBuilder("delete from bill where _id = ").append(billID);
 //			    PIMDBModel.getStatement().executeUpdate(sql.toString());
 //		    } else { 						//if found some saved outputs......saved outputs also means send to kitchen already.
 //		    	ArrayList<Dish> orderedDishes = billPanel.getOrderedDishAry();
@@ -94,7 +94,7 @@ public class Cmd_VoidOrder implements SamActionListener {
 //		    	billPanel.setComment( billPanel.getComment() + ValuePossible.VOID + " #REASON:" + ReasonDlg.comment);
 //				sql = new StringBuilder("update bill set status = ").append(DBConsts.VOIDED)
 //						.append(", comment = '").append(billPanel.getComment())
-//						.append("' where id = ").append(billPanel.getBillID());
+//						.append("' where _id = ").append(billPanel.getBillID());
 //		    	PIMDBModel.getStatement().executeQuery(sql.toString());
 //
 //		    	//update output

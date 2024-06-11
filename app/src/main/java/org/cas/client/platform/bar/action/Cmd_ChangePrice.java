@@ -130,7 +130,7 @@ public class Cmd_ChangePrice implements SamActionListener {
 //         		StringBuilder sql = new StringBuilder("update output set TOLTALPRICE = ").append(dish.getPrice() - dish.getDiscount())
 //         				.append(", deleted = ").append(DBConsts.ITEM_PRICE_CHANGED)
 //         				.append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000)) //this will cause the bill considered as revised when printing bill.
-//         				.append(" where id = ").append(outputID);
+//         				.append(" where _id = ").append(outputID);
 //
 //         		PIMDBModel.getStatement().executeUpdate(sql.toString());
 //         	}

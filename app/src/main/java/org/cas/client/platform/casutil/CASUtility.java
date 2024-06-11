@@ -1623,7 +1623,7 @@ public class CASUtility {
 //    private static void checkSN() {
 //        if (sysValue[1].length() < 1) {
 //            try {
-//                String tStr = "UPDATE SYSTEMINFO  SET VERSION = '".concat(getSerialNumber()).concat("' where id = 1");
+//                String tStr = "UPDATE SYSTEMINFO  SET VERSION = '".concat(getSerialNumber()).concat("' where _id = 1");
 //                PIMDBModel.getStatement().executeUpdate(tStr);
 //            } catch (SQLException e) {
 //                ErrorUtil.write(e);
@@ -1646,11 +1646,11 @@ public class CASUtility {
 //            // 更新系统正常启动（非计数启动）的次数。该数字作为备份数据库时通过循环起名字来限制备份的数目.
 //            String sql =
 //                    "update systeminfo set Version = '".concat(String.valueOf(Integer.parseInt(sysValue[2]) + 1))
-//                            .concat("' where id = 2");// 不能用tmount++.
+//                            .concat("' where _id = 2");// 不能用tmount++.
 //            stmt.executeUpdate(sql);
 //
 //            // 取出数据库中的"有效使用次数".@NOTE:软件使用次数放在DB中，以防治系统重装。
-//            sql = "select type from useridentity where id = 2";
+//            sql = "select type from useridentity where _id = 2";
 //            ResultSet rs = stmt.executeQuery(sql);
 //            rs.beforeFirst();
 //            while (rs.moveToNext())
@@ -1663,9 +1663,9 @@ public class CASUtility {
 //                Object tTimesInConfig = CustOpts.custOps.getValue("ElementCount");
 //                int tTimes = tTimesInConfig == null ? 0 : Integer.parseInt((String) tTimesInConfig);
 //                tAmount = tAmount > tTimes ? tAmount : tTimes;
-//                sql = "update useridentity set type = ".concat(String.valueOf(tAmount + 1)).concat(" where id = 2");// 不能用tmount++.
+//                sql = "update useridentity set type = ".concat(String.valueOf(tAmount + 1)).concat(" where _id = 2");// 不能用tmount++.
 //                stmt.executeUpdate(sql);
-//                sql = "update systeminfo set Version = '".concat(tDate).concat("' where id = 7");
+//                sql = "update systeminfo set Version = '".concat(tDate).concat("' where _id = 7");
 //                stmt.executeUpdate(sql);
 //                CustOpts.custOps.setKeyAndValue("ElementCount", tAmount + 1);
 //            }
@@ -1851,7 +1851,7 @@ public class CASUtility {
 //    public static void addToTotalIn(
 //            int pCountIn) {
 //        sysValue[3] = String.valueOf(Integer.parseInt(sysValue[3]) + pCountIn);
-//        String sql = "update systeminfo set Version = '".concat(sysValue[3]).concat("' where id = 3");
+//        String sql = "update systeminfo set Version = '".concat(sysValue[3]).concat("' where _id = 3");
 //        Statement stmt;
 //        try {
 //            stmt = PIMDBModel.getStatement();
@@ -1865,7 +1865,7 @@ public class CASUtility {
 //    public static void addToTotalOut(
 //            int pCountOut) {
 //        sysValue[4] = String.valueOf(Integer.parseInt(sysValue[4]) + pCountOut);
-//        String sql = "update systeminfo set Version = '".concat(sysValue[4]).concat("' where id = 4");
+//        String sql = "update systeminfo set Version = '".concat(sysValue[4]).concat("' where _id = 4");
 //        Statement stmt;
 //        try {
 //            stmt = PIMDBModel.getStatement();

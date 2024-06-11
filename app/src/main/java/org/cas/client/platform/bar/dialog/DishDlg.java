@@ -199,7 +199,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
                 db.execSQL(sql, new Object[]{lang1, lang2, lang3, price, gst, qst, size, printers,
                         cmbCategory.getSelectedItem().toString(), dspIndex, cbxPricePomp.isChecked(), cbxMenuPomp.isChecked(), cbxModifyPomp.isChecked()});
             } else {
-                String sql = "UPDATE dish SET name1 = ?, name2 = ?, name3 = ?, PRICE = ?, gst = ?, qst = ?, size = ?, printerIds = ?, CATEGORY = ?, displayIdx = ?, pricePomp = ?, menuPomp = ?, ModifyPomp = ? WHERE ID = ?";
+                String sql = "UPDATE dish SET name1 = ?, name2 = ?, name3 = ?, PRICE = ?, gst = ?, qst = ?, size = ?, printerIds = ?, CATEGORY = ?, displayIdx = ?, pricePomp = ?, menuPomp = ?, ModifyPomp = ? WHERE _id = ?";
                 db.execSQL(sql, new Object[]{lang1, lang2, lang3, price, gst, qst, size, printers,
                         cmbCategory.getSelectedItem().toString(), dspIndex, cbxPricePomp.isChecked(), cbxMenuPomp.isChecked(), cbxModifyPomp.isChecked(), prodID});
             }
@@ -224,7 +224,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
                     SQLiteDatabase db = AikaPos.db;
                     db.beginTransaction();
                     try {
-                        String sql = "DELETE FROM Dish WHERE ID = ?";
+                        String sql = "DELETE FROM Dish WHERE _id = ?";
                         db.execSQL(sql, new Object[]{prodID});
                         db.setTransactionSuccessful();
                         Toast.makeText(getActivity(), "Dish deleted", Toast.LENGTH_SHORT).show();

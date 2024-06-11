@@ -72,7 +72,7 @@ public class Cmd_GiftCard implements SamActionListener {
                 if (BarFrame.payDlg.inputedContent != null && BarFrame.payDlg.inputedContent.length() > 0) {
                     float newBalance = (float)(value / 100.0) - Float.valueOf(BarFrame.payDlg.inputedContent);
 	                sql = new StringBuilder("update hardware set status = ").append(DBConsts.EXPIRED)
-                    		.append(" where id = ").append(id);
+                    		.append(" where _id = ").append(id);
                     AikaPos.db.execSQL(sql.toString());
 					sql = new StringBuilder("INSERT INTO Hardware (name, category, langType, ip, style, status) VALUES ('").append(giftCardNumber)
 					    .append("', 2, ").append(Math.round(newBalance * 100)).append(", '")

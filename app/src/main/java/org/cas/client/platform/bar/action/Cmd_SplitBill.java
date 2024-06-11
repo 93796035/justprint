@@ -62,7 +62,7 @@ public class Cmd_SplitBill implements  SamActionListener {
     				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
             	//clean partial input
             	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
-            	sql.append(" where id = ").append(billPanel.getBillID());
+            	sql.append(" where _id = ").append(billPanel.getBillID());
             	try {
         			AikaPos.db.execSQL(sql.toString());
         			salesPanel.partialPaid = false;

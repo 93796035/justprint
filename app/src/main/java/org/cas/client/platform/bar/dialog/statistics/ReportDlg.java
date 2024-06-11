@@ -135,7 +135,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	private void initContent() {
 		String endTime = BarUtil.df.format(new Date());
 		String startTime = endTime.substring(0, 11) + BarOption.getStartTime();
-		StringBuilder sql = new StringBuilder("select ANNIVERSARY from USER where id = ").append(LoginDlg.USERID);
+		StringBuilder sql = new StringBuilder("select ANNIVERSARY from USER where _id = ").append(LoginDlg.USERID);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			if (rs.moveToNext()) {
@@ -152,7 +152,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		}
 
 		if (LoginDlg.getUSERTYPE() >= LoginDlg.ADMIN_STATUS) {
-			sql = new StringBuilder("select * from systeminfo where version >= '").append(startTime).append("' order by id desc");
+			sql = new StringBuilder("select * from systeminfo where version >= '").append(startTime).append("' order by _id desc");
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 				curBatchIdx = "1";
@@ -187,7 +187,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				return;
 			} else {
 				if (inputted == max) {
-					StringBuilder sql = new StringBuilder("select * from systeminfo where id = ").append(max - 1);
+					StringBuilder sql = new StringBuilder("select * from systeminfo where _id = ").append(max - 1);
 					try {
 						Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 						rs.moveToNext();
@@ -199,7 +199,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 						L.e("ReportDlg ", "Exception when fetching latest record." + sql, exp);
 					}
 				} else {
-					StringBuilder sql = new StringBuilder("select * from systeminfo where id <= ").append(inputted).append(" order by id desc limit 2");
+					StringBuilder sql = new StringBuilder("select * from systeminfo where _id <= ").append(inputted).append(" order by _id desc limit 2");
 					try {
 						Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 						rs.moveToNext();
@@ -446,7 +446,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	private void sendReportToWeb() {
 		if (BarFrame.instance.menuPanel.getPrinters()[0].getIp().toLowerCase().startsWith("mev")) {
-			StringBuilder sql = new StringBuilder("select * from USER where id = ").append(LoginDlg.USERID);
+			StringBuilder sql = new StringBuilder("select * from USER where _id = ").append(LoginDlg.USERID);
 			try {
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 				if (rs.moveToNext()) {
@@ -588,7 +588,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	public static void updateLastPrintTime(String endTime) {
-		StringBuilder sql = new StringBuilder("update USER set anniversary = '").append(endTime).append("' where id = ").append(LoginDlg.USERID);
+		StringBuilder sql = new StringBuilder("update USER set anniversary = '").append(endTime).append("' where _id = ").append(LoginDlg.USERID);
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		} catch (Exception exp) {

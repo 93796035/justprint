@@ -99,16 +99,16 @@ public class PayDlg extends DialogFragment
 //		//@NOTe: we do not use onSrc + new input, because onsrc value do not change after first time calculated.
 //		if(curTitle.startsWith(BarFrame.consts.EnterCashPayment())){
 //			int newCashReceived = reflectNewInput(valCashReceived.getText()) + (int)(Float.valueOf(valLeft.getText()) * 100);
-//			sb.append("update bill set cashReceived = ").append(oldCashReceived + newCashReceived - onSrcCashReceived).append(" where id = ").append(billId);
+//			sb.append("update bill set cashReceived = ").append(oldCashReceived + newCashReceived - onSrcCashReceived).append(" where _id = ").append(billId);
 //		} else if(curTitle.startsWith(BarFrame.consts.EnterDebitPayment())) {
 //			int newDebitReceived = reflectNewInput(valDebitReceived.getText());
-//			sb.append("update bill set debitReceived = ").append(oldDebitReceived + newDebitReceived - onSrcDebitReceived).append(" where id = ").append(billId);
+//			sb.append("update bill set debitReceived = ").append(oldDebitReceived + newDebitReceived - onSrcDebitReceived).append(" where _id = ").append(billId);
 //		} else if(curTitle.startsWith(BarFrame.consts.EnterVisaPayment())) {
 //			int newVisaReceived = reflectNewInput(valVisaReceived.getText());
-//			sb.append("update bill set visaReceived = ").append(oldVisaReceived + newVisaReceived - onSrcVisaReceived).append(" where id = ").append(billId);
+//			sb.append("update bill set visaReceived = ").append(oldVisaReceived + newVisaReceived - onSrcVisaReceived).append(" where _id = ").append(billId);
 //		} else if(curTitle.startsWith(BarFrame.consts.EnterMasterPayment())) {
 //			int newMasterReceived = reflectNewInput(valMasterReceived.getText());
-//			sb.append("update bill set masterReceived = ").append(oldMasterReceived + newMasterReceived - onSrcMasterReceived).append(" where id = ").append(billId);
+//			sb.append("update bill set masterReceived = ").append(oldMasterReceived + newMasterReceived - onSrcMasterReceived).append(" where _id = ").append(billId);
 //		}
 //
 //		try {
@@ -151,7 +151,7 @@ public class PayDlg extends DialogFragment
 //   	    		.append(", createTime = '").append(paidTime).append("'")
 //	   	    	.append(", status = ").append(DBConsts.COMPLETED)
 //	   	    	.append(", userId = ").append(LoginDlg.USERID)
-//	   	    	.append(" where id = ").append(billId);
+//	   	    	.append(" where _id = ").append(billId);
 //			PIMDBModel.getStatement().executeUpdate(sql.toString());
 //			//update the status of relevant outputs.
 //			BarFrame.instance.updateOutputStatus(DBConsts.COMPLETED);
@@ -168,7 +168,7 @@ public class PayDlg extends DialogFragment
     }
 	
 	private void initMoneyDisplay(int billId) {
-		StringBuilder sb = new StringBuilder("select * from bill where id = " + billId);
+		StringBuilder sb = new StringBuilder("select * from bill where _id = " + billId);
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
@@ -487,13 +487,13 @@ public class PayDlg extends DialogFragment
 //        } else if( o == valCashReceived || o == valDebitReceived || o == valVisaReceived || o == valMasterReceived) {
 //        	StringBuilder sb = new StringBuilder("update bill set ");
 //        	if(o == valCashReceived ) {
-//        		sb.append("cashReceived = 0 where id = ");
+//        		sb.append("cashReceived = 0 where _id = ");
 //        	} else if(o == valDebitReceived) {
-//        		sb.append("debitReceived = 0 where id = ");
+//        		sb.append("debitReceived = 0 where _id = ");
 //        	} else if(o == valVisaReceived) {
-//        		sb.append("visaReceived = 0 where id = ");
+//        		sb.append("visaReceived = 0 where _id = ");
 //        	} else if(o == valMasterReceived) {
-//        		sb.append("masterReceived = 0 where id = ");
+//        		sb.append("masterReceived = 0 where _id = ");
 //        	}
 //        	sb.append(billPanel.getBillID());
 //        	try {
@@ -585,7 +585,7 @@ public class PayDlg extends DialogFragment
 	}
 
 	public static int getBillStatus(int billId) {
-		StringBuilder sb = new StringBuilder("select * from bill where id = ").append(billId);
+		StringBuilder sb = new StringBuilder("select * from bill where _id = ").append(billId);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
 			if(rs.moveToNext()) {

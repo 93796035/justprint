@@ -81,7 +81,7 @@ public class TableButton extends Button {
 //                    .append(" WHERE name = '").append(tableName).append("'");
 //            try {
 //                PIMDBModel.getStatement().executeUpdate(sql.toString());
-//                sql = new StringBuilder("update bill set opentime = '").append(openTime).append("' where id = ").append(billId);
+//                sql = new StringBuilder("update bill set opentime = '").append(openTime).append("' where _id = ").append(billId);
 //                PIMDBModel.getStatement().executeUpdate(sql.toString());
 //            }catch(Exception exp) {
 //                L.e("openATable", "exception when openning a table: " + sql, exp);

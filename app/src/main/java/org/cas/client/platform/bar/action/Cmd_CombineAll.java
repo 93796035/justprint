@@ -69,7 +69,7 @@ public class Cmd_CombineAll implements SamActionListener {
 //				Object idx = idxMap.get(dish.getBillID());
 //				if(idx != null) {
 //					sql = new StringBuilder("update output set contactID = ").append(idx)
-//							.append(" where id = ").append(dish.getOutputID());
+//							.append(" where _id = ").append(dish.getOutputID());
 //					try {
 //						PIMDBModel.getStatement().execute(sql.toString());
 //					}catch(Exception exp) {
