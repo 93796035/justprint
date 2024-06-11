@@ -28,6 +28,7 @@ import com.just.print.db.bean.Printer;
 import com.just.print.ui.panel.PicturePane;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
+import com.just.print.util.StringUtils;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
@@ -359,10 +360,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					if (lang > categoryNameMetrix.length - 1)
 						lang = categoryNameMetrix.length - 1;
 					String text = categoryNameMetrix[lang][globleCategoryIdxOfCurCategory];
-
-					btnCategory.setText(BarUtil.empty(text) ? defaultText : text);
-					btnCategory.setTextOn(btnCategory.getText());
-					btnCategory.setTextOff(btnCategory.getText());
+					text = getTextForDsp(BarUtil.empty(text) ? defaultText : text);
+					btnCategory.setText(text);
+					btnCategory.setTextOn(text);
+					btnCategory.setTextOff(text);
 
 					btnCategory.setLang1Text(defaultText);
 					if (tgbActiveCategory != null) {
@@ -374,6 +375,11 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 							btnCategory.setSelected(true);
 						}
 					}
+				}else{
+					String text = getTextForDsp("");
+					btnCategory.setText(text);
+					btnCategory.setTextOn(text);
+					btnCategory.setTextOff(text);
 				}
 
 				globleCategoryIdxOfCurCategory++;
@@ -428,7 +434,6 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			ArrayList<MenuButton> btnMenuArry = new ArrayList<>();
 			for (int c = 0; c < menuColumn; c++) {
 				MenuButton btnMenu = new MenuButton(globleMenuIdxOfCurCategory + 1);
-				btnMenu.setMargin(0, 0, 0, 0);
 				dishButtonContainer.addView(btnMenu);
 				btnMenu.setOnClickListener(this);
 				btnMenuArry.add(btnMenu);
@@ -439,12 +444,15 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					if (lang > classifiedDishNameMetrix.length - 1)
 						lang = classifiedDishNameMetrix.length - 1;
 					String text = classifiedDishNameMetrix[lang][globleMenuIdxOfCurCategory];
+					text = getTextForDsp(BarUtil.empty(text) ? classifiedDishNameMetrix[0][globleMenuIdxOfCurCategory] : text);
 					if (BarOption.showPriceOnMenu()) {
 						text += "\n";
 						text += BarUtil.formatMoney(dish.getPrice() / 100.0);
 					}
-					btnMenu.setText(BarUtil.empty(text) ? classifiedDishNameMetrix[0][globleMenuIdxOfCurCategory] : text);
+					btnMenu.setText(text);
 					globleMenuIdxOfCurCategory++;
+				}else{
+					btnMenu.setText(getTextForDsp(BarOption.showPriceOnMenu() ? "\n\n\n" : "\n\n"));
 				}
 			}
 			onSrcMenuBtnMatrix.add(btnMenuArry);
@@ -459,6 +467,13 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				reLayout();
 			}
 		});
+	}
+
+	private String getTextForDsp(String s) {
+		if(!s.contains("\n")){
+			s += "\n";
+		}
+		return s;
 	}
 
 	private void adjustPageArrowStatus(int globleCategoryIdxOfCurCategory, int globleMenuIdxOfCurCategory) {

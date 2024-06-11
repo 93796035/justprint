@@ -1206,7 +1206,7 @@ public class BarOption {
 		CustOpts.custOps.setKeyAndValue("showTableOnBill", String.valueOf(selected));
 	}
 	public static boolean showPriceOnMenu() {
-		return CustOpts.custOps.getValue("showPriceOnMenu") == null ? false :
+		return CustOpts.custOps.getValue("showPriceOnMenu") == null ? true :
 			"true".equals(CustOpts.custOps.getValue("showPriceOnMenu"));
 	}
 	public static String getReportHeaderOfSuperAdmin() {
