@@ -446,7 +446,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					text = getTextForDsp(BarUtil.empty(text) ? classifiedDishNameMetrix[0][globleMenuIdxOfCurCategory] : text);
 					if (BarOption.showPriceOnMenu()) {
 						text += "\n";
-						text += BarUtil.formatMoney(dish.getPrice() / 100.0);
+						text += BarUtil.formatMoney(dish.getPrice());
 					}
 					btnMenu.setText(text);
 					globleMenuIdxOfCurCategory++;
