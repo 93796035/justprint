@@ -376,10 +376,9 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 						}
 					}
 				}else{
-					String text = getTextForDsp("");
-					btnCategory.setText(text);
-					btnCategory.setTextOn(text);
-					btnCategory.setTextOff(text);
+					btnCategory.setText("\n");
+					btnCategory.setTextOn("\n");
+					btnCategory.setTextOff("\n");
 				}
 
 				globleCategoryIdxOfCurCategory++;
@@ -452,7 +451,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					btnMenu.setText(text);
 					globleMenuIdxOfCurCategory++;
 				}else{
-					btnMenu.setText(getTextForDsp(BarOption.showPriceOnMenu() ? "\n\n\n" : "\n\n"));
+					btnMenu.setText(getTextForDsp(BarOption.showPriceOnMenu() ? "\n\n" : "\n"));
 				}
 			}
 			onSrcMenuBtnMatrix.add(btnMenuArry);
