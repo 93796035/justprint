@@ -706,7 +706,7 @@ public class BarFrame extends BaseFragmentActivity {
         if (index == 3) {  // setting
             superAdminAuthentication(success -> {
                 if (LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
-                    topBar.setVisibility(View.GONE);
+                    topBar.setEnabled(false);
                     ((SettingPanel)panels[3]).reLayout();
                     switchFragment(panels[3]);
                 } else {
@@ -714,17 +714,17 @@ public class BarFrame extends BaseFragmentActivity {
                 }
             });
         } else if (index == 2) {  // sale
-            topBar.setVisibility(View.VISIBLE);
+            topBar.setEnabled(true);
             topBar.setBackgroundColor(Color.GRAY);
             initSalesPanel();
             switchFragment(panels[2]);
         } else if (index == 1) {  // bill
-            topBar.setVisibility(View.VISIBLE);
+            topBar.setEnabled(true);
             topBar.setBackgroundColor(Color.DKGRAY);
             ((BillListPanel) panels[1]).initContent();
             switchFragment(panels[1]);
         } else if (index == 0) {  // table
-            topBar.setVisibility(View.GONE);
+            topBar.setEnabled(false);
             resetStatus();
             ((TablesPanel) panels[0]).initContent();
             switchFragment(panels[0]);
@@ -1083,9 +1083,6 @@ public class BarFrame extends BaseFragmentActivity {
     public static TextView lblCurBillIdx;
     @XViewByID(R.id.valCurBillIdx)
     public TextView valCurBillIdx;
-
-    @XViewByID(R.id.lblOpenTime)
-    public TextView lblOpenTime;
 
     @XViewByID(R.id.valOpenTime)
     public TextView valOpenTime;

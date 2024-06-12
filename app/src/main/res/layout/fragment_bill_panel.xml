@@ -80,7 +80,7 @@
 
                 <TextView
                     android:id="@+id/lblDiscount"
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Serv: $20.00"
@@ -89,7 +89,7 @@
 
                 <TextView
                     android:id="@+id/lblTPS"
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="TPS: $1.50"
                     android:textSize="18sp"
@@ -104,7 +104,7 @@
 
                 <TextView
                     android:id="@+id/lblServiceFee"
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Serv: $20.00"
@@ -113,7 +113,7 @@
 
                 <TextView
                     android:id="@+id/lblTVQ"
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="TVQ: $2.99"
                     android:textSize="18sp"
@@ -139,7 +139,7 @@
             android:layout_toRightOf="@+id/footerLayout"
             android:layout_weight="1"
             android:text="54.50"
-            android:textSize="48sp"
+            android:textSize="42sp"
             android:textStyle="bold"
             android:textColor="#4CAF50"
             android:gravity="right|center_vertical" />

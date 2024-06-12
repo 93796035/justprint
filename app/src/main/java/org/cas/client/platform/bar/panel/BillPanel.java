@@ -1530,8 +1530,8 @@ public class BillPanel extends BaseFragment
 //        add(scrContent);
 //
 //        addComponentListener(this);
-//        moreButton.addActionListener(this);
-//        lessButton.addActionListener(this);
+        moreButton.setOnClickListener(this);
+        lessButton.setOnClickListener(this);
 //        table.addMouseMotionListener(this);
 //        table.addMouseListener(this);
 //        table.getSelectionModel().addListSelectionListener(this);
