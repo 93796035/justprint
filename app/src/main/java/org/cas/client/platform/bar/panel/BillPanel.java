@@ -290,7 +290,7 @@ public class BillPanel extends BaseFragment
     @Override
 	public void onClick(View o) {
 		if(o instanceof ArrowButton) {
-    		int selectedRow = table.getSelectedItemPosition();
+    		int selectedRow = table.getSelectedRow();
     		Dish dish = getOrderedDishAry().get(selectedRow);
 	        if(o == moreButton) {
 				if(dish.getOutputID() >= 0) {	//already saved
@@ -638,19 +638,20 @@ public class BillPanel extends BaseFragment
         int tRowCount = table.getRowCount(); // add content to the table.
         int tColCount = 4;
         int tValidRowCount = getUsedRowCount(); // get the used RowCount
-//        if (tRowCount == tValidRowCount) { // no line is empty, add a new Line.
-//            Object[][] tValues = new Object[tRowCount + 1][tColCount];
-//            for (int r = 0; r < tRowCount; r++)
-//                for (int c = 0; c < tColCount; c++)
-//                    tValues[r][c] = table.getValueAt(r, c);
-//            table.setAdapter(DataVector(tValues, header);
-//            resetColWidth();	//now there's a new line at the end of the existing lines
-////            if(BarFrame.secondScreen != null) {
-////            	BarFrame.customerFrame.billPanel.resetColWidth();
-////            }
-//        }else {
-//        	tRowCount--;
-//        }
+        if (tRowCount == tValidRowCount) { // no line is empty, add a new Line.
+            String[][] tValues = new String[tRowCount + 1][tColCount];
+            for (int r = 0; r < tRowCount; r++)
+                for (int c = 0; c < tColCount; c++)
+                    tValues[r][c] = table.getValueAt(r, c);
+			myAdapter = new MyAdapter(tValues);
+            table.setAdapter(myAdapter);
+            resetColWidth();	//now there's a new line at the end of the existing lines
+//            if(BarFrame.secondScreen != null) {
+//            	BarFrame.customerFrame.billPanel.resetColWidth();
+//            }
+        }else {
+        	tRowCount--;
+        }
         
         Dish newDish = dish.clone();		//@NOTE: incase the cloned dish contains outpurID properties.
         newDish.setOutputID(-1);
@@ -910,16 +911,17 @@ public class BillPanel extends BaseFragment
     
     public void initContent(String billId, String billIndex, String tableName, String openTime, boolean skipSavingToDB) {
     	this.customerIndex = billIndex; //in case someone call this from outside.
-    	if((billId == null || "".equals(billId)) && (openTime == null || "".equals(openTime))) {//we can find bill by _id, if no id, then openTime is a "must have" to locate a sigle bill.
+    	if((billId == null || "".equals(billId)) && (openTime == null || "".equals(openTime))) {
+			//we can find bill by _id, if no _id, then openTime is a "must have" to locate a sigle bill.
     		//when returned from panel1, then login, then if it's counter mode, will switch to panel[2], in this case, there no start time displayed.
     		//because no table has been clicked. all we have is tableName and Bill Idx. (wait, who called BarFrame.instance.setCurBillID()? why not set vlStartTime also.) 
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
-    		Object[] tValues = new Object[0][4];
+    		String[][] tValues = new String[0][4];
 			List list = new ArrayList();
 			list.add(tValues);
-			myAdapter = new MyAdapter(BarFrame.instance, list);
-    		table.setAdapter(myAdapter);;
+			myAdapter = new MyAdapter(tValues);
+    		table.setAdapter(myAdapter);
     		updateTotalArea(skipSavingToDB);
     		resetColWidth();
 //    		if(BarFrame.secondScreen != null) {
@@ -937,10 +939,9 @@ public class BillPanel extends BaseFragment
 			
 			setOrderedDishAry(initTableWithOutput(billId, billIndex, tableName, openTime));	//make the table display the dishes in this bill first. (output of dumped bill will not match billId.)
 
-			
 			// do not set the default selected value, if it's used in billListDlg.
 			if (salesPanel != null && getOrderedDishAry().size() > 0) {
-				table.setSelection(getOrderedDishAry().size() - 1);
+				table.setSelectedRow(getOrderedDishAry().size() - 1);
 			}
 		} catch (Exception e) {
 			L.e("BillPanel", " exception when initContent()", e);
@@ -986,7 +987,6 @@ public class BillPanel extends BaseFragment
 	}
 
 	private ArrayList<Dish> initTableWithOutput(String billId, String billIndex, String tableName, Object openTime) throws SQLException {
-
 		long intCreateTime = 0;
 		try {
 			intCreateTime = BarUtil.df.parse(createTime).getTime() / 1000;
@@ -1078,7 +1078,7 @@ public class BillPanel extends BaseFragment
 			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
 			datas.add(tValues);
 		}
-		myAdapter = new MyAdapter(BarFrame.instance, datas);
+		myAdapter = new MyAdapter((String[][])datas.toArray());
 		table.setAdapter(myAdapter);
 		
 		resetColWidth();
@@ -1190,7 +1190,7 @@ public class BillPanel extends BaseFragment
     
 	private void removeSelectedLineFromTable(int selectedRow, int tValidRowCount) {
 		int tColCount = 4;
-		Object[][] tValues = new Object[tValidRowCount - 1][tColCount];
+		String[][] tValues = new String[tValidRowCount - 1][tColCount];
 		for (int r = 0; r < tValidRowCount; r++) {
 			if(r == selectedRow) {
 				continue;
@@ -1204,7 +1204,7 @@ public class BillPanel extends BaseFragment
 //        if(BarFrame.secondScreen != null) {
 //        	BarFrame.customerFrame.billPanel.resetColWidth();
 //        }
-		table.setSelection(tValues.length - 1); //@Note this will trigger a value change event, to set the curDish.
+		table.setSelectedRow(tValues.length - 1); //@Note this will trigger a value change event, to set the curDish.
 		updateTotalArea(false);
 		updateStatusMsg();
 	}
@@ -1469,7 +1469,7 @@ public class BillPanel extends BaseFragment
 		headerName.setText(BarFrame.consts.ProdName());
 		headerQty.setText(BarFrame.consts.Count());
 		headerPrice.setText(BarFrame.consts.Price());
-		
+		myAdapter = new MyAdapter(new String[][]{});
         table.setAdapter(myAdapter);
         //seems following 4 lines useless...because the table.getColumnModel().getColumn(1) seems doesn't work.
 //        DefaultPIMTableCellRenderer tCellRender = new DefaultPIMTableCellRenderer();

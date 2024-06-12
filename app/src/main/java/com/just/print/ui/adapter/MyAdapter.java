@@ -1,56 +1,82 @@
 package com.just.print.ui.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class MyAdapter extends ArrayAdapter<String[]> {
-    private List<String[]> mData;
-    private Context mContext;
+import com.just.print.R;
 
-    public MyAdapter(Context context, List<String[]> data) {
-        super(context, android.R.layout.simple_list_item_1, data);
-        mContext = context;
-        mData = data;
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+
+    private String[][] data;
+    private int selectedPosition = -1;
+
+    public MyAdapter(String[][] data) {
+        this.data = data;
+    }
+
+    @NonNull
+    @Override
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the item_row layout
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, parent, false);
+        return new MyViewHolder(view);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-        if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(android.R.layout.simple_list_item_1, parent, false);
-            holder = new ViewHolder();
-            holder.textView = convertView.findViewById(android.R.id.text1);
-            convertView.setTag(holder);
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        // Bind data to the item view
+        String[] row = data[position];
+        holder.column1.setText(row[0]);
+        holder.column2.setText(row[1]);
+        holder.column3.setText(row[2]);
+        holder.column4.setText(row[3]);
+
+        // Set the background color based on the selection state
+        if (position == selectedPosition) {
+            holder.itemView.setBackgroundColor(holder.itemView.getResources().getColor(android.R.color.darker_gray));
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            holder.itemView.setBackgroundColor(holder.itemView.getResources().getColor(android.R.color.transparent));
         }
+    }
 
-        // 假设每行数据显示为一个拼接的字符串
-        String[] rowData = mData.get(position);
-        StringBuilder sb = new StringBuilder();
-        for (String cell : rowData) {
-            sb.append(cell).append(" ");
+    @Override
+    public int getItemCount() {
+        return data.length;
+    }
+
+    public String getValueAt(int r, int c) {
+        return data[r][c];
+    }
+
+    public void setValueAt(int row, int column, String value) {
+        data[row][column] = value;
+        notifyItemChanged(row);
+    }
+
+    public void setSelectedPosition(int position) {
+        int previousPosition = selectedPosition;
+        selectedPosition = position;
+        if (previousPosition != -1) {
+            notifyItemChanged(previousPosition);
         }
-        holder.textView.setText(sb.toString().trim());
-
-        return convertView;
+        notifyItemChanged(selectedPosition);
     }
 
-    public void setValueAt(int position, int column, String value) {
-        mData.get(position)[column] = value;
-        notifyDataSetChanged(); // 通知ListView更新界面
-    }
+    static class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView column1, column2, column3, column4;
 
-    public String getValueAt(int position, int column) {
-        return mData.get(position)[column];
-    }
-    static class ViewHolder {
-        TextView textView;
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            // Find views by ID
+            column1 = itemView.findViewById(R.id.column1);
+            column2 = itemView.findViewById(R.id.column2);
+            column3 = itemView.findViewById(R.id.column3);
+            column4 = itemView.findViewById(R.id.column4);
+        }
     }
 }
