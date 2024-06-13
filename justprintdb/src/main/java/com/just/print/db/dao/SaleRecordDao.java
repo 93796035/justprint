@@ -35,8 +35,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         public final static Property UserId = new Property(9, Integer.class, "userId", false, "userId");
         public final static Property BillId = new Property(10, Integer.class, "billId", false, "billId");
         public final static Property CreatedTime = new Property(11, String.class, "createdTime", false, "createdTime");
-        public final static Property Status = new Property(12, Integer.class, "status", false, "STATUS");
-        public final static Property Version = new Property(13, Integer.class, "version", false, "VERSION");
+        public final static Property ModifiedTime = new Property(12, String.class, "modifiedTime", false, "modifiedTime");
+        public final static Property Status = new Property(13, Integer.class, "status", false, "STATUS");
+        public final static Property Version = new Property(14, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -67,8 +68,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
                 "'userId' INTEGER," + // 9: userId
                 "'billId' INTEGER," + // 10: billId
                 "'createdTime' TEXT," + // 11: createdTime
-                "'STATUS' INTEGER," + // 12: status
-                "'VERSION' INTEGER);"); // 13: version
+                "'modifiedTime' TEXT," + // 12: modifiedTime
+                "'STATUS' INTEGER," + // 13: status
+                "'VERSION' INTEGER);"); // 14: version
     }
 
     /** Drops the underlying database table. */
@@ -142,14 +144,19 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
             stmt.bindString(12, createdTime);
         }
  
+        String modifiedTime = entity.getModifiedTime();
+        if (modifiedTime != null) {
+            stmt.bindString(13, modifiedTime);
+        }
+ 
         Integer status = entity.getStatus();
         if (status != null) {
-            stmt.bindLong(13, status);
+            stmt.bindLong(14, status);
         }
  
         Integer version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(14, version);
+            stmt.bindLong(15, version);
         }
     }
 
@@ -181,8 +188,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
             cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // userId
             cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // billId
             cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // createdTime
-            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // status
-            cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13) // version
+            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // modifiedTime
+            cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13), // status
+            cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14) // version
         );
         return entity;
     }
@@ -202,8 +210,9 @@ public class SaleRecordDao extends AbstractDao<SaleRecord, Long> {
         entity.setUserId(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
         entity.setBillId(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
         entity.setCreatedTime(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setStatus(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
-        entity.setVersion(cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13));
+        entity.setModifiedTime(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setStatus(cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13));
+        entity.setVersion(cursor.isNull(offset + 14) ? null : cursor.getInt(offset + 14));
      }
     
     /** @inheritdoc */

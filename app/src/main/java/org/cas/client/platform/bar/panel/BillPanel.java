@@ -280,7 +280,7 @@ public class BillPanel extends BaseFragment
 	public List<Dish> getNotBilledDishes() {
 		List<Dish> notBilledDishes = new ArrayList<Dish>();
 		for (Dish dish : getOrderedDishAry()) {
-			if(dish.getStatus() >= DBConsts.BILL_PRINTED)	//if it's already billed, ignore.
+			if(dish.getStatus() != null && dish.getStatus() >= DBConsts.BILL_PRINTED)	//if it's already billed, ignore.
 				continue;
 			else {
 				notBilledDishes.add(dish);
@@ -910,8 +910,6 @@ public class BillPanel extends BaseFragment
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
     		String[][] tValues = new String[0][4];
-			List list = new ArrayList();
-			list.add(tValues);
 			myAdapter = new MyAdapter(tValues);
     		table.setAdapter(myAdapter);
     		updateTotalArea(skipSavingToDB);
@@ -1005,9 +1003,10 @@ public class BillPanel extends BaseFragment
 
     	Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 
-		List<String[]> datas = new ArrayList<>();
+		String[][] datas = new String[rs.getCount()][];
 		String[] tValues = new String[4];
-		while (rs.moveToNext()) {
+		for(int i = 0; i < datas.length; i++){
+			rs.moveToNext();
 			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD.modifiedTime");
 			int deleted = DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS");
 			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
@@ -1050,17 +1049,17 @@ public class BillPanel extends BaseFragment
 			}
 			String[] marks = modification.split(BarDlgConst.delimiter);
 			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i < marks.length; i++) {
-				if(marks[i].trim().length() < 1) {
-					continue;
-				}
-				String[] langs = marks[i].split(BarDlgConst.semicolon);
-				String lang = langs.length > LoginDlg.USERLANG ? langs[LoginDlg.USERLANG] : langs[0];
-				if(lang.length() == 0 || "null".equalsIgnoreCase(lang)) {
-					lang = langs[0].length() == 0 || "null".equalsIgnoreCase(lang) ? "" : langs[0];
-				}
-				sb.append(BarUtil.changeToLangForModify(lang, LoginDlg.USERLANG)).append(" ");
-			}
+            for (String mark : marks) {
+                if (mark.trim().isEmpty()) {
+                    continue;
+                }
+                String[] langs = mark.split(BarDlgConst.semicolon);
+                String lang = langs.length > LoginDlg.USERLANG ? langs[LoginDlg.USERLANG] : langs[0];
+                if (lang.isEmpty() || "null".equalsIgnoreCase(lang)) {
+                    lang = langs[0].isEmpty() || "null".equalsIgnoreCase(lang) ? "" : langs[0];
+                }
+                sb.append(BarUtil.changeToLangForModify(lang, LoginDlg.USERLANG)).append(" ");
+            }
 			if(dish.getDiscount() == 0) {
 				tValues[2] = sb.toString();
 			}else{
@@ -1068,9 +1067,9 @@ public class BillPanel extends BaseFragment
 			}
 
 			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
-			datas.add(tValues);
+			datas[i] = tValues;
 		}
-		myAdapter = new MyAdapter((String[][])datas.toArray());
+		myAdapter = new MyAdapter(datas);
 		table.setAdapter(myAdapter);
 
 		resetColWidth();

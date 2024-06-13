@@ -26,6 +26,7 @@ public class SaleRecord {
     private Integer userId;
     private Integer billId;
     private String createdTime;
+    private String modifiedTime;
     private Integer status;
     private Integer version;
 
@@ -46,7 +47,7 @@ public class SaleRecord {
         this.id = id;
     }
 
-    public SaleRecord(Long id, String tableName, String billIndex, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, Integer status, Integer version) {
+    public SaleRecord(Long id, String tableName, String billIndex, String openTime, Integer productId, Float amount, Float totalPrice, Float discount, String modifications, Integer userId, Integer billId, String createdTime, String modifiedTime, Integer status, Integer version) {
         this.id = id;
         this.tableName = tableName;
         this.billIndex = billIndex;
@@ -59,6 +60,7 @@ public class SaleRecord {
         this.userId = userId;
         this.billId = billId;
         this.createdTime = createdTime;
+        this.modifiedTime = modifiedTime;
         this.status = status;
         this.version = version;
     }
@@ -163,6 +165,14 @@ public class SaleRecord {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getModifiedTime() {
+        return modifiedTime;
+    }
+
+    public void setModifiedTime(String modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 
     public Integer getStatus() {

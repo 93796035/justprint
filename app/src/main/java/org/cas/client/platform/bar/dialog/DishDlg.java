@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.dialog;
 
+import static com.just.print.app.BarFrame.menuPanel;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.database.Cursor;
@@ -123,7 +125,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
             cbxMenuPomp.setChecked("true".equals(dish.getMenuPomp()));
             cbxModifyPomp.setChecked("true".equals(dish.getModifyPomp()));
         }
-        activeCategory = BarFrame.menuPanel.tgbActiveCategory.getText().toString();
+        activeCategory = menuPanel.tgbActiveCategory.getText().toString();
         tfdDspIndex.setText(String.valueOf(dspIndex));
 
         initCategory();
@@ -205,8 +207,9 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
             }
 
             db.setTransactionSuccessful();
-            Toast.makeText(getActivity(), "Dish saved", Toast.LENGTH_SHORT).show();
+            menuPanel.initCategoryAndDishes();
             dismiss();
+            Toast.makeText(getActivity(), "Dish saved", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         } finally {
@@ -228,6 +231,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
                         db.execSQL(sql, new Object[]{prodID});
                         db.setTransactionSuccessful();
                         Toast.makeText(getActivity(), "Dish deleted", Toast.LENGTH_SHORT).show();
+                        menuPanel.initCategoryAndDishes();
                         dismiss();
                     } catch (Exception e) {
                         Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
