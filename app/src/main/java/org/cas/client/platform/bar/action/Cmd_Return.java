@@ -2,6 +2,7 @@ package org.cas.client.platform.bar.action;
 
 import android.database.Cursor;
 import android.view.View;
+import android.widget.Toast;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
@@ -12,6 +13,7 @@ import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
 
@@ -42,42 +44,43 @@ public class Cmd_Return implements SamActionListener {
 		BillPanel billPanel = salesPanel.billPanel;
 		
 		if(billPanel.getNewDishes().size() > 0) {
-    		if(JOptionPane.showConfirmDialog(
-    				BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
-                return;	
-            }else {
-    			//call cancel all
-    			Cmd_CancelAll.getInstance().onClick(v);
-            }
-    	}
-
-    	if(BarOption.isCounterMode()) {
-    		BarFrame.instance.setVisible(false);
-			BarFrame.singleUserLoginProcess();
-			BarFrame.instance.ignoreLogin = true;
-			BarFrame.instance.switchMode(2);
-			BarFrame.instance.ignoreLogin = false;
-    	}else {	//for table mode
-    		//when bill saved(dish send to bach end), will do a check and as if waiter want to cancel the paid item.
-        	if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
-    			if(JOptionPane.showConfirmDialog(
-	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
-    				//check if the otehr receivement is not null, add back to gift card.
-    				//clean partial input
-	            	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
-	            	sql.append(" where _id = ").append(billPanel.getBillID());
-	            	try {
-	        			AikaPos.db.execSQL(sql.toString());
-	        			salesPanel.partialPaid = false;
-	        		}catch(Exception exp) {
-	        			ErrorUtil.write(exp);
-	        		}
-	            }
-    		}
-    		BarFrame.instance.switchMode(0);
-    	}
+    		JOptionPane.showConfirmDialog(null, BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle, new JOptionPane.ConfirmDialogCallback() {
+				@Override
+				public void onResult(boolean confirmed) {
+					if (confirmed) {
+						Cmd_CancelAll.getInstance().onClick(v);
+						if(BarOption.isCounterMode()) {
+							BarFrame.instance.setVisible(false);
+							BarFrame.singleUserLoginProcess();
+							BarFrame.instance.ignoreLogin = true;
+							BarFrame.instance.switchMode(2);
+							BarFrame.instance.ignoreLogin = false;
+						}else {	//for table mode
+							//when bill saved(dish send to bach end), will do a check and as if waiter want to cancel the paid item.
+							if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
+								if(JOptionPane.showConfirmDialog(
+										BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
+									//check if the otehr receivement is not null, add back to gift card.
+									//clean partial input
+									StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
+									sql.append(" where _id = ").append(billPanel.getBillID());
+									try {
+										AikaPos.db.execSQL(sql.toString());
+										salesPanel.partialPaid = false;
+									}catch(Exception exp) {
+										ErrorUtil.write(exp);
+									}
+								}
+							}
+							BarFrame.instance.switchMode(0);
+						}
+					}
+				}
+			});
+		}
 	}
-	
+
+
 	private void cleanTheLastUnsavedRecord() {
 		if(BarFrame.instance.curPanelIdx == 3) { //if current is setting panel, no need to clean empty bill.
 			return;

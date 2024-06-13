@@ -21,6 +21,7 @@ import com.just.print.R;
 import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.User;
+import com.just.print.ui.ViewUtils;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.BillListPanel;
 import com.just.print.ui.panel.SalesPanel;
@@ -706,7 +707,7 @@ public class BarFrame extends BaseFragmentActivity {
         if (index == 3) {  // setting
             superAdminAuthentication(success -> {
                 if (LoginDlg.getUSERTYPE() == LoginDlg.SUPER_ADMIN) {
-                    topBar.setEnabled(false);
+                    ViewUtils.setEnabledRecursive(topBar,false);
                     ((SettingPanel)panels[3]).reLayout();
                     switchFragment(panels[3]);
                 } else {
@@ -714,17 +715,17 @@ public class BarFrame extends BaseFragmentActivity {
                 }
             });
         } else if (index == 2) {  // sale
-            topBar.setEnabled(true);
+            ViewUtils.setEnabledRecursive(topBar,true);
             topBar.setBackgroundColor(Color.GRAY);
             initSalesPanel();
             switchFragment(panels[2]);
         } else if (index == 1) {  // bill
-            topBar.setEnabled(true);
+            ViewUtils.setEnabledRecursive(topBar,true);
             topBar.setBackgroundColor(Color.DKGRAY);
             ((BillListPanel) panels[1]).initContent();
             switchFragment(panels[1]);
         } else if (index == 0) {  // table
-            topBar.setEnabled(false);
+            ViewUtils.setEnabledRecursive(topBar,false);
             resetStatus();
             ((TablesPanel) panels[0]).initContent();
             switchFragment(panels[0]);

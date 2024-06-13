@@ -24,9 +24,11 @@ import com.stupid.method.reflect.annotation.XViewByID;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.action.Cmd_DiscItem;
 import org.cas.client.platform.bar.action.Cmd_SplitItem;
 import org.cas.client.platform.bar.action.SamActionListener;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.dialog.RefundItemDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
@@ -60,13 +62,13 @@ public class BillPanel extends BaseFragment
 	private CustomerFrame customerFrame;
 	BillListPanel billListPanel;
 	public FunctionToggleButton billButton;
-	
+
 	private int stepCounter;
 	private int minStepCounter = CustOpts.custOps.getValue("minMoveStep") == null ? 5 : Integer.valueOf((String)CustOpts.custOps.getValue("minMoveStep"));
 
     private boolean isDragging;
     private ArrayList<Dish> orderedDishAry = new ArrayList<Dish>();
-    
+
     //Bill property (not for specific item).the info should be retrieved from bill record if have.
     private int billID;
     private String createTime;
@@ -77,9 +79,9 @@ public class BillPanel extends BaseFragment
 	public int serviceFee;
 	public int totalOnBill;	//is currently only used to monitor if there's a case which will cause the wrong total was wrote into the bill record.
 	public float discount;
-	
+
 	private Map<Integer, Dish> mapForPrintedItemRemoving = new HashMap<Integer, Dish>();
-	
+
     int received;
     int cashback;
     private String comment = "";
@@ -125,7 +127,7 @@ public class BillPanel extends BaseFragment
 //		if(dishes.size() == orderedDishAry.size()) {	//didn't set the idx when bill created, because don't wanto display idx if there's only 1 bill.
 //		    BarFrame.instance.valCurBillIdx.setText(String.valueOf(BillListPanel.getANewBillIdx()));
 //		}
-		
+
 		sendDishesToKitchen(dishes, false);
 		sendDishesToDB(dishes);
 		sendDishesToServer(dishes);
@@ -133,7 +135,7 @@ public class BillPanel extends BaseFragment
 //		table.repaint();//to update the color of dishes, it's saved, so it's not red anymore.
 		return true;
 	}
-	
+
 	//if there's new dish added.... update the total value field of bill record.
 	//and make sure new added dish will be updated with new information.
 	public void billPricesUpdateToDB() {
@@ -146,7 +148,7 @@ public class BillPanel extends BaseFragment
 		if(total < 0) {
 			total = Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100);
 		}
-		
+
 		//get other field out from db:
 		StringBuilder sql = new StringBuilder("select * from bill where _id = " + getBillID());
     	try {
@@ -164,7 +166,7 @@ public class BillPanel extends BaseFragment
         	int cashBack = DBUtil.getCursorInt(rs, "CASHBACK");
             int tip = DBUtil.getCursorInt(rs, "TIP");
             int status = DBUtil.getCursorInt(rs, "STATUS");
-        
+
 			//generate a bill in db and update the output with the new bill id
 			String createtime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
@@ -186,10 +188,10 @@ public class BillPanel extends BaseFragment
 	            .append(visaReceived).append(", ")
 	            .append(masterReceived).append(", '")
 	            .append(otherreceived).append("', ")
-	            .append(status).append(")");				
-		
+	            .append(status).append(")");
+
 			AikaPos.db.execSQL(sql.toString());
-			
+
 		   	sql = new StringBuilder("Select _id from BILL where createTime = '").append(createtime)
 		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -206,7 +208,7 @@ public class BillPanel extends BaseFragment
 		dishes.add(dish);
 		sendDishesToKitchen(dishes, isCancelled);
 	}
-	
+
 	//send to printer
 	public void sendDishesToKitchen(List<Dish> dishes, boolean isCancelled) {
 		if(dishes == null || dishes.size() == 0) {
@@ -218,7 +220,7 @@ public class BillPanel extends BaseFragment
 		String waiterName = BarFrame.instance.valOperator.getText().toString();
 		PrintService.printOrderList(dishes, curTable, curCustomerIdx, waiterName, isCancelled);
 	}
-	
+
 	//save to db output
 	//before we call this, be sure to create a new bill, which has copied all the output of previous bill.
 	//which is to say the new dishes should belongs to the new bill.
@@ -230,7 +232,7 @@ public class BillPanel extends BaseFragment
 		    	String curBillIndex = BarFrame.instance.getCurBillIndex();
 		    	String currentTime = BarUtil.df.format(new Date());
 		    	DBUtil.createOutput(dish, curBillIndex, currentTime);	//at this moment, the num should have not been splitted.
-		        //in case some store need to stay in the interface after clicking the send button. 
+		        //in case some store need to stay in the interface after clicking the send button.
                 StringBuilder sql = new StringBuilder("Select _id, time from output where SUBJECT = '")
                     .append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
                     .append("' and CONTACTID = ").append(curBillIndex)
@@ -262,7 +264,7 @@ public class BillPanel extends BaseFragment
 			new DataSyncService(serverip, BarFrame.instance.getCmbCurTable().getSelectedItem().toString(), dishes).start();
 		}
 	}
-	
+
 	public List<Dish> getNewDishes() {
 		List<Dish> newDishes = new ArrayList<Dish>();
 		for (Dish dish : getOrderedDishAry()) {
@@ -286,7 +288,7 @@ public class BillPanel extends BaseFragment
 		}
 		return notBilledDishes;
 	}
-	
+
     @Override
 	public void onClick(View o) {
 		if(o instanceof ArrowButton) {
@@ -302,7 +304,7 @@ public class BillPanel extends BaseFragment
 					dish.setNum(++tQTY);
 
 					table.setValueAt(tQTY % BarOption.MaxQTY + "x", selectedRow, 0); //so the qty could be usd to save other info on high bit
-					table.setValueAt(BarOption.getMoneySign() 
+					table.setValueAt(BarOption.getMoneySign()
 							+ BarUtil.formatMoney(dish.getTotalPrice()/100f),
 							selectedRow, 3);
 			    	checkWithRules();
@@ -337,7 +339,7 @@ public class BillPanel extends BaseFragment
 		}else{
 
 		}
-		
+
 	}
 
 	private boolean adjustOnlyUI(int selectedRow, Dish dish) {
@@ -365,7 +367,7 @@ public class BillPanel extends BaseFragment
 	public void adjustBothUIandDB() {
 
 		Dish curDish = BarFrame.instance.curDish;
-		
+
 		if(curDish == null) {//check if there's an item selected.
 			JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
 			return;
@@ -409,16 +411,16 @@ public class BillPanel extends BaseFragment
 
 				logOperation(-1, curDish.getStatus(), curDish);
 			}
-			
+
 			if(curDish.getNum() > 1) {
 				int tQTY = curDish.getNum();
 				curDish.setTotalPrice(curDish.getTotalPrice() - curDish.getTotalPrice() / tQTY);
 				curDish.setNum(--tQTY);
-				table.setValueAt(tQTY + "x", table.getSelectedRow(), 0);		
+				table.setValueAt(tQTY + "x", table.getSelectedRow(), 0);
 				table.setValueAt(BarOption.getMoneySign()
 						+ BarUtil.formatMoney(curDish.getTotalPrice()/100f),
 						table.getSelectedRow(), 3);
-				
+
 				updateTotalArea(false);	//save to db immediately, because for lessing a saved output, its nature. when removing a whole line,
 
 			}else { //clean from screen.
@@ -458,7 +460,7 @@ public class BillPanel extends BaseFragment
 
 			AikaPos.db.execSQL(sql.toString(), null);
 	}
-	
+
 //	@deprecated
 	//was used when click send button, and found isFastFoodMode==true, then instead of returning back to table view, stay in
 	//the sales view. now I decide to use unified processor : initContent().
@@ -469,63 +471,53 @@ public class BillPanel extends BaseFragment
 //        resetColWidth(scrContent.getWidth());
 //        updateTotleArea();
 //    }
-    
+
     //table selection listener---------------------
 	public void valueChanged() {
-//		//adjust more and less button status.
-//		int selectedRow =  table.getSelectedRow();
-//		if(selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
-//			BarFrame.instance.curDish = null;	//if no row selected, reset curdish and return.
-//			moreButton.setEnabled(false);
-//			lessButton.setEnabled(false);
-//			return;
-//		}
-//		if(status < DBConsts.COMPLETED && status >= DBConsts.ORIGINAL) { //completed and refunded not enable the less and more button. (while completed allow to click refund button)
-//			SwingUtilities.invokeLater(new Runnable() {					//refunded can do nothing but return to table view.
-//				@Override
-//				public void run() {
-//					moreButton.setEnabled(true);
-//					lessButton.setEnabled(true);
-//				}
-//			});
-//		}
-//		if(this.getParent().getParent().getParent().getParent() instanceof RefundItemDlg) {
-//			lessButton.setEnabled(true);
-//		}
-//		//if in salesPanel mode, then adjust it's curDish and numberDlg if it's on show.
-//		//if in billListPanel mode, then change bill selection status and do moving dish.
-//		Dish selectedDish = getOrderedDishAry().get(selectedRow);
-//		if(salesPanel != null) {
-//			BarFrame.instance.curDish = selectedDish;
-//			if( BarFrame.numberPanelDlg.isVisible()) {	//if qty button seleted.
-//				Object obj = table.getValueAt(selectedRow,0);
-//				//update the qty in qtyDlg.
-//				if(obj != null)
-//					BarFrame.numberPanelDlg.setContents(obj.toString());
-//			}
-//			if(Cmd_DiscItem.getInstance().getSourceBtn().isSelected()) {
-//				Object obj = table.getValueAt(selectedRow,2);
-//				//update the discount in qtyDlg.
-//				if(obj != null)
-//					BarFrame.numberPanelDlg.setContents(obj.toString());
-//			}
-//		}else if(billListPanel != null) {
-//			if(status >= DBConsts.COMPLETED) {
-//				return;
-//			}
-//			if(Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {	//if in splite item mode, then do nothing but select the bill button.
-//				billButton.setSelected(!billButton.isSelected());
-//				return;
-//			}
-//			//only not in splitting can reach here.
-// 			if(BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != null && billListPanel.getCurBillPanel() != this) {
-//				billListPanel.moveDishToBill(this);
-//				BarFrame.instance.curDish = null;
-//			}else {
-//				billButton.setSelected(true);
-//				BarFrame.instance.curDish = selectedDish;
-//			}
-//		}
+		int selectedRow = table.getSelectedRow();
+		if (selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
+			BarFrame.instance.curDish = null;
+			moreButton.setEnabled(false);
+			lessButton.setEnabled(false);
+			return;
+		}
+		if (status < DBConsts.COMPLETED && status >= DBConsts.ORIGINAL) {
+			moreButton.setEnabled(true);
+			lessButton.setEnabled(true);
+		}
+		if (getParentFragment() instanceof RefundItemDlg) {
+			lessButton.setEnabled(true);
+		}
+
+		Dish selectedDish = getOrderedDishAry().get(selectedRow);
+		if (salesPanel != null) {
+			BarFrame.instance.curDish = selectedDish;
+			if (BarFrame.numberPanelDlg.isVisible()) {
+				String value = table.getValueAt(selectedRow, 0);
+				if (value != null)
+					BarFrame.numberPanelDlg.setContents(value);
+			}
+			if (Cmd_DiscItem.getInstance().getSourceBtn().isSelected()) {
+				String value = table.getValueAt(selectedRow, 2);
+				if (value != null)
+					BarFrame.numberPanelDlg.setContents(value);
+			}
+		} else if (billListPanel != null) {
+			if (status >= DBConsts.COMPLETED) {
+				return;
+			}
+			if (Cmd_SplitItem.getInstance().getSourceBtn().isSelected()) {
+				billButton.setSelected(!billButton.isSelected());
+				return;
+			}
+			if (BarFrame.instance.curDish != null && billListPanel.getCurBillPanel() != null && billListPanel.getCurBillPanel() != this) {
+				billListPanel.moveDishToBill(this);
+				BarFrame.instance.curDish = null;
+			} else {
+				billButton.setSelected(true);
+				BarFrame.instance.curDish = selectedDish;
+			}
+		}
 	}
 
 //	//table row color----------------------------------------------------------
@@ -652,12 +644,12 @@ public class BillPanel extends BaseFragment
         }else {
         	tRowCount--;
         }
-        
+
         Dish newDish = dish.clone();		//@NOTE: incase the cloned dish contains outpurID properties.
         newDish.setOutputID(-1);
         newDish.setNum(1);
         int price = (int)(dish.getPrice() * 100);
-        
+
         if(dish.getPricePomp() && BarOption.isTreatPricePromtAsTaxInclude()) {
         	price = (int)Math.round(price / ((100 + BarOption.getGST() + BarOption.getQST()) / 100.0));
         }
@@ -667,7 +659,7 @@ public class BillPanel extends BaseFragment
         newDish.setBillID(getBillID());
         getOrderedDishAry().add(newDish);				//valueChanged process. not being cleared immediately-----while now dosn't matter
         BarFrame.instance.curDish = newDish;
-        
+
         //update the interface.
         table.setValueAt("1x", tValidRowCount, 0); // set the count.
         table.setValueAt(NetUtil.trimContentFromHTML(dish.getLanguage(CustOpts.custOps.getUserLang())), tValidRowCount, 1);// set the Name.
@@ -695,20 +687,20 @@ public class BillPanel extends BaseFragment
 //		});
         updateStatusMsg();
     }
-    
+
     private void updateStatusMsg() {
 		BarFrame.instance.setStatusMes(table.getRowCount() + BarFrame.consts.itemAdded());
 	}
-	
+
     private void checkWithRules() {
     	CustomizedRule[] rules = BarFrame.menuPanel.getRules();
     	if(rules.length < 1) {
     		return;
     	}
-    	
+
     	//reset the ruleId in the dishes and reset the discount value.
-		removeTheRuleEffect();	
-		
+		removeTheRuleEffect();
+
 		// back up the rules and selected dishes.
 		ArrayList<CustomizedRule> copyOfRules = new ArrayList<>();
 		for (CustomizedRule rule : rules) {
@@ -718,8 +710,8 @@ public class BillPanel extends BaseFragment
 		for (Dish dish : getOrderedDishAry()) {
 			copyOfSelection.add(dish);
 		}
-		
-		while(copyOfRules.size() > 0) {	//note: can not use while(copyOfRules.size() > 0), because 
+
+		while(copyOfRules.size() > 0) {	//note: can not use while(copyOfRules.size() > 0), because
 			CustomizedRule rule = copyOfRules.get(0);
 			if(ruleSatisfied(rule, copyOfSelection)) {	//all contained in current selection.
 				discount += DBUtil.getActionPrice(rule);			// add the action of the rule into the discount.
@@ -738,11 +730,11 @@ public class BillPanel extends BaseFragment
 			Integer ruleId = dish.getRuleMark();
 			if(ruleId != null) {	//care only not-null case, clean it, and if it not added ruleIds, add into the list.
 				ruleIds.add(ruleId);	//added it into the "applied rule" collection, note: could be more than one and duplicated.
-				
+
 //can not do like this, because one combo could be selected multitimes.
 //				for(Dish dish2 : orderedDishAry) {
 //					if(dish2.getRuleMark() == ruleId) {
-//						
+//
 //					}
 //				}
 				for(CustomizedRule rule: BarFrame.menuPanel.getRules()) {	//step2, take donw the number from current discount according to each applied rules
@@ -772,7 +764,7 @@ public class BillPanel extends BaseFragment
 
 	//if all the dishes in the rule is contained in selectionList, then return the dishlist, so they can be removed).
 	private boolean ruleSatisfied(CustomizedRule rule, ArrayList<Dish> copyOfSelection) {
-		String[] dishIdsInRule = rule.getContent().split(","); 
+		String[] dishIdsInRule = rule.getContent().split(",");
 		List<Dish> matchedDishesByRule = new ArrayList<Dish>();
 		for(String id : dishIdsInRule) {
 			for(int i = copyOfSelection.size() - 1; i >= 0; i--) {
@@ -786,7 +778,7 @@ public class BillPanel extends BaseFragment
 		}
 		//be very careful to the size, because if there's a "," in the end, then the size is not acurate.
 		if(matchedDishesByRule.size() == dishIdsInRule.length) {
-			//mark those dished with a flag indication the rule id. so when it's removed from the selection, 
+			//mark those dished with a flag indication the rule id. so when it's removed from the selection,
 			//all relevent dishs will be removed the flag, and a action indicated price will
 			//be added back. then a checkWithRules will be performed.
 			for(Dish dish : matchedDishesByRule) {
@@ -800,14 +792,14 @@ public class BillPanel extends BaseFragment
 			return false;
 		}
 	}
-	
+
     public void updateTotalArea(boolean skipSavingToDB) {
     	float gstRate = BarOption.getGST();
     	float qstRate = BarOption.getQST();
     	totalGst = 0;
     	totalQst = 0;
     	subTotal = 0;
-    	
+
     	for(Dish dish: getOrderedDishAry()) {
     		//get out the num.
     		int num = dish.getNum();
@@ -819,11 +811,11 @@ public class BillPanel extends BaseFragment
     		if(num > BarOption.MaxQTY) {
     			num = num % BarOption.MaxQTY;
     		}
-    		
+
     		int totalPrice = dish.getTotalPrice();
     		float gst = totalPrice * (dish.getGst() * gstRate / 100f);	//an item could have a different tax rate.
     		float qst = totalPrice * (dish.getQst() * qstRate / 100f);
-    		
+
 //@NOTE: the price is already the final item totalprice (even the discount calculated), so no need to devide again.
 //    		if(pS > 0) {
 //    			price /= pS;
@@ -835,20 +827,20 @@ public class BillPanel extends BaseFragment
 //    			gst /= pK;
 //    			qst /= pK;
 //    		}
-    		
+
     		subTotal += totalPrice;
     		totalGst += gst;
     		totalQst += qst;
     	}
-    	
+
     	subTotal -= discount;
     	subTotal += serviceFee;
-		
+
     	if(BarOption.isDiscountAffectTax()) {
     		totalGst -= Math.round(discount * gstRate / 100f);
     		totalQst -= Math.round(discount * qstRate / 100f);
     	}
-    	
+
     	if(BarOption.isServiceFeeAffectTax()) {
     		totalGst += Math.round(serviceFee * gstRate / 100f);
     		totalQst += Math.round(serviceFee * qstRate / 100f);
@@ -879,7 +871,7 @@ public class BillPanel extends BaseFragment
 //			billPanel2.valTotlePrice.setText(valTotlePrice.getText());
 //		}
     }
-    
+
 	public void updateLabelValues(float discount, int serviceFee, float subTotal, float totalGst, float totalQst) {
 		lblDiscount.setText(discount > 0 ? BarFrame.consts.Discount() + ":-" + BarUtil.formatMoney((discount)/100f) : "");
     	lblServiceFee.setText(serviceFee > 0 ? BarFrame.consts.Serv() + ":" + BarUtil.formatMoney((serviceFee)/100f) : "");
@@ -887,17 +879,17 @@ public class BillPanel extends BaseFragment
     	lblTPS.setText(BarFrame.consts.GST() + ":" + BarUtil.formatMoney(totalGst/100f));
     	lblTVQ.setText(BarFrame.consts.QST() + ":" + BarUtil.formatMoney(totalQst/100f));
 	}
-    
+
     public void initContent() {
     	//first check is a billPane in billListPanel or it's a billPane in salesPanel
     	customerIndex = billButton != null ? billButton.getText() : BarFrame.instance.getCurBillIndex();
 		//used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
 		String tableName = (String)BarFrame.instance.getCurTable();
-		if(tableName.length() == 0) {	//add this check in case background thread update tables every minute, might reinit the model of cmbCurTable, now I've added check to avoid it. 
+		if(tableName.length() == 0) {	//add this check in case background thread update tables every minute, might reinit the model of cmbCurTable, now I've added check to avoid it.
 			L.e("BillPane", "no table info found from cmbCurtable", null);
 		}
 		String openTime = BarFrame.instance.valOpenTime.getText().toString();	//if it in cmd_return action, the opentime will be null
-		
+
 		//@Note, only when showing an expried bill (from checklistdlg), we give a billID to the method, for other case, we leave it empty.
 		//the BarFrame.instance.getCurBillID() always has value available, but we don't use it on purpose, because if the billID is empty, we'll know it's not a expired bill, the logic of fetching output is easier.
 		//
@@ -905,16 +897,16 @@ public class BillPanel extends BaseFragment
 		//why? becaue in counter mode, we feel table opened time is not necessary(new table is created and opened as soon as the dish on old table is saved, while maybe it's not used for long time until next customer
 		//come in....), so, it make more sense to calculate form the time that dish send to kitchen.
 		initContent(BarFrame.instance.isShowingAnExpiredBill() ? String.valueOf(BarFrame.instance.getCurBillID()) : "",
-				customerIndex, tableName, openTime, 
+				customerIndex, tableName, openTime,
 				true);
 	}
-    
+
     public void initContent(String billId, String billIndex, String tableName, String openTime, boolean skipSavingToDB) {
     	this.customerIndex = billIndex; //in case someone call this from outside.
     	if((billId == null || "".equals(billId)) && (openTime == null || "".equals(openTime))) {
 			//we can find bill by _id, if no _id, then openTime is a "must have" to locate a sigle bill.
     		//when returned from panel1, then login, then if it's counter mode, will switch to panel[2], in this case, there no start time displayed.
-    		//because no table has been clicked. all we have is tableName and Bill Idx. (wait, who called BarFrame.instance.setCurBillID()? why not set vlStartTime also.) 
+    		//because no table has been clicked. all we have is tableName and Bill Idx. (wait, who called BarFrame.instance.setCurBillID()? why not set vlStartTime also.)
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
     		String[][] tValues = new String[0][4];
@@ -929,14 +921,14 @@ public class BillPanel extends BaseFragment
 //            }
     		return;
     	}
-    	
+
     	resetProperties();
-    	
+
     	//get outputs of current table and bill id.
 		try {
 			// update the discount and service fee, and tip info, and (don't forget the billID).
 			initBillProperties(billId, billIndex, tableName, openTime);
-			
+
 			setOrderedDishAry(initTableWithOutput(billId, billIndex, tableName, openTime));	//make the table display the dishes in this bill first. (output of dumped bill will not match billId.)
 
 			// do not set the default selected value, if it's used in billListDlg.
@@ -971,7 +963,7 @@ public class BillPanel extends BaseFragment
 		default:
 			break;
 		}
-		
+
 		if(salesPanel != null && customerFrame == null && billButton == null) {
 			CmdBtnsManagerDlg.refreshBtnStatusForSalesPanel(status);
 			if(BarOption.getPlatformCharacters().contains(tableName.subSequence(0, 1))) { // if it's a aplatform bill (base on the table name, we can tell this), we need to refresh
@@ -981,7 +973,7 @@ public class BillPanel extends BaseFragment
 
 		moreButton.setEnabled(false);
 		lessButton.setEnabled(false);
-		
+
 		//reset the flag which is only used for showing expired bills.
 		BarFrame.instance.setShowingAnExpiredBill(false);
 	}
@@ -1047,9 +1039,9 @@ public class BillPanel extends BaseFragment
 			dish.setTotalPrice(DBUtil.getCursorInt(rs, "SALE_RECORD.totalPrice"));
 			dish.setStatus(DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS"));
 			dishAry.add(dish);
-			
+
 			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
-			
+
 			tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
 
 			String modification = dish.getModification();
@@ -1074,13 +1066,13 @@ public class BillPanel extends BaseFragment
 			}else{
 				tValues[2] = sb.append("  -").append(BarOption.getMoneySign()).append(BarUtil.formatMoney(dish.getDiscount() / 100.0)).toString();
 			}
-			
+
 			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
 			datas.add(tValues);
 		}
 		myAdapter = new MyAdapter((String[][])datas.toArray());
 		table.setAdapter(myAdapter);
-		
+
 		resetColWidth();
 //        if(BarFrame.secondScreen != null && salesPanel != null) {
 //        	BarFrame.customerFrame.billPanel.resetColWidth();
@@ -1089,7 +1081,7 @@ public class BillPanel extends BaseFragment
 	}
 
 	private void initBillProperties(String billId, String billIdx, String tableName, String openTime) throws SQLException {
-		StringBuilder sql = billId != null && billId.length() > 0 ? 
+		StringBuilder sql = billId != null && billId.length() > 0 ?
 				new StringBuilder("select * from Bill where _id = ").append(billId)
 				: new StringBuilder("select * from Bill where billIndex = '").append(billIdx).append("'")
 				.append(" and tableName = '").append(tableName).append("'")
@@ -1137,7 +1129,7 @@ public class BillPanel extends BaseFragment
 
 		mapForPrintedItemRemoving.clear();
     }
-    
+
     public void resetColWidth() {
 //    	int tableWidth = getWidth();
 //        PIMTableColumn tmpCol1 = table.getColumnModel().getColumn(0);
@@ -1167,17 +1159,17 @@ public class BillPanel extends BaseFragment
     }
 
     void removeFromSelection(int selectedRow) {
-    	
+
 		int tValidRowCount = getUsedRowCount(); // get the used RowCount
     	if(selectedRow < 0 || selectedRow > tValidRowCount - 1) {
     		JOptionPane.showMessageDialog(BarFrame.consts.OnlyOneShouldBeSelected());
     		L.e("BillPanel", "Unexpected row number when calling removeAtSelection : " + selectedRow, null);
     		return;
     	}
-    	
+
     	//update db first
     	Dish dish = getOrderedDishAry().get(selectedRow);
-    	
+
 		getOrderedDishAry().remove(selectedRow);
 
     	if(dish.getRuleMark() != null) {
@@ -1187,7 +1179,7 @@ public class BillPanel extends BaseFragment
     	//update the table view
 		removeSelectedLineFromTable(selectedRow, tValidRowCount);
 	}
-    
+
 	private void removeSelectedLineFromTable(int selectedRow, int tValidRowCount) {
 		int tColCount = 4;
 		String[][] tValues = new String[tValidRowCount - 1][tColCount];
@@ -1208,7 +1200,7 @@ public class BillPanel extends BaseFragment
 		updateTotalArea(false);
 		updateStatusMsg();
 	}
-    
+
     //make sure it's not too late to change, return true means still OK, move on, return false means the bill is too old to move on.
 	public boolean notTooLateToChangeStatus() {
 		if(status >= DBConsts.COMPLETED || status < DBConsts.ORIGINAL) {//check if the bill is already completed.
@@ -1217,8 +1209,8 @@ public class BillPanel extends BaseFragment
 		}
 		return true;
 	}
-	
-	//actually this mentod works only for the partially adjusted outputs. it doesn't touch(expire and recreate) those was not modified. 
+
+	//actually this mentod works only for the partially adjusted outputs. it doesn't touch(expire and recreate) those was not modified.
 	public void expireAndRegenerateModifiedOutputs(int status) {
 		Map<Integer, Dish> originalDishes = getOrderedDishAry().stream()
 				.collect(Collectors.toMap(Dish::getOutputID, dish -> dish));
@@ -1254,25 +1246,25 @@ public class BillPanel extends BaseFragment
 				sql = new StringBuilder("update output set deleted = ").append(DBConsts.EXPIRED)
 						.append(" where _id = ").append(dish.getOutputID());
 				AikaPos.db.execSQL(sql.toString());
-				//TODO: if the 
+				//TODO: if the
 				//TODO: and the bill cash values, bill status
 			} catch (Exception e) {
 		        L.e("expireAndRegenerateOutputs", "数据库更新异常", e);
 			}
 	    }
 	}
-	
+
 	//caller can specify the billIdx, if the billIdx is not specified, then use the billIdx on Frame.
 	public void expireAndReGenerateBill(String customerIdx) {
 		if(customerIdx == null || customerIdx.length() == 0) {
 			customerIdx = BarFrame.instance.getCurBillIndex();
 		}
-		
+
 		try {
 	 		//Generate new bill with ref to expired bill everything else use the data on current billPane
 	 		//@NOTE:Currently the output will be choosed by table and billIdx, so old output will go to new bill automatically.
 	 		//      the bad thing is, if user open the dumped old bill, then the removed item will be disappears and new added item will appear on old bill also.
-	 		//      this will be a known bug. 
+	 		//      this will be a known bug.
 			//      TDOO:we can make it better by searching expired output and filter out new created output when initContent for a expired bill. government will need to check the expired bills.
 	 		//??what do we do when removing an saved item from billPanel, and decrease conten from billPanel?
 			//TODO: when print temporary bill, or move item between bills, should check the hashMap to see if their's any item change in the output.
@@ -1282,7 +1274,7 @@ public class BillPanel extends BaseFragment
 	 		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
 		 		StringBuilder newComment = new StringBuilder(PrintUtil.REF_TO).append(getBillID());
 				if(status >= DBConsts.COMPLETED || status < DBConsts.ORIGINAL) {	//if already paid, then need to know old moneys, so in mev can report how much added or returned.
-					newComment.append("F");	
+					newComment.append("F");
 				}
 				newComment.append("\n").append(PrintUtil.DATE_REF).append(this.getZippedCreateTime());
 				newComment.append("\n").append(PrintUtil.OLD_SUBTOTAL).append(BarUtil.formatMoney(subTotal / 100.0));	//this value will be needed anyway.
@@ -1291,12 +1283,12 @@ public class BillPanel extends BaseFragment
 						.append("\n").append(PrintUtil.OLD_QST).append(BarUtil.formatMoney(totalQst / 100.0))
 						.append("\n").append(PrintUtil.OLD_TOTAL).append(valTotlePrice.getText());
 				}
-				
+
 				//as long as a bill is regenerated, the status of the bill must be at least billprinted.
-				//now the problem is shall we remember the old price? if we append the old moneys, then when we calculate the mtTransAvTaxes, sub total will minus 
+				//now the problem is shall we remember the old price? if we append the old moneys, then when we calculate the mtTransAvTaxes, sub total will minus
 				//the oldSubtotal, which means the mtTransAVTaxes will eventurally be the differents----this is good for modified invoice, not for modified check.
 				//so we currently decide only when it's completed, we append the old moneys. that mean, when we are calculating a mtTransAvTaxes for checks, we
-				//should remenber that there's only one old money(subtotal) in end message if it's not completed, but bill printed....we have to keep this one because 
+				//should remenber that there's only one old money(subtotal) in end message if it's not completed, but bill printed....we have to keep this one because
 				//when the check modified, we need to know the old subtotal in ref part.
 				this.comment = newComment.toString();	//set the comment property, so when creating a new bill base on current one, will copy the comment into the new bill.
 			}
@@ -1309,25 +1301,25 @@ public class BillPanel extends BaseFragment
 	 		int newBillID = cloneCurrentBillRecord(null,
 					customerIdx,
 					Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100));
-	 		
+
 			//expire the old bill
 			StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.EXPIRED)
 	 				.append(" where _id = ").append(getBillID());
 			AikaPos.db.execSQL(sql.toString());
 	 		//================================================================================================
-	 		
+
 	        //when we reopen a refunded bill, we create a new bill which is a original bill, so we must clean the received money with the refund count.
 	 		if(status < DBConsts.ORIGINAL){	//save the old money numbers, in case the old status is negative(means have returned some/not all money).
 	 			StringBuilder sb = new StringBuilder("select * from bill where _id = " + newBillID);
 
  	    		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
  	            rs.moveToNext();
- 	        	
+
  	            int oldCashReceived =DBUtil.getCursorInt(rs, "cashReceived");
  	            int oldDebitReceived = DBUtil.getCursorInt(rs, "debitReceived");
  	            int oldVisaReceived = DBUtil.getCursorInt(rs, "visaReceived");
  	            int oldMasterReceived = DBUtil.getCursorInt(rs, "masterReceived");
- 	        	
+
  	            //clean cashback and tip first, and clean status at the same time.
  	        	//set status = 0 immediatly when refund is covered by received money, in case another receive can also cover the refund, will be minus twice.
  	            int newCashReceived = oldCashReceived + cashback;	//cashReceived is always related with cashback.
@@ -1338,7 +1330,7 @@ public class BillPanel extends BaseFragment
 	        		status += newCashReceived;
 	        		newCashReceived = 0;
 	        	}
- 	            
+
  	        	//debitReceived
  	        	int newDebitReceived = oldDebitReceived;
  	        	if(oldDebitReceived > tip) { //as long as there's enough money, we suppose tip was from the money of this payment.
@@ -1351,7 +1343,7 @@ public class BillPanel extends BaseFragment
     				status += newDebitReceived;		//will use credit money to continue the refund.
     				newDebitReceived = 0;
     			}
- 	        	
+
  	        	//visaReceived
  	            int newVisaReceived = oldVisaReceived;
  	            if(newVisaReceived > tip) {			//
@@ -1364,7 +1356,7 @@ public class BillPanel extends BaseFragment
     				status += newVisaReceived;
     				newVisaReceived = 0;
     			}
- 	            
+
  	            //masterReceived
  	            int newMasterReceived = oldMasterReceived;
  	            if(newMasterReceived > tip) {
@@ -1377,7 +1369,7 @@ public class BillPanel extends BaseFragment
     				status += newMasterReceived;
     				newMasterReceived = 0;
     			}
- 	            
+
  	            sql = new StringBuilder("update bill set TIP = 0, CASHBACK = 0, STATUS = ").append(status).append(", cashReceived = ").append(newCashReceived)
  	            		.append(", debitReceived = ").append(newDebitReceived)
  	            		.append(", visaReceived = ").append(newVisaReceived)
@@ -1386,7 +1378,7 @@ public class BillPanel extends BaseFragment
 				AikaPos.db.execSQL(sql.toString());
  		 	    status = DBConsts.ORIGINAL;	//will be used when clicking buttons, set to original, so will not trigger warning dialogs.
 	 		}else if(status < DBConsts.COMPLETED){
-	 			//when splitting a bill in billPrinted status. new generated bill should be changed to saved status 
+	 			//when splitting a bill in billPrinted status. new generated bill should be changed to saved status
 	 			DBUtil.updateBill(newBillID, "STATUS", DBConsts.SAVED);
 	 		}
 	 		//NOTE:following changing will not affect the interface when reopenning a completed bill from SaleRecordDlg.
@@ -1398,7 +1390,7 @@ public class BillPanel extends BaseFragment
 			L.e("SalesPane", "Exception happenned when converting bill's status to 0", exp);
 		}
 	}
-	
+
 	private int getUsedRowCount() {
         for (int i = 0, len = table.getRowCount(); i < len; i++)
             if (table.getValueAt(i, 0) == null)
@@ -1406,7 +1398,7 @@ public class BillPanel extends BaseFragment
         return table.getRowCount();
     }
 
-    void reLayout() {        
+    void reLayout() {
 //    	// table area-------------
 //        int poxX = 0;
 //        int posY = 0;
@@ -1447,7 +1439,7 @@ public class BillPanel extends BaseFragment
 //				100, lblTVQ.getPreferredSize().height);
 //
     }
-    
+
     private void initComponent() {
         lblSubTotle.setText(BarFrame.consts.Subtotal());
         lblTPS.setText(BarFrame.consts.GST());
@@ -1483,7 +1475,7 @@ public class BillPanel extends BaseFragment
         //@work! valTotlePrice.setAlignmentX(Component.RIGHT_ALIGNMENT);
       //@do_not_work!valTotlePrice.setBackground(Color.RED);
       //@do_not_work!valTotlePrice.setOpaque(false);
-        
+
 //        TextView tLbl = new TextView();
 //        tLbl.setAlpha(1.0f);
 //        tLbl.setBackgroundColor(Color.GRAY);
@@ -1508,11 +1500,11 @@ public class BillPanel extends BaseFragment
         table.setFocusable(false);
         moreButton.setFocusable(false);
         lessButton.setFocusable(false);
-        
+
         // disables
         moreButton.setEnabled(false);
         lessButton.setEnabled(false);
-        
+
         // built
         if(billButton != null) {
 //        	add(billButton);
@@ -1538,7 +1530,7 @@ public class BillPanel extends BaseFragment
 //        scrContent.getViewport().addMouseListener(this);
 		reLayout();
     }
-    
+
     public int getBillID() {
 		return billID;
 	}
@@ -1562,7 +1554,7 @@ public class BillPanel extends BaseFragment
 	private TextView headerModify;
 	@XViewByID(R.id.headerPrice)
 	private TextView headerPrice;
-	
+
 	@XViewByID(R.id.tableListView)
 	public PIMTable table;
 	public MyAdapter myAdapter;
@@ -1582,7 +1574,7 @@ public class BillPanel extends BaseFragment
     private Button moreButton;
 	@XViewByID(R.id.lessButton)
     private Button lessButton;
-    
+
 	public String[] header;
 
 	@XViewByID(R.id.billButton)
@@ -1616,14 +1608,14 @@ public class BillPanel extends BaseFragment
 		if(mapForPrintedItemRemoving.isEmpty()) {
 			return orderedDishAry;
 		}
-		
+
 		ArrayList<Dish> refundedDishAry =  new ArrayList<>();
 		for(Dish dish : mapForPrintedItemRemoving.values()) {
 			refundedDishAry.add(dish);
 		}
 		return refundedDishAry;
 	}
-	
+
 	public void enableBtnLess() {
 		lessButton.setEnabled(true);
 	}

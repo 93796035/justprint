@@ -148,6 +148,14 @@ public class SalesPanel extends PicturePane{
                         .commitNow();
             }
         }
+        if (billPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
+            FragmentManager fragmentManager = billPanel.getFragmentManager();
+            if (fragmentManager != null) {
+                fragmentManager.beginTransaction()
+                        .remove(billPanel)
+                        .commitNow();
+            }
+        }
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.billPanelContainer, billPanel);
         transaction.replace(R.id.menuPanelContainer, BarFrame.menuPanel);
