@@ -48,6 +48,7 @@ public class SalesPanel extends PicturePane{
         super.onCreateView(inflater, container, savedInstanceState);
         mRoot = inflater.inflate(getLayoutId(), container, false);
         reLayout();
+        BarUtil.addFunctionButtons(this, CmdBtnsManagerDlg.groupedButtons[2]);
         BarUtil.layoutCommandButtons(mRoot.findViewById(R.id.buttonBar), CmdBtnsManagerDlg.groupedButtons[2], MAX_CMDBTN_QT);
         return mRoot;
     }

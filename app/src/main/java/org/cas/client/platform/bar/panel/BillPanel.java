@@ -233,19 +233,19 @@ public class BillPanel extends BaseFragment
 		    	String currentTime = BarUtil.df.format(new Date());
 		    	DBUtil.createOutput(dish, curBillIndex, currentTime);	//at this moment, the num should have not been splitted.
 		        //in case some store need to stay in the interface after clicking the send button.
-                StringBuilder sql = new StringBuilder("Select _id, time from output where SUBJECT = '")
+                StringBuilder sql = new StringBuilder("Select _id, openTime from SALE_RECORD where tableName = '")
                     .append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
-                    .append("' and CONTACTID = ").append(curBillIndex)
-                    .append(" and PRODUCTID = ").append(dish.getId())
+                    .append("' and billIndex = ").append(curBillIndex)
+                    .append(" and productId = ").append(dish.getId())
                     .append(" and AMOUNT = ").append(dish.getNum())
-                    .append(" and TOLTALPRICE = ").append(dish.getTotalPrice())
+                    .append(" and totalPrice = ").append(dish.getTotalPrice())
                     .append(" and DISCOUNT = ").append(dish.getDiscount())
                     .append(" and userId = ").append(LoginDlg.USERID)
-                	.append(" and CATEGORY = '").append(currentTime).append("'");
+                	.append(" and createdTime = '").append(currentTime).append("'");
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 while (rs.moveToNext()) {
                 	dish.setOutputID(DBUtil.getCursorInt(rs, "_id"));
-                	dish.setOrderedTime(DBUtil.getCursorString(rs, "time"));
+                	dish.setOrderedTime(DBUtil.getCursorString(rs, "openTime"));
                 }
 		    }
 		}catch(Exception exp) {

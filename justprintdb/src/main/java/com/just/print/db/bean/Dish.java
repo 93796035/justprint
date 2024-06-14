@@ -303,7 +303,7 @@ public class Dish {
     private int totalPrice;	//TOLTALPRICE = " + (dish.getPrice() - dish.getDiscount()) * splitRate
     private Integer ruleMark;
     public String getModification() {
-        return modification;
+        return modification == null ? "" :modification;
     }
 
     public void setModification(String modification) {

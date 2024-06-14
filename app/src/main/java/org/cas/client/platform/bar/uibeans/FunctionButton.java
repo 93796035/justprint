@@ -24,7 +24,7 @@ public class FunctionButton extends Button implements ISButton{
 	
 	public FunctionButton(String title) {
 		super(BarFrame.instance);
-		//this.title = title;
+		this.title = title;
 		String bgColor = getBK(title);
 		setBackgroundColor(bgColor == null ? Color.rgb(175, 198, 255) : Color.parseColor(bgColor));
 		setText(title);

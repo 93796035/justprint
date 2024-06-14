@@ -396,12 +396,8 @@ public class BarUtil {
             }
             max = panel.MAX_CMDBTN_QT;
         }
-
-//        for(int i = 0; i < max ; i++) {
-//            panel.add((ISButton)buttons.get(i));
-//        }
     }
-//    public static int hideCommandButtons(PicturePane panel, ArrayList<JComponent> buttons) {
+//    public static int hideCommandButtons(PicturePane panel, ArrayList<43333333333333333333JComponent> buttons) {
 //        if(buttons == null)
 //            return -1;
 //

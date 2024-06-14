@@ -18,7 +18,7 @@ public class MoreButton extends FunctionButton implements ISButton, View.OnClick
 		setText(title);
 		String bg = BarOption.getBK("Function");
     	if(bg == null) {
-    		bg = "#9999ff";
+    		bg = "#666666";//"#9999ff";
     	}
 		setBackgroundColor(Color.parseColor(bg));
 

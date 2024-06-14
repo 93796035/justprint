@@ -210,15 +210,15 @@ public class DBUtil {
 	}
 
 	public static void updatePriceAndCreateTimeInBillRecord(BillPanel billPanel, int status, String createTime) {
-		StringBuilder sql = new StringBuilder("update bill set total = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText().toString()) * 100))
-				.append(", discount = ").append(Math.round(billPanel.discount))
+		StringBuilder sql = new StringBuilder("update bill set TOTAL = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText().toString()) * 100))
+				.append(", DISCOUNT = ").append(Math.round(billPanel.discount))
 				.append(", serviceFee = ").append(billPanel.serviceFee)
 				.append(", COMMENT = ' ").append(billPanel.getComment()).append("'");
 		if(status != 0) {
 			sql.append(", STATUS = ").append(status);
 		}
 		if(createTime != null) {
-			sql.append(", createTime = '").append(createTime).append("'");
+			sql.append(", createdTime = '").append(createTime).append("'");
 		}
 		sql.append(" where _id = ").append(billPanel.getBillID());
 
@@ -329,18 +329,18 @@ public class DBUtil {
 	public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {
 		// 使用PreparedStatement替代Statement以提高性能和安全性
 
-		StringBuilder sql = new StringBuilder("INSERT INTO SALE_RECORD(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES (")
+		StringBuilder sql = new StringBuilder("INSERT INTO SALE_RECORD(tableName, billIndex, productId, AMOUNT, totalPrice, DISCOUNT, MODIFICATIONS, userId, openTime, createdTime, billId) VALUES (")
 				.append("'").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("',") // SUBJECT
 				.append("'").append(billIndex).append("',") // CONTACTID
 				.append(dish.getId()).append(",") // PRODUCTID
 				.append(dish.getNum()).append(",") // AMOUNT
 				.append(dish.getPrice() * splitRate).append(",") // TOLTALPRICE
-				.append(dish.getDiscount() * splitRate).append("',") // DISCOUNT
+				.append(dish.getDiscount() * splitRate).append(",") // DISCOUNT
 				.append("'").append(dish.getModification()).append("',") // CONTENT
 				.append(LoginDlg.USERID).append(",") // userId
 				.append("'").append(BarFrame.instance.valOpenTime.getText()).append("',") // TIME
 				.append("'").append(createdTime != null ? createdTime : dish.getOrderedTime()).append("',")// CATEGORY
-				.append(dish.getBillID()); // FOLDERID
+				.append(dish.getBillID()).append(")"); // FOLDERID
 		AikaPos.db.execSQL(sql.toString()); // 执行插入操作
 		return (int) DatabaseUtils.longForQuery(AikaPos.db, "SELECT last_insert_rowid()", null);
 	}
