@@ -473,8 +473,7 @@ public class BillPanel extends BaseFragment
 //    }
 
     //table selection listener---------------------
-	public void valueChanged() {
-		int selectedRow = table.getSelectedRow();
+	public void valueChanged(int selectedRow) {
 		if (selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
 			BarFrame.instance.curDish = null;
 			moreButton.setEnabled(false);
@@ -1525,7 +1524,12 @@ public class BillPanel extends BaseFragment
         lessButton.setOnClickListener(this);
 //        table.addMouseMotionListener(this);
 //        table.addMouseListener(this);
-//        table.getSelectionModel().addListSelectionListener(this);
+        table.adapter.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(int position) {
+				valueChanged(position);
+			}
+		});
 //        scrContent.getViewport().addMouseListener(this);
 		reLayout();
     }
@@ -1613,5 +1617,9 @@ public class BillPanel extends BaseFragment
 			refundedDishAry.add(dish);
 		}
 		return refundedDishAry;
+	}
+
+	public interface OnItemClickListener {
+		void onItemClick(int position);
 	}
 }

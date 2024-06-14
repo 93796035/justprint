@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.just.print.R;
 
+import org.cas.client.platform.bar.panel.BillPanel;
+
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private String[][] data;
@@ -42,6 +44,21 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         } else {
             holder.itemView.setBackgroundColor(holder.itemView.getResources().getColor(android.R.color.transparent));
         }
+
+        // Set the click listener for the item view
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notifyItemChanged(selectedPosition);
+                selectedPosition = holder.getAdapterPosition();
+                notifyItemChanged(selectedPosition);
+
+                // Trigger the external callback if set
+                if (onItemClickListener != null) {
+                    onItemClickListener.onItemClick(selectedPosition);
+                }
+            }
+        });
     }
 
     @Override
@@ -78,5 +95,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             column3 = itemView.findViewById(R.id.column3);
             column4 = itemView.findViewById(R.id.column4);
         }
+    }
+
+    // Listener interface for item click events
+    private BillPanel.OnItemClickListener onItemClickListener;
+    public void setOnItemClickListener(BillPanel.OnItemClickListener listener) {
+        this.onItemClickListener = listener;
     }
 }

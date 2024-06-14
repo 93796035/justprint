@@ -2,6 +2,7 @@ package org.cas.client.platform.bar.panel;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.Button;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,7 +11,8 @@ import com.just.print.ui.adapter.MyAdapter;
 
 public class PIMTable extends RecyclerView {
     public int selectedRow;
-    private MyAdapter adapter;
+    public MyAdapter adapter;
+    private Button lessButton;
 
     public PIMTable(Context context) {
         super(context);
