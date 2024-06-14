@@ -14,7 +14,7 @@ import org.cas.client.platform.bar.panel.BillPanel;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
-    private String[][] data;
+    public String[][] data;
     private int selectedPosition = -1;
 
     public MyAdapter(String[][] data) {

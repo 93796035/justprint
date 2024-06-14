@@ -291,38 +291,35 @@ public class BillPanel extends BaseFragment
 
     @Override
 	public void onClick(View o) {
-		if(o instanceof ArrowButton) {
-    		int selectedRow = table.getSelectedRow();
-    		Dish dish = getOrderedDishAry().get(selectedRow);
-	        if(o == moreButton) {
-				if(dish.getOutputID() >= 0) {	//already saved
-					BarFrame.setStatusMes(BarFrame.consts.SendItemCanNotModify());
-					addContentToList(getOrderedDishAry().get(selectedRow));
-				}else {			//not saved yet  //NOTE:getNum() couldn't be bigger than 10000, if it's saved, + button will insert a new line.
-					int tQTY = getOrderedDishAry().get(selectedRow).getNum();
-					dish.setTotalPrice(dish.getTotalPrice() + dish.getTotalPrice() / tQTY);
-					dish.setNum(++tQTY);
+    	int selectedRow = table.getSelectedRow();
+    	Dish dish = getOrderedDishAry().get(selectedRow);
+	    if(o == moreButton) {
+			if(dish.getOutputID() >= 0) {	//already saved
+				BarFrame.setStatusMes(BarFrame.consts.SendItemCanNotModify());
+				addContentToList(getOrderedDishAry().get(selectedRow));
+			}else {			//not saved yet  //NOTE:getNum() couldn't be bigger than 10000, if it's saved, + button will insert a new line.
+				int tQTY = getOrderedDishAry().get(selectedRow).getNum();
+				dish.setTotalPrice(dish.getTotalPrice() + dish.getTotalPrice() / tQTY);
+				dish.setNum(++tQTY);
 
-					table.setValueAt(tQTY % BarOption.MaxQTY + "x", selectedRow, 0); //so the qty could be usd to save other info on high bit
-					table.setValueAt(BarOption.getMoneySign()
-							+ BarUtil.formatMoney(dish.getTotalPrice()/100f),
-							selectedRow, 3);
-			    	checkWithRules();
-				}
-				logOperation(1, DBConsts.ORIGINAL, dish);
-	        } else if (o == lessButton) {
-				if(dish.getOutputID() < 0) {	//if it's already send, then do the removeItem.
-					if (adjustOnlyUI(selectedRow, dish))
-						return;
-				}else {
-					adjustBothUIandDB();
-				}
+				table.setValueAt(tQTY % BarOption.MaxQTY + "x", selectedRow, 0); //so the qty could be usd to save other info on high bit
+				table.setValueAt(BarOption.getMoneySign()
+						+ BarUtil.formatMoney(dish.getTotalPrice()/100f),
+						selectedRow, 3);
+		    	checkWithRules();
+			}
+			logOperation(1, DBConsts.ORIGINAL, dish);
+	    } else if (o == lessButton) {
+			if(dish.getOutputID() < 0) {	//if it's already send, then do the removeItem.
+				if (adjustOnlyUI(selectedRow, dish))
+					return;
+			}else {
+				adjustBothUIandDB();
+			}
 
-				if(dish.getRuleMark() != null) {
-		    		checkWithRules();
-		    	}
-	        }
-
+			if(dish.getRuleMark() != null) {
+				checkWithRules();
+			}
 			updateTotalArea(false);
         }else if(o == billButton){		//when bill button on top are clicked.
         	if(status >= DBConsts.COMPLETED || status < DBConsts.ORIGINAL) {	//@Note mess the order of each money.) {
@@ -444,21 +441,21 @@ public class BillPanel extends BaseFragment
 	 */
 	private void logOperation(int operationType, int status, Dish dish) {
 		StringBuilder sql = new StringBuilder(
-			"insert into operationlog (OperationType, userId, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) values (")
-				.append(operationType).append(",")
-				.append(LoginDlg.USERID).append(",")
-				.append(status).append(",")
-				.append(dish.getBillID()).append(",")
-				.append(dish.getOutputID()).append(",")
-				.append("'").append(BarFrame.instance.getCurTable()).append("',")
-				.append("'").append(BarFrame.instance.valOpenTime.getText()).append("',")
-				.append("'").append(BarFrame.instance.getCurBillIndex()).append("',")
-				.append("'").append(dish.getName1()).append("',")
-				.append(dish.getPrice()).append(",")
-				.append("'").append(dish.getOrderedTime()).append("',")
-				.append("'").append(BarUtil.df.format(new Date())).append("',");
+				"INSERT INTO operationlog (OperationType, userId, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) VALUES (")
+				.append(operationType).append(", ")
+				.append(LoginDlg.USERID).append(", ")
+				.append(status).append(", ")
+				.append(dish.getBillID()).append(", ")
+				.append(dish.getOutputID()).append(", '")
+				.append(BarFrame.instance.getCurTable()).append("', '")
+				.append(BarFrame.instance.valOpenTime.getText()).append("', '")
+				.append(BarFrame.instance.getCurBillIndex()).append("', '")
+				.append(dish.getName1()).append("', ")
+				.append(dish.getPrice()).append(", '")
+				.append(dish.getOrderedTime()).append("', '")
+				.append(BarUtil.df.format(new Date())).append("');");
 
-			AikaPos.db.execSQL(sql.toString(), null);
+			AikaPos.db.execSQL(sql.toString());
 	}
 
 //	@deprecated
@@ -474,6 +471,7 @@ public class BillPanel extends BaseFragment
 
     //table selection listener---------------------
 	public void valueChanged(int selectedRow) {
+		table.setSelectedRow(selectedRow);
 		if (selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
 			BarFrame.instance.curDish = null;
 			moreButton.setEnabled(false);
@@ -634,8 +632,7 @@ public class BillPanel extends BaseFragment
             for (int r = 0; r < tRowCount; r++)
                 for (int c = 0; c < tColCount; c++)
                     tValues[r][c] = table.getValueAt(r, c);
-			myAdapter = new MyAdapter(tValues);
-            table.setAdapter(myAdapter);
+			myAdapter.data = tValues;
             resetColWidth();	//now there's a new line at the end of the existing lines
 //            if(BarFrame.secondScreen != null) {
 //            	BarFrame.customerFrame.billPanel.resetColWidth();
@@ -909,8 +906,8 @@ public class BillPanel extends BaseFragment
     		//
         	//TODO: i think we need to call this, NO? resetProperties();
     		String[][] tValues = new String[0][4];
-			myAdapter = new MyAdapter(tValues);
-    		table.setAdapter(myAdapter);
+			myAdapter.data = tValues;
+			// may need this if throw exception: myAdapter.notifyDataSetChanged();
     		updateTotalArea(skipSavingToDB);
     		resetColWidth();
 //    		if(BarFrame.secondScreen != null) {
@@ -1068,8 +1065,8 @@ public class BillPanel extends BaseFragment
 			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
 			datas[i] = tValues;
 		}
-		myAdapter = new MyAdapter(datas);
-		table.setAdapter(myAdapter);
+		myAdapter.data = datas;
+		// may need this if throw exception: myAdapter.notifyDataSetChanged();
 
 		resetColWidth();
 //        if(BarFrame.secondScreen != null && salesPanel != null) {
@@ -1190,6 +1187,8 @@ public class BillPanel extends BaseFragment
 			        tValues[rowNum-1][c] = ((MyAdapter)table.getAdapter()).getValueAt(r, c);
 			}
 		}
+		((MyAdapter)table.getAdapter()).data = tValues;
+		table.adapter.notifyDataSetChanged();
 		resetColWidth();
 //        if(BarFrame.secondScreen != null) {
 //        	BarFrame.customerFrame.billPanel.resetColWidth();
