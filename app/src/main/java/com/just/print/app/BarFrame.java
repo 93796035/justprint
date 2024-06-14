@@ -1097,11 +1097,6 @@ public class BarFrame extends BaseFragmentActivity {
     @XViewByID(R.id.lblStatus)
     public static TextView lblStatus;
 
-    public void hideBillIdx(boolean b) {
-        lblCurBillIdx.setVisibility(b ? View.GONE : View.VISIBLE);
-        valCurBillIdx.setVisibility(b ? View.GONE : View.VISIBLE);
-    }
-
     public Spinner getCmbCurTable() {
         return cmbCurTable;
     }

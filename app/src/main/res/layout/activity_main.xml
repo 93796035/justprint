@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="30dp"
         android:orientation="horizontal"
         android:layout_marginTop="0dp"
         android:background="@android:color/darker_gray"
@@ -22,17 +22,21 @@
             android:layout_height="wrap_content"
             android:text="Current Table:"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"/>
 
         <Spinner
             android:id="@+id/cmbCurTable"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:popupBackground="#000000"
+            android:paddingTop="0dp"
+            android:layout_marginBottom="0dp"
             android:layout_gravity="center_vertical"/>
         <View
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="1dp"/>
         <TextView
             android:id="@+id/lblCurBillIdx"
@@ -44,27 +48,27 @@
 
         <TextView
             android:id="@+id/valCurBillIdx"
-            android:layout_width="40dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:layout_gravity="center_vertical"/>
         <View
-            android:layout_width="match_parent"
+            android:layout_width="50dp"
             android:layout_height="1dp"/>
         <TextView
             android:id="@+id/lblOpenTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="OpenTime:"
             android:textColor="#FFFFFF"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"/>
 
         <TextView
             android:id="@+id/valOpenTime"
-            android:layout_width="80dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:textColor="#FFFFFF"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>

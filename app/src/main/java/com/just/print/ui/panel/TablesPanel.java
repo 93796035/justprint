@@ -349,10 +349,8 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     if(num == 1 && CustOpts.custOps.getValue("FrobiddenQuickEnter") == null) {	// display the only bill
                         BarFrame.instance.setCurBillIdx(DBUtil.getCursorString(rs, "billIndex"));
                         BarFrame.instance.setCurBillID(DBUtil.getCursorInt(rs, "_id"));
-                        BarFrame.instance.hideBillIdx(true);
                         BarFrame.instance.switchMode(2);
                     }else { //or switch to the bill panel to show all the bills.
-                        BarFrame.instance.hideBillIdx(false);
                         BarFrame.instance.switchMode(1);
                     }
                 }

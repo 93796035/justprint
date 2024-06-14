@@ -1614,8 +1614,4 @@ public class BillPanel extends BaseFragment
 		}
 		return refundedDishAry;
 	}
-
-	public void enableBtnLess() {
-		lessButton.setEnabled(true);
-	}
 }
