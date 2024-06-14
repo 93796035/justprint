@@ -406,7 +406,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         //target the items which can be combined.
         List<Dish> dishes = new ArrayList<Dish>();
 
-        StringBuilder sql = new StringBuilder("select * from output where SUBJECT = '").append(tableName)
+        StringBuilder sql = new StringBuilder("select * from SALE_RECORD where SUBJECT = '").append(tableName)
                 .append("' and time = '").append(startTime)
                 .append("' and contactID = ").append(billIdx)
                 .append(" and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(") order by _id");
@@ -421,9 +421,9 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 dish.setNum(num);
                 dish.setDiscount(DBUtil.getCursorInt(rs,"discount"));//
                 dish.setId((long)DBUtil.getCursorInt(rs,"PRODUCTID"));
-                dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD.CONTENT"));//
-                dish.setOutputID(DBUtil.getCursorInt(rs,"SALE_RECORD._ID"));//
-                dish.setTotalPrice(DBUtil.getCursorInt(rs,"SALE_RECORD.TOLTALPRICE"));
+                dish.setModification(DBUtil.getCursorString(rs, "CONTENT"));//
+                dish.setOutputID(DBUtil.getCursorInt(rs,"_id"));//
+                dish.setTotalPrice(DBUtil.getCursorInt(rs,"TOLTALPRICE"));
                 dishes.add(dish);
             }
         }catch(Exception exp) {

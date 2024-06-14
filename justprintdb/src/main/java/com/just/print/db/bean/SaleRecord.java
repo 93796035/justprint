@@ -10,7 +10,7 @@ import com.just.print.db.dao.SaleRecordDao;
 // KEEP INCLUDES - put your custom includes here
 // KEEP INCLUDES END
 /**
- * Entity mapped to table SALE_RECORD.
+ * Entity mapped to table SALE_RECORD
  */
 public class SaleRecord {
 

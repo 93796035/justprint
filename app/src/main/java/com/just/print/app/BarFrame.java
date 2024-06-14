@@ -127,38 +127,18 @@ public class BarFrame extends BaseFragmentActivity {
         new StupidReflect(this).init();
         instance = this;
         fragmentManager = getSupportFragmentManager();
-        //this block should be useless, because dubug is already set value.-----no, it's static, so give a init here.
-        // or maybe onCreate method could be called more than one time? so every time switch back to this page,
-        // the oncreate will be called again? so we can update the debug setting without restart app?
-        try {
-            L.debug = Boolean.valueOf(Options.getCustomData(Options.debug));
-        }catch(Exception e){
-            L.i("the value of debug in customerr Data ", "can  not be parsered into a boolean!");
-        }
 
-        //working time check
-        if(isOutOfWorkingTime()
-                && StringUtils.isBlank(Options.getCustomData(Options.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
-            ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
-            finish();   //No need to add thread to make it stay. even the app quit, the showToast will still on screen for a few seconds.
-            return;
-        }
+//        working time check
+//        if(isOutOfWorkingTime()
+//                && StringUtils.isBlank(Options.getCustomData(Options.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
+//            ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
+//            finish();   //No need to add thread to make it stay. even the app quit, the showToast will still on screen for a few seconds.
+//            return;
+//        }
 //        if (alreadyExist()) {
 //            ToastUtil.showToast("An instance is already running!");
 //            return;
 //        }
-
-        //software life left time check
-        long timeLeft = checkDaysleft();
-        if (timeLeft > 0) {
-            if (timeLeft < 3024000000l) {   //3024000000L == 35days
-                ToastUtil.showToast("Application is about to expire! Please re-activate it!");
-            }
-//            switchFragment(new RegisterFragment());
-        } else {
-            ToastUtil.showToast("Application expired! Please re-activate it!");
-//            switchFragment(new ActivateFragment());
-        }
 
         //==========================================================
         menuPanel = new MenuPanel(null);	//have to be after initModel, before new BarFrame().
@@ -526,13 +506,12 @@ public class BarFrame extends BaseFragmentActivity {
     //@in some device, it always return a negative value and cause reactive dlg displayed.
     private long checkDaysleft() {
         //none limitation check
-        if("none".equals(Options.getCustomData(Options.limitation))){             L.d("limitationMode", "none");
+        if("none".equals(BarOption.getLimitation())) {         L.d("limitationMode", "none");
             return 3024000000l + 1;
         }
-
         //time of last open, @note:if existing last open time is not valid, then use lastSuccess will not be set.
         long timepassed = 0l;
-        String lastsuccessStr = Options.getCustomData(Options.lastsuccessStr);    L.d("lastSuccessStr:",lastsuccessStr);
+        String lastsuccessStr = BarOption.getLastSuccessStr(); L.d("lastSuccessStr:",lastsuccessStr);
         try{
             Long lastSuccess= Long.valueOf(lastsuccessStr);
             timepassed = new Date().getTime() - lastSuccess;            L.d("timePassed:",timepassed);        //time passed since last open.
@@ -549,6 +528,7 @@ public class BarFrame extends BaseFragmentActivity {
             //update the number and lastsuccess into local cache.
             BarOption.setLastSuccessStr(String.valueOf(new Date().getTime()));
             BarOption.setActivateTimeLeft(String.valueOf(activateTimeLeft));  L.d("update new number with:", activateTimeLeft);
+            CustOpts.custOps.saveData();
         }catch(Exception e){
             L.e("MainActivity", "the left time number can not be pasered into a long", e);
         }
@@ -556,34 +536,34 @@ public class BarFrame extends BaseFragmentActivity {
         return activateTimeLeft;
     }
 
-    private boolean isOutOfWorkingTime(){
-
-        String startTime = Options.getCustomData(Options.startTime);
-        String endTime = Options.getCustomData(Options.endTime);
-        String curTime = "";
-
-        DateFormat df = new SimpleDateFormat("HHmm");
-        try {
-            Date d = new Date();
-            curTime = df.format(d);
-        }catch(Exception e){
-            ToastUtil.showToast("Error detected with system time, please contact info@ShareTheGoodOnes.com for technique support.");
-        }
-
-        if(!StringUtils.isBlank(startTime)){
-            if(curTime.compareTo(startTime) < 0) {
-                return true;
-            }
-        }
-
-        if(!StringUtils.isBlank(endTime)){
-            if(curTime.compareTo(endTime) > 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+//    private boolean isOutOfWorkingTime(){
+//
+//        String startTime = Options.getCustomData(Options.startTime);
+//        String endTime = Options.getCustomData(Options.endTime);
+//        String curTime = "";
+//
+//        DateFormat df = new SimpleDateFormat("HHmm");
+//        try {
+//            Date d = new Date();
+//            curTime = df.format(d);
+//        }catch(Exception e){
+//            ToastUtil.showToast("Error detected with system time, please contact info@ShareTheGoodOnes.com for technique support.");
+//        }
+//
+//        if(!StringUtils.isBlank(startTime)){
+//            if(curTime.compareTo(startTime) < 0) {
+//                return true;
+//            }
+//        }
+//
+//        if(!StringUtils.isBlank(endTime)){
+//            if(curTime.compareTo(endTime) > 0) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
 
     private Fragment currentFragment;
 

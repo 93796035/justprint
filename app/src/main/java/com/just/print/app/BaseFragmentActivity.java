@@ -20,7 +20,6 @@ public class BaseFragmentActivity extends FragmentActivity implements EventBus {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(Options.getScreenOrientation());
     }
     public static void showToast(String text) {
         ToastUtil.showToast(BarFrame.instance.getBaseContext(), text);

@@ -980,59 +980,65 @@ public class BillPanel extends BaseFragment
 			L.e("BillPanel", "unexpected exception when parsing create time to a int value:" + createTime, e1);
 		}
 
-    	ArrayList<Dish> dishAry = new ArrayList<Dish>();
-    	StringBuilder sql = new StringBuilder("select * from SALE_RECORD, DISH where SALE_RECORD.tableName = '")
-    		.append(tableName)
-    		.append("' and billIndex = ").append(billIndex)
-    		.append(" AND SALE_RECORD.productId = DISH._id and SALE_RECORD.openTime = '").append(openTime).append("'");
+		ArrayList<Dish> dishAry = new ArrayList<Dish>();
+		StringBuilder sql = new StringBuilder("select SALE_RECORD.createdTime as SALE_RECORD_CREATEDTime,")
+				.append("SALE_RECORD.STATUS as SALE_RECORD_STATUS, SALE_RECORD.productId as SALE_RECORD_productId,")
+				.append("SALE_RECORD.openTime as SALE_RECORD_openTime, SALE_RECORD.modifiedTime as SALE_RECORD_modifiedTime,")
+				.append("SALE_RECORD.DISCOUNT as SALE_RECORD_DISCOUNT, SALE_RECORD.MODIFICATIONS as SALE_RECORD_MODIFICATIONS,")
+				.append("SALE_RECORD.AMOUNT as SALE_RECORD_AMOUNT, SALE_RECORD._id as SALE_RECORD_id,")
+				.append("SALE_RECORD.billId as SALE_RECORD_billId, SALE_RECORD.totalPrice as SALE_RECORD_totalPrice,")
+				.append("DISH._id as DISH_ID, DISH.category as DISH_category,")
+				.append("DISH.displayIdx as DISH_displayIdx, DISH.GST as DISH_GST, DISH._id as DISH_id, ")
+				.append("DISH.NAME1 as DISH_NAME1, DISH.NAME2 as DISH_NAME2, DISH.NAME3 as DISH_NAME3, ")
+				.append("DISH.PRICE as DISH_PRICE, DISH.printerIds as DISH_printerIds, DISH.menuPomp as DISH_menuPomp, ")
+				.append("DISH.ModifyPomp as DISH_ModifyPomp, DISH.pricePomp as DISH_pricePomp, DISH.QST as DISH_QST, ")
+				.append("DISH.SIZE as DISH_SIZE ")
+				.append("from SALE_RECORD, DISH where SALE_RECORD.tableName = '").append(tableName)
+				.append("' and billIndex = ").append(billIndex)
+				.append(" AND SALE_RECORD_productId = DISH_ID and SALE_RECORD_openTime = '").append(openTime).append("'");
 
-		//if no billId given, means to display the latest bill(should there be also some expired ones), it must be the last completed bill or a not completed bill (might be billPrinted, but not a closed one,
-		//Only if we select bill from checkOrderDlg, and selected an expired one, there will be a billID).
-    	if (billId != null && billId.length() > 0) {
-    		sql.append(" and SALE_RECORD.createdTime <= '").append(createTime).append("'") //remove all output created after the bill
-    		   .append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.DELETED)		//remove the deleted bills
-    		    	//.append(" or(SALE_RECORD.arrearage is not null and CAST(SALE_RECORD.arrearage AS DATETIME) > (select createTime from bill where _id = ").append(billId).append("))")
-    		    	.append(")");
-    	} else {
-    		sql.append(" and (SALE_RECORD.STATUS is null or SALE_RECORD.STATUS < ").append(DBConsts.VOIDED).append(")");
-    	}
+		if (billId != null && billId.length() > 0) {
+			sql.append(" and SALE_RECORD_CREATEDTime <= '").append(createTime).append("'")
+					.append(" and (SALE_RECORD_STATUS is null or SALE_RECORD_STATUS < ").append(DBConsts.DELETED).append(")");
+		} else {
+			sql.append(" and (SALE_RECORD_STATUS is null or SALE_RECORD_STATUS < ").append(DBConsts.VOIDED).append(")");
+		}
 
-    	Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 
 		String[][] datas = new String[rs.getCount()][];
 		String[] tValues = new String[4];
 		for(int i = 0; i < datas.length; i++){
 			rs.moveToNext();
-			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD.modifiedTime");
-			int deleted = DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS");
+			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD_modifiedTime");
+			int deleted = DBUtil.getCursorInt(rs, "SALE_RECORD_STATUS");
 			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
 				continue;
-			//BarUtil.df.parse(tableName)
 			}
 			Dish dish = new Dish();
-			dish.setCategory(DBUtil.getCursorString(rs, "DISH.category"));
-			dish.setDiscount(DBUtil.getCursorInt(rs, "SALE_RECORD.DISCOUNT"));//
-			dish.setDisplayIdx(Integer.valueOf(DBUtil.getCursorInt(rs, "DISH.displayIdx")));
-			dish.setGst(DBUtil.getCursorInt(rs, "DISH.GST"));
-			dish.setId(DBUtil.getCursorLong(rs, "DISH._id"));
-			dish.setName1(DBUtil.getCursorString(rs, "DISH.NAME1"));
-			dish.setName2(DBUtil.getCursorString(rs, "DISH.NAME2"));
-			dish.setName3(DBUtil.getCursorString(rs, "DISH.NAME3"));
-			dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD.MODIFICATIONS"));//
-			dish.setNum(DBUtil.getCursorInt(rs, "SALE_RECORD.AMOUNT"));//
-			dish.setOutputID(DBUtil.getCursorInt(rs, "SALE_RECORD._id"));//
-			dish.setPrice(DBUtil.getCursorInt(rs, "DISH.PRICE") / 100.0f);
-			dish.setPrinterIds(DBUtil.getCursorString(rs, "DISH.printerIds"));
-			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.menuPomp")));
-			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.ModifyPomp")));
-			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH.pricePomp")));
-			dish.setQst(DBUtil.getCursorInt(rs, "DISH.QST"));
-			dish.setSize(DBUtil.getCursorInt(rs, "DISH.SIZE"));
+			dish.setCategory(DBUtil.getCursorString(rs, "DISH_category"));
+			dish.setDiscount(DBUtil.getCursorInt(rs, "SALE_RECORD_DISCOUNT"));
+			dish.setDisplayIdx(Integer.valueOf(DBUtil.getCursorInt(rs, "DISH_displayIdx")));
+			dish.setGst(DBUtil.getCursorInt(rs, "DISH_GST"));
+			dish.setId(DBUtil.getCursorLong(rs, "DISH_id"));
+			dish.setName1(DBUtil.getCursorString(rs, "DISH_NAME1"));
+			dish.setName2(DBUtil.getCursorString(rs, "DISH_NAME2"));
+			dish.setName3(DBUtil.getCursorString(rs, "DISH_NAME3"));
+			dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD_MODIFICATIONS"));
+			dish.setNum(DBUtil.getCursorInt(rs, "SALE_RECORD_AMOUNT"));
+			dish.setOutputID(DBUtil.getCursorInt(rs, "SALE_RECORD_id"));
+			dish.setPrice(DBUtil.getCursorInt(rs, "DISH_PRICE") / 100.0f);
+			dish.setPrinterIds(DBUtil.getCursorString(rs, "DISH_printerIds"));
+			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH_menuPomp")));
+			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH_ModifyPomp")));
+			dish.setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH_pricePomp")));
+			dish.setQst(DBUtil.getCursorInt(rs, "DISH_QST"));
+			dish.setSize(DBUtil.getCursorInt(rs, "DISH_SIZE"));
 			dish.setCustomerIndex(billIndex);
-			dish.setOrderedTime(DBUtil.getCursorString(rs, "SALE_RECORD.createdTime"));	//output time is table's open time. no need to remember output created time.
-			dish.setBillID(DBUtil.getCursorInt(rs, "SALE_RECORD.billId"));
-			dish.setTotalPrice(DBUtil.getCursorInt(rs, "SALE_RECORD.totalPrice"));
-			dish.setStatus(DBUtil.getCursorInt(rs, "SALE_RECORD.STATUS"));
+			dish.setOrderedTime(DBUtil.getCursorString(rs, "SALE_RECORD_CREATEDTime"));
+			dish.setBillID(DBUtil.getCursorInt(rs, "SALE_RECORD_billId"));
+			dish.setTotalPrice(DBUtil.getCursorInt(rs, "SALE_RECORD_totalPrice"));
+			dish.setStatus(DBUtil.getCursorInt(rs, "SALE_RECORD_STATUS"));
 			dishAry.add(dish);
 
 			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
@@ -1045,17 +1051,17 @@ public class BillPanel extends BaseFragment
 			}
 			String[] marks = modification.split(BarDlgConst.delimiter);
 			StringBuilder sb = new StringBuilder();
-            for (String mark : marks) {
-                if (mark.trim().isEmpty()) {
-                    continue;
-                }
-                String[] langs = mark.split(BarDlgConst.semicolon);
-                String lang = langs.length > LoginDlg.USERLANG ? langs[LoginDlg.USERLANG] : langs[0];
-                if (lang.isEmpty() || "null".equalsIgnoreCase(lang)) {
-                    lang = langs[0].isEmpty() || "null".equalsIgnoreCase(lang) ? "" : langs[0];
-                }
-                sb.append(BarUtil.changeToLangForModify(lang, LoginDlg.USERLANG)).append(" ");
-            }
+			for (String mark : marks) {
+				if (mark.trim().isEmpty()) {
+					continue;
+				}
+				String[] langs = mark.split(BarDlgConst.semicolon);
+				String lang = langs.length > LoginDlg.USERLANG ? langs[LoginDlg.USERLANG] : langs[0];
+				if (lang.isEmpty() || "null".equalsIgnoreCase(lang)) {
+					lang = langs[0].isEmpty() || "null".equalsIgnoreCase(lang) ? "" : langs[0];
+				}
+				sb.append(BarUtil.changeToLangForModify(lang, LoginDlg.USERLANG)).append(" ");
+			}
 			if(dish.getDiscount() == 0) {
 				tValues[2] = sb.toString();
 			}else{
@@ -1069,11 +1075,9 @@ public class BillPanel extends BaseFragment
 		// may need this if throw exception: myAdapter.notifyDataSetChanged();
 
 		resetColWidth();
-//        if(BarFrame.secondScreen != null && salesPanel != null) {
-//        	BarFrame.customerFrame.billPanel.resetColWidth();
-//        }
 		return dishAry;
 	}
+
 
 	private void initBillProperties(String billId, String billIdx, String tableName, String openTime) throws SQLException {
 		StringBuilder sql = billId != null && billId.length() > 0 ?
