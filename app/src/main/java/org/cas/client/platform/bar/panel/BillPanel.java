@@ -620,71 +620,45 @@ public class BillPanel extends BaseFragment
 
 	//add dish into the billPanel, tiggered by "+"button or the bubttons on menuPanel. \
 	//moving items between bill doesn't go here.
-    void addContentToList(Dish dish) {
-    	if(!notTooLateToChangeStatus()) {
-    		return;
-    	}
-        int tRowCount = table.getRowCount(); // add content to the table.
-        int tColCount = 4;
-        int tValidRowCount = getUsedRowCount(); // get the used RowCount
-        if (tRowCount == tValidRowCount) { // no line is empty, add a new Line.
-            String[][] tValues = new String[tRowCount + 1][tColCount];
-            for (int r = 0; r < tRowCount; r++)
-                for (int c = 0; c < tColCount; c++)
-                    tValues[r][c] = table.getValueAt(r, c);
-			myAdapter.data = tValues;
-            resetColWidth();	//now there's a new line at the end of the existing lines
-//            if(BarFrame.secondScreen != null) {
-//            	BarFrame.customerFrame.billPanel.resetColWidth();
-//            }
-        }else {
-        	tRowCount--;
-        }
+	void addContentToList(Dish dish) {
+		if (!notTooLateToChangeStatus()) {
+			return;
+		}
 
-        Dish newDish = dish.clone();		//@NOTE: incase the cloned dish contains outpurID properties.
-        newDish.setOutputID(-1);
-        newDish.setNum(1);
-        int price = (int)(dish.getPrice() * 100);
+		Dish newDish = dish.clone(); // Clone the dish
+		newDish.setOutputID(-1);
+		newDish.setNum(1);
+		int price = (int) (dish.getPrice() * 100);
 
-        if(dish.getPricePomp() && BarOption.isTreatPricePromtAsTaxInclude()) {
-        	price = (int)Math.round(price / ((100 + BarOption.getGST() + BarOption.getQST()) / 100.0));
-        }
-        newDish.setTotalPrice(price * 1);
+		if (dish.getPricePomp() && BarOption.isTreatPricePromtAsTaxInclude()) {
+			price = (int) Math.round(price / ((100 + BarOption.getGST() + BarOption.getQST()) / 100.0));
+		}
+		newDish.setTotalPrice(price * 1);
 		newDish.setOrderedTime(BarUtil.df.format(new Date()));
-        newDish.setCustomerIndex(BarFrame.instance.getCurBillIndex());
-        newDish.setBillID(getBillID());
-        getOrderedDishAry().add(newDish);				//valueChanged process. not being cleared immediately-----while now dosn't matter
-        BarFrame.instance.curDish = newDish;
+		newDish.setCustomerIndex(BarFrame.instance.getCurBillIndex());
+		newDish.setBillID(getBillID());
+		getOrderedDishAry().add(newDish); // Add the dish to the list
+		BarFrame.instance.curDish = newDish;
 
-        //update the interface.
-        table.setValueAt("1x", tValidRowCount, 0); // set the count.
-        table.setValueAt(NetUtil.trimContentFromHTML(dish.getLanguage(CustOpts.custOps.getUserLang())), tValidRowCount, 1);// set the Name.
-        table.setValueAt(dish.getSize() > 1 ? dish.getSize().toString() : "", tValidRowCount, 2); // set the count.
-        table.setValueAt(BarOption.getMoneySign() + BarUtil.formatMoney(price/100f), tValidRowCount, 3); // set the price.
-//        table.scrollRectToVisible(table.getCellRect(table.getRowCount()-1, 0, true));
-        updateTotalArea(false);								//because value change will not be used to remove the record.
-//        SwingUtilities.invokeLater(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//		        table.setSelectedRow(getOrderedDishAry().size() - 1);
-//		        if("true".equals(newDish.getPrompMofify())) {
-//		    		AddModificationDlg.getInstance().isSettingMode = false;
-//		    		AddModificationDlg.getInstance().initContent(BarFrame.instance.curDish.getModification(), 0);
-//		    		AddModificationDlg.getInstance().setVisible(true);
-//		        }
-//	        	//if the original is not 0.00, then will still be treated as price promp not a taxInclude.
-//		        if(newDish.getPrice() < 0 || "true".equals(newDish.getPrompPrice()) && !BarOption.isTreatPricePromtAsTaxInclude()) {
-//		        	Cmd_ChangePrice.getInstance().showPriceChangeDlg();
-//		        }
-//		        //by now price is changed, then should check the rule.
-//		        checkWithRules();
-//			}
-//		});
-        updateStatusMsg();
-    }
+		// Update the adapter and scroll to the new item
+		myAdapter.addDish(newDish);
+		table.scrollToPosition(myAdapter.getItemCount() - 1);
+		setSelectedPosition(myAdapter.getItemCount() - 1);
 
-    private void updateStatusMsg() {
+		updateTotalArea(false);
+		updateStatusMsg();
+	}
+
+	private void setSelectedPosition(int position) {
+		int previousPosition = myAdapter.getSelectedPosition();
+		myAdapter.setSelectedPosition(position);
+		if (previousPosition != -1) {
+			myAdapter.notifyItemChanged(previousPosition);
+		}
+		myAdapter.notifyItemChanged(position);
+	}
+
+	private void updateStatusMsg() {
 		BarFrame.instance.setStatusMes(table.getRowCount() + BarFrame.consts.itemAdded());
 	}
 
@@ -1027,7 +1001,7 @@ public class BillPanel extends BaseFragment
 			dish.setModification(DBUtil.getCursorString(rs, "SALE_RECORD_MODIFICATIONS"));
 			dish.setNum(DBUtil.getCursorInt(rs, "SALE_RECORD_AMOUNT"));
 			dish.setOutputID(DBUtil.getCursorInt(rs, "SALE_RECORD_id"));
-			dish.setPrice(DBUtil.getCursorInt(rs, "DISH_PRICE") / 100.0f);
+			dish.setPrice(DBUtil.getCursorInt(rs, "DISH_PRICE"));
 			dish.setPrinterIds(DBUtil.getCursorString(rs, "DISH_printerIds"));
 			dish.setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH_menuPomp")));
 			dish.setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "DISH_ModifyPomp")));
@@ -1044,6 +1018,9 @@ public class BillPanel extends BaseFragment
 			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
 
 			tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));
+			if(tValues[1] == null || tValues[1].trim().length() == 0){
+				tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(0));
+			}
 
 			String modification = dish.getModification();
 			if(modification == null){

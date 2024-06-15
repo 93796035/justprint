@@ -103,7 +103,7 @@ public class MainGenerator {
         dish.addStringProperty("name1").columnName("NAME1");
         dish.addStringProperty("name2").columnName("NAME2");
         dish.addStringProperty("name3").columnName("NAME3");
-        dish.addFloatProperty("price");
+        dish.addIntProperty("price");
         dish.addIntProperty("gst");
         dish.addIntProperty("qst");
         dish.addIntProperty("size");

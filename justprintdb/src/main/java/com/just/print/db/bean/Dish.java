@@ -21,7 +21,7 @@ public class Dish {
     private String name1;
     private String name2;
     private String name3;
-    private Float price;
+    private Integer price;
     private Integer gst;
     private Integer qst;
     private Integer size;
@@ -61,7 +61,7 @@ public class Dish {
         this.id = id;
     }
 
-    public Dish(Long id, String name1, String name2, String name3, Float price, Integer gst, Integer qst, Integer size, String printerIds, Integer displayIdx, Boolean pricePomp, Boolean menuPomp, Boolean ModifyPomp, String category, Integer status, Integer version) {
+    public Dish(Long id, String name1, String name2, String name3, Integer price, Integer gst, Integer qst, Integer size, String printerIds, Integer displayIdx, Boolean pricePomp, Boolean menuPomp, Boolean ModifyPomp, String category, Integer status, Integer version) {
         this.id = id;
         this.name1 = name1;
         this.name2 = name2;
@@ -118,11 +118,11 @@ public class Dish {
         this.name3 = name3;
     }
 
-    public Float getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 

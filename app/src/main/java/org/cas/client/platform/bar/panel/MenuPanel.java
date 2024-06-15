@@ -270,7 +270,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				dishAry[tmpPos].setLanguage(0, dishNameMetrix[0][tmpPos]);
 				dishAry[tmpPos].setLanguage(1, dishNameMetrix[1][tmpPos]);
 				dishAry[tmpPos].setLanguage(2, dishNameMetrix[2][tmpPos]);
-				dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs, "PRICE") / 100.0f);
+				dishAry[tmpPos].setPrice(DBUtil.getCursorInt(rs, "PRICE"));
 				dishAry[tmpPos].setGst(DBUtil.getCursorInt(rs, "GST"));
 				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs, "QST"));
 				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs, "SIZE"));
@@ -446,7 +446,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 					text = getTextForDsp(BarUtil.empty(text) ? classifiedDishNameMetrix[0][globleMenuIdxOfCurCategory] : text);
 					if (BarOption.showPriceOnMenu()) {
 						text += "\n";
-						text += BarUtil.formatMoney(dish.getPrice());
+						text += BarUtil.formatMoney(dish.getPrice()/100.0f);
 					}
 					btnMenu.setText(text);
 					globleMenuIdxOfCurCategory++;

@@ -162,7 +162,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
                     modifyingMenu = menuXAdapter.get(i);
                     ((EditText)findViewById(R.id.etMenuID)).setText(menuXAdapter.get(i).getId().toString());
                     ((EditText)findViewById(R.id.etMenu)).setText(menuXAdapter.get(i).getName1());
-                    Float price = menuXAdapter.get(i).getPrice();
+                    Float price = menuXAdapter.get(i).getPrice()/100.0f;
                     ((EditText)findViewById(R.id.price)).setText(price == null ? "" : price.toString());
 
                     //preparing printers
@@ -461,7 +461,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             menu.setStatus(State.OPENNED);
             menu.setName1(mname.getText().toString().trim());
             menu.setCategory(mCategory.getName1());
-            menu.setPrice(price);
+            menu.setPrice((int)(price * 100));
             menuDao.insert(menu);
             previouseCode = menu.getId().toString();
         }else{              //updating....now it's allow duplicate name case..
@@ -470,7 +470,7 @@ public class ConfigMenuFragment extends BaseFragment implements View.OnFocusChan
             modifyingMenu.setStatus(State.OPENNED);
             modifyingMenu.setName1(mname.getText().toString().trim());
             modifyingMenu.setCategory(mCategory.getName1());
-            modifyingMenu.setPrice(price);
+            modifyingMenu.setPrice((int)(price * 100));
             menuDao.insert(modifyingMenu);
             menu = modifyingMenu;
         }

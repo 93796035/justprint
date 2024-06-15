@@ -27,7 +27,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
         public final static Property Name1 = new Property(1, String.class, "name1", false, "NAME1");
         public final static Property Name2 = new Property(2, String.class, "name2", false, "NAME2");
         public final static Property Name3 = new Property(3, String.class, "name3", false, "NAME3");
-        public final static Property Price = new Property(4, Float.class, "price", false, "PRICE");
+        public final static Property Price = new Property(4, Integer.class, "price", false, "PRICE");
         public final static Property Gst = new Property(5, Integer.class, "gst", false, "GST");
         public final static Property Qst = new Property(6, Integer.class, "qst", false, "QST");
         public final static Property Size = new Property(7, Integer.class, "size", false, "SIZE");
@@ -61,7 +61,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
                 "'NAME1' TEXT," + // 1: name1
                 "'NAME2' TEXT," + // 2: name2
                 "'NAME3' TEXT," + // 3: name3
-                "'PRICE' REAL," + // 4: price
+                "'PRICE' INTEGER," + // 4: price
                 "'GST' INTEGER," + // 5: gst
                 "'QST' INTEGER," + // 6: qst
                 "'SIZE' INTEGER," + // 7: size
@@ -106,9 +106,9 @@ public class DishDao extends AbstractDao<Dish, Long> {
             stmt.bindString(4, name3);
         }
  
-        Float price = entity.getPrice();
+        Integer price = entity.getPrice();
         if (price != null) {
-            stmt.bindDouble(5, price);
+            stmt.bindLong(5, price);
         }
  
         Integer gst = entity.getGst();
@@ -187,7 +187,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name1
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name2
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // name3
-            cursor.isNull(offset + 4) ? null : cursor.getFloat(offset + 4), // price
+            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // price
             cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // gst
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // qst
             cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // size
@@ -210,7 +210,7 @@ public class DishDao extends AbstractDao<Dish, Long> {
         entity.setName1(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setName2(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setName3(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setPrice(cursor.isNull(offset + 4) ? null : cursor.getFloat(offset + 4));
+        entity.setPrice(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
         entity.setGst(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
         entity.setQst(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setSize(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
