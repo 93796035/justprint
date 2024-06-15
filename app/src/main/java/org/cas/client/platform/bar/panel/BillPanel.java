@@ -628,7 +628,7 @@ public class BillPanel extends BaseFragment
 		Dish newDish = dish.clone(); // Clone the dish
 		newDish.setOutputID(-1);
 		newDish.setNum(1);
-		int price = (int) (dish.getPrice() * 100);
+		int price = dish.getPrice();
 
 		if (dish.getPricePomp() && BarOption.isTreatPricePromtAsTaxInclude()) {
 			price = (int) Math.round(price / ((100 + BarOption.getGST() + BarOption.getQST()) / 100.0));

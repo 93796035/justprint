@@ -123,7 +123,6 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	}
 
 	public void reLayout() {
-		// 获取宽度和高度
 		int width = mRoot.getWidth();
 		int height = mRoot.getHeight();
 
