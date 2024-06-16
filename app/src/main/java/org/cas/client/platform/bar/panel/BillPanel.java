@@ -981,7 +981,6 @@ public class BillPanel extends BaseFragment
 		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 
 		String[][] datas = new String[rs.getCount()][];
-		String[] tValues = new String[4];
 		for(int i = 0; i < datas.length; i++){
 			rs.moveToNext();
 			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD_modifiedTime");
@@ -1015,6 +1014,7 @@ public class BillPanel extends BaseFragment
 			dish.setStatus(DBUtil.getCursorInt(rs, "SALE_RECORD_STATUS"));
 			dishAry.add(dish);
 
+			String[] tValues = new String[4];
 			tValues[0] = DBUtil.getDisplayableNumWithX(dish.getNum());
 
 			tValues[1] = NetUtil.trimContentFromHTML(dish.getLanguage(LoginDlg.USERLANG));

@@ -111,7 +111,7 @@ public class DBUtil {
     		strCreateTime = BarUtil.df.format(new Date());
     		createTime = System.currentTimeMillis() / 1000;
     	} else {				//otherwise, need to fetch out the previous bill to find the "start time" for the searching in next step.
-			sql = new StringBuilder("SELECT createdTime FROM bill WHERE tableId = '").append(tableId)
+			sql = new StringBuilder("SELECT createdTime FROM BILL WHERE tableName = '").append(tableId)
 			.append("' AND openTime = '").append(openTime)
 			.append("' AND billIndex = ").append(clientIdx)
 			.append(" AND _id < ").append(billId)
@@ -119,7 +119,7 @@ public class DBUtil {
 			cursor = AikaPos.db.rawQuery(sql.toString(), null);
 			try {
 				if (cursor != null && cursor.moveToFirst()) {
-					int columnIndex = cursor.getColumnIndex("createTime");
+					int columnIndex = cursor.getColumnIndex("createdTime");
 					if (columnIndex != -1) { // 确保索引值是有效的
 						strCreateTimeOfLastBill = cursor.getString(columnIndex);
 						// 假设您已经有正确的日期格式化方式
@@ -140,17 +140,17 @@ public class DBUtil {
     	
     	//fetch out all the output created or removed during the period, 
 		//also included the price changed items.
-		sql = new StringBuilder("SELECT * FROM output WHERE subject = '").append(tableId)
-				.append("' AND time = '").append(openTime)
-				.append("' AND CONTACTID = ").append(clientIdx)
-				.append(" AND ((arrearage > ").append(createTimeOfLastbill)
-				.append(" AND arrearage <= ").append(createTime)
-				//when there's an item was changed price, the deleted is DBConsts.itemPriceChanged, so as long as the arrearage has value of this period, means there's some thing happened and affected the money amount.
+		sql = new StringBuilder("SELECT * FROM SALE_RECORD WHERE tableName = '").append(tableId)
+				.append("' AND openTime = '").append(openTime)
+				.append("' AND billIndex = ").append(clientIdx)
+				.append(" AND ((modifiedTime > ").append(createTimeOfLastbill)
+				.append(" AND modifiedTime <= ").append(createTime)
+				//when there's an item was changed price, the deleted is DBConsts.itemPriceChanged, so as long as the modifiedTime has value of this period, means there's some thing happened and affected the money amount.
 				//.append(" AND deleted = ").append(DBConsts.voided) 
 				.append(")")	//maybe not new added, but new deleted dishes.
-				.append(" OR (category > '").append(strCreateTimeOfLastBill)
-				.append("' AND category <= '").append(strCreateTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is deleted, it will be set to "deleted" not "void".
-				.append("' AND (deleted is null OR deleted < ").append(DBConsts.COMPLETED)//output has 3 status, null, void, deleted. it
+				.append(" OR (createdTime > '").append(strCreateTimeOfLastBill)
+				.append("' AND createdTime <= '").append(strCreateTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is deleted, it will be set to "deleted" not "void".
+				.append("' AND (STATUS is null OR STATUS < ").append(DBConsts.COMPLETED)//output has 3 status, null, void, deleted. it
 				.append(")))").toString();	//new created not report dishes
 		//should include the price changed item.
 		try {
@@ -162,7 +162,7 @@ public class DBUtil {
 	}
 
 	public static void updateOutput(int outputId, String fieldName, int value) {
-		StringBuilder sb = new StringBuilder("update output set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(outputId);
+		StringBuilder sb = new StringBuilder("update SALE_RECORD set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(outputId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
 		}catch(Exception e) {
@@ -171,7 +171,7 @@ public class DBUtil {
 	}
 
 	public static void updateBill(int billId, String fieldName, int value) {
-		StringBuilder sb = new StringBuilder("update bill set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(billId);
+		StringBuilder sb = new StringBuilder("update BILL set ").append(fieldName).append(" = ").append(value).append(" where _id = ").append(billId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
 		}catch(Exception e) {
@@ -180,7 +180,7 @@ public class DBUtil {
 	}
 	
 	public static void updateBill(int billId, String fieldName, String value) {
-		StringBuilder sb = new StringBuilder("update bill set ").append(fieldName)
+		StringBuilder sb = new StringBuilder("update BILL set ").append(fieldName)
 				.append(" = '").append(value).append("' where _id = ").append(billId);
 		try {
 			AikaPos.db.execSQL(sb.toString());
@@ -193,7 +193,7 @@ public class DBUtil {
 		//this is the designed time to clean those bills.
 		StringBuilder sql = new StringBuilder("update BILL set STATUS = ").append(DBConsts.DELETED)
 				.append(" WHERE tableName = '").append(tableName)
-				.append("' and OPENTIME = '").append(openTime)
+				.append("' and openTime = '").append(openTime)
 				.append("' and (STATUS IS NULL OR STATUS <= ").append(DBConsts.SAVED).append(")");	//there are bills which was generated during split, which status is "saved".
 		try {
 			AikaPos.db.execSQL(sql.toString());
@@ -314,7 +314,7 @@ public class DBUtil {
 		dish.setStatus(status);
 
 		StringBuilder sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(status)
-				.append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000))
+				.append(", modifiedTime = ").append((int)(System.currentTimeMillis() / 1000))
 				.append(" where _id = ").append(dish.getOutputID());
 		try {
 			AikaPos.db.execSQL(sql.toString());

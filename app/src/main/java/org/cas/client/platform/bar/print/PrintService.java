@@ -1516,8 +1516,9 @@ public class PrintService{
 			StringBuilder content, String subTotal, String serviceFee, String discount) {
         
 		content.append(BarUtil.getSeperatorLine(0)).append("\n\n");
-        int langIndex = ipPrinterMap.get(curPrintIp).getLangType();
-        for(Dish d:dishList){
+        Integer langIndex = ipPrinterMap.get(curPrintIp).getLangType();
+		langIndex = langIndex == null ? 0 : langIndex;
+		for(Dish d:dishList){
             StringBuilder sb = new StringBuilder();
             
             if(BarOption.isDisDishIDInKitchen()) {
