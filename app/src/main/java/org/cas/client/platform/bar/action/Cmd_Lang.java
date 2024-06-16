@@ -41,15 +41,15 @@ public class Cmd_Lang implements SamActionListener {
  		if(o.equals("EN")) {
  			CustOpts.custOps.setUserLang(0);
  			BarFrame.consts = new BarDlgConst1();
-        	updateUserLangPrefer("update USER set subject = 'EN' where _id = " + LoginDlg.USERID);
+        	updateUserLangPrefer("update USER set LONG = 1 where _id = " + LoginDlg.USERID);
  		}else if (o.equals("FR")) {
  			CustOpts.custOps.setUserLang(1);
     		BarFrame.consts = new BarDlgConst0();
-    		updateUserLangPrefer("update USER set subject = 'FR' where _id = " + LoginDlg.USERID);
+    		updateUserLangPrefer("update USER set LONG = 0 where _id = " + LoginDlg.USERID);
         } else if (o.equals("CN")) {
  			CustOpts.custOps.setUserLang(2);
     		BarFrame.consts = new BarDlgConst2();
-        	updateUserLangPrefer("update USER set subject = 'CN' where _id = " + LoginDlg.USERID);
+        	updateUserLangPrefer("update USER set LONG = 3 where _id = " + LoginDlg.USERID);
         }
 	}
 	

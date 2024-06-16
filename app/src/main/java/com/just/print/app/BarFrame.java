@@ -787,7 +787,7 @@ public class BarFrame extends BaseFragmentActivity {
     private void initMoneyDisplay() {
 
         String billIndex = getCurBillIndex();
-        //used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
+        //used STATUS <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
         String tableName = String.valueOf(cmbCurTable.getSelectedItem());
         String openTime = String.valueOf(valOpenTime.getText());
 
@@ -956,7 +956,7 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public void closeTableAndBillInDB(String tableName, String openTime) {
-        //all the bill should already completed when table closed except those was generated while has no output on it.
+        //all the bill should already completed when table closed except those was generated while has no SALE_RECORD on it.
         //this is the designed time to clean those bills.
         StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED)
                 .append(" WHERE tableName = '").append(tableName)
@@ -995,7 +995,7 @@ public class BarFrame extends BaseFragmentActivity {
     // @NOTE in first solution, we don't check the bills here, because it's OK there could be bills (an empty bill, or none-closed bills
     //generated during the splitting bill), while the bad thing is that before the table closed, there's bill displaying in the check
     //order list, which is not big problem but might cause the confusion of the store owner.....
-    //Then, I thought about a new sulution--when combining all or move item, should check the left output numbers of the bill, if no left, then put it to dumpt.
+    //Then, I thought about a new sulution--when combining all or move item, should check the left SALE_RECORD numbers of the bill, if no left, then put it to dumpt.
     //while the bad thing of this solution is that, when uncombinning will have trouble, because it need to find the unclosed billPanes, if those bill closed,
     //then the billPanel will not be found, then the button will not display unCombine, and even we do uncombine, we will need to change the status back.
     //So, finally, I think it's better to let the unclosed bills display in check list box, anyway, they are not closed yet, they are waiting for uncombine.
@@ -1005,9 +1005,9 @@ public class BarFrame extends BaseFragmentActivity {
         openTime = BarUtil.empty(openTime) ? valOpenTime.getText().toString() : openTime;
 
         try {
-            StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(tableName)
-                    .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL)
-                    .append(") and time = '").append(openTime).append("'");
+            StringBuilder sql = new StringBuilder("SELECT DISTINCT userId from SALE_RECORD where tableName = '").append(tableName)
+                    .append("' and (STATUS is null or STATUS = ").append(DBConsts.ORIGINAL)
+                    .append(") and openTime = '").append(openTime).append("'");
 
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             return rs.getCount() == 0;
@@ -1043,7 +1043,7 @@ public class BarFrame extends BaseFragmentActivity {
             if(DBUtil.getCursorInt(rs, "id") > -1);	//if not throwning exception (means there is a record), then do nothing.
             return;
         }catch(Exception exp) {			//otherwise(if no record yet), generate a record.
-            sql = "INSERT INTO evaluation(startTime, userId, subject) VALUES ('" + BarUtil.df.format(new Date())
+            sql = "INSERT INTO evaluation(startTime, userId, SUBJECT) VALUES ('" + BarUtil.df.format(new Date())
                     + "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME +"')";
             try {
                 AikaPos.db.execSQL(sql);
@@ -1090,14 +1090,14 @@ public class BarFrame extends BaseFragmentActivity {
 
     public void updateOutputStatus(int status){
         //update status of relevant outputs to be completed.
-        StringBuilder sql = new StringBuilder("update output set deleted = ").append(status)
-                .append(" where subject = '").append(cmbCurTable.getSelectedItem())
-                .append("' and contactID = ").append(getCurBillIndex())
-                .append(" and (deleted is null or deleted < ").append(DBConsts.COMPLETED).append(")");
+        StringBuilder sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(status)
+                .append(" where tableName = '").append(cmbCurTable.getSelectedItem())
+                .append("' and billIndex = ").append(getCurBillIndex())
+                .append(" and (STATUS is null or STATUS < ").append(DBConsts.COMPLETED).append(")");
         try {
             AikaPos.db.execSQL(sql.toString());
         } catch (Exception e) {
-            L.e("BarFrame", "unexpected error occured whenn updating output status.", e);
+            L.e("BarFrame", "unexpected error occured whenn updating SALE_RECORD status.", e);
         }
     }
 }

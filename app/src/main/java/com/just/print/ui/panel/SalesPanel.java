@@ -71,14 +71,14 @@ public class SalesPanel extends PicturePane{
 
     //Todo: Maybe it's safe to delete this method, because I think no need to touch ouputs.
 //	private void reopenOutput() {
-//		//convert the status of relevant output.
-//		StringBuilder sql = new StringBuilder("update output set deleted = ").append(DBConsts.original)
-//				.append(" where deleted = ").append(DBConsts.voided)
+//		//convert the status of relevant SALE_RECORD.
+//		StringBuilder sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.original)
+//				.append(" where STATUS = ").append(DBConsts.voided)
 //				.append(" and category = ").append(billPanel.billID);
 //		try {
 //			AikaPos.db.rawQuery(sql.toString(), null);
 //		}catch(Exception exp) {
-//			L.e("SalesPane", "Exception happenned when converting output's status to 0", exp);
+//			L.e("SalesPane", "Exception happenned when converting SALE_RECORD's status to 0", exp);
 //		}
 //	}
 
@@ -88,8 +88,8 @@ public class SalesPanel extends PicturePane{
         }
         long outputID = mostExpensiveDish.getOutputID();
         if(outputID >= 0) {
-            StringBuilder sql = new StringBuilder("update output set discount = ").append(value)
-                    .append(", toltalprice = ").append(Math.round(mostExpensiveDish.getPrice() - value))
+            StringBuilder sql = new StringBuilder("update SALE_RECORD set discount = ").append(value)
+                    .append(", toltalPrice = ").append(Math.round(mostExpensiveDish.getPrice() - value))
                     .append(" where _id = ").append(outputID);
             AikaPos.db.execSQL(sql.toString());
         }
@@ -101,16 +101,16 @@ public class SalesPanel extends PicturePane{
 
 //    public static void resetCurTable(){
 //    	try {
-//            //clean all empty bill (match table id and opentime, status is null, while doesn't exist in any output.).
-//            //if there's an output was deleted from this bill, this bill is still considered as empty.
-//            //if there's an output was completed 10
-////            sql = new StringBuilder("update bill set status = ").append(DBConsts.deleted)
+//            //clean all empty bill (match table id and opentime, status is null, while doesn't exist in any SALE_RECORD.).
+//            //if there's an SALE_RECORD was deleted from this bill, this bill is still considered as empty.
+//            //if there's an SALE_RECORD was completed 10
+////            sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)
 ////            		.append(" WHERE bill._id IN ( SELECT _id FROM bill WHERE tableName = ").append(BarFrame.instance.valCurTable.getText())
 ////    				.append(" and OPENTIME = '").append(BarFrame.instance.valStartTime.getText())
 ////    				.append("' and status IS NULL OR status = ").append(DBConsts.original)
-////    				.append(") AND NOT EXISTS (SELECT category FROM OUTPUT WHERE (deleted IS null or deleted = ").append(DBConsts.completed)
-////    				.append(" AND time = '").append(BarFrame.instance.valStartTime.getText())
-////    				.append("' and SUBJECT = '").append(BarFrame.instance.valCurTable.getText()).append("')");
+////    				.append(") AND NOT EXISTS (SELECT category FROM SALE_RECORD WHERE (STATUS IS null or STATUS = ").append(DBConsts.completed)
+////    				.append(" and openTime = '").append(BarFrame.instance.valStartTime.getText())
+////    				.append("' and tableName = '").append(BarFrame.instance.valCurTable.getText()).append("')");
 //
 //            //no need to be complex, all ortiginal status bills of this table should be cleaned.
 //            //close table

@@ -127,8 +127,8 @@ public class Cmd_ChangePrice implements SamActionListener {
 //         	billPanel.updateTotalArea(false);
 //         	int outputID = billPanel.getOrderedDishAry().get(row).getOutputID();
 //         	if(outputID >= 0) {
-//         		StringBuilder sql = new StringBuilder("update output set TOLTALPRICE = ").append(dish.getPrice() - dish.getDiscount())
-//         				.append(", deleted = ").append(DBConsts.ITEM_PRICE_CHANGED)
+//         		StringBuilder sql = new StringBuilder("update SALE_RECORD set TOLTALPRICE = ").append(dish.getPrice() - dish.getDiscount())
+//         				.append(", STATUS = ").append(DBConsts.ITEM_PRICE_CHANGED)
 //         				.append(", arrearage = ").append((int)(System.currentTimeMillis() / 1000)) //this will cause the bill considered as revised when printing bill.
 //         				.append(" where _id = ").append(outputID);
 //

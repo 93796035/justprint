@@ -105,10 +105,10 @@ public class Cmd_Return implements SamActionListener {
 		String curBill = BarFrame.instance.getCurBillIndex();
 
 		try {
-			StringBuilder sql = new StringBuilder("select * from output where category = '").append(billID)
-					.append("' or (subject = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
-					.append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
-					.append(" and contactID = ").append(curBill).append(")"); // in future version, might need to check the deleted property.
+			StringBuilder sql = new StringBuilder("select * from SALE_RECORD where billId = '").append(billID)
+					.append("' or (tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
+					.append(" and openTime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
+					.append(" and userId = ").append(curBill).append(")"); // in future version, might need to check the STATUS property.
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			if (rs.getCount() == 0) { // if still empty
 				sql = new StringBuilder("delete from bill where _id = ").append(billID);

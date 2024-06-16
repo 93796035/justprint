@@ -42,7 +42,7 @@ public class Cmd_AddBill implements  SamActionListener {
 		TablesPanel tablesPanel = (TablesPanel) BarFrame.instance.panels[0];
 		SalesPanel salesPanel = (SalesPanel)BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
-		//save unsaved output
+		//save unsaved SALE_RECORD
     	billPanel.unsavedItemsCheck();
     	DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.SAVED, BarUtil.df.format(new Date()));
     	if(BarOption.isCounterMode()){

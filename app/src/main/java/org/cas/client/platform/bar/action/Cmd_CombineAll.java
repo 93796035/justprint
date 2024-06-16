@@ -53,7 +53,7 @@ public class Cmd_CombineAll implements SamActionListener {
 //	                idxMap.put(DBUtil.getCursorInt(rs,"_id"), DBUtil.getCursorInt(rs,"billIndex"));
 //	            }
 //			}catch(Exception exp) {
-//				L.e("BillListPanel", "exception when change output back to original bill" + sql, exp);
+//				L.e("BillListPanel", "exception when change SALE_RECORD back to original bill" + sql, exp);
 //			}
 //
 //			//get the unclosed billPane.
@@ -68,12 +68,12 @@ public class Cmd_CombineAll implements SamActionListener {
 //			for (Dish dish : orderedDishes) {
 //				Object idx = idxMap.get(dish.getBillID());
 //				if(idx != null) {
-//					sql = new StringBuilder("update output set contactID = ").append(idx)
+//					sql = new StringBuilder("update SALE_RECORD set userId = ").append(idx)
 //							.append(" where _id = ").append(dish.getOutputID());
 //					try {
 //						PIMDBModel.getStatement().execute(sql.toString());
 //					}catch(Exception exp) {
-//						L.e("BillListPanel", "exception when change output back to original bill" + sql, exp);
+//						L.e("BillListPanel", "exception when change SALE_RECORD back to original bill" + sql, exp);
 //					}
 //				}
 //			}

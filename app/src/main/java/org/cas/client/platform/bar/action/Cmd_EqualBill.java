@@ -87,7 +87,7 @@ public class Cmd_EqualBill implements SamActionListener {
 				}
 			}
 									
-			for (int i = 1; i < num; i++) {				//generate output for splited ones.
+			for (int i = 1; i < num; i++) {				//generate SALE_RECORD for splited ones.
 				int billIndex = BillListPanel.getANewBillIdx(null, null);
 				
 				//generate a bill for each new occupied panel, incase there's discount info need to set into it.

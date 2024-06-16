@@ -60,8 +60,8 @@ public class Cmd_SplitItem implements SamActionListener {
 				return;
 			}
 			DBUtil.splitOutput(BarFrame.instance.curDish, selectedPanels.size() + 1, null); // update the num and totalprice of curDish
-			for (BillPanel billPanel : selectedPanels) { // insert new output with other billID
-				int billIndex = Integer.valueOf(billPanel.billButton.getText());
+			for (BillPanel billPanel : selectedPanels) { // insert new SALE_RECORD with other billID
+				int billIndex = Integer.parseInt(billPanel.billButton.getText());
 				//generate a bill for each new occupied panel, incase there's discount info need to set into it.
 				//@Note, when the initContent of the panel called, the bill ID will be set into the dish instance in memory.
 				//and eventually, if the bill id is not 0, will calculate the service fee and discount into Total.

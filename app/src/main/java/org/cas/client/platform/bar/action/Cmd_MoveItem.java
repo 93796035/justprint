@@ -118,9 +118,9 @@ public class Cmd_MoveItem implements SamActionListener {
 //		        	return;
 //		        }
 //
-//				// the selected output to this bill.
-//				sql = new StringBuilder("update output set contactID = ").append(targetBillIdx)
-//						.append(", category = ").append(billId)
+//				// the selected SALE_RECORD to this bill.
+//				sql = new StringBuilder("update SALE_RECORD set userId = ").append(targetBillIdx)
+//						.append(", billId = ").append(billId)
 //						.append(" where _id = ").append(BarFrame.instance.curDish.getOutputID());
 //		        try {
 //		        	PIMDBModel.getStatement().executeUpdate(sql.toString());

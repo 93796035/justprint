@@ -38,7 +38,7 @@ public class DBUtil {
 			L.e("openATable", "exception when openning a table: " + sql, exp);
 		}
 	}
-	//update all current output and bill with target table name, opentime and with the new billIdx?
+	//update all current SALE_RECORD and bill with target table name, opentime and with the new billIdx?
 	//@Note: why people merge table??? maybe they are friends met in restaurant, they shouldn't share same bill number for sure,
 	//because they might AA when pay the bill.
 	public static void moveBillToAnotherTable(String newTableName, int newBillIdx, int billID, String openTime) {
@@ -47,10 +47,10 @@ public class DBUtil {
 	}
 	//@NOTE didn't use current table as filter condition. because it have been changed.
 	public static void moveOutputToTable(int billID, String newTable, int newBillIdx, String openTime) {
-		StringBuilder sql = new StringBuilder("update output set SUBJECT = '").append(newTable)
-				.append("', CONTACTID = ").append(newBillIdx)
-				.append(", time = '").append(openTime)
-				.append("' where category = ").append(billID);
+		StringBuilder sql = new StringBuilder("update SALE_RECORD set tableName = '").append(newTable)
+				.append("', userId = ").append(newBillIdx)
+				.append(", openTime = '").append(openTime)
+				.append("' where billId = ").append(billID);
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {
@@ -138,19 +138,19 @@ public class DBUtil {
 			}//no need to update the "search end date", keep it the date of current bill.
     	}
     	
-    	//fetch out all the output created or removed during the period, 
+    	//fetch out all the SALE_RECORD created or removed during the period,
 		//also included the price changed items.
 		sql = new StringBuilder("SELECT * FROM SALE_RECORD WHERE tableName = '").append(tableId)
 				.append("' AND openTime = '").append(openTime)
 				.append("' AND billIndex = ").append(clientIdx)
 				.append(" AND ((modifiedTime > ").append(createTimeOfLastbill)
 				.append(" AND modifiedTime <= ").append(createTime)
-				//when there's an item was changed price, the deleted is DBConsts.itemPriceChanged, so as long as the modifiedTime has value of this period, means there's some thing happened and affected the money amount.
-				//.append(" AND deleted = ").append(DBConsts.voided) 
+				//when there's an item was changed price, the STATUS is DBConsts.itemPriceChanged, so as long as the modifiedTime has value of this period, means there's some thing happened and affected the money amount.
+				//.append(" AND STATUS = ").append(DBConsts.voided) 
 				.append(")")	//maybe not new added, but new deleted dishes.
 				.append(" OR (createdTime > '").append(strCreateTimeOfLastBill)
-				.append("' AND createdTime <= '").append(strCreateTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is deleted, it will be set to "deleted" not "void".
-				.append("' AND (STATUS is null OR STATUS < ").append(DBConsts.COMPLETED)//output has 3 status, null, void, deleted. it
+				.append("' AND createdTime <= '").append(strCreateTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is STATUS, it will be set to "STATUS" not "void".
+				.append("' AND (STATUS is null OR STATUS < ").append(DBConsts.COMPLETED)//SALE_RECORD has 3 status, null, void, deleted. it
 				.append(")))").toString();	//new created not report dishes
 		//should include the price changed item.
 		try {
@@ -189,7 +189,7 @@ public class DBUtil {
 		}
 	}
 	public static void closeTableAndBillInDB(String tableName, String openTime) {
-		//all the bill should already completed when table closed except those was generated while has no output on it.
+		//all the bill should already completed when table closed except those was generated while has no SALE_RECORD on it.
 		//this is the designed time to clean those bills.
 		StringBuilder sql = new StringBuilder("update BILL set STATUS = ").append(DBConsts.DELETED)
 				.append(" WHERE tableName = '").append(tableName)
@@ -407,9 +407,9 @@ public class DBUtil {
 			pX *= 100;
 		}
 		num += pX;
-		if(billIndex == null) {		//updating the original output.
-			StringBuilder sql = new StringBuilder("update output set amount = ").append(num)
-					.append(", category = ").append(dish.getBillID())
+		if(billIndex == null) {		//updating the original SALE_RECORD.
+			StringBuilder sql = new StringBuilder("update SALE_RECORD set amount = ").append(num)
+					.append(", billId = ").append(dish.getBillID())
 					.append(", TOLTALPRICE = ").append(dish.getTotalPrice() * splitRate)
 					.append(", discount = ").append(dish.getDiscount() * splitRate)
 					.append(" where _id = ").append(dish.getOutputID());

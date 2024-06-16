@@ -57,7 +57,7 @@ public class UpdateItemPriceAction implements SamActionListener{
 //             	billPanel.updateTotalArea(false);
 //             	int outputID = billPanel.getOrderedDishAry().get(row).getOutputID();
 //             	if(outputID >= 0) {
-//             		String sql = "update output set TOLTALPRICE = "
+//             		String sql = "update SALE_RECORD set TOLTALPRICE = "
 //             				+ (dish.getPrice() - dish.getDiscount()) + " where _id = " + outputID;
 //             		AikaPos.db.execSQL(sql);
 //             	}

@@ -83,7 +83,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         cleanInterface();
 
         //load all the unclosed outputs under this table with content inside.---------------------------
-        //output will be set as deleted=true only when click a "-" button. when bill closed, the output will not be set as deleted = true!
+        //SALE_RECORD will be set as STATUS=true only when click a "-" button. when bill closed, the SALE_RECORD will not be set as STATUS = true!
         //so closed bill of this table will also be counted. but will displayed in different color.
 
         int latestID = reInitBillPanels();
@@ -105,9 +105,9 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         if(unclosedNum == 1) {
             String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
             String openTime = BarFrame.instance.valOpenTime.getText().toString();
-            StringBuilder sql =  new StringBuilder("SELECT DISTINCT category from output where SUBJECT = '").append(tableName)
-                    .append("' and (deleted is null or deleted < ").append(DBConsts.COMPLETED)
-                    .append(") and time = '").append(openTime).append("'");
+            StringBuilder sql =  new StringBuilder("SELECT DISTINCT category from SALE_RECORD where tableName = '").append(tableName)
+                    .append("' and (STATUS is null or STATUS < ").append(DBConsts.COMPLETED)
+                    .append(") and openTime = '").append(openTime).append("'");
             try {
                 Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                 if (rs.getCount() > 1) {
@@ -124,15 +124,15 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
     private int reInitBillPanels(){
         String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
         String openTime = BarFrame.instance.valOpenTime.getText().toString();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(tableName)
-                .append("' and (deleted is null or deleted < ").append(DBConsts.EXPIRED)
-                .append(") and time = '").append(openTime).append("' order by contactID");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT userId from SALE_RECORD where tableName = '").append(tableName)
+                .append("' and (STATUS is null or STATUS < ").append(DBConsts.EXPIRED)
+                .append(") and openTime = '").append(openTime).append("' order by userId");
 
         int latestID = 0;
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                FunctionToggleButton billButton = new FunctionToggleButton(String.valueOf(DBUtil.getCursorInt(rs, "contactID")));
+                FunctionToggleButton billButton = new FunctionToggleButton(String.valueOf(DBUtil.getCursorInt(rs, "userId")));
 //                billButton.setMargin(new Insets(0, 0, 0, 0));
 
                 BillPanel billPanel = new BillPanel(this, billButton);
@@ -140,7 +140,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
                 billPanel.initContent();
                 billPanels.add(billPanel);
 
-                latestID = DBUtil.getCursorInt(rs, "contactID");
+                latestID = DBUtil.getCursorInt(rs, "userId");
             }
         } catch (Exception e) {
             L.e("BillListPane", "Unexpected exception when init the bill panels." + sql, e);
@@ -248,12 +248,12 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         }
 
         try {
-            //get the output price of the moving dish, it will be used to adjust the total of two bill.
+            //get the SALE_RECORD price of the moving dish, it will be used to adjust the total of two bill.
             int outputTotalPrice = 0;
-            StringBuilder sql = new StringBuilder("select toltalprice from output where _id = ").append(BarFrame.instance.curDish.getOutputID());
+            StringBuilder sql = new StringBuilder("select toltalPrice from SALE_RECORD where _id = ").append(BarFrame.instance.curDish.getOutputID());
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                outputTotalPrice = DBUtil.getCursorInt(rs, "toltalprice");
+                outputTotalPrice = DBUtil.getCursorInt(rs, "toltalPrice");
                 break;
             }
             rs.close();// 关闭
@@ -285,9 +285,9 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             }
             BarFrame.instance.curDish.setBillID(targetBillId);	//might not necessary, just in case the billPanel will not updated before it's used anywhere.
 
-            // Update the output to belongs to the new ContactID (contactID is bill Index,not  bill id)
-            sql = new StringBuilder("update output set CONTACTID = ").append(targetBillPanel.billButton.getText())
-                    .append(", category = " + targetBillId)
+            // Update the SALE_RECORD to belongs to the new userId (userId is bill Index,not  bill id)
+            sql = new StringBuilder("update SALE_RECORD set billIndex = ").append(targetBillPanel.billButton.getText())
+                    .append(", billId = " + targetBillId)
                     .append(" where _id = ").append(BarFrame.instance.curDish.getOutputID());
             AikaPos.db.execSQL(sql.toString());
 
@@ -311,7 +311,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             btnLeft.setEnabled(curPageNum > 0);
             initContent();
         }else {
-            //select all output of each bill wich curtable and status is not completed, and set the status to be cancelled.
+            //select all SALE_RECORD of each bill wich curtable and status is not completed, and set the status to be cancelled.
             //set the table as unselected.
         }
     }
@@ -319,19 +319,19 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
     public void combineBills(ArrayList<BillPanel> unclosedBillPanels, boolean needCombinOutputs) {
         String firstUnclosedBillIdx = unclosedBillPanels.get(0).billButton.getText();
 
-        //update all related output to belongs to first Bill, deleted and completed output will not be modified.
+        //update all related SALE_RECORD to belongs to first Bill, STATUS and completed SALE_RECORD will not be modified.
         //the billId will not be modified, so when waiter want to do a undo, can use the billID to undo combine all.
         String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
         String openTime = BarFrame.instance.valOpenTime.getText().toString();
-        StringBuilder sql = new StringBuilder("update output set contactID = ").append(firstUnclosedBillIdx)
-                //@NOTE we don't change the billID when combinAll(to support undo) .append(", category = '").append(firstUnclosedBillId).append("'")
-                .append(" where SUBJECT = '").append(tableName)
-                .append("' and time = '").append(openTime)
-                .append("' and (deleted is null or DELETED = ").append(DBConsts.ORIGINAL).append(")");
+        StringBuilder sql = new StringBuilder("update SALE_RECORD set billIndex = ").append(firstUnclosedBillIdx)
+                //@NOTE we don't change the billID when combinAll(to support undo) .append(", billId = '").append(firstUnclosedBillId).append("'")
+                .append(" where tableName = '").append(tableName)
+                .append("' and openTime = '").append(openTime)
+                .append("' and (STATUS is null or STATUS = ").append(DBConsts.ORIGINAL).append(")");
         try {
             AikaPos.db.execSQL(sql.toString());
         }catch(Exception exp) {
-            L.e("Combine All", "exception when updating output with "+ sql, exp);
+            L.e("Combine All", "exception when updating SALE_RECORD with "+ sql, exp);
         }
 
 //				一轮遍历过之后，可以确定消灭了二次分单的存在。但是一次分单的情况仍然存在。所以有必要再进行一遍，用来把pS也去掉。
@@ -343,7 +343,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
 
         //combine bills discount and services fees---------------------------------------------------------------------
         //combine the discount, service fee, of all the none-empty bills.
-        //Note: we don't deleted combined bills now, because might be used again later.
+        //Note: we don't STATUS combined bills now, because might be used again later.
         //when we reset the table. we check if it the last non-empty bill and clean all the empty bill .
         int combinedDiscount = 0;
         int combinedServiceFee = 0;
@@ -406,10 +406,10 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         //target the items which can be combined.
         List<Dish> dishes = new ArrayList<Dish>();
 
-        StringBuilder sql = new StringBuilder("select * from SALE_RECORD where SUBJECT = '").append(tableName)
-                .append("' and time = '").append(startTime)
-                .append("' and contactID = ").append(billIdx)
-                .append(" and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(") order by _id");
+        StringBuilder sql = new StringBuilder("select * from SALE_RECORD where tableName = '").append(tableName)
+                .append("' and openTime = '").append(startTime)
+                .append("' and userId = ").append(billIdx)
+                .append(" and (STATUS is null or STATUS = ").append(DBConsts.ORIGINAL).append(") order by _id");
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
@@ -447,7 +447,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
             String key = new StringBuilder("pk:").append(pK).append("ps:").append(pS).append("num:").append(num)
                     .append("dish:").append(dish.getId()).append(String.valueOf(dish.getModification())).toString();
 
-            if(map.containsKey(key)) {//if map already contains this key, then delete this output
+            if(map.containsKey(key)) {//if map already contains this key, then delete this SALE_RECORD
 
                 sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.DELETED)
                         .append(" where _id = ").append(dish.getOutputID());

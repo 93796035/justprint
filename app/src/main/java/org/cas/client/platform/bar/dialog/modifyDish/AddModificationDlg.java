@@ -274,7 +274,7 @@ public class AddModificationDlg extends DialogFragment
 //            	tabbedPane.setBackgroundAt(i, backgrounds[i%10]);
 //            }
 //		}catch(Exception exp) {
-//			L.e("AddModificationDlg", "exception when change output back to original bill" + sql, exp);
+//			L.e("AddModificationDlg", "exception when change SALE_RECORD back to original bill" + sql, exp);
 //		}
 	}
 	
@@ -383,7 +383,7 @@ public class AddModificationDlg extends DialogFragment
 //            	x += btn.getPreferredSize().width + CustOpts.HOR_GAP;
 //            }
 //		}catch(Exception exp) {
-//			L.e("AddModificationDlg", "exception when change output back to original bill" + sql, exp);
+//			L.e("AddModificationDlg", "exception when change SALE_RECORD back to original bill" + sql, exp);
 //		}
 //        return btn == null ? 39 : btn.getY() + btn.getHeight();
 //	}
@@ -1123,11 +1123,11 @@ public class AddModificationDlg extends DialogFragment
 //     	//update the database
 //     	int outputID = BarFrame.instance.curDish.getOutputID();
 //     	if(outputID >= 0) {
-//     		String sql = "update output set toltalprice = " + BarFrame.instance.curDish.getTotalPrice() + " where _id = " + outputID;
+//     		String sql = "update SALE_RECORD set toltalPrice = " + BarFrame.instance.curDish.getTotalPrice() + " where _id = " + outputID;
 //     		try {
 //     			PIMDBModel.getStatement().executeUpdate(sql);
 //     		}catch(Exception exp) {
-//				L.e("AddModificationDlg", " exception when update total price for output!" + sql, exp);
+//				L.e("AddModificationDlg", " exception when update total price for SALE_RECORD!" + sql, exp);
 //     		}
 //     	}
 //

@@ -238,7 +238,7 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
 	public String COMFIRMDELETEACTION2() {return "Are you sure to remove it from list?";}
     @Override
-	public String COMFIRMDELETECATEGORY() {return "Are you sure to remove the whole category? The menus under it will also be deleted! ";}
+	public String COMFIRMDELETECATEGORY() {return "Are you sure to remove the whole category? The menus under it will also be STATUS! ";}
     @Override
 	public String COMFIRMLOSTACTION() {return "Cancel the new changes?";}
     @Override
@@ -582,7 +582,7 @@ public class BarDlgConst1 implements BarDlgConst{
 	@Override
 	public String workOnOnlyUnclosedBills() {return "Combine unclosed bills?";}
 	@Override
-	public String nonEmptyBillFound() {return "Are you sure to close this table, there's still non empty bill to close first, or they will be deleted automatically.";}
+	public String nonEmptyBillFound() {return "Are you sure to close this table, there's still non empty bill to close first, or they will be STATUS automatically.";}
 	@Override
 	public String FONTSIZE() {return "Font Size";}
 	@Override

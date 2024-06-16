@@ -105,7 +105,7 @@ public class BarUtil {
 //
 //    // 先检查是否存在尚未输入完整信息的产品，如果检查到存在这种产品，方法中会自动弹出对话盒要求用户填写详细信息。
 //    public static void checkUnCompProdInfo() {
-//        String sql = "select * from Dish where subject = '' and DELETED != true"; // 是否存在上没有名字的产品？
+//        String sql = "select * from Dish where NAME1 = '' and STATUS != true"; // 是否存在上没有名字的产品？
 //        try {
 //            ResultSet rs = AikaStyle.db.execSQL(sql);
 //            rs.afterLast();
@@ -130,7 +130,7 @@ public class BarUtil {
 //                    tCodeAry[tIdx] = DBUtil.getCursorString(rs,"Code");
 //                    tPriceAry[tIdx] = DBUtil.getCursorInt(rs,"Price");
 //                    tMnemonicAry[tIdx] = DBUtil.getCursorString(rs,"Mnemonic");
-//                    tSubjectAry[tIdx] = DBUtil.getCursorString(rs,"Subject");
+//                    tSubjectAry[tIdx] = DBUtil.getCursorString(rs,"NAME1");
 //                    tStoreAry[tIdx] = DBUtil.getCursorInt(rs,"Store");
 //                    tUnitAry[tIdx] = DBUtil.getCursorString(rs,"Unit");
 //                    tCategoryAry[tIdx] = DBUtil.getCursorString(rs,"Category");
@@ -203,9 +203,9 @@ public class BarUtil {
 
 //    public static boolean isMoreThanOneBill() {
 //        try {
-//            StringBuilder sql = new StringBuilder("SELECT DISTINCT contactID from output where SUBJECT = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
-//                    .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL)
-//                    .append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("' order by contactID");
+//            StringBuilder sql = new StringBuilder("SELECT DISTINCT userId from SALE_RECORD where tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString())
+//                    .append("' and (STATUS is null or STATUS = ").append(DBConsts.ORIGINAL)
+//                    .append(" and openTime = '").append(BarFrame.instance.valOpenTime.getText()).append("' order by userId");
 //            ResultSet rs = AikaStyle.db.execSQL(sql.toString());
 //            rs.afterLast();
 //            rs.relative(-1);
@@ -351,9 +351,9 @@ public class BarUtil {
 //        try {
 //            Statement smt = PIMDBModel.getStatement();
 //            try {
-//                StringBuilder sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED);
+//                StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED);
 //                smt.executeUpdate(sql.toString());
-//                sql = new StringBuilder("update Output set deleted = ").append(DBConsts.DELETED);
+//                sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.DELETED);
 //                smt.executeUpdate(sql.toString());
 //                sql = new StringBuilder("update dining_table set status = 0, openTime = ''");
 //                PIMDBModel.getStatement().executeUpdate(sql.toString());
@@ -641,7 +641,7 @@ public class BarUtil {
 //    }
 //
 //    public static String changeLangForMenu(String aValue, int customerFrameLang) {
-//        StringBuilder sql = new StringBuilder("select * from Dish where code = ? or mnemonic = ? or subject = ?");
+//        StringBuilder sql = new StringBuilder("select * from Dish where NAME1 = ? or NAME2 = ? or NAME3 = ?");
 //
 //        try {
 //            PreparedStatement pstmt = PIMDBModel.getConnection().prepareStatement(sql.toString());
@@ -651,7 +651,7 @@ public class BarUtil {
 //            ResultSet rs = pstmt.executeQuery();
 //            if(rs.moveToNext()) {//check if the properties are all same, if not, update local to make sure local are same with server.
 //                //TODO: consider later  String localPrinterIdx = synchronizeLocalProduct(location, price, seletedPrinterIdStr, rs);
-//                return DBUtil.getCursorString(rs,customerFrameLang == 0 ? "code" : (customerFrameLang == 1 ? "mnemonic" : "subject"));
+//                return DBUtil.getCursorString(rs,customerFrameLang == 0 ? "NAME1" : (customerFrameLang == 1 ? "NAME2" : "NAME3"));
 //            }else {
 //                L.e("BarUtil ", "WTH, Can not find such a category!" + sql, null);
 //                return aValue;
@@ -714,7 +714,7 @@ public class BarUtil {
             return false;
         }
 
-        billPanel.unsavedItemsCheck();	//process the new added items (send output records to printer and db).
+        billPanel.unsavedItemsCheck();	//process the new added items (send SALE_RECORD records to printer and db).
 
         //if it's already paid, show comfirmDialog.
         if(billPanel.getStatus() >= DBConsts.COMPLETED || billPanel.getStatus() < DBConsts.ORIGINAL) {

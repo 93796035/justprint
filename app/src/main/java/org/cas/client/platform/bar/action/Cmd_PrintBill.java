@@ -51,7 +51,7 @@ public class Cmd_PrintBill implements SamActionListener {
 			return;
 		}
 		
-		billPanel.unsavedItemsCheck();		//will send new added(not printed yet) dishes to kitchen. also save output in db
+		billPanel.unsavedItemsCheck();		//will send new added(not printed yet) dishes to kitchen. also save SALE_RECORD in db
 		
 		if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
 			billPanel.expireAndRegenerateModifiedOutputs(DBConsts.BILL_PRINTED);

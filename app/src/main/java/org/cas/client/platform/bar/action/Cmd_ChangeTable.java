@@ -71,7 +71,7 @@ public class Cmd_ChangeTable implements SamActionListener {
 				}
 
 	            //if new table's startus is 0, then set start time with the old table's open time. otherwise, it's a join to not switching to table,
-				//in this case, we should update the bill and output's time to the opentime of the target table.
+				//in this case, we should update the bill and SALE_RECORD's time to the opentime of the target table.
 	            //be noticed that when table closed, we make sure the opentime is removed. it's not because it will be used for check status, it's for order site in future.
 				int targetBillIdx;
 				String openTime;

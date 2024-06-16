@@ -51,7 +51,7 @@ public class Cmd_Suspend implements SamActionListener {
 			return;
 		}
     	
-    	billPanel.unsavedItemsCheck();		//will send new added(not printed yet) dishes to kitchen. also save output in db
+    	billPanel.unsavedItemsCheck();		//will send new added(not printed yet) dishes to kitchen. also save SALE_RECORD in db
     	
 		if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
 			billPanel.expireAndReGenerateBill(null);
@@ -62,10 +62,10 @@ public class Cmd_Suspend implements SamActionListener {
         try {
         	String tableName = BarFrame.instance.getCmbCurTable().getSelectedItem().toString();
         	//update outputs
-			StringBuilder sql = new StringBuilder("update output set deleted = ").append(DBConsts.SUSPENDED)
-	                .append(" where SUBJECT = '").append(tableName)
-	                .append("' and time = '").append(BarFrame.instance.valOpenTime.getText())
-	                .append("' and (deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
+			StringBuilder sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.SUSPENDED)
+	                .append(" where tableName = '").append(tableName)
+	                .append("' and openTime = '").append(BarFrame.instance.valOpenTime.getText())
+	                .append("' and (STATUS is null or STATUS = ").append(DBConsts.ORIGINAL).append(")");
 			AikaPos.db.execSQL(sql.toString());
         }catch(Exception exp) {
         	ErrorUtil.write(exp);

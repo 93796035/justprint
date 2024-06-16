@@ -41,16 +41,16 @@ public class Cmd_VoidOrder implements SamActionListener {
 //    	String clientIdx = BarFrame.instance.getCurBillIndex();
 //		try {
 //			//find out the total count of all saved relevant outputs.
-//			//check if it's a "mistake-opening-table-action" or "adding bill action" by check if there's any output on it already.
-//			//will be considered as non-empty as long as there's output connecting to the id, even the output is not currently displaying on this bill.
-//			StringBuilder sql = new StringBuilder("select * from output where folderId = '").append(billID)
-//					.append("' or (subject = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
-//					.append(" and time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
-//					.append(" and contactID = ").append(clientIdx).append(")"); 	//in future version, might need to check the deleted property.
+//			//check if it's a "mistake-opening-table-action" or "adding bill action" by check if there's any SALE_RECORD on it already.
+//			//will be considered as non-empty as long as there's SALE_RECORD connecting to the id, even the SALE_RECORD is not currently displaying on this bill.
+//			StringBuilder sql = new StringBuilder("select * from SALE_RECORD where folderId = '").append(billID)
+//					.append("' or (tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
+//					.append(" and openTime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
+//					.append(" and userId = ").append(clientIdx).append(")"); 	//in future version, might need to check the STATUS property.
 //			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //			rs.last();
 //
-//		    if(rs.getRow() == 0) {			//if didn't find any saved output, means either empty, or all new.
+//		    if(rs.getRow() == 0) {			//if didn't find any saved SALE_RECORD, means either empty, or all new.
 //		    	sql = new StringBuilder("delete from bill where _id = ").append(billID);
 //			    PIMDBModel.getStatement().executeUpdate(sql.toString());
 //		    } else { 						//if found some saved outputs......saved outputs also means send to kitchen already.
@@ -97,8 +97,8 @@ public class Cmd_VoidOrder implements SamActionListener {
 //						.append("' where _id = ").append(billPanel.getBillID());
 //		    	PIMDBModel.getStatement().executeQuery(sql.toString());
 //
-//		    	//update output
-//		    	sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
+//		    	//update SALE_RECORD
+//		    	sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.VOIDED)
 //		    			.append(" where folderId = ").append(billPanel.getBillID());
 //		        PIMDBModel.getStatement().executeQuery(sql.toString());
 //

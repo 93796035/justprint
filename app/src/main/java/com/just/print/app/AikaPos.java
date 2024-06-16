@@ -128,7 +128,7 @@ public class AikaPos extends Application {
     private void createEvaluationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
                 "ID INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
-                "SUBJECT TEXT, receive INTEGER, target INTEGER, profit INTEGER);";
+                "tableName TEXT, receive INTEGER, target INTEGER, profit INTEGER);";
         db.execSQL(sql);
     }
 

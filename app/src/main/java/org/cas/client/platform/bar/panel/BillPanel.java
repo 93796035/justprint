@@ -118,12 +118,12 @@ public class BillPanel extends BaseFragment
 
 	//find the new (not saved) items, then send then to kitchen, save then to db. send to server...
 	public boolean unsavedItemsCheck() {
-		//if there's any new bill, send it to kitchen first, and this also made the output generated.
+		//if there's any new bill, send it to kitchen first, and this also made the SALE_RECORD generated.
 		List<Dish> dishes = getNewDishes();
 		if(dishes.size() == 0) {	//no new item added, then nothing need to send to kitchen or sever or db, just return false to tell calling to print internal bill.
 			return false;
 		}
-		//if all record are new, means it's adding a new bill.otherwise, it's adding output to exixting bill.
+		//if all record are new, means it's adding a new bill.otherwise, it's adding SALE_RECORD to exixting bill.
 //		if(dishes.size() == orderedDishAry.size()) {	//didn't set the idx when bill created, because don't wanto display idx if there's only 1 bill.
 //		    BarFrame.instance.valCurBillIdx.setText(String.valueOf(BillListPanel.getANewBillIdx()));
 //		}
@@ -167,7 +167,7 @@ public class BillPanel extends BaseFragment
             int tip = DBUtil.getCursorInt(rs, "TIP");
             int status = DBUtil.getCursorInt(rs, "STATUS");
 
-			//generate a bill in db and update the output with the new bill id
+			//generate a bill in db and update the SALE_RECORD with the new bill id
 			String createtime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
 	            "INSERT INTO BILL(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
@@ -221,8 +221,8 @@ public class BillPanel extends BaseFragment
 		PrintService.printOrderList(dishes, curTable, curCustomerIdx, waiterName, isCancelled);
 	}
 
-	//save to db output
-	//before we call this, be sure to create a new bill, which has copied all the output of previous bill.
+	//save to db SALE_RECORD
+	//before we call this, be sure to create a new bill, which has copied all the SALE_RECORD of previous bill.
 	//which is to say the new dishes should belongs to the new bill.
 	//??why do we have to copy the outputs and make the copied ones pointing to new bill?----just to keep the capability of futher unexpectable possibilities.
 	//like need to report/study the change history of the order.
@@ -371,14 +371,14 @@ public class BillPanel extends BaseFragment
 		}
 		int outputId = curDish.getOutputID();
 		if(outputId < 0) {
-			//only do clean from UI, because the output not generated yet, and will not affect the total in bill.
+			//only do clean from UI, because the SALE_RECORD not generated yet, and will not affect the total in bill.
 			removeFromSelection(table.getSelectedRow());
 			logOperation(-1, DBConsts.ORIGINAL, curDish);
 		} else {// if it's send
 			if(JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle))
 				return;
-			//clean output from db immediately.
-			//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.deleted);
+			//clean SALE_RECORD from db immediately.
+			//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.DELETED);
 			//send cancel message to kitchen
 			if(getStatus() < DBConsts.BILL_PRINTED) {
 				Dish dish = curDish.clone();
@@ -386,10 +386,10 @@ public class BillPanel extends BaseFragment
 				sendDishToKitchen(dish, true);//if billPrinted, means already finished prepare and dish is on table.no need to tell kitchen to stop it.
 				//update current bill is OK, because no bill printed yet. so no need to expire and regenerate a new bill.
 				DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
-				//update output number.(because not print temporary bill, so no need to set the out put status to exipired)
+				//update SALE_RECORD number.(because not print temporary bill, so no need to set the out put status to exipired)
 				DBUtil.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
 				if(curDish.getNum() == 1) {
-					DBUtil.updateOutput(dish.getOutputID(), "DELETED", DBConsts.DELETED);
+					DBUtil.updateOutput(dish.getOutputID(), "STATUS", DBConsts.DELETED);
 				}
 				logOperation(-1,DBConsts.SAVED, curDish);
 			}else { //if already billPrinted or refund, add to hashMapForRefund, waiting for confirmation action.
@@ -418,7 +418,7 @@ public class BillPanel extends BaseFragment
 						+ BarUtil.formatMoney(curDish.getTotalPrice()/100f),
 						table.getSelectedRow(), 3);
 
-				updateTotalArea(false);	//save to db immediately, because for lessing a saved output, its nature. when removing a whole line,
+				updateTotalArea(false);	//save to db immediately, because for lessing a saved SALE_RECORD, its nature. when removing a whole line,
 
 			}else { //clean from screen.
 				removeFromSelection(table.getSelectedRow());
@@ -600,9 +600,9 @@ public class BillPanel extends BaseFragment
 
 						Dish dish = getOrderedDishAry().get(selectedRow);
 						removeFromSelection(selectedRow);
-						if(dish.getOutputID() > -1) {	//if already saved, then check if there's a refTo information in comment, if yes, means this output belongs to a printed bill. should be put into void.
-							DBUtil.changeOutputStatusInDB(dish, comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the output is just saved and send to
-						} 																												//kitchen, not appeared in previous bill, then just change it to deleted.
+						if(dish.getOutputID() > -1) {	//if already saved, then check if there's a refTo information in comment, if yes, means this SALE_RECORD belongs to a printed bill. should be put into void.
+							DBUtil.changeOutputStatusInDB(dish, comment.contains(PrintUtil.OLD_SUBTOTAL) ? DBConsts.VOIDED : DBConsts.DELETED);	//if contains no ref_info, means the SALE_RECORD is just saved and send to
+						} 																												//kitchen, not appeared in previous bill, then just change it to STATUS.
 						//update array second.
 					}
 				}
@@ -853,7 +853,7 @@ public class BillPanel extends BaseFragment
     public void initContent() {
     	//first check is a billPane in billListPanel or it's a billPane in salesPanel
     	customerIndex = billButton != null ? billButton.getText() : BarFrame.instance.getCurBillIndex();
-		//used deleted <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
+		//used STATUS <= 1, means both uncompleted and normally completed will be displayed, unnormally delted recored will be delted = 100
 		String tableName = (String)BarFrame.instance.getCurTable();
 		if(tableName.length() == 0) {	//add this check in case background thread update tables every minute, might reinit the model of cmbCurTable, now I've added check to avoid it.
 			L.e("BillPane", "no table info found from cmbCurtable", null);
@@ -861,7 +861,7 @@ public class BillPanel extends BaseFragment
 		String openTime = BarFrame.instance.valOpenTime.getText().toString();	//if it in cmd_return action, the opentime will be null
 
 		//@Note, only when showing an expried bill (from checklistdlg), we give a billID to the method, for other case, we leave it empty.
-		//the BarFrame.instance.getCurBillID() always has value available, but we don't use it on purpose, because if the billID is empty, we'll know it's not a expired bill, the logic of fetching output is easier.
+		//the BarFrame.instance.getCurBillID() always has value available, but we don't use it on purpose, because if the billID is empty, we'll know it's not a expired bill, the logic of fetching SALE_RECORD is easier.
 		//
 		//!!!be careful that this openTime on BarFrame is from tableButton's started Time, TableButton's started time could be Bill's created time(in counter mode), or opentime (table mode)
 		//why? becaue in counter mode, we feel table opened time is not necessary(new table is created and opened as soon as the dish on old table is saved, while maybe it's not used for long time until next customer
@@ -897,7 +897,7 @@ public class BillPanel extends BaseFragment
 			// update the discount and service fee, and tip info, and (don't forget the billID).
 			initBillProperties(billId, billIndex, tableName, openTime);
 
-			setOrderedDishAry(initTableWithOutput(billId, billIndex, tableName, openTime));	//make the table display the dishes in this bill first. (output of dumped bill will not match billId.)
+			setOrderedDishAry(initTableWithOutput(billId, billIndex, tableName, openTime));	//make the table display the dishes in this bill first. (SALE_RECORD of dumped bill will not match billId.)
 
 			// do not set the default selected value, if it's used in billListDlg.
 			if (salesPanel != null && getOrderedDishAry().size() > 0) {
@@ -984,14 +984,13 @@ public class BillPanel extends BaseFragment
 		for(int i = 0; i < datas.length; i++){
 			rs.moveToNext();
 			int modifiedTime = DBUtil.getCursorInt(rs, "SALE_RECORD_modifiedTime");
-			int deleted = DBUtil.getCursorInt(rs, "SALE_RECORD_STATUS");
-			if(deleted == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
+			if(DBUtil.getCursorInt(rs, "SALE_RECORD_STATUS") == DBConsts.VOIDED && modifiedTime < intCreateTime ) {
 				continue;
 			}
 			Dish dish = new Dish();
 			dish.setCategory(DBUtil.getCursorString(rs, "DISH_category"));
 			dish.setDiscount(DBUtil.getCursorInt(rs, "SALE_RECORD_DISCOUNT"));
-			dish.setDisplayIdx(Integer.valueOf(DBUtil.getCursorInt(rs, "DISH_displayIdx")));
+			dish.setDisplayIdx(DBUtil.getCursorInt(rs, "DISH_displayIdx"));
 			dish.setGst(DBUtil.getCursorInt(rs, "DISH_GST"));
 			dish.setId(DBUtil.getCursorLong(rs, "DISH_id"));
 			dish.setName1(DBUtil.getCursorString(rs, "DISH_NAME1"));
@@ -1192,36 +1191,36 @@ public class BillPanel extends BaseFragment
 	public void expireAndRegenerateModifiedOutputs(int status) {
 		Map<Integer, Dish> originalDishes = getOrderedDishAry().stream()
 				.collect(Collectors.toMap(Dish::getOutputID, dish -> dish));
-		//base on the hashMapFroReturn values, adjust the output status, and the bill cash values.
+		//base on the hashMapFroReturn values, adjust the SALE_RECORD status, and the bill cash values.
 		StringBuilder sql = null;
 		for(Dish dish: mapForPrintedItemRemoving.values()) {
 			try {
-				//clone and expire old output, modify the  new output.
+				//clone and expire old SALE_RECORD, modify the  new SALE_RECORD.
 				Dish originalDish = originalDishes.get(dish.getOutputID());
 				if(originalDish != null) {
 					int newOutputId = DBUtil.createOutput(originalDish, BarFrame.instance.getCurBillIndex(), originalDish.getOrderedTime());
 					//为啥dish中记录的是要退还de钱，不是还剩下的钱呢？可能是为了打印时方便？现在为了算出来剩余的钱给新生成的output，必须做些调整：
-					sql = new StringBuilder("update output set amount = ").append(originalDish.getNum())
-							.append(", toltalprice = ").append(originalDish.getTotalPrice())
+					sql = new StringBuilder("update SALE_RECORD set amount = ").append(originalDish.getNum())
+							.append(", toltalPrice = ").append(originalDish.getTotalPrice())
 							.append(", discount = ").append(originalDish.getDiscount())
-							.append(", deleted = ").append(status)
-							.append(", category = '").append(BarUtil.df.format(new Date()))
+							.append(", STATUS = ").append(status)
+							.append(", createdTime = '").append(BarUtil.df.format(new Date()))
 							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 					//create ouput records specially for the decreased items, make them status as voided, so they can appear in the report.
 					newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
-					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
-							.append(", category = '").append(BarUtil.df.format(new Date()))
+					sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.VOIDED)
+							.append(", createdTime = '").append(BarUtil.df.format(new Date()))
 							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 				}else {
 					int newOutputId = DBUtil.createOutput(dish, BarFrame.instance.getCurBillIndex(), dish.getOrderedTime());
-					sql = new StringBuilder("update output set deleted = ").append(DBConsts.VOIDED)
-							.append(", category = '").append(BarUtil.df.format(new Date()))
+					sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.VOIDED)
+							.append(", createdTime = '").append(BarUtil.df.format(new Date()))
 							.append("' where _id = ").append(newOutputId);
 					AikaPos.db.execSQL(sql.toString());
 				}
-				sql = new StringBuilder("update output set deleted = ").append(DBConsts.EXPIRED)
+				sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.EXPIRED)
 						.append(" where _id = ").append(dish.getOutputID());
 				AikaPos.db.execSQL(sql.toString());
 				//TODO: if the
@@ -1240,14 +1239,14 @@ public class BillPanel extends BaseFragment
 
 		try {
 	 		//Generate new bill with ref to expired bill everything else use the data on current billPane
-	 		//@NOTE:Currently the output will be choosed by table and billIdx, so old output will go to new bill automatically.
+	 		//@NOTE:Currently the SALE_RECORD will be choosed by table and billIdx, so old SALE_RECORD will go to new bill automatically.
 	 		//      the bad thing is, if user open the dumped old bill, then the removed item will be disappears and new added item will appear on old bill also.
 	 		//      this will be a known bug.
-			//      TDOO:we can make it better by searching expired output and filter out new created output when initContent for a expired bill. government will need to check the expired bills.
+			//      TDOO:we can make it better by searching expired SALE_RECORD and filter out new created SALE_RECORD when initContent for a expired bill. government will need to check the expired bills.
 	 		//??what do we do when removing an saved item from billPanel, and decrease conten from billPanel?
-			//TODO: when print temporary bill, or move item between bills, should check the hashMap to see if their's any item change in the output.
-			// if there'is change (including removed and modified),  exprie old output and regenerate a new output.
-			//      but seems when refunding a completed bill, every time click btnLess, will modify the output in db, so when refun?
+			//TODO: when print temporary bill, or move item between bills, should check the hashMap to see if their's any item change in the SALE_RECORD.
+			// if there'is change (including removed and modified),  exprie old SALE_RECORD and regenerate a new SALE_RECORD.
+			//      but seems when refunding a completed bill, every time click btnLess, will modify the SALE_RECORD db, so when refun?
 			//
 	 		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
 		 		StringBuilder newComment = new StringBuilder(PrintUtil.REF_TO).append(getBillID());

@@ -176,7 +176,7 @@ public class CreateNewOrderAction implements SamActionListener {
 //	            .use("values", Material.class).deserialize(tList.get(1));
 //
 //
-//        //because the qt (4X) will stands for 4 material, so need to merge it before creating output.
+//        //because the qt (4X) will stands for 4 material, so need to merge it before creating SALE_RECORD.
 //        qtMap = conbineMainOrders(materials);
 //
 //	    menus = new JSONDeserializer<List<TextContent>>().use(null, ArrayList.class)
@@ -211,7 +211,7 @@ public class CreateNewOrderAction implements SamActionListener {
 //            //outputs
 //            List<Dish> dishes = generateOutputs(mainOrder, openTime, tableName, billIndex, billId, materials);
 //
-//            //send these output to kitchen.
+//            //send these SALE_RECORD to kitchen.
 //            //PrintService.printTemporaryOrderList(dishes, tableName, billIndex, "customer", false);
 //
 //            //send request to update the status to be 50.
@@ -306,14 +306,14 @@ public class CreateNewOrderAction implements SamActionListener {
 			int billId, List<Material> materials) {
 		
 		List<Dish> dishes = new ArrayList<Dish>();
-		//create output record for each materials of this mainOrder. @materials has been cleaned.
+		//create SALE_RECORD record for each materials of this mainOrder. @materials has been cleaned.
 		for (int j = 0; j < materials.size(); j++) {
 			Material material = materials.get(j);
 			if(material.mainOrder.id == mainOrder.id) {	//I prefer this way rather than generate a clean materials list as parameter, because faster and more stable.
 		    	String location = material.location;
 		    	String portionName = material.portionName;	//dish name
 		    	Integer num = qtMap.get(material.portionName + (material.remark == null ? "" : material.remark));	//@NOTE we supposed the dish name should not duplicate.
-		    	int price = material.dencity == null ? 0 : Math.round(Float.valueOf(material.dencity.substring(1).trim()) * 100);
+		    	int price = material.dencity == null ? 0 : Math.round(Float.parseFloat(material.dencity.substring(1).trim()) * 100);
 		    	
 		    	//make sure dish and marexist.
 		    	Dish dish = synchronizeToLocalDB(location, portionName, price, material.menFu);
@@ -333,9 +333,9 @@ public class CreateNewOrderAction implements SamActionListener {
 		StringBuilder sql;
 		try {
 			sql = new StringBuilder(
-		    	"INSERT INTO output(SUBJECT, CONTACTID, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES ('")
-					.append(tableName).append("', ")	//subject ->table id
-		            .append(billIndex).append(", ")			//contactID ->bill id
+		    	"INSERT INTO SALE_RECORD(tableName, userId, PRODUCTID, AMOUNT, TOLTALPRICE, DISCOUNT, CONTENT, userId, TIME, CATEGORY, FOLDERID) VALUES ('")
+					.append(tableName).append("', ")	//tableName ->table id
+		            .append(billIndex).append(", ")			//userId ->bill id
 		            .append(productID).append(", ")	//product id
 		            .append(num).append(", ")	//amount
 		            .append(price).append(", ")	//totalprice int
@@ -535,8 +535,8 @@ public class CreateNewOrderAction implements SamActionListener {
 
 	//the dencity must be a null or $1
 	private Dish makeSureDishExist(String category, String location, int menuIdx, String menuName, int price, String seletedPrinterIdStr) {
-		//ID, CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
-		StringBuilder sql = new StringBuilder("select * from Dish where deleted != true and index = ").append(menuIdx).append(" and category = ?");
+		//ID, CODE, MNEMONIC, tableName, PRICE, FOLDERID, STORE,  COST, BRAND, CATEGORY, CONTENT, UNIT, ModifyPomp, INDEX
+		StringBuilder sql = new StringBuilder("select * from Dish where STATUS != true and displayIdx = ").append(menuIdx).append(" and category = ?");
         
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), new String[]{category});
@@ -546,8 +546,8 @@ public class CreateNewOrderAction implements SamActionListener {
             	return new Dish(DBUtil.getCursorInt(rs, "_id"),
 						category,
 						menuName,
-						DBUtil.getCursorString(rs, "MNEMONIC"),
-						DBUtil.getCursorString(rs,"SUBJECT"),
+						DBUtil.getCursorString(rs, "NAME1"),
+						DBUtil.getCursorString(rs,"tableName"),
 						localPrinterIdx);
 			}else {
             	return createNewDish(location, price, seletedPrinterIdStr, category);
@@ -570,8 +570,8 @@ public class CreateNewOrderAction implements SamActionListener {
             	return new Dish(DBUtil.getCursorInt(rs,"_id"),
 						category,
 						menuName,
-						DBUtil.getCursorString(rs,"MNEMONIC"),
-						DBUtil.getCursorString(rs,"SUBJECT"),
+						DBUtil.getCursorString(rs,"NAME2"),
+						DBUtil.getCursorString(rs,"NAME3"),
 						"");
             }else {
             	return createNewDish(menuName, price, category);
@@ -601,9 +601,9 @@ public class CreateNewOrderAction implements SamActionListener {
 		name3 = name3 == null ? "" : name3;
 		
 		//values in local
-		String lName1 = DBUtil.getCursorString(rs, "CODE");
-		String lName2 = DBUtil.getCursorString(rs, "MNEMONIC");
-		String lName3 = DBUtil.getCursorString(rs, "SUBJECT");
+		String lName1 = DBUtil.getCursorString(rs, "NAME1");
+		String lName2 = DBUtil.getCursorString(rs, "NAME2");
+		String lName3 = DBUtil.getCursorString(rs, "NAME3");
 		int lPrice = DBUtil.getCursorInt(rs, "PRICE");
 		String lPrinter = DBUtil.getCursorString(rs, "BRAND");
 		
@@ -612,7 +612,7 @@ public class CreateNewOrderAction implements SamActionListener {
 			String categorySQL = DBUtil.getCursorString(rs, "CATEGORY");
 			StringBuilder sql = new StringBuilder("Update DISH set NAME1 = ?, NAME2 = ?, NAME3 = ?, PRICE = ").append(price)
 					.append(", BRAND = '").append(menFu)
-					.append("' where deleted != true and index = ").append(DBUtil.getCursorInt(rs,"INDEX")).append(" and category = ?");
+					.append("' where STATUS != true and index = ").append(DBUtil.getCursorInt(rs,"INDEX")).append(" and category = ?");
             AikaPos.db.execSQL(sql.toString(), new String[]{"1", name1, name2, name3, categorySQL});
     		BarOption.updateLastModifiyTime();
 			BarFrame.menuPanel.initComponent();
@@ -638,7 +638,7 @@ public class CreateNewOrderAction implements SamActionListener {
 		String name3 = contentMap.get("zh_service_" + location + "_description");
 		seletedPrinterIdStr = convertPrinterIPtoIdx(seletedPrinterIdStr);
 		StringBuilder sql = new StringBuilder(
-                 "INSERT INTO Product(name1, name2, name3, PRICE, gst, qst, size, printerIds, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")//CODE//MNEMONIC//SUBJECT
+                 "INSERT INTO DISH(name1, name2, name3, PRICE, gst, qst, size, printerIds, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")
                  .append(price).append(", ")	//PRICE
                  .append(1).append(", ")		//FOLDERID---if need gst?
                  .append(1).append(", ")		//store---if need qst?
@@ -669,7 +669,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	private Dish createNewDish(String menuName, int price, String category) {
 		//we need to find out the 3 name of the product and the first category string of the product.
 		StringBuilder sql = new StringBuilder(
-                 "INSERT INTO Product(CODE, MNEMONIC, SUBJECT, PRICE, FOLDERID, store, Cost,  BRAND, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")//CODE//MNEMONIC//SUBJECT
+                 "INSERT INTO DISH(NAME1, NAME2, NAME3, PRICE, FOLDERID, store, Cost,  BRAND, CATEGORY, INDEX, CONTENT, Unit, PRODUCAREA) VALUES (?,?,?,")//CODE//MNEMONIC//tableName
                  .append(price).append(", ")	//PRICE
                  .append(1).append(", ")		//FOLDERID---if need gst?
                  .append(1).append(", ")		//store---if need qst?

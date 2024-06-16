@@ -89,14 +89,14 @@ public class Cmd_OtherPay implements SamActionListener {
 	   	    	.append(" where _id = ").append(billId);
 			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.
-			sql = new StringBuilder("update output set deleted = ").append(DBConsts.COMPLETED)
+			sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.COMPLETED)
 					.append(" where time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
-					.append(" and SUBJECT = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
-					.append(" and contactid = ").append(BarFrame.instance.getCurBillIndex());
+					.append(" and tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
+					.append(" and userId = ").append(BarFrame.instance.getCurBillIndex());
 			if(billPanel.getStatus() >= DBConsts.COMPLETED) {
-				sql.append(" and deleted = ").append(DBConsts.COMPLETED);
+				sql.append(" and STATUS = ").append(DBConsts.COMPLETED);
 			}else {
-				sql.append(" and ( deleted is null or deleted = ").append(DBConsts.ORIGINAL).append(")");
+				sql.append(" and ( STATUS is null or STATUS = ").append(DBConsts.ORIGINAL).append(")");
 			}
 			AikaPos.db.execSQL(sql.toString());
    		}catch(Exception exp) {
