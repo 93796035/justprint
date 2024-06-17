@@ -264,13 +264,13 @@ public class TableButton extends Button {
             char firstLetter = tableName.toLowerCase().charAt(0);
             if (firstLetter >= 'a' && firstLetter <= 'z') {
                 String path = "t".concat(String.valueOf(firstLetter));
-                int resId = getResources().getIdentifier(path.concat(".png"), "drawable", getContext().getPackageName());
-                if (resId < 0) {
+                int resId = getResources().getIdentifier(path, "drawable", getContext().getPackageName());
+                if (resId <= 0) {
                     path = "t0";
                     if (status > 0) {
                         path = path.concat("s");
                     }
-                    resId = getResources().getIdentifier(path.concat(".png"), "drawable", getContext().getPackageName());
+                    resId = getResources().getIdentifier(path, "drawable", getContext().getPackageName());
                 }
                 setBackgroundResource(resId);
                 params = setSize(DEFALTSIZE, DEFALTSIZE);

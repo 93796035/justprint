@@ -62,7 +62,6 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mRoot = inflater.inflate(getLayoutId(), container, false);
-        initContent();
         // this thread will start a request thread every 10 seconds to fetch new order from server.
         // also will trigger a refresh of tableivew for the waiting time.
         new BackGroundTimerThread().start();
