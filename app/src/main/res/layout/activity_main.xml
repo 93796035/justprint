@@ -29,10 +29,12 @@
         <Spinner
             android:id="@+id/cmbCurTable"
             android:layout_width="100dp"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:textColor="#FFFFFF"
             android:popupBackground="#000000"
             android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:layout_margin="0dp"
             android:layout_marginBottom="0dp"
             android:layout_gravity="center_vertical"/>
         <View
@@ -111,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Status:"
-            android:textColor="#FFFFFF" />
+            android:textColor="#888888" />
 
         <!-- 这些TextView根据内容调整宽度 -->
         <TextView

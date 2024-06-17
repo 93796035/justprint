@@ -111,14 +111,18 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
             tfdPrice.setText(String.valueOf(dish.getPrice() / 100.0));
             cbxGST.setChecked(dish.getGst() == 1);
             cbxQST.setChecked(dish.getQst() == 1);
-            ((RadioButton) rgSizes.getChildAt(dish.getSize())).setChecked(true);
+            ((RadioButton) rgSizes.getChildAt(dish.getSize() < 0 ? 0 : dish.getSize())).setChecked(true);
 
             String[] printers = dish.getPrinterIds().split(",");
-            for (String printer : printers) {
-                int printerId = Integer.parseInt(printer);
-                if (printerId > 0 && printerId <= 6) {
-                    cbxPrinters[printerId - 1].setChecked(true);
+            try {
+                for (String printer : printers) {
+                    int printerId = Integer.parseInt(printer);
+                    if (printerId > 0 && printerId <= 6) {
+                        cbxPrinters[printerId - 1].setChecked(true);
+                    }
                 }
+            }catch(Exception e){
+                //in case no need to print.
             }
 
             cbxPricePomp.setChecked("true".equals(dish.getPricePomp()));

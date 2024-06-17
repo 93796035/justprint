@@ -261,8 +261,8 @@ public class TableButton extends Button {
 
         // final adjustment of the icon, if the table name starts from HDFUX, will use special icons.
         if (tableName != null && tableName.length() > 0) {
-            char firstLetter = tableName.toUpperCase().charAt(0);
-            if (firstLetter >= 'A' && firstLetter <= 'Z') {
+            char firstLetter = tableName.toLowerCase().charAt(0);
+            if (firstLetter >= 'a' && firstLetter <= 'z') {
                 String path = "t".concat(String.valueOf(firstLetter));
                 int resId = getResources().getIdentifier(path.concat(".png"), "drawable", getContext().getPackageName());
                 if (resId < 0) {
