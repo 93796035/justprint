@@ -360,7 +360,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:orientation="horizontal"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="2dp">
                 <Button
                     android:id="@+id/bkMenu"
                     android:layout_width="wrap_content"
