@@ -421,4 +421,8 @@ public class TableButton extends Button {
         this.startTime = startTime;
     }
 
+    public void setLocation(float x, float y) {
+        this.setX(x);
+        this.setY(y);
+    }
 }

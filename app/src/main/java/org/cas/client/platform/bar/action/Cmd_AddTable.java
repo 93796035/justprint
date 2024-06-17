@@ -7,6 +7,7 @@ import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.TablesPanel;
 
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.dialog.TableDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
 
 public class Cmd_AddTable implements SamActionListener {
@@ -37,7 +38,7 @@ public class Cmd_AddTable implements SamActionListener {
 		if(!BarOption.isSingleUser()) {
 			LoginDlg.getInstance().noRefresh = true;
 			LoginDlg.getInstance().show(BarFrame.instance.getSupportFragmentManager(), "login_dialog");
-            if (LoginDlg.PASSED == true) {
+            if (LoginDlg.PASSED) {
             	BarFrame.checkSignIn();
             	//@note: lowdown a little the level, to enable the admin do sales work.
             	if (LoginDlg.getUSERTYPE() >= LoginDlg.ADMIN_STATUS) {
@@ -47,7 +48,7 @@ public class Cmd_AddTable implements SamActionListener {
             	return;
             }
 		}
-//		new TableDlg(null, null).show(BarFrame.instance.getSupportFragmentManager(), "table_dialog");
+		new TableDlg(null, null).show(BarFrame.instance.getSupportFragmentManager(), "table_dialog");
 		tablesPanel.initContent();
 	}
 }

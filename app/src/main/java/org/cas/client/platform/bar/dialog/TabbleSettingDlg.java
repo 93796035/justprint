@@ -1,5 +1,7 @@
 package org.cas.client.platform.bar.dialog;
 
+import android.graphics.Color;
+
 import org.cas.client.platform.casutil.L;
 
 import org.cas.client.platform.bar.uibeans.TableButton;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 public class TabbleSettingDlg// extends JDialog implements ActionListener,
 {
 	
-//	Color bg = new Color(132,34, 22);
+	public int bg = Color.parseColor("#ff5733");
 
     private TableButton btnPressed;
     private boolean isDragged;
@@ -196,7 +198,7 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //    }
 
     // menu and category buttons must be init after initContent---------
-//	void initContent() {
+	void initContent() {
 //		//clean existing btns
 //		for (int i = btnTables.size() - 1; i >=0; i--) {
 //			TableButton tableToggleButton = btnTables.get(i);
@@ -267,8 +269,8 @@ public class TabbleSettingDlg// extends JDialog implements ActionListener,
 //			L.e("Table Setting", "Unexpected exception when init the tables from db.", e);
 //		}
 //		reLayout();
-//	}
-//
+	}
+
 //	private void absortNewTables() throws SQLException{
 //		String sql;
 //        String path = CASUtility.getPIMDirPath();

@@ -513,7 +513,7 @@ public class DiscountDlg extends DialogFragment
 //	            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 //	            rs.beforeFirst();
 //	            rs.moveToNext();
-//	            rule.setId(DBUtil.getCursorInt(rs,"id"));
+//	            rule.setId(DBUtil.getCursorInt(rs,"_id"));
 //	            rule.setRuleName(DBUtil.getCursorString(rs,"ruleName"));
 //	            rule.setContent(DBUtil.getCursorString(rs,"content"));
 //	            rule.setAction(DBUtil.getCursorInt(rs,"action"));

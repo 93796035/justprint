@@ -8,36 +8,28 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ToggleButton;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.db.expand.DaoExpand;
-
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
 
+import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.action.Cmd_CancelAll;
+import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.net.BackGroundTimerThread;
 import org.cas.client.platform.bar.net.action.CreateNewOrderAction;
-import org.cas.client.platform.bar.uibeans.ISButton;
-import org.cas.client.platform.casutil.L;
-import com.stupid.method.reflect.StupidReflect;
-
-import org.cas.client.platform.bar.BarOption;
-import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.action.Cmd_CancelAll;
-import org.cas.client.platform.bar.action.Cmd_ChangeTable;
-import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.FunctionButton;
 import org.cas.client.platform.bar.uibeans.TableButton;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,7 +45,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     private TableButton btnPressed;
     public TableButton btnLogo;
     private boolean isDragged;
-    private int xGap, yGap;
+    private float xGap, yGap;
 
     public static String startTime;
 
@@ -175,43 +167,37 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 int y = DBUtil.getCursorInt(rs, "posY");
                 int w = DBUtil.getCursorInt(rs, "WIDTH");
                 int h = DBUtil.getCursorInt(rs, "HEIGHT");
-//                if(BarOption.isCounterMode()) {
-//                    if(tableToggleButton.getStatus() == 0){
-//                        x = -100;
-//                        y = 0;
-//                        w = 1;
-//                        h = 0;
-//                    }else {
-//                        x = 0;
-//                        y = yPos;
-//                        //getWidth(), 60);
-//                        yPos += 69;
-//                    }
-//                }else {
-//                    //@Note:used the width of Barframe, because the width of tablesPane might be changed to thin style in counter mode.
-//                    if(x > BarFrame.instance.getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99)) {
-//                        x = getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99);
-//                    }
-//                    if(x < 0) {
-//                        x = 0;
-//                    }
-//                    int cmdBtnHeight = (BarFrame.instance.getHeight() - 80) / 10;
-//                    if(y > getHeight() - (type == DBConsts.LOGO_TYPE ? 200 + cmdBtnHeight : 160)) {
-//                        y =  getHeight() - (type == DBConsts.LOGO_TYPE ? 200 + cmdBtnHeight : 160);
-//                    }
-//                    if(y < 0) {
-//                        y = 0;
-//                    }
-//                    if(w <= 10) {	//doesn't matter, because will be set Rkagain in setTypeStatusAndName method.
-//                        w = 69;
-//                    }
-//                    if(h <= 10) {
-//                        h = 69;
-//                    }
-//                    tableToggleButton.setBounds(x, y, w, h);
-//                }
-                params.leftMargin = convertDpToPixel(x, BarFrame.instance);
-                params.topMargin = convertDpToPixel(y, BarFrame.instance);
+                if(BarOption.isCounterMode()) {
+                    if(tableToggleButton.getStatus() == 0){
+                        x = -100;
+                        y = 0;
+                        w = 1;
+                        h = 0;
+                    }else {
+                        x = 0;
+                        y = yPos;
+                        //getWidth(), 60);
+                        yPos += 69;
+                    }
+                }else {
+                    //@Note:used the width of Barframe, because the width of tablesPane might be changed to thin style in counter mode.
+                    if(x > mRoot.getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99)) {
+                        x = mRoot.getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99);
+                    }
+                    if(x < 0) {
+                        x = 0;
+                    }
+                    int cmdBtnHeight = (mRoot.getHeight() - 80) / 10;
+                    if(y > mRoot.getHeight() - (type == DBConsts.LOGO_TYPE ? 200 + cmdBtnHeight : 160)) {
+                        y =  mRoot.getHeight() - (type == DBConsts.LOGO_TYPE ? 200 + cmdBtnHeight : 160);
+                    }
+                    if(y < 0) {
+                        y = 0;
+                    }
+                    params.leftMargin = x;
+                    params.topMargin = y;
+                    tableToggleButton.setLayoutParams(params);
+                }
 
                 btnTables.add(tableToggleButton);
                 if(mRoot != null) {
@@ -220,7 +206,6 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 //displayIdx is used to check if it's a temporal added table button or the related client(employee) id if it's a table start with "D"(delivery type).
                 if(DBUtil.getCursorInt(rs, "displayIdx") < 0) {
                     tableToggleButton.setOnTouchListener(this);
-//                    tableToggleButton.addMouseMotionListener(this);
                 }
                 tableToggleButton.setOnClickListener(this);
             }
@@ -234,7 +219,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
 //            	PIMDBModel.getStatement().executeUpdate(sql.toString());
 //            }
             //if cmbCurTable not updated, update the model of the table combobox on BarFrame.
-            if(BarFrame.instance.getCurTable().length() == 0) {
+            if(BarFrame.instance.getCurTable().isEmpty()) {
                 initCmbCurTable();
             }
         }catch(Exception e) {
@@ -243,27 +228,25 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     }
 
     private void initCmbCurTable() {
-//        int p = 0;
-//        String[] tableNames = new String[BarOption.isCounterMode() ? btnTables.size() : btnTables.size() + 1];
-//        if(!BarOption.isCounterMode()) {
-//            tableNames[0] = "";
-//            p++;
-//        }
-//
-//        for (int i = 0; i < btnTables.size(); i++) {
-//            tableNames[p] = btnTables.get(i).getTableName();
-//            p++;
-//        }
-//
-//        BarFrame.instance.getCmbCurTable().setModel(new DefaultComboBoxModel<String>(tableNames));
-//        if(BarOption.isCounterMode()) {
-//            TableButton tableBtn = btnTables.get(BarFrame.instance.getCmbCurTable().getSelectedIndex());
-//            if(tableBtn != null) {
-//                BarFrame.instance.valOpenTime.setText(tableBtn.getOpenTime());
-//            }
-//        }
+        int p = 0;
+        String[] tableNames = new String[BarOption.isCounterMode() ? btnTables.size() : btnTables.size() + 1];
+        if(!BarOption.isCounterMode()) {
+            tableNames[0] = "";
+            p++;
+        }
 
-        BarFrame.instance.populateSpinnerWithTables(DaoExpand.queryAllTables(AikaPos.daoSession.getDiningTableDao()));
+        for (int i = 0; i < btnTables.size(); i++) {
+            tableNames[p] = btnTables.get(i).getTableName();
+            p++;
+        }
+
+        BarFrame.instance.updateCmbCurTable(tableNames);
+        if(BarOption.isCounterMode()) {
+            TableButton tableBtn = btnTables.get(BarFrame.instance.getCmbCurTable().getSelectedItemPosition());
+            if(tableBtn != null) {
+                BarFrame.instance.valOpenTime.setText(tableBtn.getOpenTime());
+            }
+        }
     }
 
     public TableButton getTableButtonByName(String newTable) {
@@ -322,7 +305,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             //this must be called after the login dialog, otherwise, it will be wiped off.
             //and also need to be reset after swithMode, because switchMode(0) will call tablesPane.initcontent, inside, will reinit cmbCurTable's model.
             BarFrame.instance.ignoreItemChange = true;
-            BarFrame.instance.cmbCurTable.setSelection(btnTables.indexOf(tableToggle));
+            BarFrame.instance.cmbCurTable.setSelection(btnTables.indexOf(tableToggle) + 1); //there's an empty one on top of the list in spinner.
             //if before is not selected, then update the status
             if(tableToggle.getStatus() == 0){ //TODO: seems not necessary, because when found out that there's no bill related to it, will do the open.
                 tableToggle.open();
@@ -356,7 +339,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 }
                 tableToggle.setSelected(true);
                 BarFrame.instance.ignoreItemChange = true;
-                BarFrame.instance.cmbCurTable.setSelection(btnTables.indexOf(tableToggle));
+                BarFrame.instance.cmbCurTable.setSelection(btnTables.indexOf(tableToggle) + 1);
             } catch (Exception exp) {
                 L.e("TablesPanel", "Exception when table button clicked", exp);
             }
@@ -367,13 +350,40 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // 处理手指按下事件
+                if( v instanceof TableButton) {
+                    btnPressed = (TableButton)v;
+                    xGap = btnPressed.getX();
+                    yGap = btnPressed.getY();
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                // 处理手指滑动事件
+                if(btnPressed != null) {
+                    if(Math.abs(btnPressed.getX() - xGap) > 100 || Math.abs(btnPressed.getY() - yGap) > 100){
+                        isDragged = true;
+                    }
+                    if(isDragged) {
+                        float newX = btnPressed.getX() + event.getX();
+                        float newY = btnPressed.getY() + event.getY();
+                        if (newY + 42 > mRoot.findViewById(R.id.buttonBar).getY()) {
+                            newY = mRoot.findViewById(R.id.buttonBar).getY() - 42;
+                        }
+                        btnPressed.setLocation(newX, newY);
+                    }
+                }
                 break;
             case MotionEvent.ACTION_UP:
-                // 处理手指抬起事件
+                if(v instanceof TableButton) {
+                    TableButton btn = (TableButton)v;
+                    if(btnPressed != null && isDragged) {
+                        //updateDB;
+                        String sql = "Update DINING_TABLE set posX = " + (btn.getX()) + ", posY = " + (btn.getY()) + " where _id = " + btn.getId();
+                        AikaPos.db.execSQL(sql);
+                    }else{
+                        btn.performClick();
+                    }
+                }
+
+                isDragged = false;
                 break;
         }
         return true;

@@ -345,6 +345,12 @@ public class BarFrame extends BaseFragmentActivity {
         }
     }
 
+    public void updateCmbCurTable(String[] tableNames) {
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tableNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        cmbCurTable.setAdapter(adapter);
+    }
+
     // AsyncTask to execute askWebMevToSignTheCertificates
     private static class AskWebMevToSignTask extends AsyncTask<String, Void, Void> {
         @Override
@@ -493,15 +499,6 @@ public class BarFrame extends BaseFragmentActivity {
         return isActive;
     }
 
-
-    public void populateSpinnerWithTables(List<DiningTable> diningTables) {
-        // 假设 diningTables 已经被初始化并且包含数据
-        adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, diningTables);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        cmbCurTable.setAdapter(adapter);
-    }
-
     //@note: there's a issue in this method!!!!!
     //@in some device, it always return a negative value and cause reactive dlg displayed.
     private long checkDaysleft() {
@@ -597,7 +594,7 @@ public class BarFrame extends BaseFragmentActivity {
                     .append("' and BillIndex = '").append(newBillIdx).append("'");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             if (rs != null && rs.moveToFirst()) {
-                return DBUtil.getCursorInt(rs, "id");
+                return DBUtil.getCursorInt(rs, "_id");
             }
         }catch(Exception exp) {
             L.e("createABill", "exception when creating a bill: " + sql, exp);
@@ -1018,8 +1015,8 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public String getCurTable() {
-        DiningTable diningTable = (DiningTable)cmbCurTable.getSelectedItem();
-        return diningTable == null ? "" : diningTable.getName();
+        Object diningTable = cmbCurTable.getSelectedItem();
+        return diningTable == null ? "" : diningTable.toString();
     }
 
     /**
@@ -1040,7 +1037,7 @@ public class BarFrame extends BaseFragmentActivity {
         try {
             Cursor rs =  AikaPos.db.rawQuery(sql, null);
             rs.moveToNext();
-            if(DBUtil.getCursorInt(rs, "id") > -1);	//if not throwning exception (means there is a record), then do nothing.
+            if(DBUtil.getCursorInt(rs, "_id") > -1);	//if not throwning exception (means there is a record), then do nothing.
             return;
         }catch(Exception exp) {			//otherwise(if no record yet), generate a record.
             sql = "INSERT INTO evaluation(startTime, userId, SUBJECT) VALUES ('" + BarUtil.df.format(new Date())
@@ -1056,7 +1053,7 @@ public class BarFrame extends BaseFragmentActivity {
     public LinearLayout topBar;
     @XViewByID(R.id.cmbCurTable)
     public Spinner cmbCurTable;
-    public ArrayAdapter<DiningTable> adapter;
+    public ArrayAdapter<String> adapter;
     @XViewByID(R.id.valOperator)
     public TextView valOperator;
 
