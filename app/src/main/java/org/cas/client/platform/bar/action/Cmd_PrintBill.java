@@ -57,7 +57,7 @@ public class Cmd_PrintBill implements SamActionListener {
 			billPanel.expireAndRegenerateModifiedOutputs(DBConsts.BILL_PRINTED);
 			billPanel.expireAndReGenerateBill(null);
 		}
-		// if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
+		// if the bill was the one that was generated when table opened, it has save createdTime as openTime. now we take
 		//the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
 		//not confuse about the outputs(which was actually generated before first time print) should belongs to which bill.
 		DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.

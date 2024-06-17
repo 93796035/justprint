@@ -77,14 +77,14 @@ public class Cmd_OtherPay implements SamActionListener {
 		//do the exact button same style updating, but set the cash column with the total and set the other column with the pay mothod(Uber ski).
 		try {
    			//NOTE: should consider might been paid with card, so the new received should be the left not the total..
-			//we need to update the createTime with current time, because the opentime could be a time before last batch, this bill was not calculatd into that batch, because it
-			//not finished yet, might add more dish...so the bill must modify the createTime to be calculated into next batch.
+			//we need to update the createdTime with current time, because the opentime could be a time before last batch, this bill was not calculatd into that batch, because it
+			//not finished yet, might add more dish...so the bill must modify the createdTime to be calculated into next batch.
 			String paidTime = BarUtil.df.format(new Date());
    	    	StringBuilder sql = new StringBuilder("update bill set cashReceived = ").append(oldTotal)
    		   	    	.append(", DEBITRECEIVED = 0, VISARECEIVED = 0, MASTERRECEIVED = 0")
-   	    		.append(", createTime = '").append(paidTime)
+   	    		.append(", createdTime = '").append(paidTime)
 	   	    	.append("', otherReceived = '").append(((FunctionButton)v).getText())
-	   	    	.append("', status = ").append(DBConsts.COMPLETED)
+	   	    	.append("', STATUS = ").append(DBConsts.COMPLETED)
 	   	    	.append(", userId = ").append(LoginDlg.USERID)
 	   	    	.append(" where _id = ").append(billId);
 			AikaPos.db.execSQL(sql.toString());

@@ -58,7 +58,7 @@ public class Cmd_PrintAll implements SamActionListener {
 			if(billPanel.getStatus() >= DBConsts.BILL_PRINTED) { // if already printed, means there's record in web-mev alredy, make sure refs are right.
 				billPanel.expireAndReGenerateBill(null);
 			}
-			// if the bill was the one that was generated when table opened, it has save createTime as openTime. now we take
+			// if the bill was the one that was generated when table opened, it has save createdTime as openTime. now we take
 			//the chance to update it to the real printed time. then, if there's an other revisee bill printed, system will
 			//not confuse about the outputs（ which was actually generated before first time print) should belongs to which bill.
 			DBUtil.updatePriceAndCreateTimeInBillRecord(billPanel, DBConsts.BILL_PRINTED, BarUtil.df.format(new Date())); //already saved billRecord need to update price to reflect the new ordered dishes.
@@ -77,9 +77,9 @@ public class Cmd_PrintAll implements SamActionListener {
 			//NOTE: if some thing goes wrong for original bill printing, then we will have trouble (btw, it's hard to know if there's problem when printing
 			//because action will prepare the content and send to the q
 			
-			//update the bill with new createTime and new comment
+			//update the bill with new createdTime and new comment
 	        //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system), 
-			DBUtil.updateBill(billPanel.getBillID(), "status", DBConsts.BILL_PRINTED);
+			DBUtil.updateBill(billPanel.getBillID(), "STATUS", DBConsts.BILL_PRINTED);
 			
 			if(BarOption.isCounterMode()) {
 	    		if(BarOption.stayAfterSave()) {

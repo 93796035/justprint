@@ -1277,8 +1277,8 @@ public class PrintService{
 		content.append("Inv#   Table#      Total").append("\n");
 		
         StringBuilder sql = new StringBuilder("select * from BILL, USER where BILL.userId = USER._id ")
-        		.append(" and createTime >= '").append(startTime)
-        		.append("' and createTime <= '").append(endTime)
+        		.append(" and createdTime >= '").append(startTime)
+        		.append("' and createdTime <= '").append(endTime)
         		.append("' and BILL.STATUS = ").append(DBConsts.COMPLETED);
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.
         	sql.append(" and USER._id = ").append(LoginDlg.USERID);
@@ -2294,8 +2294,8 @@ public class PrintService{
 		content.append("Bill#  Time    Table Cust# Total Waiter Reason").append("\n");
 		content.append(BarUtil.getSeperatorLine(0, width)).append("\n");
 
-		StringBuilder sql = new StringBuilder("Select * from bill where bill.status = ").append(DBConsts.VOIDED)
-				.append(" and createTime >= '").append(startDateStr).append("' and createTime <= '").append(endDateStr).append("'");
+		StringBuilder sql = new StringBuilder("Select * from BILL where BILL.STATUS = ").append(DBConsts.VOIDED)
+				.append(" and createdTime >= '").append(startDateStr).append("' and createdTime <= '").append(endDateStr).append("'");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
         	sql.append(" and userId = ").append(LoginDlg.USERID);
         }else {
@@ -2426,8 +2426,8 @@ public class PrintService{
 		content.append("Inv#   Table#      Total").append("\n");
 		
         StringBuilder sql = new StringBuilder("select * from BILL, USER where BILL.userId = USER._id ")
-        		//.append(" and createTime >= '").append(startTime)
-        		//.append("' and createTime <= '").append(endTime)
+        		//.append(" and createdTime >= '").append(startTime)
+        		//.append("' and createdTime <= '").append(endTime)
         		.append(" and (BILL.STATUS is null or (BILL.STATUS >= ").append(DBConsts.ORIGINAL)
         		.append(" and BILL.STATUS < ").append(DBConsts.COMPLETED).append("))");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {	//if is not admin, then get out only user related records.

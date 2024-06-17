@@ -49,7 +49,7 @@ public class MainGenerator {
         user.addStringProperty("secondName").columnName("secondName");
         user.addStringProperty("nickName").columnName("nickName");
         user.addIntProperty("lang");
-        user.addStringProperty("createTime").columnName("createTime");
+        user.addStringProperty("createdTime").columnName("createdTime");
         user.addIntProperty("role");// 1 is the biggest
         user.addStringProperty("noTPS").columnName("noTPS");
         user.addStringProperty("noTVQ").columnName("noTVQ");

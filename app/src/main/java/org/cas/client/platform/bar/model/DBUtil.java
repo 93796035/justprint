@@ -72,9 +72,9 @@ public class DBUtil {
 	public static boolean isThereItemAddOrRemoved(int billId, boolean isPreviousBill) {
 		//fetch out the "3 elements". and two format of created time
 
-		String tableId = "", openTime = "", strCreateTime = "";
+		String tableId = "", openTime = "", strCreatedTime = "";
 		int clientIdx = 0;
-		long createTime = 0;
+		long createdTime = 0;
 
 		String sql = "select * from bill where _id = " + billId;  // 直接使用字符串连接
 		Cursor cursor = AikaPos.db.rawQuery(sql, null);
@@ -83,10 +83,10 @@ public class DBUtil {
 				tableId = getCursorString(cursor, "tableId");
 				openTime = getCursorString(cursor, "opentime");
 				clientIdx = getCursorInt(cursor, "billIndex");
-				strCreateTime = getCursorString(cursor, "createTime");
+				strCreatedTime = getCursorString(cursor, "createdTime");
 
-				if (strCreateTime != null) {
-					createTime = BarUtil.df.parse(strCreateTime).getTime() / 1000;
+				if (strCreatedTime != null) {
+					createdTime = BarUtil.df.parse(strCreatedTime).getTime() / 1000;
 				} else {
 					Log.e("DatabaseError", "Column 'createTime' not found in the result set.");
 				}
@@ -105,11 +105,11 @@ public class DBUtil {
     	long createTimeOfLastbill = 0;
     	if(isPreviousBill) {  //the parameter already tell that the bill is "previouse bill", or call it "last bill"
     		//update the "search start date" to not so early(not "1970-01-011..."), but the time of this bill.
-	    	strCreateTimeOfLastBill = strCreateTime;//(if the bill is the original one. these two time should be equals.)
-	    	createTimeOfLastbill = createTime;
+	    	strCreateTimeOfLastBill = strCreatedTime;//(if the bill is the original one. these two time should be equals.)
+	    	createTimeOfLastbill = createdTime;
     		//update the "search end date", so the time range will be "since the time to now"....
-    		strCreateTime = BarUtil.df.format(new Date());
-    		createTime = System.currentTimeMillis() / 1000;
+    		strCreatedTime = BarUtil.df.format(new Date());
+    		createdTime = System.currentTimeMillis() / 1000;
     	} else {				//otherwise, need to fetch out the previous bill to find the "start time" for the searching in next step.
 			sql = new StringBuilder("SELECT createdTime FROM BILL WHERE tableName = '").append(tableId)
 			.append("' AND openTime = '").append(openTime)
@@ -126,7 +126,7 @@ public class DBUtil {
 						Date dateTime = BarUtil.df.parse(strCreateTimeOfLastBill);
 						createTimeOfLastbill = dateTime.getTime() / 1000;
 					} else {
-						Log.e("DatabaseError", "Column 'createTime' not found in the result set.");
+						Log.e("DatabaseError", "Column 'createdTime' not found in the result set.");
 					}
 				}
 			} catch (Exception exp) {
@@ -144,12 +144,12 @@ public class DBUtil {
 				.append("' AND openTime = '").append(openTime)
 				.append("' AND billIndex = ").append(clientIdx)
 				.append(" AND ((modifiedTime > ").append(createTimeOfLastbill)
-				.append(" AND modifiedTime <= ").append(createTime)
+				.append(" AND modifiedTime <= ").append(createdTime)
 				//when there's an item was changed price, the STATUS is DBConsts.itemPriceChanged, so as long as the modifiedTime has value of this period, means there's some thing happened and affected the money amount.
 				//.append(" AND STATUS = ").append(DBConsts.voided) 
 				.append(")")	//maybe not new added, but new deleted dishes.
 				.append(" OR (createdTime > '").append(strCreateTimeOfLastBill)
-				.append("' AND createdTime <= '").append(strCreateTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is STATUS, it will be set to "STATUS" not "void".
+				.append("' AND createdTime <= '").append(strCreatedTime)	//after the setting the created time, no need to check the status could be void.(if this kind item is STATUS, it will be set to "STATUS" not "void".
 				.append("' AND (STATUS is null OR STATUS < ").append(DBConsts.COMPLETED)//SALE_RECORD has 3 status, null, void, deleted. it
 				.append(")))").toString();	//new created not report dishes
 		//should include the price changed item.
@@ -209,7 +209,7 @@ public class DBUtil {
 		}
 	}
 
-	public static void updatePriceAndCreateTimeInBillRecord(BillPanel billPanel, int status, String createTime) {
+	public static void updatePriceAndCreateTimeInBillRecord(BillPanel billPanel, int status, String createdTime) {
 		StringBuilder sql = new StringBuilder("update bill set TOTAL = ").append(Math.round(Float.valueOf(billPanel.valTotlePrice.getText().toString()) * 100))
 				.append(", DISCOUNT = ").append(Math.round(billPanel.discount))
 				.append(", serviceFee = ").append(billPanel.serviceFee)
@@ -217,8 +217,8 @@ public class DBUtil {
 		if(status != 0) {
 			sql.append(", STATUS = ").append(status);
 		}
-		if(createTime != null) {
-			sql.append(", createdTime = '").append(createTime).append("'");
+		if(createdTime != null) {
+			sql.append(", createdTime = '").append(createdTime).append("'");
 		}
 		sql.append(" where _id = ").append(billPanel.getBillID());
 
@@ -267,8 +267,8 @@ public class DBUtil {
 
 		DBUtil.updateBill(billPanel.getBillID(), "COMMENT", comment);
 
-		//update the bill with new createTime and new comment
-	    //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system),
+		//update the bill with new createdTime and new comment
+	    //(it pointing to the previous record by the specified billId and createdTime and subtotal, which is not in our db, but in mev system),
 		DBUtil.updateBill(billPanel.getBillID(), "STATUS", DBConsts.BILL_PRINTED);
 
 		//NOTE: if some thing goes wrong for original bill printing, then we will have trouble (btw, it's hard to know if there's problem when printing
@@ -322,8 +322,8 @@ public class DBUtil {
 			L.e("Dish", "exception when exec sql："+sql, exp);
 		}
 	}
-	public static int createOutput(Dish dish, String billIndex, String createTime) {
-		return createSplitedOutput(dish, billIndex, 1, createTime);
+	public static int createOutput(Dish dish, String billIndex, String createdTime) {
+		return createSplitedOutput(dish, billIndex, 1, createdTime);
 	}
 
 	public static int createSplitedOutput(Dish dish, String billIndex, float splitRate, String createdTime) {

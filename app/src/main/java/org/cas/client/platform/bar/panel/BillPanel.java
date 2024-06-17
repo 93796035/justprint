@@ -71,7 +71,7 @@ public class BillPanel extends BaseFragment
 
     //Bill property (not for specific item).the info should be retrieved from bill record if have.
     private int billID;
-    private String createTime;
+    private String createdTime;
     public float totalGst;
 	public float totalQst;
 	public float subTotal;
@@ -192,7 +192,7 @@ public class BillPanel extends BaseFragment
 
 			AikaPos.db.execSQL(sql.toString());
 
-		   	sql = new StringBuilder("Select _id from BILL where createTime = '").append(createtime)
+		   	sql = new StringBuilder("Select _id from BILL where createdTime = '").append(createtime)
 		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -949,9 +949,9 @@ public class BillPanel extends BaseFragment
 	private ArrayList<Dish> initTableWithOutput(String billId, String billIndex, String tableName, Object openTime) throws SQLException {
 		long intCreateTime = 0;
 		try {
-			intCreateTime = BarUtil.df.parse(createTime).getTime() / 1000;
+			intCreateTime = BarUtil.df.parse(createdTime).getTime() / 1000;
 		} catch (ParseException e1) {
-			L.e("BillPanel", "unexpected exception when parsing create time to a int value:" + createTime, e1);
+			L.e("BillPanel", "unexpected exception when parsing create time to a int value:" + createdTime, e1);
 		}
 
 		ArrayList<Dish> dishAry = new ArrayList<Dish>();
@@ -972,7 +972,7 @@ public class BillPanel extends BaseFragment
 				.append(" AND SALE_RECORD_productId = DISH_ID and SALE_RECORD_openTime = '").append(openTime).append("'");
 
 		if (billId != null && billId.length() > 0) {
-			sql.append(" and SALE_RECORD_CREATEDTime <= '").append(createTime).append("'")
+			sql.append(" and SALE_RECORD_CREATEDTime <= '").append(createdTime).append("'")
 					.append(" and (SALE_RECORD_STATUS is null or SALE_RECORD_STATUS < ").append(DBConsts.DELETED).append(")");
 		} else {
 			sql.append(" and (SALE_RECORD_STATUS is null or SALE_RECORD_STATUS < ").append(DBConsts.VOIDED).append(")");
@@ -1080,7 +1080,7 @@ public class BillPanel extends BaseFragment
 		    	discount = Integer.valueOf(comment.substring(pDB + 9, comment.indexOf("@", pDB)));
 		    }
 		    totalOnBill = DBUtil.getCursorInt(rs, "TOTAL");
-		    createTime = DBUtil.getCursorString(rs, "createdTime");
+		    createdTime = DBUtil.getCursorString(rs, "createdTime");
 		    billID = DBUtil.getCursorInt(rs, "_id");
 		}
 	}
@@ -1522,7 +1522,7 @@ public class BillPanel extends BaseFragment
 	}
 
     public String getZippedCreateTime(){
-    	String zippedStr = createTime.replace(" ", "");
+    	String zippedStr = createdTime.replace(" ", "");
     	zippedStr = zippedStr.replace("-", "");
     	zippedStr = zippedStr.replace(":", "");
     	return zippedStr;

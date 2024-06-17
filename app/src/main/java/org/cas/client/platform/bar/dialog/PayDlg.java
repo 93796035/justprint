@@ -148,7 +148,7 @@ public class PayDlg extends DialogFragment
 //	   	    	//.append(", DebitReceived = 0, VisaReceived = 0, MasterReceived = 0")
 //   	    		// why do we need to update create time? because this field no need to indicate how many minutes to display on table anymore,
 //   	    		//we use this field to indicate when the bill was really finished, it will determine which batch this bill will display on.)
-//   	    		.append(", createTime = '").append(paidTime).append("'")
+//   	    		.append(", createdTime = '").append(paidTime).append("'")
 //	   	    	.append(", status = ").append(DBConsts.COMPLETED)
 //	   	    	.append(", userId = ").append(LoginDlg.USERID)
 //	   	    	.append(" where _id = ").append(billId);
