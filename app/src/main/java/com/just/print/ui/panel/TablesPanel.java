@@ -179,7 +179,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                         //getWidth(), 60);
                         yPos += 69;
                     }
-                }else {
+                }else if(mRoot != null){
                     //@Note:used the width of Barframe, because the width of tablesPane might be changed to thin style in counter mode.
                     if(x > mRoot.getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99)) {
                         x = mRoot.getWidth() - (type == DBConsts.LOGO_TYPE ? 133 : 99);
@@ -197,6 +197,9 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     params.leftMargin = x;
                     params.topMargin = y;
                     tableToggleButton.setLayoutParams(params);
+                }else {
+                    params.leftMargin = convertDpToPixel(x, BarFrame.instance);
+                    params.topMargin = convertDpToPixel(y, BarFrame.instance);
                 }
 
                 btnTables.add(tableToggleButton);
