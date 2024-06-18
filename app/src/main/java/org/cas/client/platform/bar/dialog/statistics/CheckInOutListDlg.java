@@ -101,10 +101,10 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
 				int id = DBUtil.getCursorInt(rs, "_id");
-				sql = "update evaluation set endtime = '" + BarUtil.df.format(new Date()) + "' where ID = " + id;
+				sql = "update evaluation set endTime = '" + BarUtil.df.format(new Date()) + "' where ID = " + id;
 				AikaPos.db.execSQL(sql);
 			} else {
-				sql = "INSERT INTO evaluation(startTime, userId, subject) VALUES ('" + BarUtil.df.format(new Date())
+				sql = "INSERT INTO evaluation(startTime, userId, tableName) VALUES ('" + BarUtil.df.format(new Date())
 						+ "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME + "')";
 				AikaPos.db.execSQL(sql);
 			}

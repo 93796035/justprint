@@ -28,7 +28,7 @@ public class UserDao extends AbstractDao<User, Long> {
         public final static Property SecondName = new Property(2, String.class, "secondName", false, "secondName");
         public final static Property NickName = new Property(3, String.class, "nickName", false, "nickName");
         public final static Property Lang = new Property(4, Integer.class, "lang", false, "LANG");
-        public final static Property CreateTime = new Property(5, String.class, "createTime", false, "createTime");
+        public final static Property CreatedTime = new Property(5, String.class, "createdTime", false, "createdTime");
         public final static Property Role = new Property(6, Integer.class, "role", false, "ROLE");
         public final static Property NoTPS = new Property(7, String.class, "noTPS", false, "noTPS");
         public final static Property NoTVQ = new Property(8, String.class, "noTVQ", false, "noTVQ");
@@ -58,7 +58,7 @@ public class UserDao extends AbstractDao<User, Long> {
                 "'secondName' TEXT," + // 2: secondName
                 "'nickName' TEXT," + // 3: nickName
                 "'LANG' INTEGER," + // 4: lang
-                "'createTime' TEXT," + // 5: createTime
+                "'createdTime' TEXT," + // 5: createdTime
                 "'ROLE' INTEGER," + // 6: role
                 "'noTPS' TEXT," + // 7: noTPS
                 "'noTVQ' TEXT," + // 8: noTVQ
@@ -103,9 +103,9 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindLong(5, lang);
         }
  
-        String createTime = entity.getCreateTime();
-        if (createTime != null) {
-            stmt.bindString(6, createTime);
+        String createdTime = entity.getCreatedTime();
+        if (createdTime != null) {
+            stmt.bindString(6, createdTime);
         }
  
         Integer role = entity.getRole();
@@ -160,7 +160,7 @@ public class UserDao extends AbstractDao<User, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // secondName
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // nickName
             cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // lang
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // createTime
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // createdTime
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // role
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // noTPS
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // noTVQ
@@ -179,7 +179,7 @@ public class UserDao extends AbstractDao<User, Long> {
         entity.setSecondName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setNickName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setLang(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setCreateTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setCreatedTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setRole(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setNoTPS(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setNoTVQ(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));

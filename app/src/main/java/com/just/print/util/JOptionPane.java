@@ -52,7 +52,7 @@ public class JOptionPane {
         dialog.show();
     }
 
-    public static void showConfirmDialog(Object instance, String content, String title, ConfirmDialogCallback callback){
+    public static void showConfirmDialog(String content, String title, ConfirmDialogCallback callback){
         AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
         builder.setTitle(title);
         builder.setMessage(content);  // 假设你已经有适合安卓的方式来获取这个消息

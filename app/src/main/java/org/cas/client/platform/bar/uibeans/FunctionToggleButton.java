@@ -46,6 +46,7 @@ public class FunctionToggleButton extends ToggleButton implements ISButton{
 	@Override
 	public void setText(String text) {
 		this.title = text;
+		setChecked(false);
 	}
 
 	@Override

@@ -52,20 +52,27 @@ public class Cmd_Send implements SamActionListener {
     		}
 	    }else {
 	    	if(salesPanel.partialPaid && billPanel.getStatus() == DBConsts.ORIGINAL) {
-    			if(JOptionPane.showConfirmDialog(
-	    				BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(), org.cas.client.resources.international.DlgConst.DlgTitle)) {
-	            	//clean partial input
-	            	StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
-	            	sql.append(" where _id = ").append(billPanel.getBillID());
-	            	try {
-	        			AikaPos.db.execSQL(sql.toString());
-	        			salesPanel.partialPaid = false;
-	        		}catch(Exception exp) {
-	        			ErrorUtil.write(exp);
-	        		}
-	            }
+    			JOptionPane.showConfirmDialog(
+	    			BarFrame.consts.COMFIRMCLEARMONEYRECEIVED(),
+					org.cas.client.resources.international.DlgConst.DlgTitle,
+					new JOptionPane.ConfirmDialogCallback() {
+						@Override
+						public void onResult(boolean confirmed) {
+							if (confirmed) {
+								//clean partial input
+								StringBuilder sql = new StringBuilder("update bill set cashReceived = 0, debitReceived = 0, visaReceived = 0, masterReceived = 0");
+								sql.append(" where _id = ").append(billPanel.getBillID());
+								try {
+									AikaPos.db.execSQL(sql.toString());
+									salesPanel.partialPaid = false;
+								} catch (Exception exp) {
+									ErrorUtil.write(exp);
+								}
+							}
+						}
+					});
     		}
-	    	BarFrame.instance.switchMode(0);
+			BarFrame.instance.switchMode(0);
 	    }
 	}
 }

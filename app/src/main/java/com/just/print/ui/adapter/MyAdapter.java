@@ -19,10 +19,12 @@ import org.cas.client.platform.cascustomize.CustOpts;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
+    BillPanel billPanel;
     public String[][] data;
     private int selectedPosition = -1;
 
-    public MyAdapter(String[][] data) {
+    public MyAdapter(BillPanel billPanel, String[][] data) {
+        this.billPanel = billPanel;
         this.data = data;
     }
 
@@ -75,7 +77,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         newData[data.length][2] = newDish.getSize() > 1 ? newDish.getSize().toString() : "";
         newData[data.length][3] = BarOption.getMoneySign() + BarUtil.formatMoney(newDish.getPrice() / 100f);
         data = newData;
+        setSelectedPosition(data.length - 1);
         notifyDataSetChanged();
+
+        billPanel.valueChanged(selectedPosition);
     }
 
     public int getSelectedPosition() {

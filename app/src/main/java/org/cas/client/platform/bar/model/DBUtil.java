@@ -72,7 +72,7 @@ public class DBUtil {
 	public static boolean isThereItemAddOrRemoved(int billId, boolean isPreviousBill) {
 		//fetch out the "3 elements". and two format of created time
 
-		String tableId = "", openTime = "", strCreatedTime = "";
+		String tableName = "", openTime = "", strCreatedTime = "";
 		int clientIdx = 0;
 		long createdTime = 0;
 
@@ -80,7 +80,7 @@ public class DBUtil {
 		Cursor cursor = AikaPos.db.rawQuery(sql, null);
 		try {
 			if (cursor != null && cursor.moveToFirst()) {
-				tableId = getCursorString(cursor, "tableId");
+				tableName = getCursorString(cursor, "tableName");
 				openTime = getCursorString(cursor, "opentime");
 				clientIdx = getCursorInt(cursor, "billIndex");
 				strCreatedTime = getCursorString(cursor, "createdTime");
@@ -111,7 +111,7 @@ public class DBUtil {
     		strCreatedTime = BarUtil.df.format(new Date());
     		createdTime = System.currentTimeMillis() / 1000;
     	} else {				//otherwise, need to fetch out the previous bill to find the "start time" for the searching in next step.
-			sql = new StringBuilder("SELECT createdTime FROM BILL WHERE tableName = '").append(tableId)
+			sql = new StringBuilder("SELECT createdTime FROM BILL WHERE tableName = '").append(tableName)
 			.append("' AND openTime = '").append(openTime)
 			.append("' AND billIndex = ").append(clientIdx)
 			.append(" AND _id < ").append(billId)
@@ -140,7 +140,7 @@ public class DBUtil {
     	
     	//fetch out all the SALE_RECORD created or removed during the period,
 		//also included the price changed items.
-		sql = new StringBuilder("SELECT * FROM SALE_RECORD WHERE tableName = '").append(tableId)
+		sql = new StringBuilder("SELECT * FROM SALE_RECORD WHERE tableName = '").append(tableName)
 				.append("' AND openTime = '").append(openTime)
 				.append("' AND billIndex = ").append(clientIdx)
 				.append(" AND ((modifiedTime > ").append(createTimeOfLastbill)

@@ -459,7 +459,7 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <!-- billId tableId and OpenTime-->
+                    <!-- billId tableName and OpenTime-->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="5dp"
@@ -630,7 +630,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            <!-- billId tableId and OpenTime-->
+            <!-- billId tableName and OpenTime-->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="5dp"

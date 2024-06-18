@@ -19,7 +19,7 @@ public class User {
     private String secondName;
     private String nickName;
     private Integer lang;
-    private String createTime;
+    private String createdTime;
     private Integer role;
     private String noTPS;
     private String noTVQ;
@@ -44,13 +44,13 @@ public class User {
         this.id = id;
     }
 
-    public User(Long id, String firstName, String secondName, String nickName, Integer lang, String createTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
+    public User(Long id, String firstName, String secondName, String nickName, Integer lang, String createdTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
         this.id = id;
         this.firstName = firstName;
         this.secondName = secondName;
         this.nickName = nickName;
         this.lang = lang;
-        this.createTime = createTime;
+        this.createdTime = createdTime;
         this.role = role;
         this.noTPS = noTPS;
         this.noTVQ = noTVQ;
@@ -105,12 +105,12 @@ public class User {
         this.lang = lang;
     }
 
-    public String getCreateTime() {
-        return createTime;
+    public String getCreatedTime() {
+        return createdTime;
     }
 
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
     public Integer getRole() {

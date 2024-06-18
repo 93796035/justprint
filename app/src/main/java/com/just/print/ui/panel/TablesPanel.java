@@ -45,7 +45,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
     private TableButton btnPressed;
     public TableButton btnLogo;
     private boolean isDragged;
-    private float xGap, yGap;
+    private float xGap, yGap, newX, newY;
 
     public static String startTime;
 
@@ -356,19 +356,21 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                     btnPressed = (TableButton)v;
                     xGap = btnPressed.getX();
                     yGap = btnPressed.getY();
+                    newX = xGap;
+                    newY = yGap;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(btnPressed != null) {
-                    if(Math.abs(btnPressed.getX() - xGap) > 100 || Math.abs(btnPressed.getY() - yGap) > 100){
+                    if(Math.abs(newX - xGap) > 100 || Math.abs(newY - yGap) > 100){
                         isDragged = true;
                     }
-                    if(isDragged) {
-                        float newX = btnPressed.getX() + event.getX();
-                        float newY = btnPressed.getY() + event.getY();
-                        if (newY + 42 > mRoot.findViewById(R.id.buttonBar).getY()) {
-                            newY = mRoot.findViewById(R.id.buttonBar).getY() - 42;
-                        }
+                    newX += event.getX() - 50;
+                    newY += event.getY() - 50;
+                    if (newY + 42 > mRoot.findViewById(R.id.buttonBar).getY()) {
+                        newY = mRoot.findViewById(R.id.buttonBar).getY() - 42;
+                    }
+                    if(isDragged){
                         btnPressed.setLocation(newX, newY);
                     }
                 }
@@ -377,10 +379,10 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                 if(v instanceof TableButton) {
                     TableButton btn = (TableButton)v;
                     if(btnPressed != null && isDragged) {
-                        //updateDB;
                         String sql = "Update DINING_TABLE set posX = " + (btn.getX()) + ", posY = " + (btn.getY()) + " where _id = " + btn.getId();
                         AikaPos.db.execSQL(sql);
                     }else{
+                        btn.setLocation(xGap, yGap);
                         btn.performClick();
                     }
                 }
@@ -424,7 +426,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             if(btnTables.get(i).getStatus() == DBConsts.OPENNED ) {
                 String opentime = btnTables.get(i).getOpenTime();
                 String tableName = btnTables.get(i).getTableName();
-                StringBuilder sql = new StringBuilder("select * from Bill where status = 0 and tableId = '")
+                StringBuilder sql = new StringBuilder("select * from Bill where status = 0 and tableName = '")
                         .append(tableName).append("' and opentime = '").append(opentime).append("'");
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

@@ -46,7 +46,7 @@ public class Cmd_Return implements SamActionListener {
 		BillPanel billPanel = salesPanel.billPanel;
 
 		if (billPanel.getNewDishes().size() > 0) {
-			JOptionPane.showConfirmDialog(null, BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle, confirmed -> {
+			JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMLOSTACTION(), org.cas.client.resources.international.DlgConst.DlgTitle, confirmed -> {
 				if (confirmed) {
 					Cmd_CancelAll.getInstance().onClick(v);
 					handleReturnAction(salesPanel, billPanel, v);

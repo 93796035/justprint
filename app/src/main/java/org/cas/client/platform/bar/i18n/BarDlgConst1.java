@@ -21,7 +21,7 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
     public String AtLeastTwoTableShouldBeSelected() {return "Two tables should be selected.";}
     @Override
-    public String ChangeTable() {return "CHANGE\nTABLE";}
+    public String ChangeTable() {return "EXCH TABLE";}
     @Override
     public String InvoiceIdx() {return "Invoice";}
     @Override

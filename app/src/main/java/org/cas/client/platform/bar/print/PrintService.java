@@ -2151,12 +2151,12 @@ public class PrintService{
 		int totalQT = 0;
 		int totalSale = 0;
 		for (Bill bill : list) {
-  			String tableId = bill.getTableName();
-  			if(tableId == null) {
+  			String tableName = bill.getTableName();
+  			if(tableName == null) {
   				L.e("Found bill with no tableName", "found a bill with no tableName", null);
   				continue;
   			}
-  			Character firstCharacter = tableId.trim().substring(0, 1).toUpperCase().toCharArray()[0];
+  			Character firstCharacter = tableName.trim().substring(0, 1).toUpperCase().toCharArray()[0];
   			if('1' <= firstCharacter && firstCharacter <= '9' || firstCharacter == 'T') { //normal table
 	  			Float totalPrice = serviceTypeMap.get('I');
 	  			if(totalPrice == null) {
@@ -2309,10 +2309,10 @@ public class PrintService{
                 Integer billId = DBUtil.getCursorInt(rs,"_id");
                 content.append(billId);
                 
-                String time = DBUtil.getCursorString(rs,"opentime");
+                String time = DBUtil.getCursorString(rs,"openTime");
                 content.append(BarUtil.generateString(6 - billId.toString().length(), " ")).append(time.substring(5, 16));	//remove the year to make it shorter.
                 
-                String table = DBUtil.getCursorString(rs,"tableId");
+                String table = DBUtil.getCursorString(rs,"tableName");
                 content.append(BarUtil.generateString(4 - table.length(), " ")).append(table);
         		
                 Integer seatIdx = DBUtil.getCursorInt(rs,"billIndex");

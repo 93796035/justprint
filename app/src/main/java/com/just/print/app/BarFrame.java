@@ -318,7 +318,7 @@ public class BarFrame extends BaseFragmentActivity {
             BarOption.setBillingNumber(BarOption.getLicense());
             // No need to check again: BarOption.APPAREIL_ID_FORMAT.equals(BarOption.getCertifiedDeviceId())
             // it's already checked, and only when it's true, can reach to this method.
-            JOptionPane.showConfirmDialog(BarFrame.instance, "Avez-vous un identifiant pour cet appareil (IDAPPRL)?", "APPAREIL_ID", new JOptionPane.ConfirmDialogCallback() {
+            JOptionPane.showConfirmDialog("Avez-vous un identifiant pour cet appareil (IDAPPRL)?", "APPAREIL_ID", new JOptionPane.ConfirmDialogCallback() {
                 @Override
                 public void onResult(boolean confirmed) {
                     if (confirmed) {
@@ -1040,7 +1040,7 @@ public class BarFrame extends BaseFragmentActivity {
             if(DBUtil.getCursorInt(rs, "_id") > -1);	//if not throwning exception (means there is a record), then do nothing.
             return;
         }catch(Exception exp) {			//otherwise(if no record yet), generate a record.
-            sql = "INSERT INTO evaluation(startTime, userId, SUBJECT) VALUES ('" + BarUtil.df.format(new Date())
+            sql = "INSERT INTO evaluation(startTime, userId, tableName) VALUES ('" + BarUtil.df.format(new Date())
                     + "', " + LoginDlg.USERID + ", '" + LoginDlg.USERNAME +"')";
             try {
                 AikaPos.db.execSQL(sql);

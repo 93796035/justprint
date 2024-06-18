@@ -227,7 +227,7 @@ public class CreateNewOrderAction implements SamActionListener {
 	public int makeSureBillExists(String waiter, String createtime, String tableName, String billIndex, Float totalPrice) {
 		//considered the case that, client added dish from slave machine in an existing bill.
 		//should the bill exist, then should update the total price, and return back the id.
-		StringBuilder sql = new StringBuilder("select _id, status from bill where tableId = '").append(tableName).append("'")
+		StringBuilder sql = new StringBuilder("select _id, status from bill where tableName = '").append(tableName).append("'")
 				.append(" and opentime = '").append(createtime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.COMPLETED)
 				.append(" and status >= ").append(DBConsts.ORIGINAL).append(")");

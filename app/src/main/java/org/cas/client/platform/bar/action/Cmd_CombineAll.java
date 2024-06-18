@@ -44,7 +44,7 @@ public class Cmd_CombineAll implements SamActionListener {
 //		//for uncombine action.
 //		else {
 //			HashMap idxMap = new HashMap();
-//			StringBuilder sql = new StringBuilder("select * from bill where tableId = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("'")
+//			StringBuilder sql = new StringBuilder("select * from bill where tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("'")
 //					.append(" and opentime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 //					.append(" and (status is null or status < ").append(DBConsts.COMPLETED).append(")");
 //			try {

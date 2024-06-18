@@ -36,7 +36,6 @@ import org.cas.client.platform.bar.net.DataSyncService;
 import org.cas.client.platform.bar.net.NetUtil;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.print.PrintUtil;
-import org.cas.client.platform.bar.uibeans.ArrowButton;
 import org.cas.client.platform.bar.uibeans.FunctionToggleButton;
 import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
@@ -143,7 +142,7 @@ public class BillPanel extends BaseFragment
 		initContent();	//always need to initContent, to make sure dish in selection ary has new property. e.g. saved dish should has different color.,
 	}
 
-	//if the tableId is null, then use the sameID of original bill.
+	//if the tableName is null, then use the sameID of original bill.
 	public int cloneCurrentBillRecord(String tableName, String billIndex, int total) {
 		if(total < 0) {
 			total = Math.round(Float.valueOf(valTotlePrice.getText().toString()) * 100);
@@ -292,6 +291,9 @@ public class BillPanel extends BaseFragment
     @Override
 	public void onClick(View o) {
     	int selectedRow = table.getSelectedRow();
+		if(selectedRow < 0){
+			return;
+		}
     	Dish dish = getOrderedDishAry().get(selectedRow);
 	    if(o == moreButton) {
 			if(dish.getOutputID() >= 0) {	//already saved
@@ -346,8 +348,10 @@ public class BillPanel extends BaseFragment
 					table.setSelectedRow(-1);
 					return true;
 				}
+				removeFromSelection(selectedRow);
+			}else {
+				removeFromSelection(selectedRow);
 			}
-			removeFromSelection(selectedRow);
 		} else {
 			int tQTY = getOrderedDishAry().get(selectedRow).getNum();
 			dish.setTotalPrice(dish.getTotalPrice() - dish.getTotalPrice() / tQTY);
@@ -375,64 +379,76 @@ public class BillPanel extends BaseFragment
 			removeFromSelection(table.getSelectedRow());
 			logOperation(-1, DBConsts.ORIGINAL, curDish);
 		} else {// if it's send
-			if(JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION(), org.cas.client.resources.international.DlgConst.DlgTitle))
-				return;
-			//clean SALE_RECORD from db immediately.
-			//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.DELETED);
-			//send cancel message to kitchen
-			if(getStatus() < DBConsts.BILL_PRINTED) {
+			JOptionPane.showConfirmDialog(
+					BarFrame.consts.COMFIRMDELETEACTION(),
+					org.cas.client.resources.international.DlgConst.DlgTitle,
+					new JOptionPane.ConfirmDialogCallback() {
+				@Override
+				public void onResult(boolean confirmed) {
+					if (confirmed) {
+						deleteAsavedSaleRecord(curDish, outputId);
+					}
+				}
+			});
+		}
+	}
+
+	private void deleteAsavedSaleRecord(Dish curDish, int outputId) {
+		//clean SALE_RECORD from db immediately.
+		//No need to do it, will be called in method removeFromSelection() BillListPanel.curDish.changeOutputStatus(DBConsts.DELETED);
+		//send cancel message to kitchen
+		if(getStatus() < DBConsts.BILL_PRINTED) {
+			Dish dish = curDish.clone();
+			dish.setNum(1);
+			sendDishToKitchen(dish, true);//if billPrinted, means already finished prepare and dish is on table.no need to tell kitchen to stop it.
+			//update current bill is OK, because no bill printed yet. so no need to expire and regenerate a new bill.
+			DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
+			//update SALE_RECORD number.(because not print temporary bill, so no need to set the out put status to exipired)
+			DBUtil.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
+			if(curDish.getNum() == 1) {
+				DBUtil.updateOutput(dish.getOutputID(), "STATUS", DBConsts.DELETED);
+			}
+			logOperation(-1,DBConsts.SAVED, curDish);
+		}else { //if already billPrinted or refund, add to hashMapForRefund, waiting for confirmation action.
+			if(mapForPrintedItemRemoving.containsKey(outputId)) {
+				Dish dish = (Dish) mapForPrintedItemRemoving.get(outputId);
+				dish.setNum(dish.getNum() + 1);
+				dish.setTotalPrice(0 - curDish.getTotalPrice() / curDish.getNum() * dish.getNum());//unit price * current number
+				dish.setDiscount(curDish.getDiscount() / curDish.getNum() * dish.getNum());
+			}else {
 				Dish dish = curDish.clone();
 				dish.setNum(1);
-				sendDishToKitchen(dish, true);//if billPrinted, means already finished prepare and dish is on table.no need to tell kitchen to stop it.
-				//update current bill is OK, because no bill printed yet. so no need to expire and regenerate a new bill.
-				DBUtil.updatePriceAndCreateTimeInBillRecord(this, 0, null);//update bill info, must be after the screen update, because will get total from screen.
-				//update SALE_RECORD number.(because not print temporary bill, so no need to set the out put status to exipired)
-				DBUtil.updateOutput(dish.getOutputID(), "AMOUNT", curDish.getNum() - 1);
-				if(curDish.getNum() == 1) {
-					DBUtil.updateOutput(dish.getOutputID(), "STATUS", DBConsts.DELETED);
-				}
-				logOperation(-1,DBConsts.SAVED, curDish);
-			}else { //if already billPrinted or refund, add to hashMapForRefund, waiting for confirmation action.
-				if(mapForPrintedItemRemoving.containsKey(outputId)) {
-					Dish dish = (Dish) mapForPrintedItemRemoving.get(outputId);
-					dish.setNum(dish.getNum() + 1);
-					dish.setTotalPrice(0 - curDish.getTotalPrice() / curDish.getNum() * dish.getNum());//unit price * current number
-					dish.setDiscount(curDish.getDiscount() / curDish.getNum() * dish.getNum());
-				}else {
-					Dish dish = curDish.clone();
-					dish.setNum(1);
-					dish.setTotalPrice(0 - curDish.getTotalPrice() / curDish.getNum());
-					dish.setDiscount(curDish.getDiscount() / curDish.getNum());
-					mapForPrintedItemRemoving.put(outputId, dish);
-				}
-
-				logOperation(-1, curDish.getStatus(), curDish);
+				dish.setTotalPrice(0 - curDish.getTotalPrice() / curDish.getNum());
+				dish.setDiscount(curDish.getDiscount() / curDish.getNum());
+				mapForPrintedItemRemoving.put(outputId, dish);
 			}
 
-			if(curDish.getNum() > 1) {
-				int tQTY = curDish.getNum();
-				curDish.setTotalPrice(curDish.getTotalPrice() - curDish.getTotalPrice() / tQTY);
-				curDish.setNum(--tQTY);
-				table.setValueAt(tQTY + "x", table.getSelectedRow(), 0);
-				table.setValueAt(BarOption.getMoneySign()
-						+ BarUtil.formatMoney(curDish.getTotalPrice()/100f),
-						table.getSelectedRow(), 3);
+			logOperation(-1, curDish.getStatus(), curDish);
+		}
 
-				updateTotalArea(false);	//save to db immediately, because for lessing a saved SALE_RECORD, its nature. when removing a whole line,
+		if(curDish.getNum() > 1) {
+			int tQTY = curDish.getNum();
+			curDish.setTotalPrice(curDish.getTotalPrice() - curDish.getTotalPrice() / tQTY);
+			curDish.setNum(--tQTY);
+			table.setValueAt(tQTY + "x", table.getSelectedRow(), 0);
+			table.setValueAt(BarOption.getMoneySign()
+					+ BarUtil.formatMoney(curDish.getTotalPrice()/100f),
+					table.getSelectedRow(), 3);
 
-			}else { //clean from screen.
-				removeFromSelection(table.getSelectedRow());
-			}
-			//facture_original is not possible to be there, when we do formating the bill, will call pushEndMessage, there, we check if the comment is empty,
-			//if empty will directly add the facture_original to the print content, not modifying the db and comment.
-			String comment = getComment();
-			if(getStatus() == DBConsts.BILL_PRINTED && !comment.contains(PrintService.FACTURE_REVISEE)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
-				setComment(comment + PrintService.FACTURE_REVISEE);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.updateBill(getBillID(), "comment", getComment());
-			}else if(getStatus() == DBConsts.COMPLETED && !comment.contains(ValuePossible.RE_FUND)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
-				setComment(comment + ValuePossible.RE_FUND);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
-	    		DBUtil.updateBill(getBillID(), "comment", getComment());
-			}
+			updateTotalArea(false);	//save to db immediately, because for lessing a saved SALE_RECORD, its nature. when removing a whole line,
+
+		}else { //clean from screen.
+			removeFromSelection(table.getSelectedRow());
+		}
+		//facture_original is not possible to be there, when we do formating the bill, will call pushEndMessage, there, we check if the comment is empty,
+		//if empty will directly add the facture_original to the print content, not modifying the db and comment.
+		String comment = getComment();
+		if(getStatus() == DBConsts.BILL_PRINTED && !comment.contains(PrintService.FACTURE_REVISEE)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
+			setComment(comment + PrintService.FACTURE_REVISEE);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
+			DBUtil.updateBill(getBillID(), "comment", getComment());
+		}else if(getStatus() == DBConsts.COMPLETED && !comment.contains(ValuePossible.RE_FUND)) { //if comment is not empty, it could be: 1/refto: ---before printing the second bill.
+			setComment(comment + ValuePossible.RE_FUND);				//if it's already revised, don't add it again, for receipt, we remove the revisee if there is one.
+			DBUtil.updateBill(getBillID(), "comment", getComment());
 		}
 	}
 
@@ -474,16 +490,16 @@ public class BillPanel extends BaseFragment
 		table.setSelectedRow(selectedRow);
 		if (selectedRow < 0 || getOrderedDishAry().size() <= selectedRow) {
 			BarFrame.instance.curDish = null;
-			moreButton.setEnabled(false);
-			lessButton.setEnabled(false);
+			moreButton.setVisibility(View.INVISIBLE);
+			lessButton.setVisibility(View.INVISIBLE);
 			return;
 		}
 		if (status < DBConsts.COMPLETED && status >= DBConsts.ORIGINAL) {
-			moreButton.setEnabled(true);
-			lessButton.setEnabled(true);
+			moreButton.setVisibility(View.VISIBLE);
+			lessButton.setVisibility(View.VISIBLE);
 		}
 		if (getParentFragment() instanceof RefundItemDlg) {
-			lessButton.setEnabled(true);
+			lessButton.setVisibility(View.VISIBLE);
 		}
 
 		Dish selectedDish = getOrderedDishAry().get(selectedRow);
@@ -902,6 +918,7 @@ public class BillPanel extends BaseFragment
 			// do not set the default selected value, if it's used in billListDlg.
 			if (salesPanel != null && getOrderedDishAry().size() > 0) {
 				table.setSelectedRow(getOrderedDishAry().size() - 1);
+				valueChanged(getOrderedDishAry().size() - 1);
 			}
 		} catch (Exception e) {
 			L.e("BillPanel", " exception when initContent()", e);
@@ -938,9 +955,6 @@ public class BillPanel extends BaseFragment
 				CmdBtnsManagerDlg.disableNonPlatformPaymentBtns();
 			}
 		}
-
-		moreButton.setEnabled(false);
-		lessButton.setEnabled(false);
 
 		//reset the flag which is only used for showing expired bills.
 		BarFrame.instance.setShowingAnExpiredBill(false);
@@ -1174,6 +1188,7 @@ public class BillPanel extends BaseFragment
 //        	BarFrame.customerFrame.billPanel.resetColWidth();
 //        }
 		table.setSelectedRow(tValues.length - 1); //@Note this will trigger a value change event, to set the curDish.
+		valueChanged(tValues.length - 1);
 		updateTotalArea(false);
 		updateStatusMsg();
 	}
@@ -1438,7 +1453,7 @@ public class BillPanel extends BaseFragment
 		headerName.setText(BarFrame.consts.ProdName());
 		headerQty.setText(BarFrame.consts.Count());
 		headerPrice.setText(BarFrame.consts.Price());
-		myAdapter = new MyAdapter(new String[][]{});
+		myAdapter = new MyAdapter(this, new String[][]{});
         table.setAdapter(myAdapter);
         //seems following 4 lines useless...because the table.getColumnModel().getColumn(1) seems doesn't work.
 //        DefaultPIMTableCellRenderer tCellRender = new DefaultPIMTableCellRenderer();
@@ -1475,12 +1490,6 @@ public class BillPanel extends BaseFragment
 //        table.setShowGrid(false);
         // forcus-------------
         table.setFocusable(false);
-        moreButton.setFocusable(false);
-        lessButton.setFocusable(false);
-
-        // disables
-        moreButton.setEnabled(false);
-        lessButton.setEnabled(false);
 
         // built
         if(billButton != null) {
