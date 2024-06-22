@@ -17,6 +17,7 @@ import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 
+import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.util.JOptionPane;
@@ -189,12 +190,30 @@ public class PrintUtil {
 	}
 
 	private static void sendToPrinter(int totalHeight, Bitmap combinedImage, Context context) {
-		// 实现打印功能，可以使用 PrintManager 和 PrintDocumentAdapter
+		PrintManager printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
+		String jobName = context.getString(R.string.app_name) + " Document";
+		printManager.print(jobName, new BitmapPrintDocumentAdapter(context, combinedImage), null);
 	}
 
 	private static String writeToPdf(Bitmap combinedImage, Context context) {
-		// 实现保存为 PDF 的功能，可以使用 PDF 库
-		return "pdf_file_path"; // 返回 PDF 文件路径
+		PdfDocument pdfDocument = new PdfDocument();
+		PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(combinedImage.getWidth(), combinedImage.getHeight(), 1).create();
+		PdfDocument.Page page = pdfDocument.startPage(pageInfo);
+		Canvas canvas = page.getCanvas();
+		canvas.drawBitmap(combinedImage, 0, 0, null);
+		pdfDocument.finishPage(page);
+
+		try {
+			File file = new File(context.getExternalFilesDir(null), "PrintDocument.pdf");
+			FileOutputStream outputStream = new FileOutputStream(file);
+			pdfDocument.writeTo(outputStream);
+			pdfDocument.close();
+			outputStream.close();
+			return file.getAbsolutePath();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 

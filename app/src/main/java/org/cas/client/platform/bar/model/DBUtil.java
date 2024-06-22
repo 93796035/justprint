@@ -88,7 +88,7 @@ public class DBUtil {
 				if (strCreatedTime != null) {
 					createdTime = BarUtil.df.parse(strCreatedTime).getTime() / 1000;
 				} else {
-					Log.e("DatabaseError", "Column 'createTime' not found in the result set.");
+					Log.e("DatabaseError", "Column 'createdTime' contains no value in the result set.");
 				}
 			}
 		} catch (Exception exp) {
