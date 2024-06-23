@@ -325,9 +325,9 @@ public class MevUtils {
 //                	serialNum = "0" + serialNum;
 //                }
 				BarOption.setCertificateSerialNumberWebSRM(serialNum);
-//				BarFrame.instance.runOnUiThread(() -> {
-				JOptionPane.showMessageDialog(ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
-//				});
+				BarFrame.instance.runOnUiThread(() -> {
+					JOptionPane.showMessageDialog(ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
+				});
 			} catch (Exception exp) {
 				L.e("MevUtils", "exception when processing received cetificate from server.", exp);
 			}
