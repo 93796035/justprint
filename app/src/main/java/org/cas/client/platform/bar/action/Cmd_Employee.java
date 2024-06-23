@@ -26,6 +26,6 @@ public class Cmd_Employee implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-//		new EmployeeListDlg(BarFrame.instance).setVisible(true);
+		//EmployeeListDlg(BarFrame.instance).setVisible(true);
 	}
 }

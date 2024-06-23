@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 按钮区 -->
+        <Button
+            android:id="@+id/btnCuscmd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Custom Command" />
+        <Button
+            android:id="@+id/btnConfigFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open Config File" />
+        <Button
+            android:id="@+id/btnClearAllDemoRecords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear All Demo Records" />
+        <Button
+            android:id="@+id/replaceCertificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Replace Certificate" />
+        <Button
+            android:id="@+id/deleteCertificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Certificate" />
+        <Button
+            android:id="@+id/btnShowOffLineLogs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Offline Logs" />
+        <!-- 复选框区 -->
+        <CheckBox
+            android:id="@+id/CounterMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Counter Mode" />
+        <CheckBox
+            android:id="@+id/CloseBatchWithUnclosedTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Close Batch With Unclosed Table" />
+        <CheckBox
+            android:id="@+id/displayWaiterInKitchen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Display Waiter In Kitchen Bill" />
+        <CheckBox
+            android:id="@+id/DisplayVisaAsCredit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Display Visa As Credit" />
+        <CheckBox
+            android:id="@+id/disDishIDInKitchen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="dis DishID In Kitchen" />
+        <CheckBox
+            android:id="@+id/displayBillInKitchen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="display Bill InKitchen" />
+       <CheckBox
+            android:id="@+id/deleteTableWhenClose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="delete Table When Close"/>
+       <CheckBox
+            android:id="@+id/disCountBeforeTax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="disCount Before Tax"/>
+       <CheckBox
+            android:id="@+id/pointerInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="pointer Input Style"/>
+        <CheckBox
+            android:id="@+id/serviceFeeAffectTax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Service Fee Affect Tax" />
+       <CheckBox
+            android:id="@+id/savePrintInvoiceWhenBilled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="save Print Invoice When Billed"/>
+        <CheckBox
+            android:id="@+id/trainingMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Training Mode" />
+       <CheckBox
+            android:id="@+id/waiterAllowedToDiscount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="waiter Allowed To Discount"/>
+       <CheckBox
+            android:id="@+id/waiterAllowedToChangePrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="waiter Allowed To Change Price"/>
+        <CheckBox
+            android:id="@+id/multiLineCellRender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multi-Line Cell Render" />
+        <CheckBox
+            android:id="@+id/noticeWhenOvertime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notice When Overtime" />
+        <CheckBox
+            android:id="@+id/sameNameForbidden"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Same Name Forbidden" />
+       <CheckBox
+            android:id="@+id/showFrameDecoration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Frame Decoration"/>
+       <CheckBox
+            android:id="@+id/showWaiterOnOpennedTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Waiter On Openned Table"/>
+       <CheckBox
+            android:id="@+id/showTimeOnOpennedTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Time On Openned Table"/>
+       <CheckBox
+            android:id="@+id/showMoneyOnOpennedTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Money On Openned Table"/>
+       <CheckBox
+            android:id="@+id/showNumberOnTable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Number On Table"/>
+       <CheckBox
+            android:id="@+id/showPriceOnMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Price On Menu"/>
+       <CheckBox
+            android:id="@+id/showRecordFromOtherWaiter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Record From Other Waiter"/>
+       <CheckBox
+            android:id="@+id/showTaxNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Tax Number"/>
+       <CheckBox
+            android:id="@+id/showOrderNoOnBill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show OrderNo On Bill"/>
+       <CheckBox
+            android:id="@+id/showTableOnBill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Table On Bill"/>
+       <CheckBox
+            android:id="@+id/showCategorySumaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Category Sumary In Report"/>
+       <CheckBox
+            android:id="@+id/showDishSumaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show Dish Sumary In Report"/>
+       <CheckBox
+            android:id="@+id/ShowInvoiceSumaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Invoice Sumary In Report"/>
+       <CheckBox
+            android:id="@+id/ShowPaymentSummaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Payment Summary In Report"/>
+        <CheckBox
+            android:id="@+id/ShowWaiterSummaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Waiter Summary In Report"/>
+        <CheckBox
+            android:id="@+id/ShowProcessingBill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Processing Bill In Bill List Dialog" />
+       <CheckBox
+            android:id="@+id/ShowSalesInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Sales In Report"/>
+       <CheckBox
+            android:id="@+id/ShowServiceTypeSummaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Service Type Summary In Report"/>
+       <CheckBox
+            android:id="@+id/ShowUnclosedBillInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Unclosed Bill In Report"/>
+       <CheckBox
+            android:id="@+id/ShowVoidItemSummaryInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Void Item Summary In Report"/>
+       <CheckBox
+            android:id="@+id/ShowWaiterAndTimeInReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Waiter And Time In Report"/>
+       <CheckBox
+            android:id="@+id/stayAfterSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="stay After Save"/>
+       <CheckBox
+            android:id="@+id/temporalTableModeAllowed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="temporal Table Mode Allowed"/>
+       <CheckBox
+            android:id="@+id/treatPricePromtAsTaxInClude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="treat Price Promt As TaxInClude"/>
+        <CheckBox
+            android:id="@+id/unclosedBillFirst"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="unclosed Bill First"/>
+        <!-- 标签与文本输入框区 -->
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/lblBatchReportAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Batch Report Address" />
+            <EditText
+                android:id="@+id/BatchReportAddress"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:minHeight="0dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bill Number Start Str" />
+            <EditText
+                android:id="@+id/BillNumberStartStr"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:minHeight="0dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/lblMoneySign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Money Sign" />
+            <EditText
+                android:id="@+id/moneySign"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:minHeight="0dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/lblExpiredWarningDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expired Warning Days" />
+            <EditText
+                android:id="@+id/ExpiredWarningDays"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:minHeight="0dp"
+                android:inputType="number" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/lblServerIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Server IP" />
+            <EditText
+                android:id="@+id/serverIp"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:minHeight="0dp"
+                android:inputType="text" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -339,7 +339,7 @@ public class BarFrame extends BaseFragmentActivity {
                             existingIdApprlCheck();
                         }
                     }
-                    new AskWebMevToSignTask().execute(ValuePossible.Modif.AJO); // 使用name()方法将枚举转换为String
+                    new MevUtils.AskWebMevToSignTask().execute(ValuePossible.Modif.AJO); // 使用name()方法将枚举转换为String
                 }
             });
         }
@@ -349,15 +349,6 @@ public class BarFrame extends BaseFragmentActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tableNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         cmbCurTable.setAdapter(adapter);
-    }
-
-    // AsyncTask to execute askWebMevToSignTheCertificates
-    private static class AskWebMevToSignTask extends AsyncTask<String, Void, Void> {
-        @Override
-        protected Void doInBackground(String... params) {
-            MevUtils.askWebMevToSignTheCertificates(params[0]); // 使用字符串参数
-            return null;
-        }
     }
 
     private void processActivationResponse(String response) {

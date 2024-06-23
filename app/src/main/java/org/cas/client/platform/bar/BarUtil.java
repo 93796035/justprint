@@ -347,28 +347,22 @@ public class BarUtil {
         }
     }
 
-//    public static void cleanDB() {
-//        try {
-//            Statement smt = PIMDBModel.getStatement();
-//            try {
-//                StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED);
-//                smt.executeUpdate(sql.toString());
-//                sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.DELETED);
-//                smt.executeUpdate(sql.toString());
-//                sql = new StringBuilder("update dining_table set status = 0, openTime = ''");
-//                PIMDBModel.getStatement().executeUpdate(sql.toString());
-//                sql = new StringBuilder("delete from WEBSRMBATCH");
-//                PIMDBModel.getStatement().executeUpdate(sql.toString());
-//                CustOpts.custOps.setKeyAndValue("KitchenBillIdx", "1");
-//            }catch(Exception exp) {
-//                L.e("SettingPanel", "Exception when clearing demo records", exp);
-//            }
-//        }catch(Exception exp) {
-//            L.e("Report", " exception when trying to delete records from db", exp);
-//        }
-//
-//    }
-//
+    public static void cleanDB() {
+        try {
+            StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED);
+            AikaPos.db.execSQL(sql.toString());
+            sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.DELETED);
+            AikaPos.db.execSQL(sql.toString());
+            sql = new StringBuilder("update dining_table set status = 0, openTime = ''");
+            AikaPos.db.execSQL(sql.toString());
+            sql = new StringBuilder("delete from WEBSRMBATCH");
+            AikaPos.db.execSQL(sql.toString());
+            CustOpts.custOps.setKeyAndValue("KitchenBillIdx", "1");
+        } catch (Exception exp) {
+            L.e("SettingPanel", "Exception when clearing demo records", exp);
+        }
+    }
+
 //    public static String encryptIfNeeded(String key, String substring) {
 //        if(key.equals("superPassword")) {
 //            substring = TaoEncrypt.encryptPassword(substring);

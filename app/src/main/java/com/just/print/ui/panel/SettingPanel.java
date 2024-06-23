@@ -23,10 +23,13 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
 import com.just.print.app.BarFrame;
+import com.just.print.ui.fragment.LoginDlg;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.dialog.CmdBtnsManagerDlg;
+import org.cas.client.platform.bar.dialog.DishDlg;
+import org.cas.client.platform.bar.dialog.MoreOptionsDlg;
 
 public class SettingPanel extends PicturePane {
 
@@ -111,9 +114,8 @@ public class SettingPanel extends PicturePane {
     }
 
     private void initListeners() {
-        // Add your event listeners here
         moreOptions.setOnClickListener(v -> {
-            // Handle more options
+            new MoreOptionsDlg().show(BarFrame.instance.getSupportFragmentManager(), "MoreOptionsDialog");
         });
 
         bkMenu.setOnClickListener(v -> {

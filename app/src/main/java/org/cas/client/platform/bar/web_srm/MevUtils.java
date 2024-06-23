@@ -48,6 +48,7 @@ package org.cas.client.platform.bar.web_srm;
 //import java.util.concurrent.*;
 
 import android.database.Cursor;
+import android.os.AsyncTask;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
@@ -105,7 +106,7 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class MevUtils {
-	
+
 	private static final String TRANS_LOT_INDICATOR = "}, \"transLot\"";
 	private static final String TRANS_LOT = "{ \"reqTrans\": { \"transLot\": [{";
 	private static final String TRANS_ACTU = "{ \"reqTrans\": { \"transActu\": {";
@@ -181,18 +182,18 @@ public class MevUtils {
 		sendOutCertificateSignRequest(modif, httpHeaders, jsonCertificatSignRequest);
 	}
 
-//	public static void askWebMevToDeleteTheCertificates() {
-//		if(BarOption.getCertificateSerialNumberSRS() == null || BarOption.getCertificateSerialNumberSRS().length() == 0) {
-//			JOptionPane.showMessageDialog(BarFrame.instance, "No local certificate to delete, please restart the application to apply for a new certificate first!");
-//			return;
-//		}
-//		// build the whole part of the string. (a JASON structured string which can be send to server as request body)
-//		String jsonCertificatSignRequest = getCertificatSignRequestBodyInJSon(ValuePossible.Modif.SUP, null, BarOption.getCertificateSerialNumberSRS());
-//
-//		// Send out the CSR to WEB-SRM with JSON format request body and header properties
-//		sendOutCertificateSignRequest(ValuePossible.Modif.SUP, httpHeaders, jsonCertificatSignRequest);
-//	}
-//
+	public static void askWebMevToDeleteTheCertificates() {
+		if(BarOption.getCertificateSerialNumberSRS() == null || BarOption.getCertificateSerialNumberSRS().length() == 0) {
+			JOptionPane.showMessageDialog("No local certificate to delete, please restart the application to apply for a new certificate first!");
+			return;
+		}
+		// build the whole part of the string. (a JASON structured string which can be send to server as request body)
+		String jsonCertificatSignRequest = getCertificatSignRequestBodyInJSon(ValuePossible.Modif.SUP, null, BarOption.getCertificateSerialNumberSRS());
+
+		// Send out the CSR to WEB-SRM with JSON format request body and header properties
+		sendOutCertificateSignRequest(ValuePossible.Modif.SUP, httpHeaders, jsonCertificatSignRequest);
+	}
+
 	//generate a standard certificate request content in string format.
 	private static String getCertificateSignRequestString() {
 		try {
@@ -226,10 +227,10 @@ public class MevUtils {
 			//will trust me, and use the public key in certificat to verify the message I send was not modified by anyone else...
 			PKCS10CertificationRequestBuilder csrBuilder = new PKCS10CertificationRequestBuilder(subject, clePublique);
 			csrBuilder.addAttribute(org.bouncycastle.asn1.x509.Extension.keyUsage, new KeyUsage(
-				  KeyUsage.digitalSignature
-				| KeyUsage.keyEncipherment
-				| KeyUsage.dataEncipherment
-				| KeyUsage.keyAgreement));
+					KeyUsage.digitalSignature
+							| KeyUsage.keyEncipherment
+							| KeyUsage.dataEncipherment
+							| KeyUsage.keyAgreement));
 			Vector<Object> keyPurposeIds = new Vector<>();
 			keyPurposeIds.add(KeyPurposeId.id_kp_clientAuth);
 			keyPurposeIds.add(KeyPurposeId.id_kp_serverAuth);
@@ -244,8 +245,8 @@ public class MevUtils {
 			PKCS10CertificationRequest csr = csrBuilder.build(signer);
 			byte[] csrBytes = csr.getEncoded();
 			return "-----BEGIN CERTIFICATE REQUEST-----\\n"
-			+ Base64.getEncoder().encodeToString(csrBytes)
-			+ "\\n-----END CERTIFICATE REQUEST-----";
+					+ Base64.getEncoder().encodeToString(csrBytes)
+					+ "\\n-----END CERTIFICATE REQUEST-----";
 
 		} catch (Exception e) {
 			L.e("MevUtiles", "exception when getCertificateSignRequestString", e);
@@ -270,15 +271,15 @@ public class MevUtils {
 	}
 
 	//Request to add, replace or delete a certificate
-    //"Modif": 				The field indicates whether the modification concerns an addition, replacement or deletion of a certificate
-    //"HTTPHeadersDict": 			Headers to be sent to the WEB-SRM
-    //"strCertificateSignRequest": 	Json document to be sent to the WEB-SRM
-    //"CertificateSerialNumberSRS": The field containing the serial number of the certificate when requesting a replacement ("REM") or deletion ("SUP"). Add null for certificate addition
-    //returns 						WEB-SRM's response
+	//"Modif": 				The field indicates whether the modification concerns an addition, replacement or deletion of a certificate
+	//"HTTPHeadersDict": 			Headers to be sent to the WEB-SRM
+	//"strCertificateSignRequest": 	Json document to be sent to the WEB-SRM
+	//"CertificateSerialNumberSRS": The field containing the serial number of the certificate when requesting a replacement ("REM") or deletion ("SUP"). Add null for certificate addition
+	//returns 						WEB-SRM's response
 	private static void sendOutCertificateSignRequest(
-    		String modif,
-    		Map<String, String> httpHeadersDict,
-    		String reqeustContentInJASON){
+			String modif,
+			Map<String, String> httpHeadersDict,
+			String reqeustContentInJASON){
 
 		WEBSRM_Response response = UtilesJSON.CertificatesRequest(modif, httpHeadersDict, reqeustContentInJASON, BarOption.getCertificateSerialNumberSRS());
 		String responseString = response.getResponseJsonWEBSRM();
@@ -308,30 +309,32 @@ public class MevUtils {
 				if(retourCertif.has("idApprl")) {
 					BarOption.setCertifiedDeviceId(retourCertif.getString("idApprl"));
 				}
-        		//add SRS private key to digital signature.
-                X509Certificate certificate_SRS = createX509Certificate(retourCertif.getString("certif"));
-                X509Certificate certificate_WEBSRM = createX509Certificate(retourCertif.getString("certifPSI"));
-                savePrivateKeyAndCertificates(certificate_SRS, certificate_WEBSRM);
+				//add SRS private key to digital signature.
+				X509Certificate certificate_SRS = createX509Certificate(retourCertif.getString("certif"));
+				X509Certificate certificate_WEBSRM = createX509Certificate(retourCertif.getString("certifPSI"));
+				savePrivateKeyAndCertificates(certificate_SRS, certificate_WEBSRM);
 
-                // save serialNumber
-                String serialNum = certificate_SRS.getSerialNumber().toString(16);
-                if(serialNum.length() < 40) {		//why for srs, the SN's length must be 40? or do I really means if less then 40, just make it a little longer by adding one "0" on head?
-                	serialNum = "0" + serialNum;
-                }
-                BarOption.setCertificateSerialNumberSRS(serialNum);
-                serialNum = certificate_WEBSRM.getSerialNumber().toString(16);
+				// save serialNumber
+				String serialNum = certificate_SRS.getSerialNumber().toString(16);
+				if(serialNum.length() < 40) {		//why for srs, the SN's length must be 40? or do I really means if less then 40, just make it a little longer by adding one "0" on head?
+					serialNum = "0" + serialNum;
+				}
+				BarOption.setCertificateSerialNumberSRS(serialNum);
+				serialNum = certificate_WEBSRM.getSerialNumber().toString(16);
 //                if(serialNum.length() < 40) {
 //                	serialNum = "0" + serialNum;
 //                }
-                BarOption.setCertificateSerialNumberWebSRM(serialNum);
-                JOptionPane.showMessageDialog(ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
-            } catch (Exception exp) {
-                L.e("MevUtils", "exception when processing received cetificate from server.", exp);
-            }
+				BarOption.setCertificateSerialNumberWebSRM(serialNum);
+//				BarFrame.instance.runOnUiThread(() -> {
+				JOptionPane.showMessageDialog(ValuePossible.Modif.AJO.equals(modif) ? "Certificate added successfully!" : "Certificate updated successfully!");
+//				});
+			} catch (Exception exp) {
+				L.e("MevUtils", "exception when processing received cetificate from server.", exp);
+			}
 		}
 		CustOpts.custOps.saveData();
 		updateHttpHeader();
-    }
+	}
 
 	public static void updateHttpHeader() {
 		httpHeaders = getHTTPHeaders(); //refill the header with new values which was just got from server. and when called from other class, it can update the testcase value(CASESSAI).
@@ -339,34 +342,34 @@ public class MevUtils {
 
 	private static void deleteLocalCertificate() {
 		try {
-            // 加载密钥库
-            FileInputStream is = new FileInputStream(MevUtils.KEYSTORE_FILE);
-            KeyStore keystore = KeyStore.getInstance(KEYSTORE_TYPE);
-            keystore.load(is, MevUtils.KEYSTORE_KEY.toCharArray());
-            is.close();
+			// 加载密钥库
+			FileInputStream is = new FileInputStream(MevUtils.KEYSTORE_FILE);
+			KeyStore keystore = KeyStore.getInstance(KEYSTORE_TYPE);
+			keystore.load(is, MevUtils.KEYSTORE_KEY.toCharArray());
+			is.close();
 
-            // 删除指定别名的证书
-            if (keystore.containsAlias(ALIAS_CERTIFICAT_SEV)) {
-                keystore.deleteEntry(ALIAS_CERTIFICAT_SEV);
-                // 保存更改后的密钥库
-                FileOutputStream os = new FileOutputStream(MevUtils.KEYSTORE_FILE);
-                keystore.store(os, MevUtils.KEYSTORE_KEY.toCharArray());
-                os.close();
-                System.out.println("The certificate has been cleared.");
-            } else {
-                System.out.println("No entry found with given alias: ****");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			// 删除指定别名的证书
+			if (keystore.containsAlias(ALIAS_CERTIFICAT_SEV)) {
+				keystore.deleteEntry(ALIAS_CERTIFICAT_SEV);
+				// 保存更改后的密钥库
+				FileOutputStream os = new FileOutputStream(MevUtils.KEYSTORE_FILE);
+				keystore.store(os, MevUtils.KEYSTORE_KEY.toCharArray());
+				os.close();
+				System.out.println("The certificate has been cleared.");
+			} else {
+				System.out.println("No entry found with given alias: ****");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-    private static X509Certificate createX509Certificate(String pemCertificate) throws Exception {
-        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(
-        		new ByteArrayInputStream(pemCertificate.getBytes()));
-    }
+	private static X509Certificate createX509Certificate(String pemCertificate) throws Exception {
+		return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(
+				new ByteArrayInputStream(pemCertificate.getBytes()));
+	}
 
-    // save private key and certificates to KeyStore
+	// save private key and certificates to KeyStore
 	private static void savePrivateKeyAndCertificates(Certificate certificateOfAikaPos,
 													  X509Certificate certificateOfWebMev) {
 
@@ -374,101 +377,101 @@ public class MevUtils {
 			KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 			keyStore.load(new FileInputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
 
- 			keyStore.deleteEntry(ALIAS_CERTIFICAT_SEV);
-            keyStore.setEntry(ALIAS_CERTIFICAT_SEV, 						//certificate of Aikapos saved into keystore together with our private key.
-            		new KeyStore.PrivateKeyEntry(privateKey, new Certificate[]{certificateOfAikaPos}),
-            		new KeyStore.PasswordProtection(KEYSTORE_KEY.toCharArray()));
+			keyStore.deleteEntry(ALIAS_CERTIFICAT_SEV);
+			keyStore.setEntry(ALIAS_CERTIFICAT_SEV, 						//certificate of Aikapos saved into keystore together with our private key.
+					new KeyStore.PrivateKeyEntry(privateKey, new Certificate[]{certificateOfAikaPos}),
+					new KeyStore.PasswordProtection(KEYSTORE_KEY.toCharArray()));
 
- 			keyStore.deleteEntry(ALIAS_CERTIFICAT_PSI);
- 			keyStore.setCertificateEntry(ALIAS_CERTIFICAT_PSI,				//certificate of webmev save into key store alone
- 					certificateOfWebMev);
+			keyStore.deleteEntry(ALIAS_CERTIFICAT_PSI);
+			keyStore.setCertificateEntry(ALIAS_CERTIFICAT_PSI,				//certificate of webmev save into key store alone
+					certificateOfWebMev);
 
- 			keyStore.store(new FileOutputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
- 		} catch (Exception e) {
- 			L.e("MevUtils", "Exception when saving private key and certificate to keystore file", e);
- 		}
- 	}
+			keyStore.store(new FileOutputStream(MevUtils.KEYSTORE_FILE), MevUtils.KEYSTORE_KEY.toCharArray());
+		} catch (Exception e) {
+			L.e("MevUtils", "Exception when saving private key and certificate to keystore file", e);
+		}
+	}
 
-    //======================================= Transaction request =========================================
+	//======================================= Transaction request =========================================
 	public static void buildTransaction(final List<String> sndMsg, final String transType, final Transaction transac) throws Exception{
 
-        //=========================header info=================================
-        transac.sectActi.Abrvt = ValuePossible.Abrvt.RBC;	 // Abbreviation of the business's sector of activity (RBC - Restaurants, bars and food trucks)
-        transac.sectActi.TypServ = getServiceType(sndMsg); // Service typeLVR is what service?
+		//=========================header info=================================
+		transac.sectActi.Abrvt = ValuePossible.Abrvt.RBC;	 // Abbreviation of the business's sector of activity (RBC - Restaurants, bars and food trucks)
+		transac.sectActi.TypServ = getServiceType(sndMsg); // Service typeLVR is what service?
 
-        transac.FormImpr = ValuePossible.S_RFER.equals(transType) || (sndMsg.size() == 6 && sndMsg.get(5).endsWith(PrintService.PAYMENT_FAIL)) ?
-        		ValuePossible.Acti.NON : ValuePossible.FormImpr.PAP;		 // Document print option (Paper)
-        transac.RelaCommer = ValuePossible.RelaCommer.B2C;	 // Business relationship
-        transac.CommerceElectronique = "N"; 					 // E-commerce? No
+		transac.FormImpr = ValuePossible.S_RFER.equals(transType) || (sndMsg.size() == 6 && sndMsg.get(5).endsWith(PrintService.PAYMENT_FAIL)) ?
+				ValuePossible.Acti.NON : ValuePossible.FormImpr.PAP;		 // Document print option (Paper)
+		transac.RelaCommer = ValuePossible.RelaCommer.B2C;	 // Business relationship
+		transac.CommerceElectronique = "N"; 					 // E-commerce? No
 
-        //Print mode for the document, for print bill, the transType should be "FAC"
-        //printing closing receipt, also use this method, then it could be also one of following:
-        //•ANN: Annulation  (cancellation) •RPR: Reproduction •DUP: Duplicata •PSP: Parti sans payer •SOB: Sans objet (n/a)FAC: bill or any other document not included in this list)
-        transac.ModImpr = ValuePossible.getModeImpr(sndMsg.get(sndMsg.size() - 1));		//print purpos: currently support RPR, DUP, ANN, PSP or FAC
-        transac.Utc = BarOption.getUTC();	//"-05:00A", in summer time will be "-05:00N"
-        transac.ModTrans = BarOption.isTrainingMode()? ValuePossible.ModTrans.FOR : ValuePossible.ModTrans.OPE; // Transaction mode (Operation)
-        transac.DatTrans = BarUtil.sdf.format(new Date());
+		//Print mode for the document, for print bill, the transType should be "FAC"
+		//printing closing receipt, also use this method, then it could be also one of following:
+		//•ANN: Annulation  (cancellation) •RPR: Reproduction •DUP: Duplicata •PSP: Parti sans payer •SOB: Sans objet (n/a)FAC: bill or any other document not included in this list)
+		transac.ModImpr = ValuePossible.getModeImpr(sndMsg.get(sndMsg.size() - 1));		//print purpos: currently support RPR, DUP, ANN, PSP or FAC
+		transac.Utc = BarOption.getUTC();	//"-05:00A", in summer time will be "-05:00N"
+		transac.ModTrans = BarOption.isTrainingMode()? ValuePossible.ModTrans.FOR : ValuePossible.ModTrans.OPE; // Transaction mode (Operation)
+		transac.DatTrans = BarUtil.sdf.format(new Date());
 
-        // "Previous signature" of the first transaction
-        transac.signa.Preced = "========================================================================================";
-        String[] addressParts = sndMsg.get(0).split("\n");
-        String address = addressParts[1].trim();
+		// "Previous signature" of the first transaction
+		transac.signa.Preced = "========================================================================================";
+		String[] addressParts = sndMsg.get(0).split("\n");
+		String address = addressParts[1].trim();
 
-        //info of store owner
-        transac.docAdr.DocNoCiviq = address.substring(0, address.indexOf(" "));	// Street number "3800";
-        transac.docAdr.DocCodePostal = addressParts[2].trim();					// Postal Code
-        transac.NomUtil = LoginDlg.USERNAME;	 		// The name of the user who produced the customer's bill(not matter)
-        transac.NomMandt = BarOption.getShopName();		// Name of the mandatory who operates the business	(not matter)
-        transac.NoTPS = BarOption.getGSTAccount();		// Mandatary’s GST and QST registration number (not the user's ones)
-        transac.NoTVQ = BarOption.getQSTAccount();
-        transac.EmprCertifSEV = KeyStoreUtils.GetCertificateThumbprint( BarOption.getCertificateSerialNumberSRS() );	// Thumb print of the certificate containing the
-        												//public key linked to the private key used to produce the current transaction signature
-        //info of aikapos
-        transac.IdPartn = BarOption.getPartnerId();		//aikapos's partner id.
-        transac.IdSev = BarOption.getIdSignedToAikaPos();        	//aikapos's idSev
-        transac.IdVersi = BarOption.getIdVersi();		//aikapos's IdVersi
-        transac.CodCertif = BarOption.getCertificationPassedCode();	//aikaPos's code certificate
-        transac.Versi = BarOption.getCertifiedVersion();			//aikapos's version
-        transac.VersiParn = BarOption.getParentVersion();	//aikapos's parent version which passed the certificate (if the getVersi is not the one)
+		//info of store owner
+		transac.docAdr.DocNoCiviq = address.substring(0, address.indexOf(" "));	// Street number "3800";
+		transac.docAdr.DocCodePostal = addressParts[2].trim();					// Postal Code
+		transac.NomUtil = LoginDlg.USERNAME;	 		// The name of the user who produced the customer's bill(not matter)
+		transac.NomMandt = BarOption.getShopName();		// Name of the mandatory who operates the business	(not matter)
+		transac.NoTPS = BarOption.getGSTAccount();		// Mandatary’s GST and QST registration number (not the user's ones)
+		transac.NoTVQ = BarOption.getQSTAccount();
+		transac.EmprCertifSEV = KeyStoreUtils.GetCertificateThumbprint( BarOption.getCertificateSerialNumberSRS() );	// Thumb print of the certificate containing the
+		//public key linked to the private key used to produce the current transaction signature
+		//info of aikapos
+		transac.IdPartn = BarOption.getPartnerId();		//aikapos's partner id.
+		transac.IdSev = BarOption.getIdSignedToAikaPos();        	//aikapos's idSev
+		transac.IdVersi = BarOption.getIdVersi();		//aikapos's IdVersi
+		transac.CodCertif = BarOption.getCertificationPassedCode();	//aikaPos's code certificate
+		transac.Versi = BarOption.getCertifiedVersion();			//aikapos's version
+		transac.VersiParn = BarOption.getParentVersion();	//aikapos's parent version which passed the certificate (if the getVersi is not the one)
 
-        //info of bill
-        transac.TypTrans = ValuePossible.TypTrans.ADDI.equals(transType) ? ValuePossible.TypTrans.ADDI : ValuePossible.TypTrans.RFER;	//the parameter(transType) can be BILL/RFER/V_RFER/R_RFER/S_RFER
-        transac.ModPai = ValuePossible.getModPai(sndMsg); 	// Method of payment used for the bill (Cash) @note: seems for bill(addi) this field and be set with anything? it will be just ignored by webmev?
-        transac.NoTrans = buildBillID(sndMsg.get(0));	// Number identifying the transaction ("100001");
-        // Table number("====0") and Number of customers
-        addressParts[addressParts.length - 1] = addressParts[addressParts.length - 1].trim();
-        transac.sectActi.NoTabl = addressParts[addressParts.length - 1].substring(0, addressParts[addressParts.length - 1].indexOf(" "));
-        int p = transac.sectActi.NoTabl.indexOf("-");
-        if(p > 0) {
-        	try {
+		//info of bill
+		transac.TypTrans = ValuePossible.TypTrans.ADDI.equals(transType) ? ValuePossible.TypTrans.ADDI : ValuePossible.TypTrans.RFER;	//the parameter(transType) can be BILL/RFER/V_RFER/R_RFER/S_RFER
+		transac.ModPai = ValuePossible.getModPai(sndMsg); 	// Method of payment used for the bill (Cash) @note: seems for bill(addi) this field and be set with anything? it will be just ignored by webmev?
+		transac.NoTrans = buildBillID(sndMsg.get(0));	// Number identifying the transaction ("100001");
+		// Table number("====0") and Number of customers
+		addressParts[addressParts.length - 1] = addressParts[addressParts.length - 1].trim();
+		transac.sectActi.NoTabl = addressParts[addressParts.length - 1].substring(0, addressParts[addressParts.length - 1].indexOf(" "));
+		int p = transac.sectActi.NoTabl.indexOf("-");
+		if(p > 0) {
+			try {
 				transac.sectActi.NoTabl = UtilesFormatterDonnees.formatterNoTabl(transac.sectActi.NoTabl.substring(0, p));
 			} catch (Exception e) {
 				L.e("MevUtils", "Unexpected exception when formatting table name:" + transac.sectActi.NoTabl, e);
 			}
-        	transac.sectActi.NbClint = addressParts[addressParts.length - 1].substring(p + 1);
-        	p = transac.sectActi.NbClint.indexOf(PrintService.INVOICE);
-        	if(p > 0) {
-        		try {
+			transac.sectActi.NbClint = addressParts[addressParts.length - 1].substring(p + 1);
+			p = transac.sectActi.NbClint.indexOf(PrintService.INVOICE);
+			if(p > 0) {
+				try {
 					transac.sectActi.NbClint = UtilesFormatterDonnees.formatterNbClint(transac.sectActi.NbClint.substring(0, p).trim());
 				} catch (Exception e) {
 					L.e("MevUtils", "Unexpected exception when formatting customerIdx.", e);
 				}
-        	}
-        }else {
-            transac.sectActi.NbClint = "001";
-        }
+			}
+		}else {
+			transac.sectActi.NbClint = "001";
+		}
 
-        // Field identifying one or more customer addresses
+		// Field identifying one or more customer addresses
 //        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.LVR, "2535", "Boul. Laurier", "Québec", "G1V5C6" ) );
 //        transac.clint.lstAdrClients.add( new TransactionAdrClint( ValeursPossibles.TypAdr.FAC, "3800", "rue Marly", "Québec", "G1X4A5" ) );
 
 
-        //============================dish part================================
-        // Supplies of the transaction
-        transac.lstItems = new ArrayList<TransactionItem>( );
-        String dishContent = sndMsg.get(2).trim();
-        String sep2 = BarUtil.getSeperatorLine(0);
-        p = dishContent.indexOf(sep2);
+		//============================dish part================================
+		// Supplies of the transaction
+		transac.lstItems = new ArrayList<TransactionItem>( );
+		String dishContent = sndMsg.get(2).trim();
+		String sep2 = BarUtil.getSeperatorLine(0);
+		p = dishContent.indexOf(sep2);
 		String subtotals = dishContent.substring(p + sep2.length()).trim();
 		p = subtotals.indexOf(PrintService.SOUSTOTAL);
 		dishContent = subtotals.substring(0, p);
@@ -496,7 +499,7 @@ public class MevUtils {
 			List<TransactionPrecisionItem> lstPrecisionsItem = new ArrayList<TransactionPrecisionItem>( );
 			float modifyTotal = 0.0f;
 			float prix = 0.0f;
-	        for(int m = 1; m < dishAndModify.length; m++) {
+			for(int m = 1; m < dishAndModify.length; m++) {
 				p = dishAndModify[m].trim().lastIndexOf("=");
 				float totalPrice = Float.valueOf(dishAndModify[m].substring(p + 1));
 				String modifyAndQT = dishAndModify[m].substring(0, p);
@@ -508,27 +511,27 @@ public class MevUtils {
 				modifyTotal += prix;
 
 				// Details for a supply of the transaction
-		        lstPrecisionsItem.add(new TransactionPrecisionItem(
-		        	UtilesFormatterDonnees.formatterQte((double)qt_modify * Qte_dish), //Qte e.g."+00001.00",
-		        	descr_modify, 		//"Descr"
-		        	UtilesFormatterDonnees.formatterMontant(totalPrice / qt_modify),	//"Unitr", "+000000001.00",
-		        	UtilesFormatterDonnees.formatterMontant(prix),  // "Prix","+000000099.00"
-		        	ValuePossible.Tax.FP, // "Tax",
-		        	prix > 0 ? ValuePossible.Acti.RES : ValuePossible.Acti.SOB));   //"Acti"     //RBC
+				lstPrecisionsItem.add(new TransactionPrecisionItem(
+						UtilesFormatterDonnees.formatterQte((double)qt_modify * Qte_dish), //Qte e.g."+00001.00",
+						descr_modify, 		//"Descr"
+						UtilesFormatterDonnees.formatterMontant(totalPrice / qt_modify),	//"Unitr", "+000000001.00",
+						UtilesFormatterDonnees.formatterMontant(prix),  // "Prix","+000000099.00"
+						ValuePossible.Tax.FP, // "Tax",
+						prix > 0 ? ValuePossible.Acti.RES : ValuePossible.Acti.SOB));   //"Acti"     //RBC
 			}
 
-	        prix = dishItemTotalPrice + modifyTotal;
-	        transac.lstItems.add(new TransactionItem(
-	        	UtilesFormatterDonnees.formatterQte((double)Qte_dish), //   "Qte", "+00001.00",
-	        	descr_dish,   											//    "Descr",  "Poutine"
-	        	UtilesFormatterDonnees.formatterMontant(prix / Qte_dish), //"Unitr", "+000000000.00"
-	        	UtilesFormatterDonnees.formatterMontant(prix),			//"Prix", "+000000979.00"
-	        	ValuePossible.Tax.FP, 								// "Tax",
-	        	ValuePossible.Acti.RES,								//"Acti",
-	        	lstPrecisionsItem ) ); 									// Add all the items to the transaction
+			prix = dishItemTotalPrice + modifyTotal;
+			transac.lstItems.add(new TransactionItem(
+					UtilesFormatterDonnees.formatterQte((double)Qte_dish), //   "Qte", "+00001.00",
+					descr_dish,   											//    "Descr",  "Poutine"
+					UtilesFormatterDonnees.formatterMontant(prix / Qte_dish), //"Unitr", "+000000000.00"
+					UtilesFormatterDonnees.formatterMontant(prix),			//"Prix", "+000000979.00"
+					ValuePossible.Tax.FP, 								// "Tax",
+					ValuePossible.Acti.RES,								//"Acti",
+					lstPrecisionsItem ) ); 									// Add all the items to the transaction
 		}
 
-        //===============================amount part=============================
+		//===============================amount part=============================
 		//first， it service exists, add the service fee as an item of transac.lstItems.
 		p = subtotals.indexOf(PrintService.SERVICE_FEE);
 		if(p > -1) {
@@ -536,26 +539,26 @@ public class MevUtils {
 			String formattedServiceFee = UtilesFormatterDonnees.formatterMontant(strServiceFee);
 			transac.lstItems.add(new TransactionItem(
 					"+00001.00", //   "Qte", "+00001.00",
-		        	"Service fee",   											//    "Descr",  "Poutine"
-		        	formattedServiceFee, 	//"Unitr" is same with "Prix" because the qty of service fee is always 1
-		        	formattedServiceFee,		//"Prix", "+000000979.00"
-		        	ValuePossible.Tax.FP, 								// "Tax", SERVICE_FF should also applied both taxes?
-		        	ValuePossible.Acti.RES));								//"Acti",
+					"Service fee",   											//    "Descr",  "Poutine"
+					formattedServiceFee, 	//"Unitr" is same with "Prix" because the qty of service fee is always 1
+					formattedServiceFee,		//"Prix", "+000000979.00"
+					ValuePossible.Tax.FP, 								// "Tax", SERVICE_FF should also applied both taxes?
+					ValuePossible.Acti.RES));								//"Acti",
 		}
 		//according to document, if change pay method, need to secretly send a transaction to mev, with all number nagative.
 		int s_rfer = ValuePossible.S_RFER.equals(transType) ? -1 : 1;
 
-        //then, check if there's discount.
-        float discount = 0.0f;
-        p = subtotals.lastIndexOf(PrintService.ANNULATION);
-        if(p > -1) {
-	        String strDiscount = subtotals.substring(p + PrintService.ANNULATION.length() + 2, subtotals.indexOf("\n", p)).trim();
-	        discount = -1 * Float.valueOf(strDiscount);	//adjusted amount is  applied to the after-tax.can be a coupon,gift card, a
+		//then, check if there's discount.
+		float discount = 0.0f;
+		p = subtotals.lastIndexOf(PrintService.ANNULATION);
+		if(p > -1) {
+			String strDiscount = subtotals.substring(p + PrintService.ANNULATION.length() + 2, subtotals.indexOf("\n", p)).trim();
+			discount = -1 * Float.valueOf(strDiscount);	//adjusted amount is  applied to the after-tax.can be a coupon,gift card, a
 			transac.Ajus = UtilesFormatterDonnees.formatterMontant(s_rfer * discount);//"+000000000.00";	//discount, rounding of the  after-tax amount, etc.
-        }else {
-        	transac.Ajus = "+000000000.00";
-        }
-        // numbers before tax
+		}else {
+			transac.Ajus = "+000000000.00";
+		}
+		// numbers before tax
 		p = subtotals.lastIndexOf(PrintService.SOUSTOTAL);
 		String subTotal = subtotals.substring(p + PrintService.SOUSTOTAL.length() + 2, subtotals.indexOf("\n", p)).trim();
 		p = subtotals.lastIndexOf(PrintService.TPS);
@@ -563,81 +566,81 @@ public class MevUtils {
 		p = subtotals.lastIndexOf(PrintService.TVQ);
 		String TPQ =  subtotals.substring(p + PrintService.TVQ.length() + 2).trim();
 
-        transac.AvantTax = UtilesFormatterDonnees.formatterMontant(s_rfer * (Float.valueOf(subTotal) + discount));//"+000000500.00";
-        transac.TPS = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPS));//"+000000025.00";
-        transac.TVQ = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPQ));//"+000000050.00";
+		transac.AvantTax = UtilesFormatterDonnees.formatterMontant(s_rfer * (Float.valueOf(subTotal) + discount));//"+000000500.00";
+		transac.TPS = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPS));//"+000000025.00";
+		transac.TVQ = UtilesFormatterDonnees.formatterMontant(s_rfer * Float.valueOf(TPQ));//"+000000050.00";
 
-        //total number after tax
-        float afterTaxAmount = Float.valueOf(subTotal) + discount + Float.valueOf(TPS) + Float.valueOf(TPQ);
-        transac.ApresTax = UtilesFormatterDonnees.formatterMontant(s_rfer * afterTaxAmount);//"+000000575.00";
+		//total number after tax
+		float afterTaxAmount = Float.valueOf(subTotal) + discount + Float.valueOf(TPS) + Float.valueOf(TPQ);
+		transac.ApresTax = UtilesFormatterDonnees.formatterMontant(s_rfer * afterTaxAmount);//"+000000575.00";
 
-        //===============================payment part===============================
-        //transac.Ajus =  //this field is cause by can be a coupon, a gift card, a discount, rounding of the  after-tax amount, etc.
-        //The amount due after adjusting the after tax amount. The value must be the sum of the apresTax and ajus fields
+		//===============================payment part===============================
+		//transac.Ajus =  //this field is cause by can be a coupon, a gift card, a discount, rounding of the  after-tax amount, etc.
+		//The amount due after adjusting the after tax amount. The value must be the sum of the apresTax and ajus fields
 		transac.MTDU = UtilesFormatterDonnees.formatterMontant(s_rfer * (afterTaxAmount - discount));
 
 		//get the currently totally paid amount from all kind of payment of this time.
-        Float currentlyPaid = 0.0f;
-        String[] currentPays = PrintService.getCurrentPays(sndMsg, transType);
-        for (String string : currentPays) {
-        	p = string.indexOf(":");
-        	if(p > 0) {
-        		currentlyPaid += Float.valueOf(string.substring(p + 1).trim());
-        	}
+		Float currentlyPaid = 0.0f;
+		String[] currentPays = PrintService.getCurrentPays(sndMsg, transType);
+		for (String string : currentPays) {
+			p = string.indexOf(":");
+			if(p > 0) {
+				currentlyPaid += Float.valueOf(string.substring(p + 1).trim());
+			}
 		}
-        //get the latest paid amount from comment  TODO: there's a mistake when fetching comm.
-        float latestPay = 0.0f;
-        String comment = PrintService.getCommentFromSndMsg(sndMsg);
-        p = comment.indexOf(PrintService.LATEST_PAY);
-        if(p > -1) {
-        	String paid = comment.substring(p + PrintService.LATEST_PAY.length() + 2, sndMsg.get(5).indexOf("\n", p)).trim();
-        	latestPay = Float.valueOf(paid);
-        }
-        //get total due
-      	float due = afterTaxAmount - currentlyPaid;
+		//get the latest paid amount from comment  TODO: there's a mistake when fetching comm.
+		float latestPay = 0.0f;
+		String comment = PrintService.getCommentFromSndMsg(sndMsg);
+		p = comment.indexOf(PrintService.LATEST_PAY);
+		if(p > -1) {
+			String paid = comment.substring(p + PrintService.LATEST_PAY.length() + 2, sndMsg.get(5).indexOf("\n", p)).trim();
+			latestPay = Float.valueOf(paid);
+		}
+		//get total due
+		float due = afterTaxAmount - currentlyPaid;
 
-      	//the paied amount of this time / the total paiment of previouse / the current due / the tip.
-      	//following 3 value shouldn't set, because we didn't selected relevant options yet
+		//the paied amount of this time / the total paiment of previouse / the current due / the tip.
+		//following 3 value shouldn't set, because we didn't selected relevant options yet
 //		transac.VersActu = UtilesFormatterDonnees.formatterMontant(s_rfer * latestPay); //getCurrentPayAmount(subtotals);//"+000000000.00";	//must correspond to the current instalment,
 //		transac.VersAnt = UtilesFormatterDonnees.formatterMontant(s_rfer * (currentlyPaid - latestPay)); //"+000000000.00";	//must correspond to the sum of all previous instalments
 //		transac.Solde = UtilesFormatterDonnees.formatterMontant(s_rfer * (due < 0 ? 0.0f : due));		//"+000000000.00";	//must correspond to the balance to be paid.
 		transac.Pourb = UtilesFormatterDonnees.formatterMontant(s_rfer * (due > 0 ? 0.0f : - due));	//"+000000000.00";	//The amount of the tip.
-        transac.NoDossFO = BarOption.getBillingNumber();	//"ER0001";
+		transac.NoDossFO = BarOption.getBillingNumber();	//"ER0001";
 
-        // Concatenation of data for digital signature calculation
-        String strConcateneePourSignature = transac.NoTrans
-            + transac.DatTrans
-            + transac.TPS
-            + transac.TVQ
-            + transac.ApresTax
-            + transac.NoTPS
-            + transac.NoTVQ
-            + transac.ModImpr
-            + transac.ModTrans
-            + transac.signa.Preced;
-        // Calculation of the current transaction signature
-        transac.signa.Actu = Base64.getEncoder().encodeToString(UtilesECDSA.getSignedText(strConcateneePourSignature));// Current transaction digital signature
-        transac.signa.DatActu = transac.DatTrans;		//not affect certificate result of bill, but affect receipt.
+		// Concatenation of data for digital signature calculation
+		String strConcateneePourSignature = transac.NoTrans
+				+ transac.DatTrans
+				+ transac.TPS
+				+ transac.TVQ
+				+ transac.ApresTax
+				+ transac.NoTPS
+				+ transac.NoTVQ
+				+ transac.ModImpr
+				+ transac.ModTrans
+				+ transac.signa.Preced;
+		// Calculation of the current transaction signature
+		transac.signa.Actu = Base64.getEncoder().encodeToString(UtilesECDSA.getSignedText(strConcateneePourSignature));// Current transaction digital signature
+		transac.signa.DatActu = transac.DatTrans;		//not affect certificate result of bill, but affect receipt.
 
-        transac.lsttransactionReferences = new ArrayList<TransactionReference>();
-        String[] comments = sndMsg.get(sndMsg.size() - 1).trim().split("\n"); //should always not null, right?
-        if(comments.length >= 3 || (comments.length > 0 && comments[0].contains(PrintService.PAYMENT_FAIL.trim()))) {
-        	try {
-		        String noTrans = PrintService.fomatBillId(comments[0].substring(comments[0].indexOf(PrintUtil.REF_TO) + PrintUtil.REF_TO.length()));
-		        String datTrans = comments[1].substring(comments[1].indexOf(PrintUtil.DATE_REF) + PrintUtil.DATE_REF.length());
-		        String avantTax = comments[2].substring(comments[2].indexOf(PrintUtil.OLD_SUBTOTAL) + PrintUtil.OLD_SUBTOTAL.length());
-		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
-		        transac.lsttransactionReferences.add(transactionReference);
-        	}catch(Exception e) {
-        		//There's a case which the comments.length is 3 but doesn't contains the right content, including paying directly without printing temporal bill.
-        		String noTrans = PrintService.fomatBillId(transac.NoTrans);
-		        String datTrans = transac.DatTrans;
-		        String avantTax = transac.AvantTax;
-		        TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
-		        transac.lsttransactionReferences.add(transactionReference);
-        	}
-        }
-    }
+		transac.lsttransactionReferences = new ArrayList<TransactionReference>();
+		String[] comments = sndMsg.get(sndMsg.size() - 1).trim().split("\n"); //should always not null, right?
+		if(comments.length >= 3 || (comments.length > 0 && comments[0].contains(PrintService.PAYMENT_FAIL.trim()))) {
+			try {
+				String noTrans = PrintService.fomatBillId(comments[0].substring(comments[0].indexOf(PrintUtil.REF_TO) + PrintUtil.REF_TO.length()));
+				String datTrans = comments[1].substring(comments[1].indexOf(PrintUtil.DATE_REF) + PrintUtil.DATE_REF.length());
+				String avantTax = comments[2].substring(comments[2].indexOf(PrintUtil.OLD_SUBTOTAL) + PrintUtil.OLD_SUBTOTAL.length());
+				TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
+				transac.lsttransactionReferences.add(transactionReference);
+			}catch(Exception e) {
+				//There's a case which the comments.length is 3 but doesn't contains the right content, including paying directly without printing temporal bill.
+				String noTrans = PrintService.fomatBillId(transac.NoTrans);
+				String datTrans = transac.DatTrans;
+				String avantTax = transac.AvantTax;
+				TransactionReference transactionReference = new TransactionReference(noTrans, datTrans, avantTax);
+				transac.lsttransactionReferences.add(transactionReference);
+			}
+		}
+	}
 
 	public static String getServiceType(List<String> sndMsg) {
 		String serviceType = BarOption.isCounterMode() ? ValuePossible.TypServ.CMP : ValuePossible.TypServ.TBL;
@@ -671,9 +674,9 @@ public class MevUtils {
 			}
 		}
 	}
-//
+	//
 	//Figure out the bill Number
-    private static String buildBillID(String content) {
+	private static String buildBillID(String content) {
 		String tBillNumberStartStr = BarOption.getBillNumberStartStr();
 
 		int tStartPos = content.lastIndexOf(tBillNumberStartStr);
@@ -684,24 +687,24 @@ public class MevUtils {
 			L.e("Printer Serice", "unexpected content found when building BillID:"+content, null);
 			return null;
 		}
-    }
-
-    public static String getCompleteJSONStr(Transaction transActu) {
-    	 String completeJSONStr = TRANS_ACTU
-    			+ transActu.GetJson()
-    			+ "}}}";
-    	return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",}", "}");
 	}
 
-    //Send the json document containing the transactions to the WEB-SRM
-    //inside will consider if there's records in the batch.
-    //it will be called when print bill, system exit, or user pressed specific button.
-    //NOTE: 1/we don't check if currently it's offline mode, instead, we check the db table(websrmbatch) to see if there's records or not in batch.
-    //2/to simplify the logic, we always divide the batch into as small as possible(if there's N records, we divide them to N(each group contains only 1 to avoid it's bigger than 256k)
+	public static String getCompleteJSONStr(Transaction transActu) {
+		String completeJSONStr = TRANS_ACTU
+				+ transActu.GetJson()
+				+ "}}}";
+		return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",}", "}");
+	}
+
+	//Send the json document containing the transactions to the WEB-SRM
+	//inside will consider if there's records in the batch.
+	//it will be called when print bill, system exit, or user pressed specific button.
+	//NOTE: 1/we don't check if currently it's offline mode, instead, we check the db table(websrmbatch) to see if there's records or not in batch.
+	//2/to simplify the logic, we always divide the batch into as small as possible(if there's N records, we divide them to N(each group contains only 1 to avoid it's bigger than 256k)
 	public static void flushBatchWithCurTransaction() {
 		flushBatchWithCurTransaction(null, null, null, null, null);
 	}
-    public static String flushBatchWithCurTransaction( String newJsonTransaction, String signatransm, String emprCertifSEV, String strUrlQRCode,  String noTrans){
+	public static String flushBatchWithCurTransaction( String newJsonTransaction, String signatransm, String emprCertifSEV, String strUrlQRCode,  String noTrans){
 //		//load all batch records into memory.
 //    	List<String[]> values = new ArrayList<>();
 //    	StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH");
@@ -721,7 +724,7 @@ public class MevUtils {
 //			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
 //		}
 //
-    	String strFR = null;
+		String strFR = null;
 //		//modify the jsonToSend string with the records in batch, and send to web-mev.
 //    	//the values.size
 //    	for (int i = -1; i < values.size(); i++) {	//initialized to -1, even values is empty will still go in once.
@@ -879,10 +882,10 @@ public class MevUtils {
 //		        executor.shutdownNow(); // Shutdown the executor
 //		    }
 //    	}
-	    return strFR;
-    }
+		return strFR;
+	}
 
-//    private static String buildOneElementBatchPartJson(String json) {
+	//    private static String buildOneElementBatchPartJson(String json) {
 //    	StringBuilder completeJSONStr = new StringBuilder(TRANS_LOT)
 //    			.append(json).append("}]}}");
 //    	try {
@@ -1107,33 +1110,33 @@ public class MevUtils {
 	//when app started, will call this to check if the certificate expired.
 	public static void checkCertificateDate() {
 		if(BarOption.getBillingNumber() != null) {
-			 X509Certificate certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberSRS());
-			 if(certificate == null) {
+			X509Certificate certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberSRS());
+			if(certificate == null) {
 				L.e("MevUtils", " Can not find certificate with serialNumber:" + BarOption.getCertificateSerialNumberSRS() , null);
 				JOptionPane.showMessageDialog("certificate not found! Aikapos will automatically register a new one! ");
 				MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
 				return;
-			 }
-			 long millisecondsDifference = certificate.getNotAfter().getTime() - new Date().getTime();
-			 long daysDifference = TimeUnit.MILLISECONDS.toDays(millisecondsDifference);
+			}
+			long millisecondsDifference = certificate.getNotAfter().getTime() - new Date().getTime();
+			long daysDifference = TimeUnit.MILLISECONDS.toDays(millisecondsDifference);
 
-			 certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberWebSRM());
-			 if(certificate == null) {
-					L.e("MevUtils", " Can not find certificate with serialNumberWebSRM:" + String.valueOf(BarOption.getCertificateSerialNumberSRS()) , null);
-					JOptionPane.showMessageDialog("WEBSRM certificate not found! Please contact Aikapos customer support! ");
-					MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
-					return;
-				 }
-			 millisecondsDifference = certificate.getNotAfter().getTime() - new Date().getTime();
-			 int expiredWarningDays = BarOption.getExpiredWarningDays();
-			 if(TimeUnit.MILLISECONDS.toDays(millisecondsDifference) < expiredWarningDays || daysDifference < expiredWarningDays){
-				 //TODO: should change here into a option with two buttons.
-                if(JOptionPane.showConfirmDialog("certificate is about to expire! Would you like to re-activate it!",
-   					 BarFrame.consts.ComboMenu())) {
-		   				//if selected yes, start to do recertificate.
-		   				MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.REM);
-		   		}
-			 }
+			certificate = KeyStoreUtils.getCertificate(BarOption.getCertificateSerialNumberWebSRM());
+			if(certificate == null) {
+				L.e("MevUtils", " Can not find certificate with serialNumberWebSRM:" + String.valueOf(BarOption.getCertificateSerialNumberSRS()) , null);
+				JOptionPane.showMessageDialog("WEBSRM certificate not found! Please contact Aikapos customer support! ");
+				MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.AJO);
+				return;
+			}
+			millisecondsDifference = certificate.getNotAfter().getTime() - new Date().getTime();
+			int expiredWarningDays = BarOption.getExpiredWarningDays();
+			if(TimeUnit.MILLISECONDS.toDays(millisecondsDifference) < expiredWarningDays || daysDifference < expiredWarningDays){
+				//TODO: should change here into a option with two buttons.
+				if(JOptionPane.showConfirmDialog("certificate is about to expire! Would you like to re-activate it!",
+						BarFrame.consts.ComboMenu())) {
+					//if selected yes, start to do recertificate.
+					MevUtils.askWebMevToSignTheCertificates(ValuePossible.Modif.REM);
+				}
+			}
 		}
 	}
 
@@ -1146,5 +1149,14 @@ public class MevUtils {
 			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
 		}
 		return false;
+	}
+
+	// AsyncTask to execute askWebMevToSignTheCertificates
+	public static class AskWebMevToSignTask extends AsyncTask<String, Void, Void> {
+		@Override
+		protected Void doInBackground(String... params) {
+			MevUtils.askWebMevToSignTheCertificates(params[0]); // 使用字符串参数
+			return null;
+		}
 	}
 }
