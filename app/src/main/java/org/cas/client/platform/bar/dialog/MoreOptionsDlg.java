@@ -85,7 +85,7 @@ public class MoreOptionsDlg extends DialogFragment {
         });
 
         deleteCertificate.setOnClickListener(v -> {
-            MevUtils.askWebMevToDeleteTheCertificates();
+            new MevUtils.AskWebMevToSignTask().execute(ValuePossible.Modif.SUP);
         });
 
         btnShowOffLineLogs.setOnClickListener(v -> {
