@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -33,6 +34,7 @@ public class EmployeeListDlg extends DialogFragment {
     private Button btnAdd, btnDelete, btnModify, btnPrintDoc, btnClose;
     private List<HashMap<String, String>> employeeList;
     private SimpleAdapter adapter;
+    private Object selectedItem;
 
     @Nullable
     @Override
@@ -78,6 +80,23 @@ public class EmployeeListDlg extends DialogFragment {
                 new String[]{"ID","NNAME", "SUBJECT", "CATEGORY","JOINTIME"},
                 new int[]{R.id.txtId, R.id.txtNName, R.id.txtLang, R.id.txtRole, R.id.txtCreatedTime});
         listView.setAdapter(adapter);
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedItem = listView.getItemAtPosition(position);
+
+                for (int i = 0; i < parent.getChildCount(); i++) {
+                    View childView = parent.getChildAt(i);
+                    // 设置未选中项的背景色
+                    childView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                }
+                // 设置当前选中项的背景色
+                view.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+                // 处理选中项的逻辑，例如更新UI或者处理数据
+            }
+        });
     }
 
     private void setupListeners() {
