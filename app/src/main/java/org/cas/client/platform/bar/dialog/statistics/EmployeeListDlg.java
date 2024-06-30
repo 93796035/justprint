@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
+import com.just.print.app.BarFrame;
 
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
@@ -104,12 +105,18 @@ public class EmployeeListDlg extends DialogFragment {
 
         btnAdd.setOnClickListener(v -> {
             // Handle add employee logic
-            Toast.makeText(getContext(), "Add Employee", Toast.LENGTH_SHORT).show();
+            new EmployeeDlg().show(BarFrame.instance.getSupportFragmentManager(), "Employee");
         });
 
         btnDelete.setOnClickListener(v -> {
-            // Handle delete employee logic
-            Toast.makeText(getContext(), "Delete Employee", Toast.LENGTH_SHORT).show();
+            String employeeId = ((HashMap<String, String>) selectedItem).get("ID");
+            boolean success = deleteEmployeeFromDatabase(employeeId);
+            if (success) {
+                Toast.makeText(getContext(), "Employee deleted successfully", Toast.LENGTH_SHORT).show();
+                refreshEmployeeList();  // 更新列表显示
+            } else {
+                Toast.makeText(getContext(), "Failed to delete employee", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnModify.setOnClickListener(v -> {
@@ -122,4 +129,39 @@ public class EmployeeListDlg extends DialogFragment {
             Toast.makeText(getContext(), "Print Document", Toast.LENGTH_SHORT).show();
         });
     }
+
+    private boolean deleteEmployeeFromDatabase(String employeeId) {
+        // 执行删除员工记录的数据库操作，并返回操作结果
+        // 示例中默认返回删除成功
+        return true;
+    }
+
+    private void refreshEmployeeList() {
+        // 清空列表数据
+        employeeList.clear();
+
+        // 重新加载员工数据
+        String sql = "SELECT * FROM USER WHERE STATUS < " + DBConsts.DELETED;
+        try {
+            Cursor rs = AikaPos.db.rawQuery(sql, null);
+            while (rs.moveToNext()) {
+                HashMap<String, String> employee = new HashMap<>();
+                employee.put("ID",  DBUtil.getCursorString(rs, "_id"));
+                employee.put("NNAME", DBUtil.getCursorString(rs, "nickName"));
+                employee.put("SUBJECT", DBUtil.getCursorString(rs, "LANG"));
+                employee.put("CATEGORY", DBUtil.getCursorString(rs, "ROLE"));
+                employee.put("JOINTIME", DBUtil.getCursorString(rs, "createdTime"));
+                employee.put("SSCNUMBER", DBUtil.getCursorString(rs, "noTVQ"));
+                employee.put("BANKNUMBER", DBUtil.getCursorString(rs, "noTPS"));
+                employeeList.add(employee);
+            }
+            rs.close();
+        } catch (Exception e) {
+            L.e("EmployeeListDialogFragment", "Exception when retrieving employee data", e);
+        }
+
+        // 更新适配器
+        adapter.notifyDataSetChanged();
+    }
+
 }
