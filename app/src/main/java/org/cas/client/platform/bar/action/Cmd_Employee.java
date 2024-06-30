@@ -2,6 +2,10 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
+import com.just.print.app.BarFrame;
+
+import org.cas.client.platform.bar.dialog.DishDlg;
+import org.cas.client.platform.bar.dialog.statistics.EmployeeListDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
 
 public class Cmd_Employee implements SamActionListener {
@@ -26,6 +30,6 @@ public class Cmd_Employee implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		//EmployeeListDlg(BarFrame.instance).setVisible(true);
+		new EmployeeListDlg().show(BarFrame.instance.getSupportFragmentManager(), "Employees");
 	}
 }
