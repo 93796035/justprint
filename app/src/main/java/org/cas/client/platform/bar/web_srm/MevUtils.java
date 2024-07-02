@@ -956,102 +956,95 @@ public class MevUtils {
 //		}
 //		return dateTrans;
 //	}
-//
-//	//==================================== user reqeusts ================================================
-//    // Add a user on the WEB-SRM
-//    //"Michel Untel"/"567891234RT0001"/"5678912340TQ0001";
-//    public static void registerUser(String userName, String noGSTUser, String noQSTUser) {
-//        // Preparation of the json document to send to the WEB-SRM
-//        String jsonUser = UtilesJSON.GetJsonUser(ValuePossible.Modif.AJO, userName, noGSTUser, noQSTUser);
-//
-//        // Send the request to the WEB-SRM
-//        WEBSRM_Response webSRMResponse = UtilesJSON.UserRequest(httpHeaders, jsonUser, BarOption.getCertificateSerialNumberSRS());
-//
-//        // Processing of error messages received from WEB-SRM, if any
-//        if (!webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
-//			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
-//					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente")
-//					&& !webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-//				//do nothing.
-//			} else {
-//				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
-//					JOptionPane.showMessageDialog(BarFrame.instance,
-//							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.",
-//							"Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//				} else if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-//					JOptionPane.showMessageDialog(BarFrame.instance,
-//							"Problème de certificat pour vous authentifer auprès du MEV-WEB", "Web-srm Response Error:",
-//							JOptionPane.ERROR_MESSAGE);
-//				} else {
-//					JOptionPane.showMessageDialog(BarFrame.instance, webSRMResponse.getResponseJsonWEBSRM(),
-//							"Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//				}
-//			}
-//        } else {
-//        	StringBuilder errorMsg = new StringBuilder();
-//	        errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
-//	        errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
-//	        List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
-//	        for (ErrorWEBSRM error : errors) {
-//	        	errorMsg.append("Id : " + error).append("\n");
-//	        }
-//			JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString(), "Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//			StringBuilder sql = new StringBuilder("delete from USER where nickName is '" + userName + "'");
-//			try {
-//				PIMDBModel.getStatement().executeUpdate(sql.toString());
-//			} catch (Exception exp) {
-//				L.e("MevUtils... ", "error happend when deleting an Error employee:" + sql, exp);
-//			}
-//
-//		}
-//    }
-//
-//    /**
-//     * Delete a user on the WEB-SRM
-//     * "Michel Untel"/"567891234RT0001"/"5678912340TQ0001";
-//     */
-//    public static void deleteUser(String userName, String noGSTUser, String noQSTUser) {
-//
-//        // Preparation of the json document to send to the WEB-SRM
-//        String jsonUtilisateur = UtilesJSON.GetJsonUser(ValuePossible.Modif.SUP, userName, noGSTUser, noQSTUser);
-//
-//        // Send the request to the WEB-SRM
-//        WEBSRM_Response webSRMResponse = UtilesJSON.UserRequest(httpHeaders, jsonUtilisateur, BarOption.getCertificateSerialNumberSRS());
-//
-//        // Processing of error messages received from WEB-SRM, if any
-//		if (!webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
-//			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
-//					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente") && !webSRMResponse
-//							.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-//				//do nothing.
-//			} else {
-//				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
-//					JOptionPane.showMessageDialog(BarFrame.instance,
-//							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.",
-//							"Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//				} else {
-//					if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-//						JOptionPane.showMessageDialog(BarFrame.instance,
-//								"Problème de certificat pour vous authentifer auprès du MEV-WEB",
-//								"Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//					} else {
-//						JOptionPane.showMessageDialog(BarFrame.instance, webSRMResponse.getResponseJsonWEBSRM(),
-//								"Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//					}
-//				}
-//			}
-//		} else {
-//            StringBuilder errorMsg = new StringBuilder();
-//            errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
-//            errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
-//            List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
-//            for (ErrorWEBSRM error : errors) {
-//            	errorMsg.append("error : " + error).append("\n");
-//            }
-//			JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString(), "Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//        }
-//    }
-//
+
+	//==================================== user reqeusts ================================================
+    // Add a user on the WEB-SRM
+    //"Michel Untel"/"567891234RT0001"/"5678912340TQ0001";
+    public static void registerUser(String userName, String noGSTUser, String noQSTUser) {
+        // Preparation of the json document to send to the WEB-SRM
+        String jsonUser = UtilesJSON.GetJsonUser(ValuePossible.Modif.AJO, userName, noGSTUser, noQSTUser);
+
+        // Send the request to the WEB-SRM
+        WEBSRM_Response webSRMResponse = UtilesJSON.UserRequest(httpHeaders, jsonUser, BarOption.getCertificateSerialNumberSRS());
+
+        // Processing of error messages received from WEB-SRM, if any
+        if (!webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
+			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
+					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente")
+					&& !webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
+				//do nothing.
+			} else {
+				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
+					JOptionPane.showMessageDialog(
+							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+				} else if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
+					JOptionPane.showMessageDialog("Problème de certificat pour vous authentifer auprès du MEV-WEB");
+				} else {
+					JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+				}
+			}
+        } else {
+        	StringBuilder errorMsg = new StringBuilder();
+	        errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
+	        errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
+	        List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
+	        for (ErrorWEBSRM error : errors) {
+	        	errorMsg.append("Id : " + error).append("\n");
+	        }
+			JOptionPane.showMessageDialog(errorMsg.toString());
+			StringBuilder sql = new StringBuilder("delete from USER where nickName is '" + userName + "'");
+			try {
+				AikaPos.db.execSQL(sql.toString());
+			} catch (Exception exp) {
+				L.e("MevUtils... ", "error happend when deleting an Error employee:" + sql, exp);
+			}
+
+		}
+    }
+
+    /**
+     * Delete a user on the WEB-SRM
+     * "Michel Untel"/"567891234RT0001"/"5678912340TQ0001";
+     */
+    public static void deleteUser(String userName, String noGSTUser, String noQSTUser) {
+
+        // Preparation of the json document to send to the WEB-SRM
+        String jsonUtilisateur = UtilesJSON.GetJsonUser(ValuePossible.Modif.SUP, userName, noGSTUser, noQSTUser);
+
+        // Send the request to the WEB-SRM
+        WEBSRM_Response webSRMResponse = UtilesJSON.UserRequest(httpHeaders, jsonUtilisateur, BarOption.getCertificateSerialNumberSRS());
+
+        // Processing of error messages received from WEB-SRM, if any
+		if (!webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
+			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
+					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente") && !webSRMResponse
+							.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
+				//do nothing.
+			} else {
+				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
+					JOptionPane.showMessageDialog(
+							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+				} else {
+					if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
+						JOptionPane.showMessageDialog(
+								"Problème de certificat pour vous authentifer auprès du MEV-WEB");
+					} else {
+						JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+					}
+				}
+			}
+		} else {
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
+            errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
+            List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
+            for (ErrorWEBSRM error : errors) {
+            	errorMsg.append("error : " + error).append("\n");
+            }
+			JOptionPane.showMessageDialog(errorMsg.toString());
+        }
+    }
+
 //	//==================================== document reqeust ==============================================
 //	public static boolean sendUserDocumentRequest(DocumentRUT docRUT, int userId, String date, Float afterTextAmount) {//String name, String taxCode1, String taxCode2) {
 //

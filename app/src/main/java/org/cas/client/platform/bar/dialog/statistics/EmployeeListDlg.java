@@ -18,9 +18,11 @@ import androidx.fragment.app.DialogFragment;
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
+import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.casutil.L;
 
 import java.sql.ResultSet;
@@ -28,6 +30,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EmployeeListDlg extends DialogFragment {
 
@@ -35,7 +38,7 @@ public class EmployeeListDlg extends DialogFragment {
     private Button btnAdd, btnDelete, btnModify, btnPrintDoc, btnClose;
     private List<HashMap<String, String>> employeeList;
     private SimpleAdapter adapter;
-    private Object selectedItem;
+    private HashMap<String, String> selectedItem;
 
     @Nullable
     @Override
@@ -57,28 +60,9 @@ public class EmployeeListDlg extends DialogFragment {
 
     private void initList() {
         employeeList = new ArrayList<>();
-        String sql = "SELECT * FROM USER WHERE STATUS < " + DBConsts.DELETED;
-
-        try {
-            Cursor rs = AikaPos.db.rawQuery(sql, null);
-            while (rs.moveToNext()) {
-                HashMap<String, String> employee = new HashMap<>();
-                employee.put("ID",  DBUtil.getCursorString(rs, "_id"));
-                employee.put("NNAME", DBUtil.getCursorString(rs, "nickName"));
-                employee.put("SUBJECT", DBUtil.getCursorString(rs, "LANG"));
-                employee.put("CATEGORY", DBUtil.getCursorString(rs, "ROLE"));
-                employee.put("JOINTIME", DBUtil.getCursorString(rs, "createdTime"));
-                employee.put("SSCNUMBER", DBUtil.getCursorString(rs, "noTVQ"));
-                employee.put("BANKNUMBER", DBUtil.getCursorString(rs, "noTPS"));
-                employeeList.add(employee);
-            }
-            rs.close();
-        } catch (Exception e) {
-            L.e("EmployeeListDialogFragment", "Exception when retrieving employee data", e);
-        }
 
         adapter = new SimpleAdapter(getContext(), employeeList, R.layout.employee_list_item,
-                new String[]{"ID","NNAME", "SUBJECT", "CATEGORY","JOINTIME"},
+                new String[]{"ID","NNAME", "LANG", "ROLE", "createdTime"},
                 new int[]{R.id.txtId, R.id.txtNName, R.id.txtLang, R.id.txtRole, R.id.txtCreatedTime});
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -86,7 +70,7 @@ public class EmployeeListDlg extends DialogFragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedItem = listView.getItemAtPosition(position);
+                selectedItem = (HashMap<String, String>)listView.getItemAtPosition(position);
 
                 for (int i = 0; i < parent.getChildCount(); i++) {
                     View childView = parent.getChildAt(i);
@@ -98,30 +82,27 @@ public class EmployeeListDlg extends DialogFragment {
                 // 处理选中项的逻辑，例如更新UI或者处理数据
             }
         });
+
+        refreshEmployeeList();
     }
 
     private void setupListeners() {
         btnClose.setOnClickListener(v -> dismiss());
 
         btnAdd.setOnClickListener(v -> {
-            // Handle add employee logic
-            new EmployeeDlg().show(BarFrame.instance.getSupportFragmentManager(), "Employee");
+            // 创建一个空的参数 Map
+            Map<String, String> params = new HashMap<>();
+            // 调用 newInstance 方法来显示 EmployeeDlg
+            EmployeeDlg.newInstance(params, this).show(BarFrame.instance.getSupportFragmentManager(), "Employee");
         });
-
         btnDelete.setOnClickListener(v -> {
-            String employeeId = ((HashMap<String, String>) selectedItem).get("ID");
-            boolean success = deleteEmployeeFromDatabase(employeeId);
-            if (success) {
-                Toast.makeText(getContext(), "Employee deleted successfully", Toast.LENGTH_SHORT).show();
-                refreshEmployeeList();  // 更新列表显示
-            } else {
-                Toast.makeText(getContext(), "Failed to delete employee", Toast.LENGTH_SHORT).show();
-            }
+            String employeeId = selectedItem.get("ID");
+            deleteEmployeeFromDatabase(employeeId);
         });
 
         btnModify.setOnClickListener(v -> {
             // Handle modify employee logic
-            Toast.makeText(getContext(), "Modify Employee", Toast.LENGTH_SHORT).show();
+            EmployeeDlg.newInstance(selectedItem, this).show(BarFrame.instance.getSupportFragmentManager(), "Employee");
         });
 
         btnPrintDoc.setOnClickListener(v -> {
@@ -130,13 +111,35 @@ public class EmployeeListDlg extends DialogFragment {
         });
     }
 
-    private boolean deleteEmployeeFromDatabase(String employeeId) {
-        // 执行删除员工记录的数据库操作，并返回操作结果
-        // 示例中默认返回删除成功
-        return true;
+    private void deleteEmployeeFromDatabase(String employeeId) {
+        JOptionPane.showConfirmDialog(BarFrame.consts.COMFIRMDELETEACTION2(), BarFrame.consts.Operator(), new JOptionPane.ConfirmDialogCallback() {
+            @Override
+            public void onResult(boolean confirmed) {
+                if(BarFrame.instance.menuPanel.getPrinters()[0].getIp().startsWith("mev")) {
+                    String sql = "select * from USER where _id = " + employeeId;
+                    try {
+                        Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+                        //get out every field of first matching record.
+                        rs.moveToNext();
+                        String name = DBUtil.getCursorString(rs, "nickName");
+                        String taxAccount1 = DBUtil.getCursorString(rs, "noTPS");
+                        String taxAccount2 = DBUtil.getCursorString(rs, "noTVQ");
+                        if(taxAccount1.length() == 15 && taxAccount2.length() == 16) {
+                            MevUtils.deleteUser(name, taxAccount1, taxAccount2);
+                        }
+                    }catch(Exception exp) {
+                        L.e("Redeem Coupon", "exception happend when redeem coupon: " + sql, exp);
+                    }
+                }
+
+                String sql = "update USER set STATUS = " + DBConsts.DELETED + " where _id = " + employeeId;
+                AikaPos.db.execSQL(sql.toString());
+                refreshEmployeeList();  // 更新列表显示
+            }
+        });
     }
 
-    private void refreshEmployeeList() {
+    public void refreshEmployeeList() {
         // 清空列表数据
         employeeList.clear();
 
@@ -148,11 +151,12 @@ public class EmployeeListDlg extends DialogFragment {
                 HashMap<String, String> employee = new HashMap<>();
                 employee.put("ID",  DBUtil.getCursorString(rs, "_id"));
                 employee.put("NNAME", DBUtil.getCursorString(rs, "nickName"));
-                employee.put("SUBJECT", DBUtil.getCursorString(rs, "LANG"));
-                employee.put("CATEGORY", DBUtil.getCursorString(rs, "ROLE"));
-                employee.put("JOINTIME", DBUtil.getCursorString(rs, "createdTime"));
-                employee.put("SSCNUMBER", DBUtil.getCursorString(rs, "noTVQ"));
-                employee.put("BANKNUMBER", DBUtil.getCursorString(rs, "noTPS"));
+                employee.put("PWD", DBUtil.getCursorString(rs, "PWD"));
+                employee.put("LANG", DBUtil.getCursorString(rs, "LANG"));
+                employee.put("ROLE", DBUtil.getCursorString(rs, "ROLE"));
+                employee.put("createdTime", DBUtil.getCursorString(rs, "createdTime"));
+                employee.put("noTVQ", DBUtil.getCursorString(rs, "noTVQ"));
+                employee.put("noTPS", DBUtil.getCursorString(rs, "noTPS"));
                 employeeList.add(employee);
             }
             rs.close();

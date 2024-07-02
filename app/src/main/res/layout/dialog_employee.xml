@@ -3,41 +3,36 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Employee Details"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:paddingBottom="16dp" />
     <!-- ID -->
     <LinearLayout
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="start|center_vertical">
-
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Employee Details"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:paddingBottom="8dp" />
         <TextView
             android:id="@+id/tvIdLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID"
+            android:text="ID:"
             android:textSize="16sp"
             android:textColor="@android:color/white"
             android:paddingEnd="8dp" />
-
-        <EditText
-            android:id="@+id/edtId"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <TextView
+            android:id="@+id/tvIdValue"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:enabled="false"
-            android:inputType="none"
-            android:background="@android:color/darker_gray"
             android:padding="8dp"
             android:textColor="@android:color/white" />
     </LinearLayout>
@@ -45,10 +40,9 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="4dp"
         android:background="@android:color/darker_gray"
-        android:layout_marginStart="8dp" />
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
 
     <!-- Nick Name -->
     <LinearLayout
@@ -69,96 +63,166 @@
         <EditText
             android:id="@+id/edtName"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:padding="8dp"
-            android:textColor="@android:color/white" />
+            android:inputType="text"/>
+
+        <TextView
+            android:id="@+id/tvPwd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pass Code"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp" />
+
+        <EditText
+            android:id="@+id/edtPwd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Password (minimum 4 characters)"
+            android:inputType="textPassword"/>
+
     </LinearLayout>
 
-    <!-- Lang RadioBox -->
-    <RadioGroup
-        android:id="@+id/radioLangGroup"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="start|center_vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:gravity="start|center_vertical">
+        <!-- Lang RadioBox -->
+        <RadioGroup
+            android:id="@+id/radioLangGroup"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:checkedButton="@+id/radioEn"> <!-- 默认选中第二个RadioButton -->
+
+            <TextView
+                android:id="@+id/tvLangLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lang"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:paddingEnd="8dp" />
+
+            <RadioButton
+                android:id="@+id/radioFr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="français"
+                android:textColor="@android:color/white" />
+
+            <RadioButton
+                android:id="@+id/radioEn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="English"
+                android:textColor="@android:color/white" />
+
+            <RadioButton
+                android:id="@+id/radioZh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中文"
+                android:textColor="@android:color/white" />
+        </RadioGroup>
+
+        <!-- Role RadioBox -->
+        <RadioGroup
+            android:id="@+id/radioRoleGroup"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:checkedButton="@+id/radioEmployee">
+
+            <TextView
+                android:id="@+id/tvRoleLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Role"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:paddingEnd="8dp" />
+
+            <RadioButton
+                android:id="@+id/radioEmployee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Employee"
+                android:textColor="@android:color/white" />
+
+            <RadioButton
+                android:id="@+id/radioManager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manager"
+                android:textColor="@android:color/white" />
+
+            <RadioButton
+                android:id="@+id/radioAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Admin"
+                android:textColor="@android:color/white" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+    <!-- noTVQ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start|center_vertical">
 
         <TextView
-            android:id="@+id/tvLangLabel"
+            android:id="@+id/tvNoTVQLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lang"
+            android:text="TVQ"
             android:textSize="16sp"
             android:textColor="@android:color/white"
             android:paddingEnd="8dp" />
 
-        <RadioButton
-            android:id="@+id/radioFr"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/edtNoTVQ"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="français"
-            android:textColor="@android:color/white" />
-
-        <RadioButton
-            android:id="@+id/radioEn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="English"
-            android:textColor="@android:color/white" />
-
-        <RadioButton
-            android:id="@+id/radioZh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="中文"
-            android:textColor="@android:color/white" />
-
-    </RadioGroup>
-
-    <!-- Role RadioBox -->
-    <RadioGroup
-        android:id="@+id/radioRoleGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:inputType="text"/>
 
         <TextView
-            android:id="@+id/tvRoleLabel"
+            android:id="@+id/tvNoTPSLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Role"
+            android:text="TPS"
             android:textSize="16sp"
             android:textColor="@android:color/white"
+            android:paddingStart="16dp"
             android:paddingEnd="8dp" />
 
-        <RadioButton
-            android:id="@+id/radioEmployee"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/edtNoTPS"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Employee"
-            android:textColor="@android:color/white" />
-
-        <RadioButton
-            android:id="@+id/radioManager"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Manager"
-            android:textColor="@android:color/white" />
-
-        <RadioButton
-            android:id="@+id/radioAdmin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Admin"
-            android:textColor="@android:color/white" />
-
-    </RadioGroup>
-
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:inputType="text"/>
+    </LinearLayout>
     <!-- Join Time -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -177,90 +241,25 @@
 
         <EditText
             android:id="@+id/edtJoinTime"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:textColor="@android:color/white" />
-    </LinearLayout>
-
-    <!-- Separator Line -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="5dp"/>
-
-    <!-- noTVQ -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
-
-        <TextView
-            android:id="@+id/tvNoTVQLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="noTVQ"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:paddingEnd="8dp" />
-
-        <EditText
-            android:id="@+id/edtNoTVQ"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:textColor="@android:color/white" />
-    </LinearLayout>
-
-    <!-- noTPS -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
-
-        <TextView
-            android:id="@+id/tvNoTPSLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="noTPS"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:paddingEnd="8dp" />
-
-        <EditText
-            android:id="@+id/edtNoTPS"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:textColor="@android:color/white" />
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="start|center_vertical">
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+        android:gravity="center_horizontal">
+
         <Button
             android:id="@+id/btnSave"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="Save"
-            android:gravity="center_horizontal"
             android:layout_marginTop="16dp" />
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>
