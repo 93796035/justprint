@@ -50,18 +50,16 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="start|center_vertical">
-
         <TextView
-            android:id="@+id/tvNameLabel"
+            android:id="@+id/tvNNameLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nick Name"
             android:textSize="16sp"
             android:textColor="@android:color/white"
             android:paddingEnd="8dp" />
-
         <EditText
-            android:id="@+id/edtName"
+            android:id="@+id/edtNName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -77,15 +75,44 @@
             android:textColor="@android:color/white"
             android:paddingStart="16dp"
             android:paddingEnd="8dp" />
-
         <EditText
             android:id="@+id/edtPwd"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Password (minimum 4 characters)"
             android:inputType="textPassword"/>
 
+        <TextView
+            android:id="@+id/tvNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:paddingEnd="8dp" />
+        <EditText
+            android:id="@+id/edtName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:inputType="text"/>
+
+        <TextView
+            android:id="@+id/tvfamilyNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Family Name"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:paddingEnd="8dp" />
+        <EditText
+            android:id="@+id/edtFamilyName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -229,6 +256,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="start|center_vertical">
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Address"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:paddingEnd="8dp" />
+
+        <EditText
+            android:id="@+id/edtAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:inputType="text" />
 
         <TextView
             android:id="@+id/tvJoinTimeLabel"

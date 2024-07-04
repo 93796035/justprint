@@ -708,7 +708,7 @@ public class BarDlgConst1 implements BarDlgConst{
     @Override
     public String thisyear() { return "This Year";}
     @Override
-    public String ThisYearOrLastYear() { return "Generate the document for last year or this year?";}
+    public String ThisYearOrLastYear() { return "Do you want to generate the document for last year or this year? If you choose No, will generate report for this year!";}
     @Override
     public String WholeBillRefund() { return "Whole Bill Refund";}
     @Override

@@ -708,7 +708,7 @@ public class BarDlgConst3 implements BarDlgConst{
     @Override
     public String thisyear() { return "今年";}
     @Override
-    public String ThisYearOrLastYear() { return "请选择生成去年的报告还是今年的报告";}
+    public String ThisYearOrLastYear() { return "请选择是否生成去年的税务报告, 如果选择No，将生成今年的税务报告";}
     @Override
     public String WholeBillRefund() { return "整单退付";}
     @Override

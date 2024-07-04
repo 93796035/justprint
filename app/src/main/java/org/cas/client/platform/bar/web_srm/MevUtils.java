@@ -1142,4 +1142,12 @@ public class MevUtils {
 			return null;
 		}
 	}
+	public static class AskWebMevToRegisterUserTask extends AsyncTask<String, Void, Void> {
+		@Override
+		protected Void doInBackground(String... params) {
+			MevUtils.askWebMevToSignTheCertificates(params[0]); // 使用字符串参数
+			MevUtils.registerUser(params[0], params[1], params[2]);
+			return null;
+		}
+	}
 }

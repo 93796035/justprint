@@ -24,17 +24,18 @@ public class UserDao extends AbstractDao<User, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property FirstName = new Property(1, String.class, "firstName", false, "firstName");
-        public final static Property SecondName = new Property(2, String.class, "secondName", false, "secondName");
+        public final static Property Name = new Property(1, String.class, "name", false, "name");
+        public final static Property FamilyName = new Property(2, String.class, "familyName", false, "familyName");
         public final static Property NickName = new Property(3, String.class, "nickName", false, "nickName");
-        public final static Property Lang = new Property(4, Integer.class, "lang", false, "LANG");
-        public final static Property CreatedTime = new Property(5, String.class, "createdTime", false, "createdTime");
-        public final static Property Role = new Property(6, Integer.class, "role", false, "ROLE");
-        public final static Property NoTPS = new Property(7, String.class, "noTPS", false, "noTPS");
-        public final static Property NoTVQ = new Property(8, String.class, "noTVQ", false, "noTVQ");
-        public final static Property Pwd = new Property(9, String.class, "pwd", false, "PWD");
-        public final static Property Status = new Property(10, Integer.class, "status", false, "STATUS");
-        public final static Property Version = new Property(11, Integer.class, "version", false, "VERSION");
+        public final static Property Address = new Property(4, String.class, "address", false, "address");
+        public final static Property Lang = new Property(5, Integer.class, "lang", false, "LANG");
+        public final static Property JoinTime = new Property(6, String.class, "joinTime", false, "joinTime");
+        public final static Property Role = new Property(7, Integer.class, "role", false, "ROLE");
+        public final static Property NoTPS = new Property(8, String.class, "noTPS", false, "noTPS");
+        public final static Property NoTVQ = new Property(9, String.class, "noTVQ", false, "noTVQ");
+        public final static Property Pwd = new Property(10, String.class, "pwd", false, "PWD");
+        public final static Property Status = new Property(11, Integer.class, "status", false, "STATUS");
+        public final static Property Version = new Property(12, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -54,17 +55,18 @@ public class UserDao extends AbstractDao<User, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'USER' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
-                "'firstName' TEXT," + // 1: firstName
-                "'secondName' TEXT," + // 2: secondName
+                "'name' TEXT," + // 1: name
+                "'familyName' TEXT," + // 2: familyName
                 "'nickName' TEXT," + // 3: nickName
-                "'LANG' INTEGER," + // 4: lang
-                "'createdTime' TEXT," + // 5: createdTime
-                "'ROLE' INTEGER," + // 6: role
-                "'noTPS' TEXT," + // 7: noTPS
-                "'noTVQ' TEXT," + // 8: noTVQ
-                "'PWD' TEXT," + // 9: pwd
-                "'STATUS' INTEGER," + // 10: status
-                "'VERSION' INTEGER);"); // 11: version
+                "'address' TEXT," + // 4: address
+                "'LANG' INTEGER," + // 5: lang
+                "'joinTime' TEXT," + // 6: joinTime
+                "'ROLE' INTEGER," + // 7: role
+                "'noTPS' TEXT," + // 8: noTPS
+                "'noTVQ' TEXT," + // 9: noTVQ
+                "'PWD' TEXT," + // 10: pwd
+                "'STATUS' INTEGER," + // 11: status
+                "'VERSION' INTEGER);"); // 12: version
     }
 
     /** Drops the underlying database table. */
@@ -83,14 +85,14 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindLong(1, id);
         }
  
-        String firstName = entity.getFirstName();
-        if (firstName != null) {
-            stmt.bindString(2, firstName);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(2, name);
         }
  
-        String secondName = entity.getSecondName();
-        if (secondName != null) {
-            stmt.bindString(3, secondName);
+        String familyName = entity.getFamilyName();
+        if (familyName != null) {
+            stmt.bindString(3, familyName);
         }
  
         String nickName = entity.getNickName();
@@ -98,44 +100,49 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindString(4, nickName);
         }
  
-        Integer lang = entity.getLang();
-        if (lang != null) {
-            stmt.bindLong(5, lang);
+        String address = entity.getAddress();
+        if (address != null) {
+            stmt.bindString(5, address);
         }
  
-        String createdTime = entity.getCreatedTime();
-        if (createdTime != null) {
-            stmt.bindString(6, createdTime);
+        Integer lang = entity.getLang();
+        if (lang != null) {
+            stmt.bindLong(6, lang);
+        }
+ 
+        String joinTime = entity.getJoinTime();
+        if (joinTime != null) {
+            stmt.bindString(7, joinTime);
         }
  
         Integer role = entity.getRole();
         if (role != null) {
-            stmt.bindLong(7, role);
+            stmt.bindLong(8, role);
         }
  
         String noTPS = entity.getNoTPS();
         if (noTPS != null) {
-            stmt.bindString(8, noTPS);
+            stmt.bindString(9, noTPS);
         }
  
         String noTVQ = entity.getNoTVQ();
         if (noTVQ != null) {
-            stmt.bindString(9, noTVQ);
+            stmt.bindString(10, noTVQ);
         }
  
         String pwd = entity.getPwd();
         if (pwd != null) {
-            stmt.bindString(10, pwd);
+            stmt.bindString(11, pwd);
         }
  
         Integer status = entity.getStatus();
         if (status != null) {
-            stmt.bindLong(11, status);
+            stmt.bindLong(12, status);
         }
  
         Integer version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(12, version);
+            stmt.bindLong(13, version);
         }
     }
 
@@ -156,17 +163,18 @@ public class UserDao extends AbstractDao<User, Long> {
     public User readEntity(Cursor cursor, int offset) {
         User entity = new User( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // firstName
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // secondName
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // familyName
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // nickName
-            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // lang
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // createdTime
-            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // role
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // noTPS
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // noTVQ
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // pwd
-            cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // status
-            cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11) // version
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // address
+            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // lang
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // joinTime
+            cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // role
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // noTPS
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // noTVQ
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // pwd
+            cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11), // status
+            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12) // version
         );
         return entity;
     }
@@ -175,17 +183,18 @@ public class UserDao extends AbstractDao<User, Long> {
     @Override
     public void readEntity(Cursor cursor, User entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setFirstName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setSecondName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setFamilyName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setNickName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setLang(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setCreatedTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setRole(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
-        entity.setNoTPS(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setNoTVQ(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setPwd(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setStatus(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
-        entity.setVersion(cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11));
+        entity.setAddress(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setLang(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setJoinTime(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setRole(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
+        entity.setNoTPS(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setNoTVQ(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setPwd(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setStatus(cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11));
+        entity.setVersion(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
      }
     
     /** @inheritdoc */

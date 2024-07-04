@@ -15,11 +15,12 @@ import com.just.print.db.dao.UserDao;
 public class User {
 
     private Long id;
-    private String firstName;
-    private String secondName;
+    private String name;
+    private String familyName;
     private String nickName;
+    private String address;
     private Integer lang;
-    private String createdTime;
+    private String joinTime;
     private Integer role;
     private String noTPS;
     private String noTVQ;
@@ -44,13 +45,14 @@ public class User {
         this.id = id;
     }
 
-    public User(Long id, String firstName, String secondName, String nickName, Integer lang, String createdTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
+    public User(Long id, String name, String familyName, String nickName, String address, Integer lang, String joinTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
         this.id = id;
-        this.firstName = firstName;
-        this.secondName = secondName;
+        this.name = name;
+        this.familyName = familyName;
         this.nickName = nickName;
+        this.address = address;
         this.lang = lang;
-        this.createdTime = createdTime;
+        this.joinTime = joinTime;
         this.role = role;
         this.noTPS = noTPS;
         this.noTVQ = noTVQ;
@@ -73,20 +75,20 @@ public class User {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getFamilyName() {
+        return familyName;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
     }
 
     public String getNickName() {
@@ -97,6 +99,14 @@ public class User {
         this.nickName = nickName;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public Integer getLang() {
         return lang;
     }
@@ -105,12 +115,12 @@ public class User {
         this.lang = lang;
     }
 
-    public String getCreatedTime() {
-        return createdTime;
+    public String getJoinTime() {
+        return joinTime;
     }
 
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
+    public void setJoinTime(String joinTime) {
+        this.joinTime = joinTime;
     }
 
     public Integer getRole() {

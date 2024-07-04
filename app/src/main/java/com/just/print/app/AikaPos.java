@@ -94,10 +94,10 @@ public class AikaPos extends Application {
         UserDao userDao = session.getUserDao();
         List<User> users = new ArrayList<>();
         String currentTime = BarUtil.df.format(new Date());
-        users.add(new User(null, "user", "0", "Operator1", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", 0, 0));
-        users.add(new User(null, "user", "1", "Operator2", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", 0, 0));
-        users.add(new User(null, "user", "2", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", 0, 0));
-        users.add(new User(null, "user", "3", "Admin", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", 0, 0));
+        users.add(new User(null, "Michael", "Johndan", "ShuaiGe", "10754 l'hotel", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", 0, 0));
+        users.add(new User(null, "Tao", "Jiang", "Operator2","1214 cardinal", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", 0, 0));
+        users.add(new User(null, "Wei", "Hao", "hw", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", 0, 0));
+        users.add(new User(null, "Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", 0, 0));
         userDao.insertInTx(users);
     }
 

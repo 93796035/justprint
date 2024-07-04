@@ -45,11 +45,12 @@ public class MainGenerator {
         // +---------+-----------+------------+---------+
         Entity user = schema.addEntity("User");
         user.addIdProperty();
-        user.addStringProperty("firstName").columnName("firstName");
-        user.addStringProperty("secondName").columnName("secondName");
+        user.addStringProperty("name").columnName("name");
+        user.addStringProperty("familyName").columnName("familyName");
         user.addStringProperty("nickName").columnName("nickName");
+        user.addStringProperty("address").columnName("address");
         user.addIntProperty("lang");
-        user.addStringProperty("createdTime").columnName("createdTime");
+        user.addStringProperty("joinTime").columnName("joinTime");
         user.addIntProperty("role");// 1 is the biggest
         user.addStringProperty("noTPS").columnName("noTPS");
         user.addStringProperty("noTVQ").columnName("noTVQ");

@@ -20,13 +20,16 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.util.JOptionPane;
 
+import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.web_srm.MevUtils;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.casutil.L;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +65,7 @@ public class EmployeeListDlg extends DialogFragment {
         employeeList = new ArrayList<>();
 
         adapter = new SimpleAdapter(getContext(), employeeList, R.layout.employee_list_item,
-                new String[]{"ID","NNAME", "LANG", "ROLE", "createdTime"},
+                new String[]{"ID","nickName", "LANG", "ROLE", "joinTime"},
                 new int[]{R.id.txtId, R.id.txtNName, R.id.txtLang, R.id.txtRole, R.id.txtCreatedTime});
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -106,8 +109,37 @@ public class EmployeeListDlg extends DialogFragment {
         });
 
         btnPrintDoc.setOnClickListener(v -> {
-            // Handle print document logic
-            Toast.makeText(getContext(), "Print Document", Toast.LENGTH_SHORT).show();
+            Object[] options = {BarFrame.consts.lastyear(),  BarFrame.consts.thisyear()};
+            JOptionPane.showConfirmDialog(BarFrame.consts.ThisYearOrLastYear(), // message
+                    BarFrame.consts.Title(),  new JOptionPane.ConfirmDialogCallback() {
+                        @Override
+                        public void onResult(boolean confirmed) {
+                            LocalDate date = LocalDate.now();
+                            int year = date.getYear() - 1;
+                            int monthTo = 12;
+                            int dayTo = 31;
+                            if (!confirmed) {   //this year
+                                year++;
+                                monthTo = date.getMonthValue();
+                                dayTo = date.getDayOfMonth();
+                            }
+
+                            try {
+                                String sql = "select * from USER where _id = " + selectedItem.get("ID");
+                                Cursor rs = AikaPos.db.rawQuery(sql, null);
+                                if(rs.moveToNext()) {
+                                    String name = DBUtil.getCursorString(rs, "NName");
+                                    String address = DBUtil.getCursorString(rs, "ADDRESS");
+                                    ReportDlg.printDocument(Integer.valueOf(selectedItem.get("ID")),
+                                            name, address, year, monthTo, dayTo,
+                                            selectedItem.get("noTPS"), selectedItem.get("noTVQ"));
+                                }
+                            }catch(Exception exp) {
+                                L.e("ReportDlg ", "Exception when ertiving ANNIVERSARY. wit sql: select * from Employee where ID = " + selectedItem.get("ID"), exp);
+                            }
+                            new MevUtils.AskWebMevToSignTask().execute(ValuePossible.Modif.AJO); // 使用name()方法将枚举转换为String
+                        }
+                    });
         });
     }
 
@@ -150,11 +182,14 @@ public class EmployeeListDlg extends DialogFragment {
             while (rs.moveToNext()) {
                 HashMap<String, String> employee = new HashMap<>();
                 employee.put("ID",  DBUtil.getCursorString(rs, "_id"));
-                employee.put("NNAME", DBUtil.getCursorString(rs, "nickName"));
+                employee.put("name", DBUtil.getCursorString(rs, "name"));
+                employee.put("familyName", DBUtil.getCursorString(rs, "familyName"));
+                employee.put("nickName", DBUtil.getCursorString(rs, "nickName"));
+                employee.put("address", DBUtil.getCursorString(rs, "address"));
                 employee.put("PWD", DBUtil.getCursorString(rs, "PWD"));
                 employee.put("LANG", DBUtil.getCursorString(rs, "LANG"));
                 employee.put("ROLE", DBUtil.getCursorString(rs, "ROLE"));
-                employee.put("createdTime", DBUtil.getCursorString(rs, "createdTime"));
+                employee.put("joinTime", DBUtil.getCursorString(rs, "joinTime"));
                 employee.put("noTVQ", DBUtil.getCursorString(rs, "noTVQ"));
                 employee.put("noTPS", DBUtil.getCursorString(rs, "noTPS"));
                 employeeList.add(employee);
