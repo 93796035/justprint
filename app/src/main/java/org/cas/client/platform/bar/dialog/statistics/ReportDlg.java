@@ -28,8 +28,13 @@ import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.web_srm.DocumentRUT;
+import org.cas.client.platform.bar.web_srm.MevUtils;
+import org.cas.client.platform.bar.web_srm.utiles.KeyStoreUtils;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
+import org.json.JSONException;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -476,7 +481,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		}
 	}
 
-	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException {
+	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException, JSONException {
 		String recentLoginTime = null;
 		String sql = "select * from evaluation where userId = " + userId + " order by starttime desc";
 		try {
@@ -493,63 +498,64 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				BarUtil.df.format(Date.from(LocalDateTime.of(year, 1, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())),
 				BarUtil.df.format(Date.from(LocalDateTime.of(year, monthTo, dayTo, 23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())),
 				true);
-		List<String> strAryFR = new ArrayList<>();
+		ArrayList<String> strAryFR = new ArrayList<>();
 		int tWidth = BarUtil.getPreferedWidth();
-//		PrintService.pushSalesSummary(strAryFR, salesAndRefunds, tWidth);
-//		PrintService.pushPaymentAndWaiterSummaryForReport(strAryFR, salesAndRefunds, tWidth);
-//
-//		String line = strAryFR.get(0);
-//		int pNumber = line.indexOf("Number");
-//		int pTotalAvaTaxe = line.indexOf("Total avant taxes");
-//		int pGST = line.indexOf("GST");
-//		int pQst = line.indexOf("QST");
-//		int PSeparater = line.indexOf("====");
-//
-//		DocumentRUT docRUT = new DocumentRUT();
-//		docRUT.setRT(gst);
-//		docRUT.setTQ(qst);
-//		docRUT.setUT(name);
-//
-//		StringBuilder sql = new StringBuilder("SELECT * FROM CUSTOMIZATIONS WHERE KEY = '").append(userId).append("' ORDER BY value desc");
-//		try {
-//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-//			rs.moveToNext();
-//			docRUT.setDF(DBUtil.getCursorString(rs,"value"));
-//			docRUT.setNO(DBUtil.getCursorString(rs,"STATUS"));
-//			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
-//		} catch (SQLException e1) {
-//			L.e("BarOption", "Unexpected exception when getting next order id from db with:" + sql, e1);
-//		}
-//
-//		docRUT.setAN(String.valueOf(year));
-//		docRUT.setSN(line.substring(pNumber + "Number".length(), pTotalAvaTaxe).trim());
-//		docRUT.setSV(getPaymentTransactionNumber(strAryFR.get(1)));
-//		String beforeTax = line.substring(pTotalAvaTaxe + "Total avant taxes".length(), pGST).trim();
-//		docRUT.setSS(UtilesFormatterDonnees.formatterMontant(beforeTax));
-//		String gstTotal = line.substring(pGST + "GST".length(), pQst).trim();
-//		docRUT.setSF(UtilesFormatterDonnees.formatterMontant(gstTotal));
-//		String qstTotall = line.substring(pQst + "QST".length(), PSeparater).trim();
-//		docRUT.setSP(UtilesFormatterDonnees.formatterMontant(qstTotall));
-//		float toltal = Float.valueOf(beforeTax) + Float.valueOf(gstTotal) + Float.valueOf(qstTotall);
-//		docRUT.setST(UtilesFormatterDonnees.formatterMontant(toltal));
-//		float adjustedAmount = getRefoundTotal(line);
-//		docRUT.setSA(UtilesFormatterDonnees.formatterMontant(adjustedAmount));
-//		float afterTaxAmount = toltal + adjustedAmount;
-//		docRUT.setSD(UtilesFormatterDonnees.formatterMontant(afterTaxAmount));
-//
-//		docRUT.setIA(BarOption.getCertifiedDeviceId());
-//		docRUT.setIS(BarOption.getIdSignedToAikaPos());
-//		docRUT.setVR(BarOption.getCertifiedVersion());
-//
-//		docRUT.setDC(UtilesFormatterDonnees.GetDateHeureFormatté(BarUtil.df.parse(recentLoginTime)));
-//		String date = UtilesFormatterDonnees.GetDateHeureFormatté(new Date());
-//		docRUT.setDR(date);
-//		docRUT.setEM(KeyStoreUtils.GetCertificateThumbprint(BarOption.getCertificateSerialNumberSRS()));
-//		docRUT.setAD(address);
-//
-//		if (MevUtils.sendUserDocumentRequest(docRUT, userId, date, afterTaxAmount)) {
-//			BarFrame.setStatusMes(name + "'s document was send to Revenue Quebec successfully!");
-//		}
+		PrintService.pushSalesSummary(strAryFR, salesAndRefunds, tWidth);
+		PrintService.pushPaymentAndWaiterSummaryForReport(strAryFR, salesAndRefunds, tWidth);
+
+		String line = strAryFR.get(0);
+		int pNumber = line.indexOf("Number");
+		int pTotalAvaTaxe = line.indexOf("Total avant taxes");
+		int pGST = line.indexOf("GST");
+		int pQst = line.indexOf("QST");
+		int PSeparater = line.indexOf("====");
+
+		DocumentRUT docRUT = new DocumentRUT();
+		docRUT.setRT(gst);
+		docRUT.setTQ(qst);
+		docRUT.setUT(name);
+
+		sql = new StringBuilder("SELECT * FROM CUSTOMIZATIONS WHERE KEY = '").append(userId).append("' ORDER BY value desc").toString();
+		try {
+			Cursor rs = AikaPos.db.rawQuery(sql, null);
+			rs.moveToNext();
+			docRUT.setDF(DBUtil.getCursorString(rs,"value"));
+			docRUT.setNO(DBUtil.getCursorString(rs,"STATUS"));
+			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
+		} catch (Exception e1) {
+			L.e("BarOption", "Unexpected exception when getting next order id from db with:" + sql, e1);
+		}
+
+		docRUT.setAN(String.valueOf(year));
+		docRUT.setSN(line.substring(pNumber + "Number".length(), pTotalAvaTaxe).trim());
+		docRUT.setSV(getPaymentTransactionNumber(strAryFR.get(1)));
+		String beforeTax = line.substring(pTotalAvaTaxe + "Total avant taxes".length(), pGST).trim();
+		docRUT.setSS(UtilesFormatterDonnees.formatterMontant(beforeTax));
+		String gstTotal = line.substring(pGST + "GST".length(), pQst).trim();
+		docRUT.setSF(UtilesFormatterDonnees.formatterMontant(gstTotal));
+		String qstTotall = line.substring(pQst + "QST".length(), PSeparater).trim();
+		docRUT.setSP(UtilesFormatterDonnees.formatterMontant(qstTotall));
+		float toltal = Float.valueOf(beforeTax) + Float.valueOf(gstTotal) + Float.valueOf(qstTotall);
+		docRUT.setST(UtilesFormatterDonnees.formatterMontant(toltal));
+		float adjustedAmount = getRefoundTotal(line);
+		docRUT.setSA(UtilesFormatterDonnees.formatterMontant(adjustedAmount));
+		float afterTaxAmount = toltal + adjustedAmount;
+		docRUT.setSD(UtilesFormatterDonnees.formatterMontant(afterTaxAmount));
+
+		docRUT.setIA(BarOption.getCertifiedDeviceId());
+		docRUT.setIS(BarOption.getIdSignedToAikaPos());
+		docRUT.setVR(BarOption.getCertifiedVersion());
+
+		docRUT.setDC(UtilesFormatterDonnees.GetDateHeureFormatté(BarUtil.df.parse(recentLoginTime)));
+		String date = UtilesFormatterDonnees.GetDateHeureFormatté(new Date());
+		docRUT.setDR(date);
+		docRUT.setEM(KeyStoreUtils.GetCertificateThumbprint(BarOption.getCertificateSerialNumberSRS()));
+		docRUT.setAD(address);
+
+//		new MevUtils.AskWebMevToSendDocTask().execute(docRUT, userId, date, afterTaxAmount);
+		if (MevUtils.sendUserDocumentRequest(docRUT, userId, date, afterTaxAmount)) {
+			BarFrame.setStatusMes(name + "'s document was send to Revenue Quebec successfully!");
+		}
 	}
 
 	private static String getPaymentTransactionNumber(String summary) {

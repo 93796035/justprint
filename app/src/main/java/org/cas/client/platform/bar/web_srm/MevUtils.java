@@ -70,8 +70,6 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -80,6 +78,7 @@ import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.web_srm.utiles.KeyStoreUtils;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesJSON;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -972,15 +971,22 @@ public class MevUtils {
 			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
 					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente")
 					&& !webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-				//do nothing.
+				BarFrame.instance.runOnUiThread(() -> {
+					JOptionPane.showMessageDialog("User is registered on MEV-WEB successfully!");
+				});
 			} else {
 				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
-					JOptionPane.showMessageDialog(
-							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+					BarFrame.instance.runOnUiThread(() -> {
+						JOptionPane.showMessageDialog("Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+					});
 				} else if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-					JOptionPane.showMessageDialog("Problème de certificat pour vous authentifer auprès du MEV-WEB");
+					BarFrame.instance.runOnUiThread(() -> {
+						JOptionPane.showMessageDialog("Problème de certificat pour vous authentifer auprès du MEV-WEB");
+					});
 				} else {
-					JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+					BarFrame.instance.runOnUiThread(() -> {
+						JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+					});
 				}
 			}
         } else {
@@ -1019,17 +1025,23 @@ public class MevUtils {
 			if (!webSRMResponse.getResponseJsonWEBSRM().contains("Error")
 					&& !webSRMResponse.getResponseJsonWEBSRM().contains("délai d'attente") && !webSRMResponse
 							.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-				//do nothing.
+				BarFrame.instance.runOnUiThread(() -> {
+					JOptionPane.showMessageDialog("User is deleted successfully from MEV-WEB");
+				});
 			} else {
 				if (webSRMResponse.getResponseJsonWEBSRM().contains("Le délai d'attente de l'opération a expiré.")) {
-					JOptionPane.showMessageDialog(
-							"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+					BarFrame.instance.runOnUiThread(() -> {
+						JOptionPane.showMessageDialog("Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+					});
 				} else {
 					if (webSRMResponse.getResponseJsonWEBSRM().contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-						JOptionPane.showMessageDialog(
-								"Problème de certificat pour vous authentifer auprès du MEV-WEB");
+						BarFrame.instance.runOnUiThread(() -> {
+							JOptionPane.showMessageDialog("Problème de certificat pour vous authentifer auprès du MEV-WEB");
+						});
 					} else {
-						JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+						BarFrame.instance.runOnUiThread(() -> {
+							JOptionPane.showMessageDialog(webSRMResponse.getResponseJsonWEBSRM());
+						});
 					}
 				}
 			}
@@ -1041,54 +1053,58 @@ public class MevUtils {
             for (ErrorWEBSRM error : errors) {
             	errorMsg.append("error : " + error).append("\n");
             }
-			JOptionPane.showMessageDialog(errorMsg.toString());
+			BarFrame.instance.runOnUiThread(() -> {
+				JOptionPane.showMessageDialog(errorMsg.toString());
+			});
         }
     }
 
-//	//==================================== document reqeust ==============================================
-//	public static boolean sendUserDocumentRequest(DocumentRUT docRUT, int userId, String date, Float afterTextAmount) {//String name, String taxCode1, String taxCode2) {
-//
-//		// 数字签名
-//		byte[] signature = UtilesECDSA.getSignedText(docRUT.GetDocumentConcateneSignature());
-//		docRUT.setSI(Base64.getEncoder().encodeToString(signature));	//Mandatary's digital signature 88 characters
-//
-//		// 准备 JSON 文档
-//		String json = UtilesJSON.GetJsonDocument(ValuePossible.TypDoc.RUT, docRUT.getDocumentConcatenatedQRCode());
-//
-//		System.out.println(UtilesJSON.indentJson(json));
-//
-//		// 发送请求到 WEB-SRM
-//		WEBSRM_Response webSRMResponse = UtilesJSON.DocumentRequest(httpHeaders, json, BarOption.getCertificateSerialNumberSRS());
-//
-//		// Processing of error messages received from WEB-SRM, if any
-//		if (webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
-//			StringBuilder errorMsg = new StringBuilder();
-//			errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
-//			errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
-//			List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
-//			for (ErrorWEBSRM error : errors) {
-//				errorMsg.append("error : " + error).append("\n");
-//			}
-//			JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString());
-//			return false;
-//		} else {
-//			JSONObject jsonResponse = new JSONObject(webSRMResponse.getResponseJsonWEBSRM());
-//			String noDocValue = jsonResponse.getJSONObject("retourDoc").getString("noDoc");
-//			System.out.println(noDocValue);
-//			StringBuilder sql = new StringBuilder("INSERT INTO customizations (key, value, type, status) VALUES (");
-//			sql.append("'").append(userId).append("',")
-//			.append(" '").append(date).append("',")
-//			.append(Math.round(afterTextAmount * 100)).append(",")
-//			.append(noDocValue).append(")");
-//			try {
-//				PIMDBModel.getStatement().executeUpdate(sql.toString());
-//			} catch (SQLException e) {
-//				L.e("MevUtiles", "Unexpected exception when insert userDocument info into customization :" + sql, e);;
-//			}
-//			return true;
-//		}
-//	}
-//
+	//==================================== document reqeust ==============================================
+	public static boolean sendUserDocumentRequest(DocumentRUT docRUT, int userId, String date, Float afterTextAmount) throws JSONException {//String name, String taxCode1, String taxCode2) {
+
+		// 数字签名
+		byte[] signature = UtilesECDSA.getSignedText(docRUT.GetDocumentConcateneSignature());
+		docRUT.setSI(Base64.getEncoder().encodeToString(signature));	//Mandatary's digital signature 88 characters
+
+		// 准备 JSON 文档
+		String json = UtilesJSON.GetJsonDocument(ValuePossible.TypDoc.RUT, docRUT.getDocumentConcatenatedQRCode());
+
+		System.out.println(UtilesJSON.indentJson(json));
+
+		// 发送请求到 WEB-SRM
+		WEBSRM_Response webSRMResponse = UtilesJSON.DocumentRequest(httpHeaders, json, BarOption.getCertificateSerialNumberSRS());
+
+		// Processing of error messages received from WEB-SRM, if any
+		if (webSRMResponse.getResponseJsonWEBSRM().contains("listErr")) {
+			StringBuilder errorMsg = new StringBuilder();
+			errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
+			errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n"));
+			List<ErrorWEBSRM> errors = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
+			for (ErrorWEBSRM error : errors) {
+				errorMsg.append("error : " + error).append("\n");
+			}
+			BarFrame.instance.runOnUiThread(() -> {
+				JOptionPane.showMessageDialog(errorMsg.toString());
+			});
+			return false;
+		} else {
+			JSONObject jsonResponse = new JSONObject(webSRMResponse.getResponseJsonWEBSRM());
+			String noDocValue = jsonResponse.getJSONObject("retourDoc").getString("noDoc");
+			System.out.println(noDocValue);
+			StringBuilder sql = new StringBuilder("INSERT INTO customizations (key, value, type, status) VALUES (");
+			sql.append("'").append(userId).append("',")
+			.append(" '").append(date).append("',")
+			.append(Math.round(afterTextAmount * 100)).append(",")
+			.append(noDocValue).append(")");
+			try {
+				AikaPos.db.execSQL(sql.toString(), null);
+			} catch (Exception e) {
+				L.e("MevUtiles", "Unexpected exception when insert userDocument info into customization :" + sql, e);;
+			}
+			return true;
+		}
+	}
+
 	//==================================== certificate expiration check ==================================
 	//when app started, will call this to check if the certificate expired.
 	public static void checkCertificateDate() {
@@ -1145,9 +1161,22 @@ public class MevUtils {
 	public static class AskWebMevToRegisterUserTask extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			MevUtils.askWebMevToSignTheCertificates(params[0]); // 使用字符串参数
 			MevUtils.registerUser(params[0], params[1], params[2]);
 			return null;
 		}
 	}
+	public static class AskWebMevToDeleteUserTask extends AsyncTask<String, Void, Void> {
+		@Override
+		protected Void doInBackground(String... params) {
+			MevUtils.deleteUser(params[0], params[1], params[2]);
+			return null;
+		}
+	}
+//	public static class AskWebMevToSendDocTask extends AsyncTask<String, Void, Void> {
+//		@Override
+//		protected Void doInBackground(String... params) {
+//			MevUtils.sendUserDocumentRequest(params[0]); // 使用字符串参数
+//			return null;
+//		}
+//	}
 }

@@ -12,6 +12,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
@@ -139,7 +141,8 @@ public class LoginDlg extends DialogFragment {
             USERLANG = user.getLang();
             CustOpts.custOps.setUserLang(USERLANG);//next start up will use it as default interface language.
 
-//            ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
+            dismissAllDialogs(BarFrame.instance.getSupportFragmentManager());
+            ((BarFrame)getActivity()).switchFragment(TablesPanel.getInstance());
 
             //if it's not for temparal manager login(like discount bill), then need to re-init the interfaces
             if(!noRefresh) {
@@ -304,5 +307,14 @@ public class LoginDlg extends DialogFragment {
             instance = new LoginDlg();
         }
         return instance;
+    }
+
+    public void dismissAllDialogs(FragmentManager fragmentManager) {
+        List<Fragment> fragments = fragmentManager.getFragments();
+        for (Fragment fragment : fragments) {
+            if (fragment instanceof DialogFragment) {
+                ((DialogFragment) fragment).dismiss();
+            }
+        }
     }
 }

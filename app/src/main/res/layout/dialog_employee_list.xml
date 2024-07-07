@@ -89,6 +89,7 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="Delete"
+            android:enabled="false"
             android:layout_marginStart="8dp" />
 
         <Button
@@ -96,6 +97,7 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="Modify"
+            android:enabled="false"
             android:layout_marginStart="8dp" />
 
         <Button
@@ -103,6 +105,7 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="Print Doc"
+            android:enabled="false"
             android:layout_marginStart="8dp" />
 
         <View
