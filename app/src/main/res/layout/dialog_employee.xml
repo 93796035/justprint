@@ -183,28 +183,30 @@
                 android:textSize="16sp"
                 android:textColor="@android:color/white"
                 android:paddingEnd="8dp" />
-
+            <RadioButton
+                android:id="@+id/radioCustomer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Customer"
+                android:textColor="@android:color/white" />
             <RadioButton
                 android:id="@+id/radioEmployee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Employee"
                 android:textColor="@android:color/white" />
-
             <RadioButton
                 android:id="@+id/radioManager"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Manager"
                 android:textColor="@android:color/white" />
-
             <RadioButton
                 android:id="@+id/radioAdmin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Admin"
                 android:textColor="@android:color/white" />
-
         </RadioGroup>
     </LinearLayout>
 

@@ -518,10 +518,11 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		sql = new StringBuilder("SELECT * FROM CUSTOMIZATIONS WHERE KEY = '").append(userId).append("' ORDER BY value desc").toString();
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
-			rs.moveToNext();
-			docRUT.setDF(DBUtil.getCursorString(rs,"value"));
-			docRUT.setNO(DBUtil.getCursorString(rs,"STATUS"));
-			docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
+			if(rs.moveToNext()) {
+				docRUT.setDF(DBUtil.getCursorString(rs, "value"));
+				docRUT.setNO(DBUtil.getCursorString(rs, "STATUS"));
+				docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
+			}
 		} catch (Exception e1) {
 			L.e("BarOption", "Unexpected exception when getting next order id from db with:" + sql, e1);
 		}

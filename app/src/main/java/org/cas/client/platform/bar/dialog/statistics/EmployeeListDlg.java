@@ -18,6 +18,7 @@ import androidx.fragment.app.DialogFragment;
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
+import com.just.print.ui.adapter.CustomAdapter;
 import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
@@ -64,9 +65,15 @@ public class EmployeeListDlg extends DialogFragment {
     private void initList() {
         employeeList = new ArrayList<>();
 
-        adapter = new SimpleAdapter(getContext(), employeeList, R.layout.employee_list_item,
-                new String[]{"ID","nickName", "LANG", "ROLE", "joinTime"},
-                new int[]{R.id.txtId, R.id.txtNName, R.id.txtLang, R.id.txtRole, R.id.txtCreatedTime});
+        // 定义语言和角色的映射数组
+        String[] langArray = {"Fr", "En", "Zh"};
+        String[] roleArray = {"customer", "employee", "manager", "admin"};
+
+        // 使用自定义的适配器
+        adapter = new CustomAdapter(getContext(), employeeList, R.layout.employee_list_item,
+                new String[]{"ID", "nickName", "LANG", "ROLE", "joinTime"},
+                new int[]{R.id.txtId, R.id.txtNName, R.id.txtLang, R.id.txtRole, R.id.txtCreatedTime},
+                langArray, roleArray);
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 

@@ -100,7 +100,7 @@ public class CheckInOutListDlg extends DialogFragment implements View.OnClickLis
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
-				int id = DBUtil.getCursorInt(rs, "_id");
+				int id = DBUtil.getCursorInt(rs, "ID");
 				sql = "update evaluation set endTime = '" + BarUtil.df.format(new Date()) + "' where ID = " + id;
 				AikaPos.db.execSQL(sql);
 			} else {

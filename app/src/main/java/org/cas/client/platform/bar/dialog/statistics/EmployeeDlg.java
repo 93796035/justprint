@@ -214,14 +214,17 @@ public class EmployeeDlg extends DialogFragment {
     private int getSelectedRole() {
         int role = -1;
         switch (radioRoleGroup.getCheckedRadioButtonId()) {
-            case R.id.radioEmployee:
+            case R.id.radioCustomer:
                 role = 0;
                 break;
-            case R.id.radioManager:
+            case R.id.radioEmployee:
                 role = 1;
                 break;
-            case R.id.radioAdmin:
+            case R.id.radioManager:
                 role = 2;
+                break;
+            case R.id.radioAdmin:
+                role = 3;
                 break;
         }
         return role;
