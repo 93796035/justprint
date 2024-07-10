@@ -31,6 +31,7 @@ import org.cas.client.platform.bar.dialog.statistics.ReportDlg;
 import org.cas.client.platform.bar.i18n.BarDlgConst0;
 import org.cas.client.platform.bar.i18n.BarDlgConst1;
 import org.cas.client.platform.bar.i18n.BarDlgConst2;
+import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
@@ -270,7 +271,18 @@ public class LoginDlg extends DialogFragment {
     }
 
     private void initContent() {
-        users = DaoExpand.queryAllTables(AikaPos.daoSession.getUserDao());
+        String sql = "select * from user where STATUS < " + DBConsts.DELETED;
+        Cursor rs = AikaPos.db.rawQuery(sql, null);
+        while(rs.moveToNext()){
+            User user = new User();
+            user.setId(DBUtil.getCursorLong(rs,"_id"));
+            user.setPwd(DBUtil.getCursorString(rs,"PWD"));
+            user.setRole(DBUtil.getCursorInt(rs, "ROLE"));
+            user.setLang(DBUtil.getCursorInt(rs, "LANG"));
+            user.setNickName(DBUtil.getCursorString(rs, "nickName"));
+            users.add(user);
+        }
+//        users = DaoExpand.queryAllTables(AikaPos.daoSession.getUserDao());
     }
 
     public static int getUSERTYPE() {

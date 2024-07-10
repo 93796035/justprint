@@ -1060,17 +1060,7 @@ public class MevUtils {
     }
 
 	//==================================== document reqeust ==============================================
-	public static boolean sendUserDocumentRequest(DocumentRUT docRUT, int userId, String date, Float afterTextAmount) throws JSONException {//String name, String taxCode1, String taxCode2) {
-
-		// 数字签名
-		byte[] signature = UtilesECDSA.getSignedText(docRUT.GetDocumentConcateneSignature());
-		docRUT.setSI(Base64.getEncoder().encodeToString(signature));	//Mandatary's digital signature 88 characters
-
-		// 准备 JSON 文档
-		String json = UtilesJSON.GetJsonDocument(ValuePossible.TypDoc.RUT, docRUT.getDocumentConcatenatedQRCode());
-
-		System.out.println(UtilesJSON.indentJson(json));
-
+	public static boolean sendUserDocumentRequest(String json, String userId, String date, String afterTexAmountStr) throws JSONException {//String name, String taxCode1, String taxCode2) {
 		// 发送请求到 WEB-SRM
 		WEBSRM_Response webSRMResponse = UtilesJSON.DocumentRequest(httpHeaders, json, BarOption.getCertificateSerialNumberSRS());
 
@@ -1094,13 +1084,16 @@ public class MevUtils {
 			StringBuilder sql = new StringBuilder("INSERT INTO customizations (key, value, type, status) VALUES (");
 			sql.append("'").append(userId).append("',")
 			.append(" '").append(date).append("',")
-			.append(Math.round(afterTextAmount * 100)).append(",")
+			.append(afterTexAmountStr).append(",")
 			.append(noDocValue).append(")");
 			try {
-				AikaPos.db.execSQL(sql.toString(), null);
+				AikaPos.db.execSQL(sql.toString());
 			} catch (Exception e) {
 				L.e("MevUtiles", "Unexpected exception when insert userDocument info into customization :" + sql, e);;
 			}
+			BarFrame.instance.runOnUiThread(() -> {
+				JOptionPane.showMessageDialog("User document was send to Revenue Quebec successfully!");
+			});
 			return true;
 		}
 	}
@@ -1172,11 +1165,16 @@ public class MevUtils {
 			return null;
 		}
 	}
-//	public static class AskWebMevToSendDocTask extends AsyncTask<String, Void, Void> {
-//		@Override
-//		protected Void doInBackground(String... params) {
-//			MevUtils.sendUserDocumentRequest(params[0]); // 使用字符串参数
-//			return null;
-//		}
-//	}
+
+	public static class AskWebMevToSendDocTask extends AsyncTask<String, Void, Void> {
+		@Override
+		protected Void doInBackground(String... params) {
+			try {
+				MevUtils.sendUserDocumentRequest(params[1], params[2], params[3], params[4]);
+			} catch (JSONException e) {
+				L.e("MevUtils", "Exception when anylisis the json string" + params[1], e);
+			}
+			return null;
+		}
+	}
 }

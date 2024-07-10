@@ -98,7 +98,7 @@ public class Printer {
     }
 
     public Integer getLangType() {
-        return langType;
+        return langType == null ? 0 : langType;
     }
 
     public void setLangType(Integer langType) {

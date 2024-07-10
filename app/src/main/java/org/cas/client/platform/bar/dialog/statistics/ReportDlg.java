@@ -30,8 +30,11 @@ import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.bar.web_srm.DocumentRUT;
 import org.cas.client.platform.bar.web_srm.MevUtils;
+import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.bar.web_srm.utiles.KeyStoreUtils;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesJSON;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 import org.json.JSONException;
@@ -41,6 +44,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -483,11 +487,11 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException, JSONException {
 		String recentLoginTime = null;
-		String sql = "select * from evaluation where userId = " + userId + " order by starttime desc";
+		String sql = "select * from evaluation where userId = " + userId + " order by startTime desc";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
-				recentLoginTime = DBUtil.getCursorString(rs,"starttime");
+				recentLoginTime = DBUtil.getCursorString(rs,"startTime");
 			}
 			rs.close();
 		} catch (Exception e) {
@@ -553,10 +557,14 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		docRUT.setEM(KeyStoreUtils.GetCertificateThumbprint(BarOption.getCertificateSerialNumberSRS()));
 		docRUT.setAD(address);
 
-//		new MevUtils.AskWebMevToSendDocTask().execute(docRUT, userId, date, afterTaxAmount);
-		if (MevUtils.sendUserDocumentRequest(docRUT, userId, date, afterTaxAmount)) {
-			BarFrame.setStatusMes(name + "'s document was send to Revenue Quebec successfully!");
-		}
+		// 数字签名
+		byte[] signature = UtilesECDSA.getSignedText(docRUT.GetDocumentConcateneSignature());
+		docRUT.setSI(Base64.getEncoder().encodeToString(signature));	//Mandatary's digital signature 88 characters
+		// 准备 JSON 文档
+		String json = UtilesJSON.GetJsonDocument(ValuePossible.TypDoc.RUT, docRUT.getDocumentConcatenatedQRCode());
+		System.out.println(UtilesJSON.indentJson(json));
+
+		new MevUtils.AskWebMevToSendDocTask().execute(name, json, String.valueOf(userId), date, String.valueOf(Math.round(afterTaxAmount * 100)));
 	}
 
 	private static String getPaymentTransactionNumber(String summary) {
