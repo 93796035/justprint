@@ -13,6 +13,7 @@ import com.just.print.db.bean.Printer;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
+import com.just.print.util.StringUtils;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 
 //If the ip of a printer is "LPT1", then will actually user com interface to drive the printer.
 public class PrintService{
@@ -351,7 +353,7 @@ public class PrintService{
         //1、遍历每个选中的菜，并分别遍历加在其上的打印机。并在ipSelectionsMap上对应IP后面增加菜品
         for(Dish dish : selectdDishAry){
             String printerStr = dish.getPrinterIds();
-            if(printerStr == null) {
+            if(StringUtils.isBlank(printerStr)) {
             	continue;
             }
             String[] printerIdx = printerStr.split(",");
@@ -477,8 +479,13 @@ public class PrintService{
             	} else if("serial2".equalsIgnoreCase(printerName)) { 
             		fileNameKey = PrintUtil.doSerialPrint(sndMsg);
             	} else {//if it's not connected to the serial port.
-            		fileNameKey = PrintUtil.doWebSocketPrint(printerName, sndMsg);
-            	}
+					CompletableFuture<String> result = PrintUtil.doWebSocketPrint(printerName, sndMsg);
+					try {
+						fileNameKey = result.get();
+					} catch (Exception e) {
+						L.e("PrintService", " printContents", e);
+					}
+				}
         		
             	//add the fileNameKey link into comment, or add printer into errorlist.
         		//TODO: if it's a kitchen print not a bill print, shouldn't modify the bill't info other than status to saved?
@@ -505,10 +512,15 @@ public class PrintService{
 //        			}
              		
          			//or if didn't print well, add to error list, because USER never want to fix the printer...they always call boss.
-         			JOptionPane.showMessageDialog(entry.getKey() + BarFrame.consts.PrinterSettingError());
-         			PrintUtil.errorPrinterList.add(entry.getKey());
-         			BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);
-                    errorsAmount ++;
+					JOptionPane.showMessageDialog(entry.getKey() + BarFrame.consts.PrinterSettingError(), new JOptionPane.ConfirmDialogCallback() {
+						@Override
+						public void onResult(boolean confirmed) {
+						}
+					});
+
+					PrintUtil.errorPrinterList.add(entry.getKey());
+					BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);
+					errorsAmount ++;
              	}
         	}
         }

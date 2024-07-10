@@ -170,9 +170,9 @@ public class AikaPos extends Application {
         List<DiningTable> diningTables = new ArrayList<>();
         //public DiningTable(Long id, String name, String openTime, Integer dspIdx, Integer posX, Integer posY, Integer width, Integer height, Integer type, Integer status, Integer version) {
         diningTables.add(new DiningTable(null, "01", "", 1, 100, 50, 40, 40, 11, 0, 0));
-        diningTables.add(new DiningTable(null, "02", "", 2, 200, 50, 40, 40, 22, 0, 0));
-        diningTables.add(new DiningTable(null, "03", "", 3, 300, 50, 40, 40, 33, 0, 0));
-        diningTables.add(new DiningTable(null, "04", "", 4, 400, 50, 40, 40, 44, 0, 0));
+        diningTables.add(new DiningTable(null, "02", "", 2, 400, 50, 40, 40, 22, 0, 0));
+        diningTables.add(new DiningTable(null, "03", "", 3, 600, 50, 40, 40, 33, 0, 0));
+        diningTables.add(new DiningTable(null, "04", "", 4, 800, 50, 40, 40, 44, 0, 0));
         diningTableDao.insertInTx(diningTables);
     }
 

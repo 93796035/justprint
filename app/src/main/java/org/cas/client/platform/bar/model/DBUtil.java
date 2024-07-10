@@ -334,7 +334,7 @@ public class DBUtil {
 				.append("'").append(billIndex).append("',") // CONTACTID
 				.append(dish.getId()).append(",") // PRODUCTID
 				.append(dish.getNum()).append(",") // AMOUNT
-				.append(dish.getPrice() * splitRate).append(",") // TOLTALPRICE
+				.append(dish.getTotalPrice() * splitRate).append(",") // TOLTALPRICE
 				.append(dish.getDiscount() * splitRate).append(",") // DISCOUNT
 				.append("'").append(dish.getModification()).append("',") // CONTENT
 				.append(LoginDlg.USERID).append(",") // userId

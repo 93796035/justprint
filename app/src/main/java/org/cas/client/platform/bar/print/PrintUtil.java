@@ -43,6 +43,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PrintUtil {
 
@@ -54,6 +57,7 @@ public class PrintUtil {
 	public static final String OLD_QST = "*Old QST:";
 	public static final String OLD_TOTAL = "*Old Total:";
 
+	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 	public static List<String> errorPrinterList = new ArrayList<String>();
 	
 	static PrintManager defaultService;
@@ -657,60 +661,61 @@ public class PrintUtil {
 			}
 		}
 	}
-	
-	static String doWebSocketPrint(String ip, List<String> sndMsg){
-		if(ip == null || ip.length() == 0)
-			return null;
-		
+
+	static CompletableFuture<String> doWebSocketPrint(final String ip, final List<String> sndMsg) {
+		if (ip == null || ip.length() == 0)
+			return CompletableFuture.completedFuture(null);
+
 		String[] ipAry = ip.split("\\.");
-		if(ipAry.length != 4) {
+		if (ipAry.length != 4) {
 			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}
-		
-		Socket socket = null;
-		OutputStream outputStream = null;
-		try {
-			InetAddress inet = InetAddress.getByAddress(new byte[] {
-	        		Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(), 
-	        		Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});  
-	        if(!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
-	        	L.e("printer slow. ip is: ", ip, null);
-	        	return null;
-	        }
-	        
-			socket = new Socket(ip, 9100);
-			outputStream = socket.getOutputStream();
-			for (String msg : sndMsg) {
-	        	if(msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
-	        		continue;
-	        	}
-				sendContentOutThroughStream(msg, outputStream, ip);
-			}
-			outputStream.close();
-			socket.close();
-			return "OK";
-		} catch (Exception exp) {
-			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
-			ErrorUtil.write(exp);
-			L.e(ip, "Error when printing content to socket", exp);
-			return null;
-		} finally {
-			if(outputStream != null) {
-				try {
-					outputStream.close();
-				}catch(Exception exp) {
-					L.e(ip, "Error when trying to close outputStream", exp);
+
+		return CompletableFuture.supplyAsync(() -> {
+			Socket socket = null;
+			OutputStream outputStream = null;
+			try {
+				InetAddress inet = InetAddress.getByAddress(new byte[]{
+						Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
+						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
+				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
+					L.e("printer slow. ip is: ", ip, null);
+					return null;
+				}
+
+				socket = new Socket(ip, 9100);
+				outputStream = socket.getOutputStream();
+				for (String msg : sndMsg) {
+					if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
+						continue;
+					}
+					sendContentOutThroughStream(msg, outputStream, ip);
+				}
+				outputStream.close();
+				socket.close();
+				return "OK";
+			} catch (Exception exp) {
+				ErrorUtil.write(exp);
+				L.e(ip, "Error when printing content to socket", exp);
+				return null;
+			} finally {
+				if (outputStream != null) {
+					try {
+						outputStream.close();
+					} catch (Exception exp) {
+						L.e(ip, "Error when trying to close outputStream", exp);
+					}
+				}
+				if (socket != null) {
+					try {
+						socket.close();
+					} catch (Exception exp) {
+						L.e(ip, "Error when trying to close socket", exp);
+					}
 				}
 			}
-			if(socket != null) {
-				try {
-					socket.close();
-				}catch(Exception exp) {
-					L.e(ip, "Error when trying to close socket", exp);
-				}
-			}
-		}
+		}, executorService);
 	}
 	
     public static byte[] POS_S_SetQRcode(String strCodedata, int nWidthX, int nErrorCorrectionLevel) {
