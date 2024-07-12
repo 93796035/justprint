@@ -532,134 +532,82 @@ public class PrintUtil {
 //        return command.toByteArray();
 //    }
 //
-	public static String doWebSocketPrint(String ip, String mainContent, Bitmap image, String responseFromWebMev) {
-		if(ip == null || ip.length() == 0)
-			return null;
+	public static CompletableFuture<String> doWebSocketPrint(String ip, String mainContent, Bitmap image, String responseFromWebMev) {
+		if (ip == null || ip.length() == 0)
+			return CompletableFuture.completedFuture(null);
 
 		String[] ipAry = ip.split("\\.");
-		if(ipAry.length != 4) {
+		if (ipAry.length != 4) {
 			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}
 
-		Socket socket = null;
-		OutputStream outputStream = null;
-		try {
-			InetAddress inet = InetAddress.getByAddress(new byte[] {
-	        		Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
-	        		Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
-	        if(!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
-	        	L.e("printer slow. ip is: ", ip, null);
-	        	return null;
-	        }
+		return CompletableFuture.supplyAsync(() -> {
+			Socket socket = null;
+			OutputStream outputStream = null;
+			try {
+				InetAddress inet = InetAddress.getByAddress(new byte[]{
+						Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
+						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
+				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
+					L.e("printer slow. ip is: ", ip, null);
+					return null;
+				}
 
-			socket = new Socket(ip, 9100);
-			outputStream = socket.getOutputStream();
+				socket = new Socket(ip, 9100);
+				outputStream = socket.getOutputStream();
 
-			outputStream.write(getImageBytes(image));
+				outputStream.write(getImageBytes_chatGPT(image));
 
-//			byte[] command1 = { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x02, 0x00 };
-//			outputStream.write(command1);
-//			byte[] command2 = { 0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x02, 0x00 };
-//			outputStream.write(command2);
-//			byte[] command3 = { 0x1D, 0x28, 0x6B, (byte) (qrcodeImg.length() + 3), 0x00, 0x31, 0x50, 0x30 };
-//			outputStream.write(command3);
-//			byte[] data = qrcodeImg.getBytes("GBK");
-//			outputStream.write(data);
-//			if(true) {
-//
-//				// Initialize printer
-//				outputStream.write(new byte[]{0x1B, '@'});
-//
-//	            // QR code command for ESC/POS capable printers
-//	            String data = "https://example.com"; // The data to encode in the QR code
-//	            byte[] qrCodeCommand = generateQRCodeCommand(data);
-//	            outputStream.write(qrCodeCommand);
-//
-//	            // Cut paper
-//	            outputStream.write(new byte[]{0x1D, 'V', 1});
-//
-//	            outputStream.flush();
-//
-////				try {
-////		            // Send ESC/POS commands to print QRCode
-////		            sendQRCodeToPrinter(outputStream, qrcodeImg);
-////
-////		            outputStream.close();
-////		            socket.close();
-////		        } catch (Exception e) {
-////		            e.printStackTrace();
-////		        }
-//				byte[] b = {0x1d,0x6b,0x07,0x6e,0x61,0x72};
-//			    //This is the commands as I interpreted the to print out 12 and 34
-//
-//			    DocPrintJob job = PrintServiceLookup.lookupDefaultPrintService().createPrintJob();
-//
-//			    DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
-//			    /*This is how I send byte sequences.
-//			    if you got something better then don't hesitate yelling at me :D : ). */
-//
-//			    Doc doc = new SimpleDoc(b, flavor, null);
-//
-//			    job.print(doc, null);
-//			}
+				// Write main content
+				sendContentOutThroughStream(mainContent, outputStream, ip);
 
-			sendContentOutThroughStream(mainContent, outputStream, ip);
+				// Example of sending QR code commands to the printer
+				byte[] selectQRSize = new byte[]{0x1D, 'z', 0x02};  // Example size command
+				outputStream.write(selectQRSize);
 
-	        try  {
+				byte[] errorCorrection = new byte[]{0x1D, 'y', 0x02};  // Example error correction command
+				outputStream.write(errorCorrection);
 
-	            // 选择二维码模块大小
-	            byte[] selectQRSize = new byte[]{0x1D, 'z', 0x02};  // 假设n为2，具体值根据手册
-	            outputStream.write(selectQRSize);
+				String qrData = "https://www.example.com"; // Example QR code content
+				byte[] storeQRData = new byte[3 + qrData.length()];
+				storeQRData[0] = 0x1D;
+				storeQRData[1] = 'd';
+				storeQRData[2] = (byte) qrData.length();
+				System.arraycopy(qrData.getBytes(), 0, storeQRData, 3, qrData.length());
+				outputStream.write(storeQRData);
 
-	            // 选择错误纠正等级
-	            byte[] errorCorrection = new byte[]{0x1D, 'y', 0x02};  // 假设n为2，具体值根据手册
-	            outputStream.write(errorCorrection);
+				byte[] printQRCode = new byte[]{0x1D, 'm'};
+				outputStream.write(printQRCode);
 
-	            // 存储QRCode数据
-	            String qrData = "https://www.example.com"; // QRCode内容
-	            byte[] storeQRData = new byte[3 + qrData.length()];
-	            storeQRData[0] = 0x1D;
-	            storeQRData[1] = 'd';
-	            storeQRData[2] = (byte) qrData.length(); // 假设QRCode内容不超过255字节
-	            System.arraycopy(qrData.getBytes(), 0, storeQRData, 3, qrData.length());
-	            outputStream.write(storeQRData);
+				outputStream.flush();
 
-	            // 打印QRCode数据
-	            byte[] printQRCode = new byte[]{0x1D, 'm'};
-	            outputStream.write(printQRCode);
+				// Example of sending an image to the printer
+				sendQRCodeToPrinter(outputStream, image);
 
-	            outputStream.flush();
-
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-			sendQRCodeToPrinter(outputStream, image);
-
-//            outputStream.write(POS_S_SetQRcode(qrcodeImg, 6,4));
-			outputStream.close();
-			return "OK";
-		} catch (Exception exp) {
-			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
-			ErrorUtil.write(exp);
-			L.e(ip, "Error when printing content to socket", exp);
-			return null;
-		} finally {
-			if(outputStream != null) {
-				try {
-					outputStream.close();
-				}catch(Exception exp) {
-					L.e(ip, "Error when trying to close outputStream", exp);
+				outputStream.close();
+				return "OK";
+			} catch (Exception exp) {
+				ErrorUtil.write(exp);
+				L.e(ip, "Error when printing content to socket", exp);
+				return null;
+			} finally {
+				if (outputStream != null) {
+					try {
+						outputStream.close();
+					} catch (Exception exp) {
+						L.e(ip, "Error when trying to close outputStream", exp);
+					}
+				}
+				if (socket != null) {
+					try {
+						socket.close();
+					} catch (Exception exp) {
+						L.e(ip, "Error when trying to close socket", exp);
+					}
 				}
 			}
-			if(socket != null) {
-				try {
-					socket.close();
-				}catch(Exception exp) {
-					L.e(ip, "Error when trying to close socket", exp);
-				}
-			}
-		}
+		}, executorService);
 	}
 
 	static CompletableFuture<String> doWebSocketPrint(final String ip, final List<String> sndMsg) {
@@ -1107,17 +1055,22 @@ public class PrintUtil {
 		return "";
 	}
 
+	private static byte[] getImageBytes_chatGPT(Bitmap image) {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		return stream.toByteArray();
+	}
 	public static byte[] getImageBytes(Bitmap image) throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
 		// 初始化打印机
-		baos.write(Command.ESC_Init);
+		stream.write(Command.ESC_Init);
 
 		int width = image.getWidth();
 		int height = image.getHeight();
 
 		// 打印图像命令
-		baos.write(Command.GS_k_m_v_r_nL_nH);
+		stream.write(Command.GS_k_m_v_r_nL_nH);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x += 8) {
@@ -1134,11 +1087,11 @@ public class PrintUtil {
 						}
 					}
 				}
-				baos.write(colorByte);
+				stream.write(colorByte);
 			}
-			baos.write(0x0A); // 打印并走纸一行
+			stream.write(0x0A); // 打印并走纸一行
 		}
 
-		return baos.toByteArray();
+		return stream.toByteArray();
 	}
 }

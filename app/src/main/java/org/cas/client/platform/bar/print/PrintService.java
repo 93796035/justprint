@@ -617,11 +617,16 @@ public class PrintService{
     			if(p > 0) {
     				printerName = printerName.substring(0, p);
     			}
-    			strFR = PrintUtil.doWebSocketPrint(
+				CompletableFuture<String> result = PrintUtil.doWebSocketPrint(
 						printerName.trim(),
 						mainContent,
-    					responseStrs == null ? null : (Bitmap) responseStrs.get(0),
-    					responseStrs == null ? null : responseStrs.get(1).toString());
+						responseStrs == null ? null : (Bitmap) responseStrs.get(0),
+						responseStrs == null ? null : responseStrs.get(1).toString());
+				try {
+					strFR = result.get();
+				} catch (Exception e) {
+					L.e("PrintService", " doMevPrint", e);
+				}
     			//in case user want to always print duplicated temporal bill automatically
     			if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
     				PrintUtil.doWebSocketPrint(printerName.trim(), mainContent, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
