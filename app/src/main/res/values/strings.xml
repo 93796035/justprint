@@ -4,4 +4,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_activate">Activate</string>
+
+    <string-array name="style_array">
+        <item>Separate</item>
+        <item>All</item>
+    </string-array>
+    <string-array name="language_array">
+        <item>Fr</item>
+        <item>En</item>
+        <item>Zh</item>
+    </string-array>
 </resources>

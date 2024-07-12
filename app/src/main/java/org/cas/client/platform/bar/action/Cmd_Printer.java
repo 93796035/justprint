@@ -2,6 +2,9 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
+import com.just.print.app.BarFrame;
+
+import org.cas.client.platform.bar.dialog.SettingPrinterDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
 
 public class Cmd_Printer implements SamActionListener {
@@ -26,6 +29,6 @@ public class Cmd_Printer implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-//		new SettingPrinterDlg(BarFrame.instance).setVisible(true);
+		new SettingPrinterDlg().show(BarFrame.instance.getSupportFragmentManager(), "Setting Printer");
 	}
 }

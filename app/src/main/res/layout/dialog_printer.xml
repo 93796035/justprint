@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:minWidth="600dp"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="5"
+            android:rowCount="7"
+            android:padding="16dp">
+
+            <!-- Header Row -->
+            <TextView
+                android:layout_row="0"
+                android:layout_column="0"
+                android:text="Name"
+                android:textSize="24sp" />
+            <TextView
+                android:layout_row="0"
+                android:layout_column="1"
+                android:text="Location"
+                android:textSize="24sp" />
+            <TextView
+                android:layout_row="0"
+                android:layout_column="2"
+                android:text="Category"
+                android:textSize="24sp" />
+            <TextView
+                android:layout_row="0"
+                android:layout_column="3"
+                android:text="Lang"
+                android:textSize="24sp" />
+            <TextView
+                android:layout_row="0"
+                android:layout_column="4"
+                android:text="Width"
+                android:textSize="24sp" />
+
+            <!-- Dynamic Rows -->
+            <!-- Repeat the block below for 6 times, changing ids accordingly -->
+            <EditText
+                android:id="@+id/tfdName1"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:hint="P1"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP1"
+                android:layout_row="1"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle1"
+                android:layout_row="1"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage1"
+                android:layout_row="1"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth1"
+                android:layout_row="1"
+                android:layout_column="4"
+                android:hint="40"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+
+            <!-- Repeat above block for tfdName2 to tfdName6, tfdIP2 to tfdIP6, etc. -->
+
+            <EditText
+                android:id="@+id/tfdName2"
+                android:layout_row="2"
+                android:layout_column="0"
+                android:hint="P2"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP2"
+                android:layout_row="2"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle2"
+                android:layout_row="2"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage2"
+                android:layout_row="2"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth2"
+                android:layout_row="2"
+                android:layout_column="4"
+                android:hint="42"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+
+            <EditText
+                android:id="@+id/tfdName3"
+                android:layout_row="3"
+                android:layout_column="0"
+                android:hint="P2"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP3"
+                android:layout_row="3"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle3"
+                android:layout_row="3"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage3"
+                android:layout_row="3"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth3"
+                android:layout_row="3"
+                android:layout_column="4"
+                android:hint="42"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+
+            <EditText
+                android:id="@+id/tfdName4"
+                android:layout_row="4"
+                android:layout_column="0"
+                android:hint="P2"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP4"
+                android:layout_row="4"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle4"
+                android:layout_row="4"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage4"
+                android:layout_row="4"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth4"
+                android:layout_row="4"
+                android:layout_column="4"
+                android:hint="42"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+
+
+            <EditText
+                android:id="@+id/tfdName5"
+                android:layout_row="5"
+                android:layout_column="0"
+                android:hint="P2"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP5"
+                android:layout_row="5"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle5"
+                android:layout_row="5"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage5"
+                android:layout_row="5"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth5"
+                android:layout_row="5"
+                android:layout_column="4"
+                android:hint="42"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+
+            <EditText
+                android:id="@+id/tfdName6"
+                android:layout_row="6"
+                android:layout_column="0"
+                android:hint="P2"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdIP6"
+                android:layout_row="6"
+                android:layout_column="1"
+                android:hint="IP"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="200dp" />
+            <Spinner
+                android:id="@+id/cmbStyle6"
+                android:layout_row="6"
+                android:layout_column="2"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="100dp" />
+            <Spinner
+                android:id="@+id/cmbLanguage6"
+                android:layout_row="6"
+                android:layout_column="3"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+            <EditText
+                android:id="@+id/tfdWidth6"
+                android:layout_row="6"
+                android:layout_column="4"
+                android:hint="42"
+                android:textSize="24sp"
+                android:layout_height="40dp"
+                android:singleLine="true"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:layout_gravity="center_vertical"
+                android:minWidth="60dp" />
+        </GridLayout>
+
+        <!-- CheckBoxes -->
+        <CheckBox
+            android:id="@+id/cbxIsDisplayBillInKitchen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Display bill index in kitchen print"
+            android:textSize="24sp" />
+        <CheckBox
+            android:id="@+id/cbxIsDisplayWaiterInKitchen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Display waiter in kitchen print"
+            android:textSize="24sp" />
+        <CheckBox
+            android:id="@+id/cbxSavePrintInvoiceWhenBilled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Print no invoice when billed."
+            android:textSize="24sp" />
+        <CheckBox
+            android:id="@+id/cbxPrintDuplicatedBill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Print a copy when printing temporal bill"
+            android:textSize="24sp" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+            <Button
+                android:id="@+id/btnOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OK"
+                android:textSize="24sp" />
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
