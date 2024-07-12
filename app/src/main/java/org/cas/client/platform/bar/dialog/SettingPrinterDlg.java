@@ -93,7 +93,7 @@ public class SettingPrinterDlg extends DialogFragment {
             int tRowCount = rs.getCount();
             if (tRowCount > 0) {
                 int tIdx = 0;
-                while (rs.moveToNext()) {
+                while (rs.moveToNext() && tIdx < 6) {
                     ids[tIdx] = DBUtil.getCursorLong(rs,"_id");
                     tfdName[tIdx].setText(DBUtil.getCursorString(rs, "NAME"));
                     tfdIP[tIdx].setText(DBUtil.getCursorString(rs, "IP"));
@@ -107,14 +107,29 @@ public class SettingPrinterDlg extends DialogFragment {
             ErrorUtil.write(exp);
         }
 
-        cbxIsDisplayBillInKitchen.setSelected(BarOption.isDisplayBillInKitchen());
-        cbxIsDisplayWaiterInKitchen.setSelected(BarOption.isDisplayWaiterInKitchen());
-        cbxSavePrintInvoiceWhenBilled.setSelected(BarOption.isSavePrintInvoiceWhenBilled());
-        cbxPrintDuplicatedBill.setSelected(BarOption.isPrintDuplicatedBill());
+        cbxIsDisplayBillInKitchen.setChecked(BarOption.isDisplayBillInKitchen());
+        cbxIsDisplayWaiterInKitchen.setChecked(BarOption.isDisplayWaiterInKitchen());
+        cbxSavePrintInvoiceWhenBilled.setChecked(BarOption.isSavePrintInvoiceWhenBilled());
+        cbxPrintDuplicatedBill.setChecked(BarOption.isPrintDuplicatedBill());
     }
 
     private void saveSettings() {
-        // 在这里添加保存设置的逻辑
-        // 例如，保存到数据库或共享首选项
+        for (int i = 0; i < 6; i++) {
+            long id = ids[i];
+            String name = tfdName[i].getText().toString();
+            String ip = tfdIP[i].getText().toString();
+            int style = cmbStyle[i].getSelectedItemPosition();
+            int language = cmbLanguage[i].getSelectedItemPosition();
+            int width = Integer.parseInt(tfdWidth[i].getText().toString());
+
+            String sql = "UPDATE PRINTER SET NAME = ?, IP = ?, STYLE = ?, langType = ?, STATUS = ? WHERE _id = ?";
+            Object[] bindArgs = new Object[]{name, ip, style, language, width, id};
+            AikaPos.db.execSQL(sql, bindArgs);
+        }
+
+        BarOption.setIsDisplayBillInKitchen(cbxIsDisplayBillInKitchen.isChecked());
+        BarOption.setIsDisplayWaiterInKitchen(cbxIsDisplayWaiterInKitchen.isChecked());
+        BarOption.setSavePrintInvoiceWhenBilled(cbxSavePrintInvoiceWhenBilled.isChecked());
+        BarOption.setPrintDuplicatedBill(cbxPrintDuplicatedBill.isChecked());
     }
 }
