@@ -556,9 +556,9 @@ public class PrintUtil {
 
 				socket = new Socket(ip, 9100);
 				outputStream = socket.getOutputStream();
-
-				outputStream.write(getImageBytes_chatGPT(image));
-
+				if(image != null) {
+					outputStream.write(getImageBytes_chatGPT(image));
+				}
 				// Write main content
 				sendContentOutThroughStream(mainContent, outputStream, ip);
 

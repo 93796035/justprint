@@ -512,11 +512,7 @@ public class PrintService{
 //        			}
              		
          			//or if didn't print well, add to error list, because USER never want to fix the printer...they always call boss.
-					JOptionPane.showMessageDialog(entry.getKey() + BarFrame.consts.PrinterSettingError(), new JOptionPane.ConfirmDialogCallback() {
-						@Override
-						public void onResult(boolean confirmed) {
-						}
-					});
+					JOptionPane.showMessageDialog(entry.getKey() + BarFrame.consts.PrinterSettingError());
 
 					PrintUtil.errorPrinterList.add(entry.getKey());
 					BarFrame.instance.btnRetryPrinter.setVisibility(View.VISIBLE);

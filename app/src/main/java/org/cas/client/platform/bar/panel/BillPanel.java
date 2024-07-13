@@ -946,7 +946,7 @@ public class BillPanel extends BaseFragment
 			break;
 
 		default:
-			break;
+			findViewById(R.id.tableListView).setBackgroundColor(Color.TRANSPARENT);
 		}
 
 		if(salesPanel != null && customerFrame == null && billButton == null) {
