@@ -153,12 +153,12 @@ public class BillPanel extends BaseFragment
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            String opentime = DBUtil.getCursorString(rs, "opentime");
+            String opentime = DBUtil.getCursorString(rs, "openTime");
         	int cashReceived = DBUtil.getCursorInt(rs, "cashReceived");
         	int debitReceived = DBUtil.getCursorInt(rs, "debitReceived");
             int visaReceived = DBUtil.getCursorInt(rs, "visaReceived");
             int masterReceived = DBUtil.getCursorInt(rs, "masterReceived");
-            String otherreceived = DBUtil.getCursorString(rs, "otherreceived");
+            String otherreceived = DBUtil.getCursorString(rs, "otherReceived");
             if(otherreceived == null) {
             	otherreceived = "";
             }

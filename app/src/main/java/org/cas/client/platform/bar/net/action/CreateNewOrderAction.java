@@ -70,7 +70,7 @@ public class CreateNewOrderAction implements SamActionListener {
 			String[] disheStrs = orderContent.split("DishStart:");
 			
 			//start to generate the order.===============================
-			String openTime = rjson.has("opentime") ? rjson.getString("opentime") : "";
+			String openTime = rjson.has("openTime") ? rjson.getString("openTime") : "";
 	        if(openTime != null && openTime.trim().length() > 0) {
 	        	openTime = BarUtil.df.format(new Date());
 	        }

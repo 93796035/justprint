@@ -81,7 +81,7 @@ public class DBUtil {
 		try {
 			if (cursor != null && cursor.moveToFirst()) {
 				tableName = getCursorString(cursor, "tableName");
-				openTime = getCursorString(cursor, "opentime");
+				openTime = getCursorString(cursor, "openTime");
 				clientIdx = getCursorInt(cursor, "billIndex");
 				strCreatedTime = getCursorString(cursor, "createdTime");
 
