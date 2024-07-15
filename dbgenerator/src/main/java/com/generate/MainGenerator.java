@@ -217,16 +217,16 @@ public class MainGenerator {
         customizedRule.addStringProperty("ext2");
         customizedRule.addStringProperty("ext3");
 
-        // +---------+--------WebsrmBatch---+------------+---------+
-        // WebsrmBatch
-        // +---------+-----------+------------+---------+
-        Entity websrmBatch = schema.addEntity("WebsrmBatch");
-        websrmBatch.addIdProperty();
-        websrmBatch.addStringProperty("jsonToSend").columnName("jsonToSend");
-        websrmBatch.addStringProperty("signatransm");
-        websrmBatch.addStringProperty("emprCertifSev").columnName("emprCertifSev");
-        websrmBatch.addStringProperty("strUrlQRCode").columnName("strUrlQRCode");
-        websrmBatch.addIntProperty("userId").columnName("userId");
+//        // +---------+--------WebsrmBatch---+------------+---------+
+//        // WebsrmBatch
+//        // +---------+-----------+------------+---------+
+//        Entity websrmBatch = schema.addEntity("WebsrmBatch");
+//        websrmBatch.addIdProperty();
+//        websrmBatch.addStringProperty("jsonToSend").columnName("jsonToSend");
+//        websrmBatch.addStringProperty("signatransm");
+//        websrmBatch.addStringProperty("emprCertifSev").columnName("emprCertifSev");
+//        websrmBatch.addStringProperty("strUrlQRCode").columnName("strUrlQRCode");
+//        websrmBatch.addIntProperty("userId").columnName("userId");
 
         // +---------+-----------+------------+---------+
         // Device

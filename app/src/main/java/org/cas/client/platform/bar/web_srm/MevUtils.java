@@ -49,18 +49,12 @@ package org.cas.client.platform.bar.web_srm;
 
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.view.View;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDlg;
 import com.just.print.util.JOptionPane;
-
-import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.print.PrintService;
-import org.cas.client.platform.bar.print.PrintUtil;
-import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
-import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
-import org.cas.client.platform.casutil.L;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -75,9 +69,16 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.print.PrintService;
+import org.cas.client.platform.bar.print.PrintUtil;
 import org.cas.client.platform.bar.web_srm.utiles.KeyStoreUtils;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
+import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesJSON;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.L;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -102,7 +103,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class MevUtils {
 
@@ -682,7 +689,7 @@ public class MevUtils {
 		String completeJSONStr = TRANS_ACTU
 				+ transActu.GetJson()
 				+ "}}}";
-		return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",}", "}");
+		return completeJSONStr.replaceFirst("\"", "\\\"").replaceAll(",\\}", "}");
 	}
 
 	//Send the json document containing the transactions to the WEB-SRM
@@ -694,245 +701,248 @@ public class MevUtils {
 		flushBatchWithCurTransaction(null, null, null, null, null);
 	}
 	public static String flushBatchWithCurTransaction( String newJsonTransaction, String signatransm, String emprCertifSEV, String strUrlQRCode,  String noTrans){
-//		//load all batch records into memory.
-//    	List<String[]> values = new ArrayList<>();
-//    	StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH");
-//    	try {
-//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-//			while (rs.moveToNext()) {
-//				String[] record = new String[6];
-//				record[0] = DBUtil.getCursorString(rs,"_id");
-//				record[1] = DBUtil.getCursorString(rs,"JSONTOSEND");
-//				record[2] = DBUtil.getCursorString(rs,"SIGNATRANSM");
-//				record[3] = DBUtil.getCursorString(rs,"EMPRCERTIFSEV");
-//				record[4] = DBUtil.getCursorString(rs,"STRURLQRCODE");
-//				record[5] = DBUtil.getCursorString(rs,"userId");
-//				values.add(record);
-//			}
-//		}catch(Exception exp) {
-//			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
-//		}
-//
+		//load all batch records into memory.
+    	List<String[]> values = new ArrayList<>();
+    	StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH");
+    	try {
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+			while (rs.moveToNext()) {
+				String[] record = new String[6];
+				record[0] = DBUtil.getCursorString(rs,"_id");
+				record[1] = DBUtil.getCursorString(rs,"jsonToSend");
+				record[2] = DBUtil.getCursorString(rs,"signatransm");
+				record[3] = DBUtil.getCursorString(rs,"emprCertifSEV");
+				record[4] = DBUtil.getCursorString(rs,"strUrlQRCode");
+				record[5] = DBUtil.getCursorString(rs,"userId");
+				values.add(record);
+			}
+		}catch(Exception exp) {
+			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
+		}
+
 		String strFR = null;
-//		//modify the jsonToSend string with the records in batch, and send to web-mev.
-//    	//the values.size
-//    	for (int i = -1; i < values.size(); i++) {	//initialized to -1, even values is empty will still go in once.
-//    		if(signatransm != null) {		//has new bill, not triggered by flush button or logout button, note sholdn't trigger when login, because the test case need to show the button there.
-//    			httpHeaders.put("SIGNATRANSM", signatransm);
-//    			httpHeaders.put("EMPRCERTIFTRANSM", emprCertifSEV);
-//    		}else if(i >= 0){        		//in this case need to replace two property in header
-//        		httpHeaders.put("SIGNATRANSM", values.get(i)[2]);
-//        		httpHeaders.put("EMPRCERTIFTRANSM", values.get(i)[3]);
-//    		}
-//
-//    		final String jsonToSend;
-//    		if(i == -1 && values.size() > 0) {//first round, while batch is not empty.
-//        		continue;					//batch is not empty, so don't send in this loop round, just go to next round to
-//        	}else if(i == -1) {
-//        		// check if given parameter is null, null means is calling when app exit or click the flush button.
-//        		if(newJsonTransaction == null) {//there's no record in batch, and the param is null, means no need to do batch flush.
-//        			BarOption.setWebMevOfflineMode(false);
-//		        	BarFrame.instance.btnFlushMevBatch.setVisible(false);
-//        			return null;
-//        		}
-//        		//if not returned, means no record in the batch, and parameter json is not null, so let's do not modify the jsonToSend;
-//        		//let continue excuting to the code down there, and do only one time request.(no loop)
-//        		jsonToSend = newJsonTransaction;
-//        	}else if(i == 0 && newJsonTransaction != null) {	//the first request will be new record + the oldest batch
-//        		jsonToSend = addElementFromBatchIntoJson(newJsonTransaction, values.get(0)[1]);
-//        	}else {				//the first request will contains only the oldest batch.
-//        		jsonToSend = buildOneElementBatchPartJson(values.get(i)[1]);
-//        	}
-//
-//
-//	        // Send the request to the WEB-SRM
-//			ExecutorService executor = Executors.newSingleThreadExecutor();
-//		    Future<WEBSRM_Response> future = executor.submit(new Callable<WEBSRM_Response>() {
-//		        @Override
-//		        public WEBSRM_Response call() {
-//		            return UtilesJSON.TransactionRequest(httpHeaders, jsonToSend, BarOption.getCertificateSerialNumberSRS());
-//		        }
-//		    });
-//
-//		    try {
-//		    	// add time limitation.
-//		    	WEBSRM_Response webSRMResponse = future.get(BarOption.getWebMevWaitTime(), TimeUnit.SECONDS); // Try to get the response within maximum waiting seconds
-//
-//		        if(webSRMResponse.getStatusCode() >= 200 && webSRMResponse.getStatusCode() < 300) {
-//		        	if(BarOption.isWebMevOfflineMode()) {
-//			        	BarOption.setWebMevOfflineMode(false);
-//			        	BarFrame.instance.btnFlushMevBatch.setVisible(false);
-//			        	BarFrame.setStatusMes("Web srm back to normal! system exit from offline mode!");
-//		        		L.i("MevUtiles", "Web srm back to normal! system exit from offline mode================================");
-//		        	}
-//		        	if(i > -1) {
-//		        		cleanFromDB(values.get(i)[0]);	//I choosed the shorter one as the key.
-//		        	}
-//		        }else {
-//		        	if(!BarOption.isWebMevOfflineMode()) {
-//			        	BarOption.setWebMevOfflineMode(true);
-//			        	BarFrame.instance.btnFlushMevBatch.setVisible(true);
-//			        	BarFrame.setStatusMes("Having problem communicating with Web srm, system has turned into offline mode!");
-//		        		L.i("MevUtiles", "Having problem communicating with Web srm, system entering the offline mode------------------------");
-//		        	}
-//		        	if(i <= 0) {	//if not success(save 5 string to DB)
-//		        		addToBatch(jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, noTrans);
-//		        	}
-//		        }
-//
-//		        if(webSRMResponse.ResponseJsonWEBSRM == null) {
-//		        	L.e("MevUtiles", "webSRMResponse.ResponseJsonWEBSRM is null", null);
-//		        	return null;
-//		        }
-//
-//		        // Processing of error messages received from WEB-SRM, if any
-//				if (webSRMResponse.ResponseJsonWEBSRM.contains("listErr")) {
-//					StringBuilder errorMsg = new StringBuilder();
-//					errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
-//					errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n")).append("\n");
-//					List<ErrorWEBSRM> lstErr = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
-//					if (lstErr.size() > 0) {
-//						for (ErrorWEBSRM er : lstErr) {
-//							errorMsg.append("Id : " + er.Id).append(" ");
-//							errorMsg.append("Message : " + er.Mess).append("\n");
-//							errorMsg.append("Code de retour : " + er.CodRetour).append(" ");
-//							errorMsg.append("Numéro de transaction : " + er.NoTrans).append("\n");
-//
-//							if (er.CodRetour.endsWith("0") || er.CodRetour.endsWith("1") || er.CodRetour.endsWith("5"))
-//								errorMsg.append("La transaction numéro " + er.NoTrans
-//										+ " n'a pas été transmise. Par conséquent, votre SEV devra la retransmettre dans un lot lors de la prochaine requête de type Transaction.").append("\n");
-//							errorMsg.append("--------------------------");
-//						}
-//					}
-//
-//					L.e("webMev Error!!!",errorMsg.toString(), null);
-//					JOptionPane.showMessageDialog(BarFrame.instance, errorMsg.toString(), "Web-srm Response Error:", JOptionPane.ERROR_MESSAGE);
-//				} else {
-//					if (i <= 0 && newJsonTransaction != null  //the meaningful response is the one for the new transaction. for batch records, just send request, will not print again.
-//							&& !webSRMResponse.ResponseJsonWEBSRM.contains("Error")
-//							&& !webSRMResponse.ResponseJsonWEBSRM.contains("délai d'attente")
-//							&& !webSRMResponse.ResponseJsonWEBSRM
-//									.contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
-//						// Get the informations received from the WEB-SRM
-//						ResponseTransaction reponseTransaction = UtilesJSON
-//								.ParseResponseTransaction(webSRMResponse.ResponseJsonWEBSRM);
-//
-//						// Information received from the WEB-SRM
-//						L.i("MevUtiles", webSRMResponse.ResponseJsonWEBSRM);
-//						L.i("MevUtiles", "ProchainCasEssai : " + reponseTransaction.ProchainCasEssai);
-//						L.i("MevUtiles", "NoTrans : " + reponseTransaction.NoTrans);
-//						L.i("MevUtiles", "PsiNoTrans : " + reponseTransaction.PsiNoTrans);
-//						L.i("MevUtiles", "PsiDatTrans : " + reponseTransaction.PsiDatTrans);
-//						L.i("MevUtiles", "noLot : " + reponseTransaction.noLot);
-//						L.i("MevUtiles", "datLot : " + reponseTransaction.datLot);
-//						String date = reponseTransaction.PsiDatTrans;
-//						if(date.length() < 14) {
-//							date = BarUtil.sdf.format(new Date());
-//						}
-//						StringBuilder sb = new StringBuilder("       ").append(date.substring(0,4)).append("-")
-//								.append(date.substring(4,6)).append("-")
-//								.append(date.substring(6,8)).append(" ")
-//								.append(date.subSequence(8, 10)).append(":")
-//								.append(date.substring(10, 12)).append(":")
-//								.append(date.substring(12)).append("\n")
-//								.append("       ")
-//								.append(reponseTransaction.PsiNoTrans).append("\n")
-//								.append("          ")
-//								.append(BarOption.getCertifiedDeviceId()).append("\n")
-//								.append(BarUtil.getSeperatorLine(1));
-//						strFR = sb.toString();
-//					} else {
-//						if (webSRMResponse.ResponseJsonWEBSRM.contains("Le délai d'attente de l'opération a expiré."))
-//							System.out.println(
-//									"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
-//						else {
-//
-//							if (webSRMResponse.ResponseJsonWEBSRM.contains("Impossible de créer un canal sécurisé SSL/TLS."))
-//								System.out.println("Problème de certificat pour vous authentifer auprès du MEV-WEB");
-//							else
-//								System.out.println(UtilesJSON.indentJson(webSRMResponse.ResponseJsonWEBSRM));
-//						}
-//						//TODO: what shall we return for this case?
-//					}
-//				}
-//		    } catch (TimeoutException e) {
-//		        future.cancel(true); // Interrupt the transaction request if necessary
-//		        L.e("MevUtiles", "TransactionRequest took longer than expected maximum seconds!", e);
-//	        	BarOption.setWebMevOfflineMode(true);
-//
-//	        	if(i <= 0) {
-//	        		addToBatch(newJsonTransaction, signatransm, emprCertifSEV, strUrlQRCode, noTrans);//add latest record.
-//	        	}
-//	        	break;
-//		    } catch (InterruptedException | ExecutionException e) {
-//		        // Handle other exceptions if necessary
-//		        L.e("MevUtiles", "unexpected exception happend:", e);
-//		    } finally {
-//		        executor.shutdownNow(); // Shutdown the executor
-//		    }
-//    	}
+		//modify the jsonToSend string with the records in batch, and send to web-mev.
+    	//the values.size
+    	for (int i = -1; i < values.size(); i++) {	//initialized to -1, even values is empty will still go in once.
+    		if(signatransm != null) {		//has new bill, not triggered by flush button or logout button, note sholdn't trigger when login, because the test case need to show the button there.
+    			httpHeaders.put("SIGNATRANSM", signatransm);
+    			httpHeaders.put("EMPRCERTIFTRANSM", emprCertifSEV);
+    		}else if(i >= 0){        		//in this case need to replace two property in header
+        		httpHeaders.put("SIGNATRANSM", values.get(i)[2]);
+        		httpHeaders.put("EMPRCERTIFTRANSM", values.get(i)[3]);
+    		}
+
+    		final String jsonToSend;
+    		if(i == -1 && values.size() > 0) {//first round, while batch is not empty.
+        		continue;					//batch is not empty, so don't send in this loop round, just go to next round to
+        	}else if(i == -1) {
+        		// check if given parameter is null, null means is calling when app exit or click the flush button.
+        		if(newJsonTransaction == null) {//there's no record in batch, and the param is null, means no need to do batch flush.
+        			BarOption.setWebMevOfflineMode(false);
+		        	BarFrame.instance.btnFlushMevBatch.setVisibility(View.INVISIBLE);;
+        			return null;
+        		}
+        		//if not returned, means no record in the batch, and parameter json is not null, so let's do not modify the jsonToSend;
+        		//let continue excuting to the code down there, and do only one time request.(no loop)
+        		jsonToSend = newJsonTransaction;
+        	}else if(i == 0 && newJsonTransaction != null) {	//the first request will be new record + the oldest batch
+        		jsonToSend = addElementFromBatchIntoJson(newJsonTransaction, values.get(0)[1]);
+        	}else {				//the first request will contains only the oldest batch.
+        		jsonToSend = buildOneElementBatchPartJson(values.get(i)[1]);
+        	}
+
+
+	        // Send the request to the WEB-SRM
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+		    Future<WEBSRM_Response> future = executor.submit(new Callable<WEBSRM_Response>() {
+		        @Override
+		        public WEBSRM_Response call() {
+		            return UtilesJSON.TransactionRequest(httpHeaders, jsonToSend, BarOption.getCertificateSerialNumberSRS());
+		        }
+		    });
+
+		    try {
+		    	// add time limitation.
+//				WEBSRM_Response webSRMResponse = future.get(BarOption.getWebMevWaitTime(), TimeUnit.SECONDS); // Try to get the response within maximum waiting seconds
+				WEBSRM_Response webSRMResponse = future.get(BarOption.getWebMevWaitTime(), TimeUnit.SECONDS); // Try to get the response within maximum waiting seconds
+
+				if(webSRMResponse.getStatusCode() >= 200 && webSRMResponse.getStatusCode() < 300) {
+		        	if(BarOption.isWebMevOfflineMode()) {
+			        	BarOption.setWebMevOfflineMode(false);
+			        	BarFrame.instance.btnFlushMevBatch.setVisibility(View.INVISIBLE);
+			        	BarFrame.setStatusMes("Web srm back to normal! system exit from offline mode!");
+		        		L.i("MevUtiles", "Web srm back to normal! system exit from offline mode================================");
+		        	}
+		        	if(i > -1) {
+		        		cleanFromDB(values.get(i)[0]);	//I choosed the shorter one as the key.
+		        	}
+		        }else {
+		        	if(!BarOption.isWebMevOfflineMode()) {
+			        	BarOption.setWebMevOfflineMode(true);
+			        	BarFrame.instance.btnFlushMevBatch.setVisibility(View.VISIBLE);
+			        	BarFrame.setStatusMes("Having problem communicating with Web srm, system has turned into offline mode!");
+		        		L.i("MevUtiles", "Having problem communicating with Web srm, system entering the offline mode------------------------");
+		        	}
+		        	if(i <= 0) {	//if not success(save 5 string to DB)
+		        		addToBatch(jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, noTrans);
+		        	}
+		        }
+
+		        if(webSRMResponse.ResponseJsonWEBSRM == null) {
+		        	L.e("MevUtiles", "webSRMResponse.ResponseJsonWEBSRM is null", null);
+		        	return null;
+		        }
+
+		        // Processing of error messages received from WEB-SRM, if any
+				if (webSRMResponse.ResponseJsonWEBSRM.contains("listErr")) {
+					StringBuilder errorMsg = new StringBuilder();
+					errorMsg.append("HTTP Status Code : " + webSRMResponse.getStatusCode()).append("\n");
+					errorMsg.append("HTTP Status Description : " + webSRMResponse.getResponseJsonWEBSRM().replace(",", "\n")).append("\n");
+					List<ErrorWEBSRM> lstErr = UtilesJSON.ParseErrors(webSRMResponse.getResponseJsonWEBSRM());
+					if (lstErr.size() > 0) {
+						for (ErrorWEBSRM er : lstErr) {
+							errorMsg.append("Id : " + er.Id).append(" ");
+							errorMsg.append("Message : " + er.Mess).append("\n");
+							errorMsg.append("Code de retour : " + er.CodRetour).append(" ");
+							errorMsg.append("Numéro de transaction : " + er.NoTrans).append("\n");
+
+							if (er.CodRetour.endsWith("0") || er.CodRetour.endsWith("1") || er.CodRetour.endsWith("5"))
+								errorMsg.append("La transaction numéro " + er.NoTrans
+										+ " n'a pas été transmise. Par conséquent, votre SEV devra la retransmettre dans un lot lors de la prochaine requête de type Transaction.").append("\n");
+							errorMsg.append("--------------------------");
+						}
+					}
+
+					L.e("webMev Error!!!",errorMsg.toString(), null);
+					JOptionPane.showMessageDialog(errorMsg.toString());
+				} else {
+					if (i <= 0 && newJsonTransaction != null  //the meaningful response is the one for the new transaction. for batch records, just send request, will not print again.
+							&& !webSRMResponse.ResponseJsonWEBSRM.contains("Error")
+							&& !webSRMResponse.ResponseJsonWEBSRM.contains("délai d'attente")
+							&& !webSRMResponse.ResponseJsonWEBSRM
+									.contains("Impossible de créer un canal sécurisé SSL/TLS.")) {
+						// Get the informations received from the WEB-SRM
+						ResponseTransaction reponseTransaction = UtilesJSON
+								.ParseResponseTransaction(webSRMResponse.ResponseJsonWEBSRM);
+
+						// Information received from the WEB-SRM
+						L.i("MevUtiles", webSRMResponse.ResponseJsonWEBSRM);
+						L.i("MevUtiles", "ProchainCasEssai : " + reponseTransaction.ProchainCasEssai);
+						L.i("MevUtiles", "NoTrans : " + reponseTransaction.NoTrans);
+						L.i("MevUtiles", "PsiNoTrans : " + reponseTransaction.PsiNoTrans);
+						L.i("MevUtiles", "PsiDatTrans : " + reponseTransaction.PsiDatTrans);
+						L.i("MevUtiles", "noLot : " + reponseTransaction.noLot);
+						L.i("MevUtiles", "datLot : " + reponseTransaction.datLot);
+						String date = reponseTransaction.PsiDatTrans;
+						if(date.length() < 14) {
+							date = BarUtil.sdf.format(new Date());
+						}
+						StringBuilder sb = new StringBuilder("       ").append(date.substring(0,4)).append("-")
+								.append(date.substring(4,6)).append("-")
+								.append(date.substring(6,8)).append(" ")
+								.append(date.subSequence(8, 10)).append(":")
+								.append(date.substring(10, 12)).append(":")
+								.append(date.substring(12)).append("\n")
+								.append("       ")
+								.append(reponseTransaction.PsiNoTrans).append("\n")
+								.append("          ")
+								.append(BarOption.getCertifiedDeviceId()).append("\n")
+								.append(BarUtil.getSeperatorLine(1));
+						strFR = sb.toString();
+					} else {
+						if (webSRMResponse.ResponseJsonWEBSRM.contains("Le délai d'attente de l'opération a expiré."))
+							System.out.println(
+									"Problème de communication avec le MEV-WEB. Le délai d'attente de l'opération a expiré.");
+						else {
+
+							if (webSRMResponse.ResponseJsonWEBSRM.contains("Impossible de créer un canal sécurisé SSL/TLS."))
+								System.out.println("Problème de certificat pour vous authentifer auprès du MEV-WEB");
+							else
+								System.out.println(UtilesJSON.indentJson(webSRMResponse.ResponseJsonWEBSRM));
+						}
+						//TODO: what shall we return for this case?
+					}
+				}
+		    } catch (TimeoutException e) {
+		        future.cancel(true); // Interrupt the transaction request if necessary
+		        L.e("MevUtiles", "TransactionRequest took longer than expected maximum seconds!", e);
+	        	BarOption.setWebMevOfflineMode(true);
+
+	        	if(i <= 0) {
+	        		addToBatch(newJsonTransaction, signatransm, emprCertifSEV, strUrlQRCode, noTrans);//add latest record.
+	        	}
+	        	break;
+		    } catch (InterruptedException e) {
+		        // Handle other exceptions if necessary
+		        L.e("MevUtiles", "unexpected InterruptedException happend:", e);
+		    } catch (ExecutionException e) {
+				L.e("MevUtiles", "unexpected ExecutionException happend:", e);
+			} finally {
+		        executor.shutdownNow(); // Shutdown the executor
+		    }
+    	}
 		return strFR;
 	}
 
-	//    private static String buildOneElementBatchPartJson(String json) {
-//    	StringBuilder completeJSONStr = new StringBuilder(TRANS_LOT)
-//    			.append(json).append("}]}}");
-//    	try {
-//            new JSONObject(completeJSONStr.toString());
-//        } catch (Exception e) {
-//            L.w("MevUtils","Invalid JSON format", e);
-//            completeJSONStr.append("}");
-//        }
-//      	 return completeJSONStr.toString();
-//	}
-//
-//	private static String addElementFromBatchIntoJson(String jsonToSend, String jsonInBatch) {
-//		StringBuilder sb = new StringBuilder(jsonToSend.substring(0, jsonToSend.length() - 2))
-//				.append(", \"transLot\": [{").append(jsonInBatch).append("}]}}");
-//		return sb.toString();
-//	}
-//
-//	private static void cleanFromDB(String noTrans) {
-//		StringBuilder sql = new StringBuilder("delete from WEBSRMBATCH where _id = ").append(noTrans);
-//		try {
-//			ResultSet rs = PIMDBModel.getStatement().executeQuery(sql.toString());
-//		}catch(Exception exp) {
-//			//it's normal record which id = noTrans not exists.
-//		}
-//	}
-//
-//	private static void addToBatch(String jsonToSend, String signatransm, String emprCertifSEV, String strUrlQRCode, String noTrans) {
-//		//if parameter not valid, return (when app exit, will flush the webmev batch, in that case, parames will be null
-//		if(jsonToSend == null || signatransm == null || emprCertifSEV == null || strUrlQRCode == null || noTrans == null) {
-//			return;
-//		}
-//		//if already exists return; otherwise, save to db.
-//		int billID = Integer.valueOf(noTrans.substring(2).split("-")[0]);//noTrans is like 10000...001, remove the first two letters should be safe to get the id.
-//		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where _id = ").append(billID);
-//		try {
-//			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
-//			if (!rs.moveToNext()) {
-//				jsonToSend = jsonToSend.substring(TRANS_ACTU.length());
-//				int pTransLot = jsonToSend.indexOf(TRANS_LOT_INDICATOR);
-//				if(pTransLot > 0) {
-//					jsonToSend = jsonToSend.substring(0, pTransLot);
-//				}else {
-//					jsonToSend = jsonToSend.substring(0, jsonToSend.length() - 3);
-//				}
-//				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, userId) VALUES (")
-//					.append(billID).append(", '")
-//					.append(jsonToSend).append("', '")
-//				    .append(signatransm).append("', '")
-//				    .append(emprCertifSEV).append("', '")
-//				    .append(strUrlQRCode).append("', ")
-//					.append(LoginDlg.USERID).append(")") ;
-//				rs = PIMDBModel.getStatement().executeQuery(sql.toString());
-//			}
-//		}catch(Exception exp) {
-//			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
-//		}
-//	}
-//
+	private static String buildOneElementBatchPartJson(String json) {
+    	StringBuilder completeJSONStr = new StringBuilder(TRANS_LOT)
+    			.append(json).append("}]}}");
+    	try {
+            new JSONObject(completeJSONStr.toString());
+        } catch (Exception e) {
+            L.w("MevUtils","Invalid JSON format", e);
+            completeJSONStr.append("}");
+        }
+      	 return completeJSONStr.toString();
+	}
+
+	private static String addElementFromBatchIntoJson(String jsonToSend, String jsonInBatch) {
+		StringBuilder sb = new StringBuilder(jsonToSend.substring(0, jsonToSend.length() - 2))
+				.append(", \"transLot\": [{").append(jsonInBatch).append("}]}}");
+		return sb.toString();
+	}
+
+	private static void cleanFromDB(String noTrans) {
+		StringBuilder sql = new StringBuilder("delete from WEBSRMBATCH where _id = ").append(noTrans);
+		try {
+			AikaPos.db.execSQL(sql.toString());
+		}catch(Exception exp) {
+			//it's normal record which id = noTrans not exists.
+		}
+	}
+
+	private static void addToBatch(String jsonToSend, String signatransm, String emprCertifSEV, String strUrlQRCode, String noTrans) {
+		//if parameter not valid, return (when app exit, will flush the webmev batch, in that case, parames will be null
+		if(jsonToSend == null || signatransm == null || emprCertifSEV == null || strUrlQRCode == null || noTrans == null) {
+			return;
+		}
+		//if already exists return; otherwise, save to db.
+		int billID = Integer.valueOf(noTrans.substring(2).split("-")[0]);//noTrans is like 10000...001, remove the first two letters should be safe to get the id.
+		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where ID = ").append(billID);
+		try {
+			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+			if (!rs.moveToNext()) {
+				jsonToSend = jsonToSend.substring(TRANS_ACTU.length());
+				int pTransLot = jsonToSend.indexOf(TRANS_LOT_INDICATOR);
+				if(pTransLot > 0) {
+					jsonToSend = jsonToSend.substring(0, pTransLot);
+				}else {
+					jsonToSend = jsonToSend.substring(0, jsonToSend.length() - 3);
+				}
+				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, userId) VALUES (")
+					.append(billID).append(", '")
+					.append(jsonToSend).append("', '")
+				    .append(signatransm).append("', '")
+				    .append(emprCertifSEV).append("', '")
+				    .append(strUrlQRCode).append("', ")
+					.append(LoginDlg.USERID).append(")") ;
+				AikaPos.db.execSQL(sql.toString());
+			}
+		}catch(Exception exp) {
+			L.e("MevUtils ", "unexpected error when inserting web mev reqeust into db. sql:" + sql, exp);
+		}
+	}
+
 //	//not used for now, because the time in sndMsg could be still a little different with the time request reach to the Web-srm server.
 //	private static String getDatTrans(List<String> sndMsg) {
 //		String tText = sndMsg.get(1).trim(); //find out the waiter and time and subtotal and tps tpq

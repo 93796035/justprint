@@ -523,7 +523,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if(rs.moveToNext()) {
-				docRUT.setDF(DBUtil.getCursorString(rs, "value"));
+				docRUT.setDF(DBUtil.getCursorString(rs, "VALUE"));
 				docRUT.setNO(DBUtil.getCursorString(rs, "STATUS"));
 				docRUT.setMT(UtilesFormatterDonnees.formatterMontant(DBUtil.getCursorInt(rs, "type") / 100.00f));
 			}

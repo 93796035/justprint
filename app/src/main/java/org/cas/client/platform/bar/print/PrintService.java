@@ -548,7 +548,9 @@ public class PrintService{
 		billNumber = billNumber.trim();
 		for(int i = 0; i < billNumber.length(); i++) {
 			if(!billNumber.substring(i, i + 1).equals("0")) {
-				return billNumber.substring(i);
+				billNumber = billNumber.substring(i);
+				int p = billNumber.indexOf("-");
+				return p > -1 ? billNumber.substring(0, p) : billNumber;
 			}
 		}
 		return "0";
@@ -2528,7 +2530,7 @@ public class PrintService{
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            int invoiceid = DBUtil.getCursorInt(rs,"invoiceid");
+            int invoiceid = DBUtil.getCursorInt(rs,"invoiceId");
             if(invoiceid > 0) {
             	return String.valueOf(invoiceid);
             }

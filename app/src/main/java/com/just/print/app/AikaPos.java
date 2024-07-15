@@ -127,14 +127,14 @@ public class AikaPos extends Application {
 
     private void createEvaluationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
-                "ID INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
+                "_id INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
                 "tableName TEXT, receive INTEGER, target INTEGER, profit INTEGER);";
         db.execSQL(sql);
     }
 
     private void createBillTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Bill (" +
-                "ID INTEGER PRIMARY KEY, createtime TEXT, tableName TEXT, BillIndex TEXT, " +
+                "_id INTEGER PRIMARY KEY, createtime TEXT, tableName TEXT, BillIndex TEXT, " +
                 "total INTEGER, discount INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
                 "debitReceived INTEGER, visaReceived INTEGER, masterReceived INTEGER, " +
                 "otherReceived TEXT, tip INTEGER, cashback INTEGER, STATUS INTEGER, " +
@@ -144,14 +144,14 @@ public class AikaPos extends Application {
 
     private void createWEBSRMBatchTable() {
         String sql = "CREATE TABLE IF NOT EXISTS WEBSRMBATCH (" +
-                "ID INTEGER PRIMARY KEY, userId INTEGER, jsonToSend TEXT, " +
+                "_id INTEGER PRIMARY KEY, userId INTEGER, jsonToSend TEXT, " +
                 "signatransm TEXT, emprCertifSEV TEXT, strUrlQRCode TEXT);";
         db.execSQL(sql);
     }
 
     private void createOperationLogTable() {
         String sql = "CREATE TABLE IF NOT EXISTS OPERATIONLOG (" +
-                "ID INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
+                "_id INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
                 "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tablename TEXT, " +
                 "opentime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
                 "orderTime TEXT, operationTime TEXT, other1 INTEGER, other2 INTEGER, " +

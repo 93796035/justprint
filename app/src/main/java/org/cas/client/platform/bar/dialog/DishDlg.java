@@ -146,7 +146,7 @@ public class DishDlg extends DialogFragment implements View.OnClickListener {
 
             tmpPos = 0;
             while (categoryRS.moveToNext()) {
-                //categoryIdAry[tmpPos] = categoryRS.getInt("ID");
+                //categoryIdAry[tmpPos] = categoryRS.getInt("_id");
                 categorySubjectAry[tmpPos] = DBUtil.getCursorString(categoryRS, "NAME1");
                 tmpPos++;
             }
