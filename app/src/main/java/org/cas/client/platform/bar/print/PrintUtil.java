@@ -23,6 +23,7 @@ import com.just.print.app.BarFrame;
 import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.CASUtility;
@@ -137,7 +138,7 @@ public class PrintUtil {
 			paint.setTextSize(12);
 
 			// 计算文本的宽度和高度
-			int maxWidth = (int) paint.measureText("-");
+			int maxWidth = (int) paint.measureText(BarUtil.getSeperatorLine(1));
 			int totalHeight = (int) (paint.getFontMetrics().bottom - paint.getFontMetrics().top) * (lines1.size() + lines2.size() + 2);
 			if (qrcodeImage != null) {
 				totalHeight += qrcodeImage.getHeight();
