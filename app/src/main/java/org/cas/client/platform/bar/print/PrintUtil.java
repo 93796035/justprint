@@ -92,19 +92,9 @@ public class PrintUtil {
 		return String.valueOf(cashQt).length() + cashTotal.length();
 	}
 
-	static void checkPrinter() {
-		//check printer.
-	    if(defaultService == null) {
-		    defaultService = (PrintManager) BarFrame.instance.getSystemService(Context.PRINT_SERVICE);
-		    if(defaultService == null) {
-			    defaultService = (PrintManager) BarFrame.instance.getSystemService(Context.PRINT_SERVICE);
-
-				if (defaultService == null) {
-					JOptionPane.showMessageDialog("Please install printer first.");
-					L.e("PrintUtil", "Please install printer first.", null);
-				}
-		    }
-	    }
+	static int checkPrinter(String printerName) {
+		int p = printerName.indexOf("192.168.");  //local printer
+		return p < 0 ? printerName.indexOf("10.") : p;
 	}
 
 	public static Path getSerialCommandFilePath(String fileName, byte[] command) {
@@ -127,60 +117,6 @@ public class PrintUtil {
 		return path;
 	}
 
-	public static String combinedPrint(String part1, Bitmap qrcodeImage, String part2) {
-		try {
-			// 处理文本内容
-			List<String> lines1 = part1 == null ? new ArrayList<String>() : Arrays.asList(part1.split("\n"));
-			List<String> lines2 = part2 == null ? new ArrayList<String>() : Arrays.asList(part2.split("\n"));
-
-			Paint paint = new Paint();
-			paint.setTypeface(Typeface.create("宋体", Typeface.NORMAL));
-			paint.setTextSize(12);
-
-			// 计算文本的宽度和高度
-			int maxWidth = (int) paint.measureText(BarUtil.getSeperatorLine(1));
-			int totalHeight = (int) (paint.getFontMetrics().bottom - paint.getFontMetrics().top) * (lines1.size() + lines2.size() + 2);
-			if (qrcodeImage != null) {
-				totalHeight += qrcodeImage.getHeight();
-			}
-
-			Bitmap combinedImage = Bitmap.createBitmap(maxWidth, totalHeight, Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(combinedImage);
-			canvas.drawColor(Color.WHITE); // 设置背景颜色为白色
-
-			paint.setColor(Color.BLACK); // 设置绘制颜色为黑色
-
-			// 绘制第一段文本
-			int y = drawFirstPart(lines1, canvas, paint, maxWidth);
-
-			if (qrcodeImage != null) {
-				// 绘制二维码
-				canvas.drawBitmap(qrcodeImage, (maxWidth - qrcodeImage.getWidth()) / 2, y, null);
-				y += qrcodeImage.getHeight();
-
-				// 绘制第二段文本
-				for (String line : lines2) {
-					line = line.trim();
-					int textWidth = (int) paint.measureText(line); // 获取文本宽度
-					int startX = (maxWidth - textWidth) / 2; // 计算文本的起始X坐标，使其居中
-
-					canvas.drawText(line, startX, y, paint);
-					y += (int) (paint.getFontMetrics().bottom - paint.getFontMetrics().top);
-				}
-			}
-
-			// 发送到打印机（需要实现 sendToPrinter 方法）
-			sendToPrinter(totalHeight, combinedImage, BarFrame.instance);
-
-			// 保存为PDF（需要实现 writeToPdf 方法）
-			return writeToPdf(combinedImage, BarFrame.instance);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 	private static int drawFirstPart(List<String> lines, Canvas canvas, Paint paint, int maxWidth) {
 		int y = (int) (-paint.getFontMetrics().top); // 初始 y 坐标
 		for (String line : lines) {
@@ -194,11 +130,16 @@ public class PrintUtil {
 		return y;
 	}
 
-	private static void sendToPrinter(int totalHeight, Bitmap combinedImage, Context context) {
-		PrintManager printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
-		String jobName = context.getString(R.string.app_name) + " Document";
-		printManager.print(jobName, new BitmapPrintDocumentAdapter(context, combinedImage), null);
-	}
+//	private static void sendToPrinter(int totalHeight, Bitmap combinedImage, Context context) {
+//		PrintManager printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
+//		String jobName = context.getString(R.string.app_name) + " Document";
+//		printManager.print(jobName, new BitmapPrintDocumentAdapter(context, combinedImage), null);
+//	}
+	private static final byte[] INIT_PRINTER = {0x1B, 0x40}; // 初始化打印机
+	private static final byte[] SELECT_QR_MODEL = {0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00}; // 选择QR码模型2
+	private static final byte[] SET_QR_SIZE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06}; // 设置QR码大小
+	private static final byte[] SET_QR_ERROR_CORRECTION = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30}; // 设置错误校正级别
+	private static final byte[] PRINT_QR_CODE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30}; // 打印QR码
 
 	private static String writeToPdf(Bitmap combinedImage, Context context) {
 		PdfDocument pdfDocument = new PdfDocument();
@@ -473,70 +414,7 @@ public class PrintUtil {
         }
     }
     
-	// Send QRCode image to the printer
-	public static void sendQRCodeToPrinter(OutputStream outputStream, Bitmap qrCodeImage) throws IOException {
-		// Convert Bitmap to byte array
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		qrCodeImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-		byte[] imageBytes = byteArrayOutputStream.toByteArray();
-
-		// ESC/POS command to print an image (may vary based on printer model)
-		outputStream.write(Command.GS_k_m_v_r_nL_nH);
-
-		try {
-			// 选择二维码模块大小
-			byte[] selectQRSize = new byte[]{0x1D, 'z', 0x02};  // 假设n为2，具体值根据手册
-			outputStream.write(selectQRSize);
-
-			// 选择错误纠正等级
-			byte[] errorCorrection = new byte[]{0x1D, 'y', 0x02};  // 假设n为2，具体值根据手册
-			outputStream.write(errorCorrection);
-
-			// 存储QRCode数据
-			String qrData = "https://www.example.com"; // QRCode内容
-			byte[] storeQRData = new byte[3 + qrData.length()];
-			storeQRData[0] = 0x1D;
-			storeQRData[1] = 'd';
-			storeQRData[2] = (byte) qrData.length(); // 假设QRCode内容不超过255字节
-			System.arraycopy(qrData.getBytes(), 0, storeQRData, 3, qrData.length());
-			outputStream.write(storeQRData);
-
-			// 打印QRCode数据
-			byte[] printQRCode = new byte[]{0x1D, 'm'};
-			outputStream.write(printQRCode);
-
-			outputStream.flush();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// Send the image data to the printer
-		outputStream.write(imageBytes);
-		outputStream.flush();
-	}
-
-	//
-//    private static byte[] generateQRCodeCommand(String data) {
-//        // This is a simplified example, and the actual command might vary 
-//        // based on the printer's ESC/POS command documentation.
-//        ByteArrayOutputStream command = new ByteArrayOutputStream();
-//
-//        // QR code size, error correction, and other parameters might be set here
-//
-//        // Command to print QR code with data
-//        command.write(0x1D);  // GS (Group Separator)
-//        command.write('(');   // (
-//        command.write('k');  // k
-//        // ... more parameters, including data length and the actual data bytes
-//
-//        return command.toByteArray();
-//    }
-//
-	public static CompletableFuture<String> doWebSocketPrint(String ip, String mainContent, Bitmap image, String responseFromWebMev) {
-		if (ip == null || ip.length() == 0)
-			return CompletableFuture.completedFuture(null);
-
+	public static CompletableFuture<String> doWebSocketPrint(String ip, List<String> sndMsg, Bitmap image, String responseFromWebMev) {
 		String[] ipAry = ip.split("\\.");
 		if (ipAry.length != 4) {
 			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
@@ -552,97 +430,54 @@ public class PrintUtil {
 						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
 				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
 					L.e("printer slow. ip is: ", ip, null);
-					return null;
+					return null;//TODO: shouldn't return null, should throw an exception or show message to user.
 				}
 
 				socket = new Socket(ip, 9100);
 				outputStream = socket.getOutputStream();
-				if(image != null) {
-					outputStream.write(getImageBytes_chatGPT(image));
-				}
-				// Write main content
-				sendContentOutThroughStream(mainContent, outputStream, ip);
-
-				// Example of sending QR code commands to the printer
-				byte[] selectQRSize = new byte[]{0x1D, 'z', 0x02};  // Example size command
-				outputStream.write(selectQRSize);
-
-				byte[] errorCorrection = new byte[]{0x1D, 'y', 0x02};  // Example error correction command
-				outputStream.write(errorCorrection);
-
-				String qrData = "https://www.example.com"; // Example QR code content
-				byte[] storeQRData = new byte[3 + qrData.length()];
-				storeQRData[0] = 0x1D;
-				storeQRData[1] = 'd';
-				storeQRData[2] = (byte) qrData.length();
-				System.arraycopy(qrData.getBytes(), 0, storeQRData, 3, qrData.length());
-				outputStream.write(storeQRData);
-
-				byte[] printQRCode = new byte[]{0x1D, 'm'};
-				outputStream.write(printQRCode);
-
-				outputStream.flush();
-
-				// Example of sending an image to the printer
-				sendQRCodeToPrinter(outputStream, image);
-
-				outputStream.close();
-				return "OK";
-			} catch (Exception exp) {
-				ErrorUtil.write(exp);
-				L.e(ip, "Error when printing content to socket", exp);
-				return null;
-			} finally {
-				if (outputStream != null) {
-					try {
-						outputStream.close();
-					} catch (Exception exp) {
-						L.e(ip, "Error when trying to close outputStream", exp);
-					}
-				}
-				if (socket != null) {
-					try {
-						socket.close();
-					} catch (Exception exp) {
-						L.e(ip, "Error when trying to close socket", exp);
-					}
-				}
-			}
-		}, executorService);
-	}
-
-	static CompletableFuture<String> doWebSocketPrint(final String ip, final List<String> sndMsg) {
-		if (ip == null || ip.length() == 0)
-			return CompletableFuture.completedFuture(null);
-
-		String[] ipAry = ip.split("\\.");
-		if (ipAry.length != 4) {
-			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
-			return CompletableFuture.completedFuture(null);
-		}
-
-		return CompletableFuture.supplyAsync(() -> {
-			Socket socket = null;
-			OutputStream outputStream = null;
-			try {
-				InetAddress inet = InetAddress.getByAddress(new byte[]{
-						Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
-						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
-				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
-					L.e("printer slow. ip is: ", ip, null);
-					return null;
-				}
-
-				socket = new Socket(ip, 9100);
-				outputStream = socket.getOutputStream();
+				//main content
 				for (String msg : sndMsg) {
 					if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
 						continue;
 					}
 					sendContentOutThroughStream(msg, outputStream, ip);
 				}
-				outputStream.close();
-				socket.close();
+				//QRCode.
+				if(image != null) {
+					/////////////////////////////
+					// 初始化打印机
+					outputStream.write(INIT_PRINTER);
+
+					// 选择QR码模型
+					outputStream.write(SELECT_QR_MODEL);
+
+					// 设置QR码大小
+					outputStream.write(SET_QR_SIZE);
+
+					// 设置错误校正级别
+					outputStream.write(SET_QR_ERROR_CORRECTION);
+
+					// 存储QR码数据
+					byte[] qrDataBytes = "https://www.example.com".getBytes("UTF-8");
+					int qrDataLength = qrDataBytes.length + 3;
+					byte[] storeQrDataCommand = {0x1D, 0x28, 0x6B, (byte) (qrDataLength % 256), (byte) (qrDataLength / 256), 0x31, 0x50, 0x30};
+					outputStream.write(storeQrDataCommand);
+					outputStream.write(qrDataBytes);
+
+					// 打印QR码
+					outputStream.write(PRINT_QR_CODE);
+
+					// 结束打印
+					outputStream.write("\n\n".getBytes());
+					//////////////////////////
+				}
+				if(responseFromWebMev != null){
+					List<String> lastPart = Arrays.asList(responseFromWebMev.split("\n"));
+					for (String msg : lastPart) {
+						sendContentOutThroughStream(msg, outputStream, ip);
+					}
+					sendContentOutThroughStream(CUT, outputStream, ip);
+				}
 				return "OK";
 			} catch (Exception exp) {
 				ErrorUtil.write(exp);
@@ -666,6 +501,62 @@ public class PrintUtil {
 			}
 		}, executorService);
 	}
+
+//	static CompletableFuture<String> doWebSocketPrint(final String ip, final List<String> sndMsg) {
+//		if (ip == null || ip.length() == 0)
+//			return CompletableFuture.completedFuture(null);
+//
+//		String[] ipAry = ip.split("\\.");
+//		if (ipAry.length != 4) {
+//			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
+//			return CompletableFuture.completedFuture(null);
+//		}
+//
+//		return CompletableFuture.supplyAsync(() -> {
+//			Socket socket = null;
+//			OutputStream outputStream = null;
+//			try {
+//				InetAddress inet = InetAddress.getByAddress(new byte[]{
+//						Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
+//						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
+//				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
+//					L.e("printer slow. ip is: ", ip, null);
+//					return null;
+//				}
+//
+//				socket = new Socket(ip, 9100);
+//				outputStream = socket.getOutputStream();
+//				for (String msg : sndMsg) {
+//					if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
+//						continue;
+//					}
+//					sendContentOutThroughStream(msg, outputStream, ip);
+//				}
+//				outputStream.close();
+//				socket.close();
+//				return "OK";
+//			} catch (Exception exp) {
+//				ErrorUtil.write(exp);
+//				L.e(ip, "Error when printing content to socket", exp);
+//				return null;
+//			} finally {
+//				if (outputStream != null) {
+//					try {
+//						outputStream.close();
+//					} catch (Exception exp) {
+//						L.e(ip, "Error when trying to close outputStream", exp);
+//					}
+//				}
+//				if (socket != null) {
+//					try {
+//						socket.close();
+//					} catch (Exception exp) {
+//						L.e(ip, "Error when trying to close socket", exp);
+//					}
+//				}
+//			}
+//		}, executorService);
+//	}
 	
     public static byte[] POS_S_SetQRcode(String strCodedata, int nWidthX, int nErrorCorrectionLevel) {
     	
@@ -844,6 +735,8 @@ public class PrintUtil {
 			// code can be customized
 			String charset = BarOption.getCharset();
 			 if(sndMsg != null) {
+				if(!sndMsg.endsWith("\n"))
+					sndMsg = sndMsg + "\n";
 			    byte[] send;
 			    try {
 			        send = sndMsg.getBytes(charset);
@@ -1056,11 +949,11 @@ public class PrintUtil {
 		return "";
 	}
 
-	private static byte[] getImageBytes_chatGPT(Bitmap image) {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
-		return stream.toByteArray();
-	}
+//	private static byte[] getImageBytes_chatGPT(Bitmap image) {
+//		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//		return stream.toByteArray();
+//	}
 	public static byte[] getImageBytes(Bitmap image) throws Exception {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 

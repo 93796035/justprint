@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
@@ -474,12 +475,8 @@ public class PrintService{
         		//the printer might be connected by serial port, or by usb, or by websocket.
         		if(printerName.startsWith("mev")) {	// if it's for mev. before print, should change to unique "mev-format", no command inside.
              		fileNameKey = doMevPrint(printerName, sndMsg);
-             	} else if("serial".equalsIgnoreCase(printerName)) { 
-            		fileNameKey = doSerialFilePrint(sndMsg);
-            	} else if("serial2".equalsIgnoreCase(printerName)) { 
-            		fileNameKey = PrintUtil.doSerialPrint(sndMsg);
-            	} else {//if it's not connected to the serial port.
-					CompletableFuture<String> result = PrintUtil.doWebSocketPrint(printerName, sndMsg);
+             	} else {//if it's not connected to the serial port.
+					CompletableFuture<String> result = PrintUtil.doWebSocketPrint(printerName, sndMsg, null, null);
 					try {
 						fileNameKey = result.get();
 					} catch (Exception e) {
@@ -556,90 +553,58 @@ public class PrintService{
 		return "0";
 	}
 
-	//=====================================simple serial port print========================================
-	static String doSerialFilePrint(List<String> pSndMsg) {
-		//check if mev device and printer has been installed?
-		PrintUtil.checkPrinter();
-
-    	//check the msg type and do a clean to remove unnecessary lines like empty line and cut..(e.g. if it's a bill/check(6 item inside)  or a receipt/invoice (7 item inside)
-		String transType = PrintService.getOutTransType(pSndMsg);	//we've added special content when prparing the content, in method:
-		List<String> sndMsg = PrintService.cleanSndMsgBaseOnType(pSndMsg, transType);
-		
-		//build the content, 
-		byte[] contentToWirteToFile = PrintUtil.buildSerialLabelContent(sndMsg);
-		
-		//save contents into a file
-		String filePath = CASUtility.getPIMDirPath().concat(new Date().getTime() + "transaction.xml");
-		return PrintUtil.printSerialFormattedContent(Paths.get(filePath), contentToWirteToFile);
-	}
-	
     //==============================================mev print part===========================================
 	//this method is currently works for creating bill. 
     private static String doMevPrint(String printerName, List<String> pSndMsg) {
     	//check if mev device and printer has been installed?
-    	PrintUtil.checkPrinter();
-
+    	int p = PrintUtil.checkPrinter(printerName);
+		if(p < 0){
+			JOptionPane.showMessageDialog(printerName + "is not correct printer ip, please set printer ip first.");
+			return null;
+		}else {
+			printerName = printerName.substring(p);
+			p = printerName.indexOf(')');
+			if (p > 0) {
+				printerName = printerName.substring(0, p);
+			}
+		}
     	//check the msg type and do a clean to remove unnecessary lines like empty line and cut..(e.g. if it's a bill/check(6 item inside)  or a receipt/invoice (7 item inside)
     	//@NOTE: we know the message type(bill, receipt, rp, db base on the sndMsg's length.
     	String transType = getOutTransType(pSndMsg);	//we've added special content when preparing the content.----????bad comment! should mention what's the special content.
     	List<String> sndMsg = cleanSndMsgBaseOnType(pSndMsg, transType);
-    	
-    	//build the content, 
-    	String mainContent;
-    	if(transType.equals(REPORT)) {
-    		mainContent =  buildMevReportContent(sndMsg);
-        	//save contents into a file and send it to mev.
-    		return printMevFormattedContent(mainContent, null, "");
-    	}else if(transType.equals(KITCHEN)) {	//just a backup of kitchen bill, no need to send to web mev.
-    		mainContent = buildKitchenContent(sndMsg);
-        	//save contents into a file and send it to mev.
-    		return printMevFormattedContent(mainContent, null, "");
-    	}else {//other types has same print format (ADDI, RFER, R(eturn)_RFER, V(oid)_RFER)
+
+		List<Object> responseStrs = null;
+		String strFR = null;
+    	if(!transType.equals(REPORT) && !transType.equals(KITCHEN)) {
+			//other types has same print format (ADDI, RFER, R(eturn)_RFER, V(oid)_RFER)
 			//if not for internal use, must send request.
     		boolean isForInternalUse = sndMsg.get(sndMsg.size() - 1).contains(ValuePossible.RE_PRINTED_INTERNAL_USE);
-    		List<Object> responseStrs = isForInternalUse ? null : sendWebMevBillRequest(sndMsg, transType);  //send request to webMev and generate the QRCode Image in temporal folder.
+			responseStrs = isForInternalUse ? null : sendWebMevBillRequest(sndMsg, transType);  //send request to webMev and generate the QRCode Image in temporal folder.
     		//if only for send to webmev, then no need to print.
     		if(ValuePossible.S_RFER.equals(transType) 
     				|| sndMsg.get(sndMsg.size() - 1).contains(TRANSACTION_ONLY)
     				|| sndMsg.get(sndMsg.size() - 1).endsWith(PAYMENT_FAIL)) {
     			return "NONeedPrint";
     		}
-    		mainContent = buildMevBillFormat(sndMsg, transType); //@note must do this after the sendWebMevBillRequest() method, because the transction id and time might be changed if request failed.
-    		//send to printer
-    		String strFR = null;
-    		int p = printerName.indexOf("192.168.");  //local printer
-    		p = p < 0 ? printerName.indexOf("10.") : p;
-    		if(p > -1) {
-    			printerName = printerName.substring(p);
-    			p = printerName.indexOf(')');
-    			if(p > 0) {
-    				printerName = printerName.substring(0, p);
-    			}
-				CompletableFuture<String> result = PrintUtil.doWebSocketPrint(
-						printerName.trim(),
-						mainContent,
-						responseStrs == null ? null : (Bitmap) responseStrs.get(0),
-						responseStrs == null ? null : responseStrs.get(1).toString());
-				try {
-					strFR = result.get();
-				} catch (Exception e) {
-					L.e("PrintService", " doMevPrint", e);
-				}
-    			//in case user want to always print duplicated temporal bill automatically
-    			if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-    				PrintUtil.doWebSocketPrint(printerName.trim(), mainContent, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
-    			}
-			} else {									//cloud printer
-				strFR = printMevFormattedContent(mainContent,
-						responseStrs == null ? null : (Bitmap)responseStrs.get(0),
-						responseStrs == null ? null : responseStrs.get(1).toString());
-				//in case user want to always print duplicated temporal bill automatically
-				if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-					printMevFormattedContent(mainContent, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
-				}
-			}
-    		return strFR;
+			String mainContent = buildMevBillFormat(sndMsg, transType); //@note must do this after the sendWebMevBillRequest() method, because the transction id and time might be changed if request failed.
+			pSndMsg = Arrays.asList(mainContent.split("\n"));
     	}
+
+		CompletableFuture<String> result = PrintUtil.doWebSocketPrint(
+				printerName.trim(),
+				pSndMsg,
+				responseStrs == null ? null : (Bitmap) responseStrs.get(0),
+				responseStrs == null ? null : responseStrs.get(1).toString());
+		try {
+			strFR = result.get();
+		} catch (Exception e) {
+			L.e("PrintService", " doMevPrint", e);
+		}
+		//in case user want to always print duplicated temporal bill automatically
+		if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
+			PrintUtil.doWebSocketPrint(printerName.trim(), sndMsg, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
+		}
+		return strFR;
 	}
     
 	private static List<Object> sendWebMevBillRequest(final List<String> sndMsg, String transType) {
@@ -770,22 +735,6 @@ public class PrintService{
 		return sndMsg;
 	}
 
-	//if qrcodeImg is null, means it's internal used reprint or there's exception when sending request to server.
-	private static String printMevFormattedContent(String contentToWriteToFile, Bitmap qrcodeImg, String contentToWirteToFile2) {
-
-		//print the text part content and qrcode content out.
-		String key = PrintUtil.combinedPrint(contentToWriteToFile, qrcodeImg, contentToWirteToFile2);
-				//PrintUtil.printThroughOSdriver(PrintUtil.getMevCommandFilePath(path1, null), false) && PrintUtil.combinedPrint(null, qrcodeImg, path2);
-				//PrintUtil.combinedPrintToPDF(path1, qrcodeImg, path2);
-				//PrintUtil.printThroughOSdriver(path1, qrcodeImg, path2, CustOpts.custOps.getDeleteOriginalTransaction());
-
-		if(key == null) {
-			JOptionPane.showMessageDialog(BarFrame.consts.PrinterError());
-		}
-
-		return key; //note:returning only the key part of the the whole file path.
-	}
-	
 	private static String getOutTransType(List<String> sndMsg) {
 		if(sndMsg.size() <= KITCHEN_SIZE) {	//if it's KITCHEN BILL, allow it to come out from mev printer, because it's better than only thrown out an exception. 
 			return KITCHEN;
@@ -805,27 +754,6 @@ public class PrintService{
 		return "";
 	}
 
-	private static String buildMevReportContent(List<String> sndMsg) {
-		//the contents could be composed by :1/Command.BEEP 2/BigFont 3/NormalFont 4/cut 5/content.
-		//while when sending to mev device, the sndMsg could only be content. and length will always be 1.
-		StringBuilder printContent = new StringBuilder();
-		for (int i = 0; i < sndMsg.size(); i++) {					
-			printContent.append(sndMsg.get(i));
-		}
-		
-		return printContent.toString();
-	}
-	
-	private static String buildKitchenContent(List<String> sndMsg) {
-		//the contents could be composed by :1/Command.BEEP 2/BigFont 3/NormalFont 4/cut 5/content.
-		//while when sending to mev device, the sndMsg could only be content. and length will always be 1.
-		StringBuilder printContent = new StringBuilder();
-		for (int i = 0; i < sndMsg.size(); i++) {					
-			printContent.append(sndMsg.get(i));
-		}
-		
-		return printContent.toString();
-	}
 	//the contents for printers could be composed by :1/Command.BEEP 2/BigFont 3/NormalFont 4/cut 5/content.
 	//while when sending to mev device, the sndMsg could only be content. and length will always be 1.
 	public static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
@@ -864,14 +792,6 @@ public class PrintService{
 		//append the bill Type
 		printContent.append("\n" + getInvoiceType(sndMsg));
 		return printContent.toString();
-//		//=====================convert to ASCII and return========================
-//		try {
-//			byte[] textPart = printContent.toString().getBytes(BarOption.getCharset());//"857");
-//			return textPart;
-//		} catch (UnsupportedEncodingException e) {
-//			ErrorUtil.write(e);
-//			return null;
-//		}
 	}
 	
 	//decide what to display before the qrcode.FACTURE_ORIGINAL or PAYMENT_RECU or REPRINT......
