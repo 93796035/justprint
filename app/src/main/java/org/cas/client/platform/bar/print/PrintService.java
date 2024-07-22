@@ -56,10 +56,10 @@ public class PrintService{
 	private static final String PROBLEME_COMMUNICATION = "PROBLÈME DE COMMUNICATION";
 	public static final String TRANSACTION_ONLY = "#TRANSACTION_ONLY@";
 	public static final String INVOICE = "TRANSACTION#";
-	public static final String FACTURE_ORIGINAL = "\n                          *FACTURE ORIGINAL*";
-	public static final String FACTURE_REVISEE =  "\n                *FACTURE RÉVISÉE*(Remplace 1 facture)";
-	private static final String PAYMENT_REÇU =   "\n                                *PAIEMENT REÇU*";
-	public static final String PAYMENT_FAIL =   "\n                                *PAIEMENT FAILED*";
+	public static final String FACTURE_ORIGINAL = "\n            *FACTURE ORIGINAL*";
+	public static final String FACTURE_REVISEE =  "\n      *FACTURE RÉVISÉE*(Remplace 1 facture)";
+	private static final String PAYMENT_REÇU =   "\n               *PAIEMENT REÇU*";
+	public static final String PAYMENT_FAIL =   "\n              *PAIEMENT FAILED*";
 	private static final String FILE = " #file:";
 	private static final int KITCHEN_SIZE = 7;
 	private static final int V_RFER_SIZE = 8;
@@ -573,7 +573,7 @@ public class PrintService{
     	String transType = getOutTransType(pSndMsg);	//we've added special content when preparing the content.----????bad comment! should mention what's the special content.
     	List<String> sndMsg = cleanSndMsgBaseOnType(pSndMsg, transType);
 
-		List<Object> responseStrs = null;
+		List<String> responseStrs = null;
 		String strFR = null;
     	if(!transType.equals(REPORT) && !transType.equals(KITCHEN)) {
 			//other types has same print format (ADDI, RFER, R(eturn)_RFER, V(oid)_RFER)
@@ -593,7 +593,7 @@ public class PrintService{
 		CompletableFuture<String> result = PrintUtil.doWebSocketPrint(
 				printerName.trim(),
 				pSndMsg,
-				responseStrs == null ? null : (Bitmap) responseStrs.get(0),
+				responseStrs == null ? null : responseStrs.get(0),
 				responseStrs == null ? null : responseStrs.get(1).toString());
 		try {
 			strFR = result.get();
@@ -602,12 +602,12 @@ public class PrintService{
 		}
 		//in case user want to always print duplicated temporal bill automatically
 		if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-			PrintUtil.doWebSocketPrint(printerName.trim(), sndMsg, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
+			PrintUtil.doWebSocketPrint(printerName.trim(), sndMsg, responseStrs.get(0), responseStrs.get(1).toString());
 		}
 		return strFR;
 	}
     
-	private static List<Object> sendWebMevBillRequest(final List<String> sndMsg, String transType) {
+	private static List<String> sendWebMevBillRequest(final List<String> sndMsg, String transType) {
     	Transaction transActu = new Transaction( );
 		try {
 			MevUtils.buildTransaction(sndMsg, transType, transActu);
@@ -629,13 +629,14 @@ public class PrintService{
 		String strUrlQRCode = UtilesQRCode.createUrlQRCode(transActu,
 				BarOption.getCertificateSerialNumberWebSRM());
 
-		List<Object> responses = new ArrayList<Object>();
-		// Creation of the image containing the QR code
-		try {
-			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 188,  188, 0));//why 250, 70 seems doesn't change anything?
-		} catch (Exception e) {
-			L.e("MevUtils", "exception when generating codeQR for transaction", e);
-		}
+		List<String> responses = new ArrayList<String>();
+		responses.add(strUrlQRCode);
+//		// Creation of the image containing the QR code
+//		try {
+//			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 188,  188, 0));//why 250, 70 seems doesn't change anything?
+//		} catch (Exception e) {
+//			L.e("MevUtils", "exception when generating codeQR for transaction", e);
+//		}
 		
 		// now that we've got everything ready, Send the transaction to the WEB-SRM (yeah need to also check if there's records in batch.
 		String response = MevUtils.flushBatchWithCurTransaction(jsonTransaction, signatransm, transActu.EmprCertifSEV, strUrlQRCode, transActu.NoTrans);
@@ -1378,7 +1379,10 @@ public class PrintService{
 		StringBuilder content = new StringBuilder();
 		//normal bill vs combined bill
         if(billDishesMap.size() == 1) {
-            formatDishListContent(dishList, curPrintIp, tWidth, content, null, null, null);
+            formatDishListContent(dishList, curPrintIp, tWidth, content,
+					null,
+					null,
+					null);
         }else {//it's a combined bill
         	//@NOTE:in case the original bill was used again after combination, so the values of the bill record could changed.
         	//so have to use the dish list to calculate every thing again,  while the service fee and discount will be problem.
@@ -1483,7 +1487,7 @@ public class PrintService{
             
             String price = BarUtil.formatMoney((d.getTotalPrice())/100f);
             int occupiedLength = BarUtil.getLengthOfString(subStrs[i - 1].toString());
-            sb.append(BarUtil.generateString(tWidth - occupiedLength - (price.length()), " "));
+            sb.append(BarUtil.generateString(tWidth - occupiedLength - (price.length()) - 2, " "));
             sb.append(price).append(" ");
             if(d.getGst() == 1) {
             	sb.append("F");

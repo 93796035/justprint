@@ -58,6 +58,12 @@ public class PrintUtil {
 	public static final String OLD_QST = "*Old QST:";
 	public static final String OLD_TOTAL = "*Old Total:";
 
+	private static final byte[] INIT_PRINTER = {0x1B, 0x40}; // 初始化打印机
+	private static final byte[] SELECT_QR_MODEL =         {0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00}; // 选择QR码模型2
+	private static final byte[] SET_QR_SIZE =             {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x0C}; // 设置QR码大小
+	private static final byte[] SET_QR_ERROR_CORRECTION = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30}; // 设置错误校正级别
+	private static final byte[] PRINT_QR_CODE =           {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30}; // 打印QR码
+
 	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 	public static List<String> errorPrinterList = new ArrayList<String>();
 	
@@ -117,30 +123,6 @@ public class PrintUtil {
 		return path;
 	}
 
-	private static int drawFirstPart(List<String> lines, Canvas canvas, Paint paint, int maxWidth) {
-		int y = (int) (-paint.getFontMetrics().top); // 初始 y 坐标
-		for (String line : lines) {
-			line = line.trim();
-			int textWidth = (int) paint.measureText(line); // 获取文本宽度
-			int startX = (maxWidth - textWidth) / 2; // 计算文本的起始X坐标，使其居中
-
-			canvas.drawText(line, startX, y, paint);
-			y += (int) (paint.getFontMetrics().bottom - paint.getFontMetrics().top);
-		}
-		return y;
-	}
-
-//	private static void sendToPrinter(int totalHeight, Bitmap combinedImage, Context context) {
-//		PrintManager printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
-//		String jobName = context.getString(R.string.app_name) + " Document";
-//		printManager.print(jobName, new BitmapPrintDocumentAdapter(context, combinedImage), null);
-//	}
-	private static final byte[] INIT_PRINTER = {0x1B, 0x40}; // 初始化打印机
-	private static final byte[] SELECT_QR_MODEL = {0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00}; // 选择QR码模型2
-	private static final byte[] SET_QR_SIZE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06}; // 设置QR码大小
-	private static final byte[] SET_QR_ERROR_CORRECTION = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30}; // 设置错误校正级别
-	private static final byte[] PRINT_QR_CODE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30}; // 打印QR码
-
 	private static String writeToPdf(Bitmap combinedImage, Context context) {
 		PdfDocument pdfDocument = new PdfDocument();
 		PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(combinedImage.getWidth(), combinedImage.getHeight(), 1).create();
@@ -160,224 +142,6 @@ public class PrintUtil {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-
-	private static void sendToPrinter(Bitmap combinedImage, Context context) {
-		// 创建打印管理器
-		PrintManager printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
-
-		// 创建一个打印适配器
-		PrintDocumentAdapter printAdapter = new PrintDocumentAdapter() {
-			@Override
-			public void onStart() {
-				super.onStart();
-			}
-
-			@Override
-			public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes, CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
-				if (cancellationSignal.isCanceled()) {
-					callback.onLayoutCancelled();
-					return;
-				}
-
-				PrintDocumentInfo.Builder builder = new PrintDocumentInfo.Builder("combined_print");
-				builder.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-						.setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
-						.build();
-
-				callback.onLayoutFinished(builder.build(), true);
-			}
-
-			@Override
-			public void onWrite(PageRange[] pages, ParcelFileDescriptor destination, CancellationSignal cancellationSignal, WriteResultCallback callback) {
-				OutputStream out = null;
-				try {
-					out = new FileOutputStream(destination.getFileDescriptor());
-
-					// 将Bitmap写入PDF
-					PdfDocument pdfDocument = new PdfDocument();
-					PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(combinedImage.getWidth(), combinedImage.getHeight(), 1).create();
-					PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-
-					Canvas canvas = page.getCanvas();
-					canvas.drawBitmap(combinedImage, 0, 0, null);
-
-					pdfDocument.finishPage(page);
-
-					pdfDocument.writeTo(out);
-					pdfDocument.close();
-
-					callback.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
-				} catch (IOException e) {
-					e.printStackTrace();
-					callback.onWriteFailed(e.toString());
-				} finally {
-					try {
-						if (out != null) {
-							out.close();
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-
-		// 启动打印对话框
-		printManager.print("combined_print_job", printAdapter, new PrintAttributes.Builder().build());
-	}
-
-
-//	// 将BufferedImage保存为PDF
-//	private static String writeToPdf(BufferedImage combinedImage) throws IOException, FileNotFoundException {
-//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//		ImageIO.write(combinedImage, "PNG", baos);
-//		byte[] imageInByte = baos.toByteArray();
-//		baos.close();
-//
-//		ImageData imageData = ImageDataFactory.create(imageInByte);
-//		Image pdfImg = new Image(imageData);
-//
-//		// Specify the path to save the PDF
-//		String key = BarUtil.sdf.format(new Date());
-//		//write text part content to a file.
-//		String dest = CASUtility.getPIMDirPath().concat(key + "transaction.pdf");
-//		PdfWriter writer = new PdfWriter(dest);		//~~~~this step generate an empty file on hard disk!~~~
-//		PdfDocument pdfDoc = new PdfDocument(writer);
-//		Document document = new Document(pdfDoc);
-//
-//		// Add image to PDF
-//		document.add(pdfImg);
-//
-//		document.close();	//all the content in document is now write to the file on hard disk~~~~
-//		return key;
-//	}
-//
-//	private static int drawFisrtPart(List<String> lines1, Graphics2D g, int maxWidth) {
-//	    int y = 20; //@NOTE can not print from 0, because seems the first line was printed out of the area.(can not be seen)
-//	    if(lines1.size() == 0) {
-//	        return y;
-//	    }
-//	    boolean startToLeftAline = false;
-//	    for (int i = 0; i < lines1.size() - 1; i++) {
-//	        String line = lines1.get(i).trim();
-//	        int startP = 0;
-//	        if(!startToLeftAline && line.equals(BarUtil.getSeperatorLine(0))) {
-//	            startToLeftAline = true;
-//	            line += line.substring(0, 30);
-//	        }
-//	        if(!startToLeftAline) {
-//	            startP = (maxWidth - g.getFontMetrics().stringWidth(line)) / 2;
-//	        }
-//
-//	        // Check for consecutive spaces when startP is zero
-//	        if (startP == 0) {
-//	            int lastSpaceIndex = line.lastIndexOf("  ");
-//	            if (lastSpaceIndex != -1) {
-//	                String leftPart = line.substring(0, lastSpaceIndex);
-//	                String rightPart = line.substring(lastSpaceIndex).trim();
-//	                g.drawString(leftPart, 0, y);
-//	                g.drawString(rightPart, maxWidth - g.getFontMetrics().stringWidth(rightPart), y);
-//	                y += g.getFontMetrics().getHeight();
-//	                continue;
-//	            }
-//	        }
-//
-//	        g.drawString(line, startP, y);
-//	        y += g.getFontMetrics().getHeight();
-//	    }
-//	    String lastLine = lines1.get(lines1.size() - 1).trim();
-//	    g.drawString(lastLine, (maxWidth - g.getFontMetrics().stringWidth(lastLine)) / 2, y);
-//	    return y;
-//	}
-
-	public static boolean printThroughOSdriver(Path path1, File qrcodeImg, Path path2, boolean deleteCommandFile) {
-		//if qrcodeImg is null, then treated as calling the two parameters method.
-		if (qrcodeImg == null) {
-			boolean status = printThroughOSdriver(PrintUtil.getMevCommandFilePath(path1, Command.GS_V_m_n), false);
-			flushout();
-			return status;
-		}
-		//qrcodeImg is not null, then also call into the 2 param method to print out the text part.
-		if(!printThroughOSdriver(path1, deleteCommandFile)) {
-			return false;
-		}
-
-		if(path2 != null && !printThroughOSdriver(path2, deleteCommandFile)) {
-			return false;
-		}
-
-//		//then print out the qrcode part.
-//		DocPrintJob job = defaultService.createPrintJob();
-//		PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
-//
-//		pras.add(OrientationRequested.PORTRAIT);
-//		pras.add(PrintQuality.HIGH);
-//		pras.add(new Copies(1));
-//		pras.add(MediaSizeName.ISO_A7);
-//
-//		DocAttributeSet das = new HashDocAttributeSet();
-//		das.add(new MediaPrintableArea(0.3f, 0, 2, 2, MediaPrintableArea.INCH));
-//		try {
-//			FileInputStream fin = new FileInputStream(qrcodeImg);
-//			Doc doc = new SimpleDoc(fin, DocFlavor.INPUT_STREAM.PNG, das);
-//
-//			job.print(doc, pras);
-//			fin.close();
-//		} catch (PrintException | IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			return false;
-//		}
-
-
-		flushout();
-
-		return true;
-	}
-
-	private static void flushout() {
-		byte[] resetCommand = new byte[]{(byte) 0x0C};  // FF (Form Feed)
-
-//        InputStream is = new ByteArrayInputStream(resetCommand);
-//
-//        // 获取默认打印服务
-//        PrintService service = PrintServiceLookup.lookupDefaultPrintService();
-//
-//        // 创建打印任务
-//        DocPrintJob printJob = service.createPrintJob();
-//        DocFlavor flavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
-//        Doc doc = new SimpleDoc(is, flavor, null);
-//
-//        // 发送打印任务
-//        try {
-//			printJob.print(doc, null);
-//		} catch (PrintException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	}
-	
-	public static boolean printThroughOSdriver(Path path, boolean deleteCommandFile) {
-//		try {
-//			DocPrintJob job = defaultService.createPrintJob();
-//	    	FileInputStream stream = new FileInputStream(path.toFile());
-//
-//	    	PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
-//			DocAttributeSet das = new HashDocAttributeSet();
-//
-//			job.print(new SimpleDoc(stream,  DocFlavor.INPUT_STREAM.AUTOSENSE, das), pras);
-//			if(deleteCommandFile) {
-//				Files.deleteIfExists(path);
-//			}
-//			return true;
-//		} catch (PrintException e) {
-//			L.e("PrintService", ": Print through OS", e);
-//		} catch(IOException ioe) {
-//			L.e("PrintService", ": Print through OS", ioe);
-//		}
-		return false;
 	}
 
 	public static Path getMevCommandFilePath(String fileName, byte[] command) {
@@ -444,21 +208,13 @@ public class PrintUtil {
 				}
 				//QRCode.
 				if(image != null) {
-					/////////////////////////////
-					// 初始化打印机
-					outputStream.write(INIT_PRINTER);
-
-					// 选择QR码模型
-					outputStream.write(SELECT_QR_MODEL);
-
-					// 设置QR码大小
-					outputStream.write(SET_QR_SIZE);
-
-					// 设置错误校正级别
-					outputStream.write(SET_QR_ERROR_CORRECTION);
+					outputStream.write(INIT_PRINTER);	// 初始化打印机
+					outputStream.write(SELECT_QR_MODEL);			// 选择QR码模型
+					outputStream.write(SET_QR_SIZE);	// 设置QR码大小
+					outputStream.write(SET_QR_ERROR_CORRECTION);	// 设置错误校正级别
 
 					// 存储QR码数据
-					byte[] qrDataBytes = "https://www.example.com".getBytes("UTF-8");
+					byte[] qrDataBytes = getImageBytes_chatGPT(image);
 					int qrDataLength = qrDataBytes.length + 3;
 					byte[] storeQrDataCommand = {0x1D, 0x28, 0x6B, (byte) (qrDataLength % 256), (byte) (qrDataLength / 256), 0x31, 0x50, 0x30};
 					outputStream.write(storeQrDataCommand);
@@ -502,62 +258,6 @@ public class PrintUtil {
 		}, executorService);
 	}
 
-//	static CompletableFuture<String> doWebSocketPrint(final String ip, final List<String> sndMsg) {
-//		if (ip == null || ip.length() == 0)
-//			return CompletableFuture.completedFuture(null);
-//
-//		String[] ipAry = ip.split("\\.");
-//		if (ipAry.length != 4) {
-//			L.e("Invalidate Ip found in doWebSocketPrint, the ip is:", ip, null);
-//			return CompletableFuture.completedFuture(null);
-//		}
-//
-//		return CompletableFuture.supplyAsync(() -> {
-//			Socket socket = null;
-//			OutputStream outputStream = null;
-//			try {
-//				InetAddress inet = InetAddress.getByAddress(new byte[]{
-//						Short.valueOf(ipAry[0]).byteValue(), Short.valueOf(ipAry[1]).byteValue(),
-//						Short.valueOf(ipAry[2]).byteValue(), Short.valueOf(ipAry[3]).byteValue()});
-//				if (!inet.isReachable(BarOption.getPrinterMinWaiTime())) {
-//					L.e("printer slow. ip is: ", ip, null);
-//					return null;
-//				}
-//
-//				socket = new Socket(ip, 9100);
-//				outputStream = socket.getOutputStream();
-//				for (String msg : sndMsg) {
-//					if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
-//						continue;
-//					}
-//					sendContentOutThroughStream(msg, outputStream, ip);
-//				}
-//				outputStream.close();
-//				socket.close();
-//				return "OK";
-//			} catch (Exception exp) {
-//				ErrorUtil.write(exp);
-//				L.e(ip, "Error when printing content to socket", exp);
-//				return null;
-//			} finally {
-//				if (outputStream != null) {
-//					try {
-//						outputStream.close();
-//					} catch (Exception exp) {
-//						L.e(ip, "Error when trying to close outputStream", exp);
-//					}
-//				}
-//				if (socket != null) {
-//					try {
-//						socket.close();
-//					} catch (Exception exp) {
-//						L.e(ip, "Error when trying to close socket", exp);
-//					}
-//				}
-//			}
-//		}, executorService);
-//	}
-	
     public static byte[] POS_S_SetQRcode(String strCodedata, int nWidthX, int nErrorCorrectionLevel) {
     	
 		if (nWidthX < 2 | nWidthX > 6 | nErrorCorrectionLevel < 1 | nErrorCorrectionLevel > 4)
@@ -592,115 +292,7 @@ public class PrintUtil {
         return send;
     }
     
-
-	
 	//==============================================
-	static String doSerialPrint(List<String> sndMsg) {
-//        CommPortIdentifier commPortIdentifier;
-//        SerialPort tSerialPort = null;
-//        DataOutputStream outputStream = null;
-//        try {
-//            Enumeration tPorts = CommPortIdentifier.getPortIdentifiers();
-//            if (tPorts == null || !tPorts.hasMoreElements()) {
-//            	JOptionPane.showMessageDialog(BarFrame.instance, "no comm ports found! please check the printer connection.");
-//                return null;
-//            }
-//
-//            while (tPorts.hasMoreElements()) {
-//                commPortIdentifier = (CommPortIdentifier) tPorts.nextElement();
-//                if (commPortIdentifier.getPortType() != CommPortIdentifier.PORT_SERIAL)
-//                    continue;
-//
-//                //if (!commPortIdentifier.isCurrentlyOwned()) {
-//                    tSerialPort = (SerialPort)commPortIdentifier.open("PrintService", 10000);//并口用"ParallelBlackBox"
-//                    outputStream = new DataOutputStream(tSerialPort.getOutputStream());
-//                    for (String msg : sndMsg) {
-//                    	if(msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
-//                    		continue;
-//                    	}
-//            			sendContentOutThroughStream(msg, outputStream, "serial");
-//					}
-////                    outputStream.write(27); // 打印机初始化：
-////                    outputStream.write(64);
-////
-////                    char[] tTime = pDate.toCharArray(); // 输出日期时间 输出操作员工号
-////                    for (int i = 0; i < tTime.length; i++)
-////                        outputStream.write(tTime[i]);
-////
-////                    outputStream.write(13); // 回车
-////                    outputStream.write(10); // 换行
-////                    outputStream.write(10); // 进纸一行
-////
-////                    outputStream.write(28); // 设置为中文模式：
-////                    outputStream.write(38);
-////                    String tContent = ((String) CustOpts.custOps.getValue(PosDlgConst.PrintTitle)).concat("\n");
-////                    for (int i = 0, len = getUsedRowCount(); i < len; i++) { // 遍历有效行。
-////                        tContent = tContent.concat((String) tblContent.getValueAt(i, 1)).concat("\n"); // 再取出品名
-////                        tContent = tContent.concat((String) tblContent.getValueAt(i, 3)).concat("   "); // 再取出单价
-////                        tContent = tContent.concat((String) tblContent.getValueAt(i, 2)).concat("   "); // 再取出数量
-////                        tContent = tContent.concat((String) tblContent.getValueAt(i, 4)).concat("\n"); // 再取出小计
-////                    }
-////                    for (int i = 0; i < 4; i++)
-////                        // 换行
-////                        tContent = tContent.concat("\n");
-////
-////                    tContent = tContent.concat(PosDlgConst.SumTotal);
-////                    tContent = tContent.concat(tfdShoudReceive.getText());
-////                    tContent = tContent.concat(PosDlgConst.Unit).concat("   ");// 总计
-////
-////                    tContent = tContent.concat(PosDlgConst.Receive);
-////                    tContent = tContent.concat(tfdActuallyReve.getText());
-////                    tContent = tContent.concat(PosDlgConst.Unit).concat("\n");// 收银
-////
-////                    tContent = tContent.concat(PosDlgConst.Change);
-////                    tContent = tContent.concat(tfdChange.getText());
-////                    tContent = tContent.concat(PosDlgConst.Unit);// 找零
-////
-////                    tContent =
-////                            tContent.concat("\n\n      ").concat(
-////                                    (String) CustOpts.custOps.getValue(PosDlgConst.Thankword));
-////                    tContent = tContent.concat("\n\n");
-////
-////                    Object tEncodType = CustOpts.custOps.getValue(PosDlgConst.EncodeStyle);
-////                    if (tEncodType == null)
-////                        tEncodType = "GBK";
-////                    if (!Charset.isSupported(tEncodType.toString()))
-////                        return;
-////                    BufferedWriter tWriter =
-////                            new BufferedWriter(new OutputStreamWriter(outputStream, tEncodType.toString()));
-////                    tWriter.write(tContent);
-////                    tWriter.close();
-
-        			return "OK";
-//                //}
-//            }
-//
-//			JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.PrinterError());
-//            return null;
-//        } catch (Exception e) {
-//			ErrorUtil.write(e);
-//			L.e("LPT printing", "Error when printing content to LPT.", e);
-//			return null;
-//        }finally {
-//        	if(outputStream != null) {
-//        		try {
-//        			outputStream.close();
-//        		}catch(Exception exp) {
-//        			System.out.println(exp);
-//					L.e("serial2", "Error when trying to close outputString of serial port", exp);
-//        		}
-//        	}
-//        	if(tSerialPort != null) {
-//        		try {
-//        			tSerialPort.close();
-//        		}catch(Exception e) {
-//        			System.out.println(e);
-//					L.e("serial2", "Error when trying to close serial port", e);
-//        		}
-//        	}
-//        }
-    }
-
 	static void sendContentOutThroughStream(String sndMsg, OutputStream outputStream, String ip)
 			throws IOException {
 		if("Command.BEEP".equals(sndMsg)) {
@@ -858,68 +450,6 @@ public class PrintUtil {
 		return formattedContent;
 	}
 
-	static String printSerialFormattedContent(Path path, byte[] contentToWirteToFile) {
-		//write content to file.
-		try {
-	    	Files.write(path, contentToWirteToFile);
-	    } catch (IOException e) {
-	    	ErrorUtil.write(e);
-	    	return null;
-	    }
-		//set font
-		String font = (String)CustOpts.custOps.getValue("serialfont");
-	    if(font ==  null || font.length() < 1) {
-	        font = (String)CustOpts.custOps.getValue("font");
-	    }
-	    byte[] fontCmd = null;
-		if (font == null || font.length() < 1) {
-			fontCmd = Command.GS_ExclamationMark;
-		} else {
-			// default: "27, 33, 48" because it works for both thermal and non-thermal
-			String[] pieces = font.split(",");
-			if (pieces.length != 3) {
-				fontCmd = Command.GS_ExclamationMark;
-			} else {
-				for (int i = 0; i < 3; i++) {
-					Command.GS_ExclamationMark[i] = Integer.valueOf(pieces[i].trim()).byteValue();
-				}
-				fontCmd = Command.GS_ExclamationMark;
-			}
-		}
-		printThroughOSdriver(getSerialCommandFilePath("serialBigFontCommand.xml", fontCmd), false);
-		//print the file content out.
-		boolean isSuccess = printThroughOSdriver(path, null, null, !BarOption.isDebugMode());
-
-		//print cut paper command.
-		if(isSuccess) {
-			isSuccess = printThroughOSdriver(getSerialCommandFilePath("serialCutCommand.xml", Command.GS_V_m_n), null, null, false);
-		}
-
-		return "OK";
-	}
-//
-//      L.d("PrintService", "start to translate selection into ipContent for printing.");
-//      String ip = getIPofNonEmptyIpContentMapEntry();
-//      if(ip != null){
-//          L.d("PrintService", "ipContent not empty, means last print job not finished yet! returning not success flag.");
-//          return ip;                     //未打印完毕
-//      }
-//      if(checkErrorPrinterList()){
-//          BarFrame.setStatusMes("PRINTING...");
-//      }
-//      popKitchenBillIdx();
-//
-//      Double priceOfBill = saveSaleRecToDB(isCancel);                              //save to db
-//
-//      if(!StringUtils.isBlank(serverip)){                     //send to server
-//          sendToServer(serverip);
-//      }
-//
-//      if (manageDishesIntoMapAndWaitingForPrint(isCancel, priceOfBill)) { //send to printer
-//          return SUCCESS_STR;
-//      }else {
-//          return ERROR_STR;
-//      }
 	private static boolean checkErrorPrinterList() {
 	    StringBuilder ipStr = new StringBuilder();
 	    for(String ip : errorPrinterList){
@@ -949,11 +479,12 @@ public class PrintUtil {
 		return "";
 	}
 
-//	private static byte[] getImageBytes_chatGPT(Bitmap image) {
-//		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
-//		return stream.toByteArray();
-//	}
+	private static byte[] getImageBytes_chatGPT(Bitmap image) {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		return stream.toByteArray();
+	}
+
 	public static byte[] getImageBytes(Bitmap image) throws Exception {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
