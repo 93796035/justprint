@@ -573,7 +573,7 @@ public class PrintService{
     	String transType = getOutTransType(pSndMsg);	//we've added special content when preparing the content.----????bad comment! should mention what's the special content.
     	List<String> sndMsg = cleanSndMsgBaseOnType(pSndMsg, transType);
 
-		List<String> responseStrs = null;
+		List<Object> responseStrs = null;
 		String strFR = null;
     	if(!transType.equals(REPORT) && !transType.equals(KITCHEN)) {
 			//other types has same print format (ADDI, RFER, R(eturn)_RFER, V(oid)_RFER)
@@ -593,7 +593,7 @@ public class PrintService{
 		CompletableFuture<String> result = PrintUtil.doWebSocketPrint(
 				printerName.trim(),
 				pSndMsg,
-				responseStrs == null ? null : responseStrs.get(0),
+				responseStrs == null ? null : (Bitmap)responseStrs.get(0),
 				responseStrs == null ? null : responseStrs.get(1).toString());
 		try {
 			strFR = result.get();
@@ -602,12 +602,12 @@ public class PrintService{
 		}
 		//in case user want to always print duplicated temporal bill automatically
 		if(BarOption.isPrintDuplicatedBill() && transType.equals(ValuePossible.TypTrans.ADDI)) {
-			PrintUtil.doWebSocketPrint(printerName.trim(), sndMsg, responseStrs.get(0), responseStrs.get(1).toString());
+			PrintUtil.doWebSocketPrint(printerName.trim(), sndMsg, (Bitmap)responseStrs.get(0), responseStrs.get(1).toString());
 		}
 		return strFR;
 	}
     
-	private static List<String> sendWebMevBillRequest(final List<String> sndMsg, String transType) {
+	private static List<Object> sendWebMevBillRequest(final List<String> sndMsg, String transType) {
     	Transaction transActu = new Transaction( );
 		try {
 			MevUtils.buildTransaction(sndMsg, transType, transActu);
@@ -629,14 +629,13 @@ public class PrintService{
 		String strUrlQRCode = UtilesQRCode.createUrlQRCode(transActu,
 				BarOption.getCertificateSerialNumberWebSRM());
 
-		List<String> responses = new ArrayList<String>();
-		responses.add(strUrlQRCode);
-//		// Creation of the image containing the QR code
-//		try {
-//			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 188,  188, 0));//why 250, 70 seems doesn't change anything?
-//		} catch (Exception e) {
-//			L.e("MevUtils", "exception when generating codeQR for transaction", e);
-//		}
+		List<Object> responses = new ArrayList<Object>();
+		// Creation of the image containing the QR code
+		try {
+			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 188,  188, 0));//why 250, 70 seems doesn't change anything?
+		} catch (Exception e) {
+			L.e("MevUtils", "exception when generating codeQR for transaction", e);
+		}
 		
 		// now that we've got everything ready, Send the transaction to the WEB-SRM (yeah need to also check if there's records in batch.
 		String response = MevUtils.flushBatchWithCurTransaction(jsonTransaction, signatransm, transActu.EmprCertifSEV, strUrlQRCode, transActu.NoTrans);
