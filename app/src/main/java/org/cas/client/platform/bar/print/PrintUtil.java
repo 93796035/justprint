@@ -3,6 +3,7 @@ package org.cas.client.platform.bar.print;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -57,6 +58,12 @@ public class PrintUtil {
 	public static final String OLD_GST = "*Old GST:";
 	public static final String OLD_QST = "*Old QST:";
 	public static final String OLD_TOTAL = "*Old Total:";
+
+	private static final byte[] INIT_PRINTER = {0x1B, 0x40}; // 初始化打印机
+	private static final byte[] SELECT_QR_MODEL = {0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00}; // 选择QR码模型2
+	private static final byte[] SET_QR_SIZE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x0C}; // 设置QR码大小
+	private static final byte[] SET_QR_ERROR_CORRECTION = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x30}; // 设置错误校正级别
+	private static final byte[] PRINT_QR_CODE = {0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x51, 0x30}; // 打印QR码
 
 	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 	public static List<String> errorPrinterList = new ArrayList<String>();
@@ -473,33 +480,23 @@ public class PrintUtil {
 		return "";
 	}
 
-	private static byte[] getImageBytes_chatGPT(Bitmap image) {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		image.compress(Bitmap.CompressFormat.PNG, 100, stream);
-		return stream.toByteArray();
-	}
-
 	public static byte[] convertImageToEscPosCommand(Bitmap image) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		// 设置初始化命令
-		baos.write(0x1B);
-		baos.write('@');
-
-		// 设置图片模式
-		baos.write(0x1B);
-		baos.write(0x33);
-		baos.write(0x00); // 设置行间距为0
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(0x1B);// 设置初始化命令
+		stream.write('@');
+		stream.write(0x1B);// 设置图片模式
+		stream.write(0x33);
+		stream.write(0x30); // 设置行间距
 
 		for (int y = 0; y < height; y += 24) {
-			baos.write(0x1B);
-			baos.write(0x2A);
-			baos.write(0x21); // 选择位图模式，24点密度
-			baos.write((byte) (width % 256)); // 图片宽度低位
-			baos.write((byte) (width / 256)); // 图片宽度高位
+			stream.write(0x1B);
+			stream.write(0x2A);
+			stream.write(0x21); // 选择位图模式，24点密度
+			stream.write((byte) (width % 256)); // 图片宽度低位
+			stream.write((byte) (width / 256)); // 图片宽度高位
 
 			for (int x = 0; x < width; x++) {
 				for (int k = 0; k < 3; k++) {
@@ -515,30 +512,23 @@ public class PrintUtil {
 							slice |= (1 << (7 - b));
 						}
 					}
-					baos.write(slice);
+					stream.write(slice);
 				}
 			}
-			baos.write(0x0A); // 换行
+			stream.write(0x0A); // 换行
 		}
-
-		// 重置行间距
-		baos.write(0x1B);
-		baos.write(0x32);
-
-		return baos.toByteArray();
+		stream.write(0x1B);// 重置行间距
+		stream.write(0x32);
+		return stream.toByteArray();
 	}
 
 	public static byte[] getImageBytes(Bitmap image) throws Exception {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
-		// 初始化打印机
-		stream.write(Command.ESC_Init);
-
+		stream.write(Command.ESC_Init);// 初始化打印机
 		int width = image.getWidth();
 		int height = image.getHeight();
 
-		// 打印图像命令
-		stream.write(Command.GS_k_m_v_r_nL_nH);
+		stream.write(Command.GS_k_m_v_r_nL_nH);		// 打印图像命令
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x += 8) {
