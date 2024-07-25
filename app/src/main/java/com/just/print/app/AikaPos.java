@@ -134,11 +134,11 @@ public class AikaPos extends Application {
 
     private void createBillTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Bill (" +
-                "_id INTEGER PRIMARY KEY, createtime TEXT, tableName TEXT, BillIndex TEXT, " +
+                "_id INTEGER PRIMARY KEY, createdtime TEXT, tableName TEXT, BillIndex TEXT, " +
                 "total INTEGER, discount INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
                 "debitReceived INTEGER, visaReceived INTEGER, masterReceived INTEGER, " +
                 "otherReceived TEXT, tip INTEGER, cashback INTEGER, STATUS INTEGER, " +
-                "userId INTEGER, Comment TEXT, opentime TEXT, invoiceId INTEGER);";
+                "userId INTEGER, Comment TEXT, openTime TEXT, invoiceId INTEGER);";
         db.execSQL(sql);
     }
 
@@ -153,7 +153,7 @@ public class AikaPos extends Application {
         String sql = "CREATE TABLE IF NOT EXISTS OPERATIONLOG (" +
                 "_id INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
                 "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tablename TEXT, " +
-                "opentime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
+                "openTime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
                 "orderTime TEXT, operationTime TEXT, other1 INTEGER, other2 INTEGER, " +
                 "other3 TEXT, other4 TEXT);";
         db.execSQL(sql);

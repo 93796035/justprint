@@ -109,7 +109,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
             //have to fetch the bill by outputs, because there's some table might have no output one it, it exist just in case user want to undo the split......
             StringBuilder sql = new StringBuilder("select t._id, t.openTime, t.STATUS as s1, t.posX, t.posY, t.WIDTH, t.HEIGHT, t.displayIdx, t.name, ")
                     .append("t.TYPE, e.nickName, b.createdTime, b.TOTAL, b.STATUS as s2")
-                    .append(" from dining_Table as t left join bill as b on t.name = b.tableName and t.opentime = b.opentime")
+                    .append(" from dining_Table as t left join bill as b on t.name = b.tableName and t.openTime = b.openTime")
                     .append(" and (b.STATUS is null or b.STATUS < ").append(DBConsts.COMPLETED).append(")")
                     .append(" left join USER as e on b.userId = e._id");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -424,10 +424,10 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
         //check if there's an empty bill for each table.
         for (int i = 0; i < TablesPanel.btnTables.size(); i++) {
             if(btnTables.get(i).getStatus() == DBConsts.OPENNED ) {
-                String opentime = btnTables.get(i).getOpenTime();
+                String openTime = btnTables.get(i).getOpenTime();
                 String tableName = btnTables.get(i).getTableName();
                 StringBuilder sql = new StringBuilder("select * from Bill where status = 0 and tableName = '")
-                        .append(tableName).append("' and opentime = '").append(opentime).append("'");
+                        .append(tableName).append("' and openTime = '").append(openTime).append("'");
                 try {
                     Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
                     int tmpPos = rs.getCount();

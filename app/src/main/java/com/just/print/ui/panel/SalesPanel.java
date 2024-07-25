@@ -101,7 +101,7 @@ public class SalesPanel extends PicturePane{
 
 //    public static void resetCurTable(){
 //    	try {
-//            //clean all empty bill (match table id and opentime, status is null, while doesn't exist in any SALE_RECORD.).
+//            //clean all empty bill (match table id and openTime, status is null, while doesn't exist in any SALE_RECORD.).
 //            //if there's an SALE_RECORD was deleted from this bill, this bill is still considered as empty.
 //            //if there's an SALE_RECORD was completed 10
 ////            sql = new StringBuilder("update bill set status = ").append(DBConsts.DELETED)

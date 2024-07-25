@@ -631,12 +631,12 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				AikaPos.db.execSQL(sql.toString());
 				//updating the open time of the table--------for counter mode, this step is necessary, because user might need to switch between the
 				//opened tables(table is worked as bills in counter mode.)
-				sql = new StringBuilder("update dining_Table set opentime = '").append(timeStr)
+				sql = new StringBuilder("update dining_Table set openTime = '").append(timeStr)
 						.append("' WHERE name = '").append(BarFrame.instance.getCurTable()).append("'");
 				AikaPos.db.execSQL(sql.toString());
 				BarFrame.instance.valOpenTime.setText(timeStr);
 			} catch (Exception e) {
-				L.e("MenuPanel ", "Updating opentime when adding first dish: " + sql, e);
+				L.e("MenuPanel ", "Updating openTime when adding first dish: " + sql, e);
 			}
 
 		}

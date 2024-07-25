@@ -712,7 +712,7 @@ public class WifiPrintService implements Runnable{
             dataSyncService.tableName = CustomerSelection.getInstance().getTableName();
             dataSyncService.billIndex = billIndex;
             dataSyncService.totalPrice = totalPrice;
-            dataSyncService.opentime = openTime;
+            dataSyncService.openTime = openTime;
             ArrayList<SelectionDetail> newList = new ArrayList<SelectionDetail>();
             for (SelectionDetail selectionDetail : CustomerSelection.getInstance().getSelectedDishes()) {
                 newList.add(selectionDetail);

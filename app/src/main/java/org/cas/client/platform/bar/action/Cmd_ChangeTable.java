@@ -54,7 +54,7 @@ public class Cmd_ChangeTable implements SamActionListener {
 			}
 			try {
 				StringBuilder sql = new StringBuilder("select _id from bill where tableName = '").append(selectedTables.get(0).getTableName()).append("'")
-						.append(" and opentime = '").append(selectedTables.get(0).getOpenTime()).append("'")
+						.append(" and openTime = '").append(selectedTables.get(0).getOpenTime()).append("'")
 						.append(" and (status is null or status < ").append(DBConsts.COMPLETED)
 						.append(" and status >= ").append(DBConsts.ORIGINAL).append(")");
 				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -71,14 +71,14 @@ public class Cmd_ChangeTable implements SamActionListener {
 				}
 
 	            //if new table's startus is 0, then set start time with the old table's open time. otherwise, it's a join to not switching to table,
-				//in this case, we should update the bill and SALE_RECORD's time to the opentime of the target table.
-	            //be noticed that when table closed, we make sure the opentime is removed. it's not because it will be used for check status, it's for order site in future.
+				//in this case, we should update the bill and SALE_RECORD's time to the openTime of the target table.
+	            //be noticed that when table closed, we make sure the openTime is removed. it's not because it will be used for check status, it's for order site in future.
 				int targetBillIdx;
 				String openTime;
 				TableButton targetTableBtn = selectedTables.get(1);
 				if(targetTableBtn.getStatus() == DBConsts.ORIGINAL) {	//if the target is not openned.
 					targetBillIdx = 1;
-					openTime = selectedTables.get(0).getOpenTime(); //the startTime is opentime here, because only table mode has change table.
+					openTime = selectedTables.get(0).getOpenTime(); //the startTime is openTime here, because only table mode has change table.
 					DBUtil.updateTableStatusInDB(targetTableBtn.getTableName(), openTime);
 					targetTableBtn.setOpenTime(openTime);
 				}else {											//if the target table is already opened

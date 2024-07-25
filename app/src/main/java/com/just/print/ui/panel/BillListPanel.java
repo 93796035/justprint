@@ -498,7 +498,7 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         int num = 0;
         try {
             StringBuilder sql = new StringBuilder("select billIndex from BILL where tableName = '").append(tableName).append("'")
-                    .append(" and opentime = '").append(openTime).append("'");
+                    .append(" and openTime = '").append(openTime).append("'");
             //TBD:the status curently used "expired", means void and completed bills will all be included, to ensure the new customer number
             //number not duplicated with existing one.
             sql.append(" and (STATUS is null or STATUS < ").append(DBConsts.EXPIRED).append(" and STATUS >= 0)");

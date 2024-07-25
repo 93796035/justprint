@@ -56,7 +56,7 @@ public class Cmd_Report implements SamActionListener {
     					Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
     		            rs.moveToNext();
     		            String endTime = DBUtil.getCursorString(rs,"version");
-    		            sql = new StringBuilder("select * from Bill where opentime > '").append(endTime).append("'");
+    		            sql = new StringBuilder("select * from Bill where openTime > '").append(endTime).append("'");
     		            rs = AikaPos.db.rawQuery(sql.toString(), null);
     		            int tmpPos = rs.getCount();
     		            if(tmpPos > 0) {

@@ -155,12 +155,12 @@ public class BarOption {
     	String dateString = date.substring(0, 11);
     	String timeString = date.substring(11);
     	String barStartTime = BarOption.getStartTime();
-    	StringBuilder sql = new StringBuilder("select * from Bill where opentime > '")
+    	StringBuilder sql = new StringBuilder("select * from Bill where openTime > '")
 				.append(dateString + barStartTime).append("'");
 		try {
 			Cursor cursor = AikaPos.db.rawQuery(sql.toString(), null);
 			return (cursor.moveToFirst() == false && BarUtil.df.parse(dateString + timeString).getTime() > BarUtil.df.parse(dateString + barStartTime).getTime());
-            //no bill with opentime of today, and currently is not the morning before the store open....
+            //no bill with openTime of today, and currently is not the morning before the store open....
 		}catch(Exception exp) {
 			L.e("TablesPane", "exception happend when locateAEmptyTable: " + sql, exp);
 		}

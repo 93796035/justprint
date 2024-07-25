@@ -153,25 +153,25 @@ public class BillPanel extends BaseFragment
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
-            String opentime = DBUtil.getCursorString(rs, "openTime");
+            String openTime = DBUtil.getCursorString(rs, "openTime");
         	int cashReceived = DBUtil.getCursorInt(rs, "cashReceived");
         	int debitReceived = DBUtil.getCursorInt(rs, "debitReceived");
             int visaReceived = DBUtil.getCursorInt(rs, "visaReceived");
             int masterReceived = DBUtil.getCursorInt(rs, "masterReceived");
-            String otherreceived = DBUtil.getCursorString(rs, "otherReceived");
-            if(otherreceived == null) {
-            	otherreceived = "";
+            String otherReceived = DBUtil.getCursorString(rs, "otherReceived");
+            if(otherReceived == null) {
+            	otherReceived = "";
             }
         	int cashBack = DBUtil.getCursorInt(rs, "CASHBACK");
             int tip = DBUtil.getCursorInt(rs, "TIP");
             int status = DBUtil.getCursorInt(rs, "STATUS");
 
 			//generate a bill in db and update the SALE_RECORD with the new bill id
-			String createtime = BarUtil.df.format(new Date());
+			String createdTime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
-	            "INSERT INTO BILL(createtime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
-	            .append(" opentime, cashReceived, debitReceived, visaReceived, masterReceived, otherreceived, status) VALUES ('")
-				.append(createtime).append("', '")
+	            "INSERT INTO BILL(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
+	            .append(" openTime, cashReceived, debitReceived, visaReceived, masterReceived, otherReceived, status) VALUES ('")
+				.append(createdTime).append("', '")
 	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table
 	            .append(billIndex == null ? DBUtil.getCursorString(rs, "BillIndex") : billIndex).append("', ")	//bill
 	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
@@ -181,17 +181,17 @@ public class BillPanel extends BaseFragment
 	            .append(cashBack).append(", ")	//discount
 	            .append(LoginDlg.USERID).append(", '")		//emoployid
 	            .append(comment).append("', '")
-	            .append(opentime).append("', ")
+	            .append(openTime).append("', ")
 	            .append(cashReceived).append(", ")
 	            .append(debitReceived).append(", ")
 	            .append(visaReceived).append(", ")
 	            .append(masterReceived).append(", '")
-	            .append(otherreceived).append("', ")
+	            .append(otherReceived).append("', ")
 	            .append(status).append(")");
 
 			AikaPos.db.execSQL(sql.toString());
 
-		   	sql = new StringBuilder("Select _id from BILL where createdTime = '").append(createtime)
+		   	sql = new StringBuilder("Select _id from BILL where createdTime = '").append(createdTime)
 		   			.append("' and billIndex = '").append(billIndex).append("'");
             rs = AikaPos.db.rawQuery(sql.toString(), null);
             rs.moveToNext();
@@ -457,7 +457,7 @@ public class BillPanel extends BaseFragment
 	 */
 	private void logOperation(int operationType, int status, Dish dish) {
 		StringBuilder sql = new StringBuilder(
-				"INSERT INTO operationlog (OperationType, userId, BILLSTATUS, billId, outputId, tablename, opentime, billIdx, dishName, dishPrice, orderTime, operationTime) VALUES (")
+				"INSERT INTO operationlog (OperationType, userId, BILLSTATUS, billId, outputId, tablename, openTime, billIdx, dishName, dishPrice, orderTime, operationTime) VALUES (")
 				.append(operationType).append(", ")
 				.append(LoginDlg.USERID).append(", ")
 				.append(status).append(", ")
@@ -874,12 +874,12 @@ public class BillPanel extends BaseFragment
 		if(tableName.length() == 0) {	//add this check in case background thread update tables every minute, might reinit the model of cmbCurTable, now I've added check to avoid it.
 			L.e("BillPane", "no table info found from cmbCurtable", null);
 		}
-		String openTime = BarFrame.instance.valOpenTime.getText().toString();	//if it in cmd_return action, the opentime will be null
+		String openTime = BarFrame.instance.valOpenTime.getText().toString();	//if it in cmd_return action, the openTime will be null
 
 		//@Note, only when showing an expried bill (from checklistdlg), we give a billID to the method, for other case, we leave it empty.
 		//the BarFrame.instance.getCurBillID() always has value available, but we don't use it on purpose, because if the billID is empty, we'll know it's not a expired bill, the logic of fetching SALE_RECORD is easier.
 		//
-		//!!!be careful that this openTime on BarFrame is from tableButton's started Time, TableButton's started time could be Bill's created time(in counter mode), or opentime (table mode)
+		//!!!be careful that this openTime on BarFrame is from tableButton's started Time, TableButton's started time could be Bill's created time(in counter mode), or openTime (table mode)
 		//why? becaue in counter mode, we feel table opened time is not necessary(new table is created and opened as soon as the dish on old table is saved, while maybe it's not used for long time until next customer
 		//come in....), so, it make more sense to calculate form the time that dish send to kitchen.
 		initContent(BarFrame.instance.isShowingAnExpiredBill() ? String.valueOf(BarFrame.instance.getCurBillID()) : "",
@@ -1074,7 +1074,7 @@ public class BillPanel extends BaseFragment
 				new StringBuilder("select * from Bill where _id = ").append(billId)
 				: new StringBuilder("select * from Bill where billIndex = '").append(billIdx).append("'")
 				.append(" and tableName = '").append(tableName).append("'")
-				.append(" and opentime = '").append(openTime).append("'")
+				.append(" and openTime = '").append(openTime).append("'")
 				.append(" and (status is null or status < ").append(DBConsts.EXPIRED).append(")");// for expired bills, for sure it will have billId.
 
 		Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -1285,8 +1285,8 @@ public class BillPanel extends BaseFragment
 				this.comment = newComment.toString();	//set the comment property, so when creating a new bill base on current one, will copy the comment into the new bill.
 			}
 			 //TODO: why here is a logic bug, currently it will never be reached.....redo it when understand the meaning of government.
-			 else if(status < DBConsts.ORIGINAL){	//according to revenue test case, if it's refunded bill, when regenerate a bill base on it, should have no ref part, (personally don't understand it yet).
-				this.comment = "";
+			 else {	//according to revenue test case, if it's refunded bill, when regenerate a bill base on it, should have no ref part, (personally don't understand it yet).
+				L.e("BillPanel ", "unexpected status found when doing expireAndReGenerateBill: " + status, null);
 			}
 
 	 		// create a new bill=============================================================================

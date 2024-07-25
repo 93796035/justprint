@@ -30,7 +30,7 @@ public class DBUtil {
 
 	public static void updateTableStatusInDB(String tableName, String openTime) {
 		StringBuilder sql = new StringBuilder("update dining_Table set STATUS = ").append(DBConsts.OPENNED)
-				.append(", opentime = '").append(openTime)
+				.append(", openTime = '").append(openTime)
 				.append("' WHERE name = '").append(tableName).append("'");
 		try {
 			AikaPos.db.execSQL(sql.toString());
@@ -38,7 +38,7 @@ public class DBUtil {
 			L.e("openATable", "exception when openning a table: " + sql, exp);
 		}
 	}
-	//update all current SALE_RECORD and bill with target table name, opentime and with the new billIdx?
+	//update all current SALE_RECORD and bill with target table name, openTime and with the new billIdx?
 	//@Note: why people merge table??? maybe they are friends met in restaurant, they shouldn't share same bill number for sure,
 	//because they might AA when pay the bill.
 	public static void moveBillToAnotherTable(String newTableName, int newBillIdx, int billID, String openTime) {
@@ -61,7 +61,7 @@ public class DBUtil {
 		StringBuilder sql;
 		sql = new StringBuilder("update bill set tableName = '").append(newTable)
 				.append("', BillIndex = '").append(billIdx)
-				.append("' , opentime = '").append(openTime)
+				.append("' , openTime = '").append(openTime)
 				.append("' where _id = ").append(billID);
 		try {
 			AikaPos.db.execSQL(sql.toString());

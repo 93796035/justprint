@@ -563,10 +563,10 @@ public class BarFrame extends BaseFragmentActivity {
             newBillIdx = BillListPanel.getANewBillIdx(tableName, openTime);
         }
         //create a bill for it. in case there will be something like order fee in future. this bill has no create time yet, so will not display minutes on buttom in counter mode.(counter
-        //mode calculated created time, table mode calculates waited minutes by opentime.
+        //mode calculated created time, table mode calculates waited minutes by openTime.
         StringBuilder sql = new StringBuilder(
-                "INSERT INTO BILL(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, STATUS) VALUES ('")
-                .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, opentime, status) VALUES ('")
+                "INSERT INTO BILL(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, openTime, STATUS) VALUES ('")
+                .append(BarUtil.df.format(new Date())).append("', '")//		        "INSERT INTO bill(tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment, openTime, status) VALUES ('")
                 .append(tableName).append("', '")	//table
                 .append(newBillIdx).append("', ")			//bill
                 .append(0).append(", ")	//total
@@ -580,7 +580,7 @@ public class BarFrame extends BaseFragmentActivity {
                 .append(status).append(")");				//content
         try {
             AikaPos.db.execSQL(sql.toString());
-            sql = new StringBuilder("Select _id from bill where opentime = '").append(openTime)
+            sql = new StringBuilder("Select _id from bill where openTime = '").append(openTime)
                     .append("' and tableName = '").append(tableName)
                     .append("' and BillIndex = '").append(newBillIdx).append("'");
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

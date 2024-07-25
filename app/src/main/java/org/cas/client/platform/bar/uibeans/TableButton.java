@@ -68,7 +68,7 @@ public class TableButton extends Button {
         int billId = BarFrame.instance.createAnEmptyBill(getTableName(), openTime, 0, 0);
         BarFrame.instance.setCurBillID(billId);
 
-        //process the deliever type of table by making the opentime of both table and bill to the user set time.
+        //process the deliever type of table by making the openTime of both table and bill to the user set time.
         if(tableName.toUpperCase().startsWith("D")) {
 //            CustomerMatchingDlg customerMatchingDlg = new CustomerMatchingDlg(AikaPos.instance);
 //            customerMatchingDlg.setVisible(true);
@@ -77,11 +77,11 @@ public class TableButton extends Button {
 //            openTime = BarUtil.df.format(customerMatchingDlg.openTime);
 //            setOpenTime(openTime);
 //            StringBuilder sql = new StringBuilder("update dining_Table set displayIdx = ").append(customerMatchingDlg.selectedID).append(",")
-//                    .append(" opentime = '").append(openTime).append("'")
+//                    .append(" openTime = '").append(openTime).append("'")
 //                    .append(" WHERE name = '").append(tableName).append("'");
 //            try {
 //                PIMDBModel.getStatement().executeUpdate(sql.toString());
-//                sql = new StringBuilder("update bill set opentime = '").append(openTime).append("' where _id = ").append(billId);
+//                sql = new StringBuilder("update bill set openTime = '").append(openTime).append("' where _id = ").append(billId);
 //                PIMDBModel.getStatement().executeUpdate(sql.toString());
 //            }catch(Exception exp) {
 //                L.e("openATable", "exception when openning a table: " + sql, exp);
@@ -193,7 +193,7 @@ public class TableButton extends Button {
                 setAlpha(1.0f);
             } else { // if opened and in table mode, then the icon will be not opaque.
                 long minute = 0;
-                startTime = BarOption.isCounterMode() ? startTime : openTime; // table mode use opentime to calculate the waited time.
+                startTime = BarOption.isCounterMode() ? startTime : openTime; // table mode use openTime to calculate the waited time.
                 try {
                     minute = (startTime == null || startTime.length() == 0 || total == 0) ? 0L : (new Date().getTime() - BarUtil.df.parse(startTime).getTime()) / 1000 / 60;
                 } catch (Exception e) {

@@ -45,7 +45,7 @@ public class Cmd_CombineAll implements SamActionListener {
 //		else {
 //			HashMap idxMap = new HashMap();
 //			StringBuilder sql = new StringBuilder("select * from bill where tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem().toString()).append("'")
-//					.append(" and opentime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
+//					.append(" and openTime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 //					.append(" and (status is null or status < ").append(DBConsts.COMPLETED).append(")");
 //			try {
 //				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);

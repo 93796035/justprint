@@ -77,7 +77,7 @@ public class Cmd_OtherPay implements SamActionListener {
 		//do the exact button same style updating, but set the cash column with the total and set the other column with the pay mothod(Uber ski).
 		try {
    			//NOTE: should consider might been paid with card, so the new received should be the left not the total..
-			//we need to update the createdTime with current time, because the opentime could be a time before last batch, this bill was not calculatd into that batch, because it
+			//we need to update the createdTime with current time, because the openTime could be a time before last batch, this bill was not calculatd into that batch, because it
 			//not finished yet, might add more dish...so the bill must modify the createdTime to be calculated into next batch.
 			String paidTime = BarUtil.df.format(new Date());
    	    	StringBuilder sql = new StringBuilder("update bill set cashReceived = ").append(oldTotal)
@@ -90,7 +90,7 @@ public class Cmd_OtherPay implements SamActionListener {
 			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.
 			sql = new StringBuilder("update SALE_RECORD set STATUS = ").append(DBConsts.COMPLETED)
-					.append(" where time = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
+					.append(" where openTime = '").append(BarFrame.instance.valOpenTime.getText()).append("'")
 					.append(" and tableName = '").append(BarFrame.instance.getCmbCurTable().getSelectedItem()).append("'")
 					.append(" and userId = ").append(BarFrame.instance.getCurBillIndex());
 			if(billPanel.getStatus() >= DBConsts.COMPLETED) {
@@ -101,6 +101,8 @@ public class Cmd_OtherPay implements SamActionListener {
 			AikaPos.db.execSQL(sql.toString());
    		}catch(Exception exp) {
 			ErrorUtil.write(exp);
+			BarFrame.setStatusMes("Not payed succesfully, please choose other pay for now and notice the technician to check log.");
+			return;
 		}
 		
     	PrintService.printReceipt(billPanel, false, true, needToBePrinted);

@@ -63,7 +63,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
     public String tableName;
     public String billIndex;
     public Double totalPrice;
-    public String opentime;
+    public String openTime;
     private OrderFragmentActivity orderFragmentActivity;
 
     public static DataSyncService getInstance() {
@@ -96,7 +96,7 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     //load the new orders-----------------------
                     if (lastSelection != null && lastSelection.size() > 0) { //if there's order to send, then send.
                         json.put("totalPrice", totalPrice);
-                        json.put("openTime", opentime);
+                        json.put("openTime", openTime);
                         json.put("waiter", Options.getUserName());
                         json.put("table", URLEncoder.encode(tableName, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
                         json.put("billIndex", billIndex);//把数据put进json对象中
