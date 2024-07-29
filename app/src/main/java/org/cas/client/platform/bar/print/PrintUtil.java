@@ -204,72 +204,48 @@ public class PrintUtil {
 				outputStream = socket.getOutputStream();
 				//main content
 
+				if(image != null) {
+					Paint paint = new Paint();
+					paint.setColor(Color.BLACK);
+					paint.setTextSize(24);
+					paint.setAntiAlias(true);
+					paint.setTypeface(Typeface.MONOSPACE);
 
-				Paint paint = new Paint();
-				paint.setColor(Color.BLACK);
-				paint.setTextSize(24);
-				paint.setAntiAlias(true);
+					// 计算图像宽度和高度
+					float maxWidth = paint.measureText(BarUtil.getSeperatorLine(1));
+					List<String> lines2 = Arrays.asList(responseFromWebMev.split("\n"));
+					int totalHeight = (sndMsg.size() + lines2.size() + 2) * 30; // 每行30px
+					if (image != null) {
+						totalHeight += image.getHeight();
+					}
 
-				// 计算图像宽度和高度
-				int maxWidth = (int) paint.measureText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-				List<String> lines2 = Arrays.asList(responseFromWebMev.split("\n"));
-				int totalHeight = (sndMsg.size() + lines2.size() + 2) * 30; // 每行30px
-				if (image != null) {
-					totalHeight += image.getHeight();
-				}
+					Bitmap combinedImage = Bitmap.createBitmap((int)maxWidth, totalHeight, Bitmap.Config.ARGB_8888);
+					Canvas canvas = new Canvas(combinedImage);
+					canvas.drawColor(Color.WHITE);
 
-				Bitmap combinedImage = Bitmap.createBitmap(maxWidth, totalHeight, Bitmap.Config.ARGB_8888);
-				Canvas canvas = new Canvas(combinedImage);
-				canvas.drawColor(Color.WHITE);
-
-				int y = drawText(sndMsg, canvas, paint, maxWidth, 0);
-				if (image != null) {
+					float y = drawText(sndMsg, canvas, paint, maxWidth, 0);
 					canvas.drawBitmap(image, (maxWidth - image.getWidth()) / 2, y, null);
 					y += image.getHeight();
-				}
-				drawText(lines2, canvas, paint, maxWidth, y);
+					drawText(lines2, canvas, paint, maxWidth, y);
 
-				// 保存为临时文件
-				File tempFile = new File("/storage/emulated/0/Android/data/com.just.print/files/", "combinedPrint.png");
-				FileOutputStream fos = new FileOutputStream(tempFile);
-				combinedImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-				fos.flush();
-				fos.close();
+					// 保存为临时文件
+					File tempFile = new File("/storage/emulated/0/Android/data/com.just.print/files/", "combinedPrint.png");
+					FileOutputStream fos = new FileOutputStream(tempFile);
+					combinedImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+					fos.flush();
+					fos.close();
 
-
-				for (String msg : sndMsg) {
-					if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
-						continue;
-					}
-					sendContentOutThroughStream(msg, outputStream, ip);
-				}
-				//QRCode.
-				if(image != null) {
-//					outputStream.write(INIT_PRINTER);	// 初始化打印机
-//					outputStream.write(SELECT_QR_MODEL);			// 选择QR码模型
-//					outputStream.write(SET_QR_SIZE);	// 设置QR码大小
-//					outputStream.write(SET_QR_ERROR_CORRECTION);	// 设置错误校正级别
-
-					// 存储QR码数据
 					byte[] qrDataBytes = convertImageToEscPosCommand(combinedImage);
-//					int qrDataLength = qrDataBytes.length + 3;
-//					byte[] storeQrDataCommand = {0x1D, 0x28, 0x6B, (byte) (qrDataLength % 256), (byte) (qrDataLength / 256), 0x31, 0x50, 0x30};
-//					outputStream.write(storeQrDataCommand);
 					outputStream.write(qrDataBytes);
 
-//					// 打印QR码
-//					outputStream.write(PRINT_QR_CODE);
-//
-//					// 结束打印
-//					outputStream.write("\n\n".getBytes());
-					//////////////////////////
-				}
-				if(responseFromWebMev != null){
-					List<String> lastPart = Arrays.asList(responseFromWebMev.split("\n"));
-					for (String msg : lastPart) {
+					sendContentOutThroughStream(CUT, outputStream, ip);
+				}else{
+					for (String msg : sndMsg) {
+						if (msg.contains(REF_TO) && msg.substring(msg.indexOf(REF_TO) + REF_TO.length()).equals(sndMsg.get(0).substring(1))) {
+							continue;
+						}
 						sendContentOutThroughStream(msg, outputStream, ip);
 					}
-					sendContentOutThroughStream(CUT, outputStream, ip);
 				}
 				return "OK";
 			} catch (Exception exp) {
@@ -294,8 +270,8 @@ public class PrintUtil {
 			}
 		}, executorService);
 	}
-	private static int drawText(List<String> lines, Canvas canvas, Paint paint, int maxWidth, int startY) {
-		int y = 20; //@NOTE can not print from 0, because seems the first line was printed out of the area.(can not be seen)
+	private static float drawText(List<String> lines, Canvas canvas, Paint paint, float maxWidth, float startY) {
+		float y = 20; //@NOTE can not print from 0, because seems the first line was printed out of the area.(can not be seen)
 		if(lines.size() == 0) {
 			return y;
 		}

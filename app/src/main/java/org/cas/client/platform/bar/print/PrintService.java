@@ -56,10 +56,10 @@ public class PrintService{
 	private static final String PROBLEME_COMMUNICATION = "PROBLÈME DE COMMUNICATION";
 	public static final String TRANSACTION_ONLY = "#TRANSACTION_ONLY@";
 	public static final String INVOICE = "TRANSACTION#";
-	public static final String FACTURE_ORIGINAL = "\n            *FACTURE ORIGINAL*";
-	public static final String FACTURE_REVISEE =  "\n      *FACTURE RÉVISÉE*(Remplace 1 facture)";
-	private static final String PAYMENT_REÇU =   "\n               *PAIEMENT REÇU*";
-	public static final String PAYMENT_FAIL =   "\n              *PAIEMENT FAILED*";
+	public static final String FACTURE_ORIGINAL = "\n*FACTURE ORIGINAL*";
+	public static final String FACTURE_REVISEE =  "\n*FACTURE RÉVISÉE*(Remplace 1 facture)";
+	private static final String PAYMENT_REÇU =   "\n*PAIEMENT REÇU*";
+	public static final String PAYMENT_FAIL =   "\n*PAIEMENT FAILED*";
 	private static final String FILE = " #file:";
 	private static final int KITCHEN_SIZE = 7;
 	private static final int V_RFER_SIZE = 8;
@@ -148,9 +148,12 @@ public class PrintService{
         	JOptionPane.showMessageDialog(BarFrame.consts.PrinterSettingError());
         	return;
         }
-        if(ipContentMap.get(printerIP) == null)
-        	ipContentMap.put(printerIP,new ArrayList<String>());
+
         List<String> contentList = ipContentMap.get(printerIP);
+		if(contentList == null){
+			contentList = new ArrayList<String>();
+			ipContentMap.put(printerIP,contentList);
+		}
         
     	pushAllInOneBillContent(unclosedBillPanels, contentList, printerIP);
     	
@@ -632,7 +635,7 @@ public class PrintService{
 		List<Object> responses = new ArrayList<Object>();
 		// Creation of the image containing the QR code
 		try {
-			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 188,  188, 0));//why 250, 70 seems doesn't change anything?
+			responses.add(UtilesQRCode.getQRCodeImage(strUrlQRCode, 620,  620, 0));//why 250, 70 seems doesn't change anything?
 		} catch (Exception e) {
 			L.e("MevUtils", "exception when generating codeQR for transaction", e);
 		}
@@ -2412,8 +2415,6 @@ public class PrintService{
     	if(s != null && s.trim().length() > 0) {
     		String[] infos = s.split(":");
     		for(String info : infos) {
-    			int length = (tWidth - info.length())/2;
-    			sb.append(BarUtil.generateString(length, " "));
     			sb.append(info);
     			sb.append("\n");
     		}
@@ -2440,7 +2441,6 @@ public class PrintService{
 			}
 		}
 		idx += "  " + INVOICE + billId;
-		sb.append(BarUtil.generateString((tWidth - idx.length())/2, " "));
 		sb.append(idx);
 		sb.append("\n");
 		
