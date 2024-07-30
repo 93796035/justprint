@@ -958,6 +958,8 @@ public class BarFrame extends BaseFragmentActivity {
     }
 
     public void closeTableAndBillInDB(String tableName, String openTime) {
+        tableName = BarUtil.empty(tableName) ? cmbCurTable.getSelectedItem().toString() : tableName;
+        openTime = openTime == null || openTime.length() == 0? valOpenTime.getText().toString() : openTime;
         //all the bill should already completed when table closed except those was generated while has no SALE_RECORD on it.
         //this is the designed time to clean those bills.
         StringBuilder sql = new StringBuilder("update bill set STATUS = ").append(DBConsts.DELETED)
