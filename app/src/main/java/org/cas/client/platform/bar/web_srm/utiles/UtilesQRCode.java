@@ -27,6 +27,7 @@ public class UtilesQRCode {
 
     public static Bitmap getQRCodeImage(String data, int height, int width, int margin) throws WriterException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
+        hints.put(EncodeHintType.MARGIN, margin);
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L); // 7% error correction
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();

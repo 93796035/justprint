@@ -3,25 +3,15 @@ package org.cas.client.platform.bar.print;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.pdf.PdfDocument;
-import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.ParcelFileDescriptor;
-import android.print.PageRange;
-import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 
-import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
@@ -33,8 +23,6 @@ import org.cas.client.platform.casutil.L;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -212,22 +200,19 @@ public class PrintUtil {
 					paint.setTypeface(Typeface.MONOSPACE);
 
 					// 计算图像宽度和高度
-					float maxWidth = paint.measureText(BarUtil.getSeperatorLine(1));
+					float maxWidth = paint.measureText(BarUtil.getSeperatorLine(1)) + 20;
 					List<String> lines2 = Arrays.asList(responseFromWebMev.split("\n"));
-					int totalHeight = (sndMsg.size() + lines2.size() + 2) * 30; // 每行30px
-					if (image != null) {
-						totalHeight += image.getHeight();
-					}
+					int totalHeight = (sndMsg.size() + lines2.size() + 2) * 30 + image.getHeight(); // 每行30px
 
 					Bitmap combinedImage = Bitmap.createBitmap((int)maxWidth, totalHeight, Bitmap.Config.ARGB_8888);
 					Canvas canvas = new Canvas(combinedImage);
 					canvas.drawColor(Color.WHITE);
 
 					sndMsg.set(0, "\n\n\n" + sndMsg.get(0));
-					float y = drawText(sndMsg, canvas, paint, maxWidth, 0);
-					canvas.drawBitmap(image, (maxWidth - image.getWidth()) / 2, y, null);
-					y += image.getHeight();
-					drawText(lines2, canvas, paint, maxWidth, y);
+					float y = drawTextIntoCanvas(sndMsg, canvas, paint, maxWidth, 50);
+					canvas.drawBitmap(image, (maxWidth - image.getWidth()) / 2, y - 30, null);
+					y += image.getHeight() - 20;
+					drawTextIntoCanvas(lines2, canvas, paint, maxWidth, y);
 
 					// 保存为临时文件
 					File tempFile = new File("/storage/emulated/0/Android/data/com.just.print/files/", "combinedPrint.png");
@@ -271,7 +256,7 @@ public class PrintUtil {
 			}
 		}, executorService);
 	}
-	private static float drawText(List<String> lines, Canvas canvas, Paint paint, float maxWidth, float startY) {
+	private static float drawTextIntoCanvas(List<String> lines, Canvas canvas, Paint paint, float maxWidth, float startY) {
 		float y = 20; //@NOTE can not print from 0, because seems the first line was printed out of the area.(can not be seen)
 		if(lines.size() == 0) {
 			return y;

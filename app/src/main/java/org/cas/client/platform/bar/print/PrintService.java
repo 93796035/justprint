@@ -645,7 +645,7 @@ public class PrintService{
 		if(response == null) {
 			responses.add("\nPROBLÈME DE COMMUNICATION\n" + BarOption.getCertifiedDeviceId());
 		}else {
-			responses.add("\nConsulter la transaction en lingne\n" + response);
+			responses.add("Consulter la transaction en lingne\n" + response);
 		}
 		return responses;
 	}
