@@ -762,8 +762,6 @@ public class MevUtils {
 		    });
 
 		    try {
-		    	// add time limitation.
-//				WEBSRM_Response webSRMResponse = future.get(BarOption.getWebMevWaitTime(), TimeUnit.SECONDS); // Try to get the response within maximum waiting seconds
 				WEBSRM_Response webSRMResponse = future.get(BarOption.getWebMevWaitTime(), TimeUnit.SECONDS); // Try to get the response within maximum waiting seconds
 
 				if(webSRMResponse.getStatusCode() >= 200 && webSRMResponse.getStatusCode() < 300) {
@@ -907,7 +905,7 @@ public class MevUtils {
 		try {
 			AikaPos.db.execSQL(sql.toString());
 		}catch(Exception exp) {
-			//it's normal record which id = noTrans not exists.
+			L.e("MevUtils ", "exception when clean From WebSrmBatch:" + sql, exp);
 		}
 	}
 

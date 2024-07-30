@@ -223,6 +223,7 @@ public class PrintUtil {
 					Canvas canvas = new Canvas(combinedImage);
 					canvas.drawColor(Color.WHITE);
 
+					sndMsg.set(0, "\n\n\n" + sndMsg.get(0));
 					float y = drawText(sndMsg, canvas, paint, maxWidth, 0);
 					canvas.drawBitmap(image, (maxWidth - image.getWidth()) / 2, y, null);
 					y += image.getHeight();

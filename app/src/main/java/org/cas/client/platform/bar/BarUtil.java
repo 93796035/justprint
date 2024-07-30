@@ -171,7 +171,7 @@ public class BarUtil {
 //    }
 //
     public static int getPreferedWidth() {
-        int tWidth = 42;
+        int tWidth = 40;
         try {
             tWidth = Integer.valueOf((String)CustOpts.custOps.getValue( "width"));
         }catch(Exception e){

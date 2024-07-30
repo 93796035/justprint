@@ -1073,7 +1073,7 @@ public class WifiPrintService implements Runnable{
         }
 
         //determin the width of paper.
-        width = 42;
+        width = 40;
         String reportWidth = Options.getCustomData(Options.reportWidth);
         try{
             width = Integer.valueOf(reportWidth);
