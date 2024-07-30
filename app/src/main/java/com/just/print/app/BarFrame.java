@@ -50,6 +50,7 @@ import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.panel.CustomerFrame;
 import org.cas.client.platform.bar.panel.MenuPanel;
+import org.cas.client.platform.bar.print.PrintUtil;
 import org.cas.client.platform.bar.web_srm.MevUtils;
 import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
@@ -236,6 +237,19 @@ public class BarFrame extends BaseFragmentActivity {
 //		    	PrintService.printTemporaryReport( BarFrame.menuPanel.getPrinters()[0].getIp(), formattedString);
 //			}
 //		});
+        btnFlushMevBatch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MevUtils.flushBatchWithCurTransaction();
+            }
+        });
+        btnRetryPrinter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PrintUtil.errorPrinterList.clear();
+                btnRetryPrinter.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void validateActivation() {

@@ -835,15 +835,13 @@ public class MevUtils {
 						if(date.length() < 14) {
 							date = BarUtil.sdf.format(new Date());
 						}
-						StringBuilder sb = new StringBuilder("       ").append(date.substring(0,4)).append("-")
+						StringBuilder sb = new StringBuilder().append(date.substring(0,4)).append("-")
 								.append(date.substring(4,6)).append("-")
 								.append(date.substring(6,8)).append(" ")
 								.append(date.subSequence(8, 10)).append(":")
 								.append(date.substring(10, 12)).append(":")
 								.append(date.substring(12)).append("\n")
-								.append("       ")
 								.append(reponseTransaction.PsiNoTrans).append("\n")
-								.append("          ")
 								.append(BarOption.getCertifiedDeviceId()).append("\n")
 								.append(BarUtil.getSeperatorLine(1));
 						strFR = sb.toString();
