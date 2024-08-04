@@ -1602,7 +1602,7 @@ public class PrintService{
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
-            float total = (float) (DBUtil.getCursorInt(rs,"total") / 100.0);
+            float total = (float) (DBUtil.getCursorInt(rs,"TOTAL") / 100.0);
 
             String otherReceived = DBUtil.getCursorString(rs,"otherReceived");
             int cashReceived = DBUtil.getCursorInt(rs,"cashReceived");
@@ -2259,7 +2259,7 @@ public class PrintService{
                 Integer seatIdx = DBUtil.getCursorInt(rs,"billIndex");
                 content.append(BarUtil.generateString(3 - seatIdx.toString().length(), " ")).append(seatIdx);
                 
-                double f = DBUtil.getCursorInt(rs,"total") / 100.0;
+                double f = DBUtil.getCursorInt(rs,"TOTAL") / 100.0;
                 String money = BarUtil.formatMoney(f);
                 content.append(BarUtil.generateString(8 - money.length(), " ")).append(money);
                 totalSales += f;
@@ -2267,7 +2267,7 @@ public class PrintService{
                 Integer employeeId = DBUtil.getCursorInt(rs,"userId");
                 content.append("  ").append(employeeId);
                 
-                String comment = DBUtil.getCursorString(rs,"comment");
+                String comment = DBUtil.getCursorString(rs,"COMMENT");
                 int p = comment.indexOf(REASON_MARK);
                 if(p >= 0) {
                 	comment = comment.substring(p + REASON_MARK.length()).trim();

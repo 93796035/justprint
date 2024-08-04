@@ -66,7 +66,7 @@ public class Cmd_OtherPay implements SamActionListener {
     	try {
     		Cursor rs = AikaPos.db.rawQuery(sb.toString(), null);
             rs.moveToNext();
-            oldTotal = DBUtil.getCursorInt(rs,"total");
+            oldTotal = DBUtil.getCursorInt(rs,"TOTAL");
     	}catch(Exception exp) {
     		ErrorUtil.write(exp);
     	}

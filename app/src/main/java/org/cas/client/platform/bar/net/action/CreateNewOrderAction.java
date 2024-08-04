@@ -236,8 +236,8 @@ public class CreateNewOrderAction implements SamActionListener {
         	if(rs.moveToNext()) {
         		
         		int billId = DBUtil.getCursorInt(rs, "_id");
-        		int status = DBUtil.getCursorInt(rs, "status");
-        		int price = DBUtil.getCursorInt(rs, "total");
+        		int status = DBUtil.getCursorInt(rs, "STATUS");
+        		int price = DBUtil.getCursorInt(rs, "TOTAL");
         		if(status >= DBConsts.BILL_PRINTED || status < DBConsts.ORIGINAL) {
 //    				if (JOptionPane.showConfirmDialog(BarFrame.instance, BarFrame.consts.ConvertClosedBillBack(), BarFrame.consts.Operator(),
 //    			            JOptionPane.YES_NO_OPTION) != 0) {// are you sure to convert the voided bill back？
@@ -245,7 +245,7 @@ public class CreateNewOrderAction implements SamActionListener {
 //    				}else {
     					//update the totalprice of bill;
     					//@This means waiter can not update discount and service fee on the slave machine.
-    					DBUtil.updateBill(billId, "total", Math.round(price + totalPrice * 100));
+    					DBUtil.updateBill(billId, "TOTAL", Math.round(price + totalPrice * 100));
     					return billId;
 //    				}
         		}

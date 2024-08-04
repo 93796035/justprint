@@ -914,7 +914,7 @@ public class MevUtils {
 		}
 		//if already exists return; otherwise, save to db.
 		int billID = Integer.valueOf(noTrans.substring(2).split("-")[0]);//noTrans is like 10000...001, remove the first two letters should be safe to get the id.
-		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where ID = ").append(billID);
+		StringBuilder sql = new StringBuilder("select * from WEBSRMBATCH where _id = ").append(billID);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 			if (!rs.moveToNext()) {

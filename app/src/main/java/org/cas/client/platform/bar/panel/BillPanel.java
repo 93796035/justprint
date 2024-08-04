@@ -169,12 +169,12 @@ public class BillPanel extends BaseFragment
 			//generate a bill in db and update the SALE_RECORD with the new bill id
 			String createdTime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
-	            "INSERT INTO BILL(createdTime, tableName, BillIndex, total, discount, tip, serviceFee, cashback, userId, Comment,")
-	            .append(" openTime, cashReceived, debitReceived, visaReceived, masterReceived, otherReceived, status) VALUES ('")
+	            "INSERT INTO BILL(createdTime, tableName, billIndex, TOTAL, discount, TIP, serviceFee, CASEBACK, userId, COMMENT,")
+	            .append(" openTime, cashReceived, debitReceived, visaReceived, masterReceived, otherReceived, STATUS) VALUES ('")
 				.append(createdTime).append("', '")
 	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table
-	            .append(billIndex == null ? DBUtil.getCursorString(rs, "BillIndex") : billIndex).append("', ")	//bill
-	            .append(total < 0 ? DBUtil.getCursorInt(rs, "total") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
+	            .append(billIndex == null ? DBUtil.getCursorString(rs, "billIndex") : billIndex).append("', ")	//bill
+	            .append(total < 0 ? DBUtil.getCursorInt(rs, "TOTAL") : total).append(", ")//Math.round(Float.valueOf(valTotlePrice.getText()) * 100)/num).append(", ")	//total
 	            .append(discount).append(", ")
 	            .append(tip).append(", ")
 	            .append(serviceFee).append(", ")			//currently used for storing service fee -_-!

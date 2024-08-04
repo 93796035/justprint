@@ -6,6 +6,8 @@ import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
 
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.DishDlg;
+import org.cas.client.platform.bar.dialog.PayDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.FunctionButton;
@@ -14,58 +16,61 @@ import org.cas.client.platform.bar.uibeans.ISButton;
 public class Cmd_Pay implements SamActionListener {
 
 	private static Cmd_Pay instance;
-	private Cmd_Pay() {}
+
+	private Cmd_Pay() {
+	}
+
 	public static Cmd_Pay getInstance() {
-		if(instance == null)
+		if (instance == null)
 			instance = new Cmd_Pay();
 		return instance;
 	}
-	
+
 	private ISButton sourceBtn;
-	
+
 	public ISButton getSourceBtn() {
 		return sourceBtn;
 	}
+
 	@Override
 	public void setSourceBtn(ISButton sourceBtn) {
 		this.sourceBtn = sourceBtn;
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 
 		BillPanel billPanel = ((SalesPanel) BarFrame.instance.panels[2]).billPanel;
-    	
+
 		//if it's processing a closed bill, then
-    	if(billPanel.getStatus() >= DBConsts.COMPLETED) {
-    		Cmd_OtherPay.getInstance().onClick(v);
-    		return;
-    	}
-    	
-		if(!BarUtil.routineCheckBeforePrintingReceipt()) {
+		if (billPanel.getStatus() >= DBConsts.COMPLETED) {
+			Cmd_OtherPay.getInstance().onClick(v);
 			return;
 		}
-		//check if the pay dialog is already visible, if yes, then update bill received values.
-		if(BarFrame.payDlg.isVisible()) {
-			BarFrame.payDlg.updateBill(billPanel.getBillID());
-		}
-		//show dialog-------------------------------------
-// 		BarFrame.payDlg.setFloatSupport(true);
 
-		String txtOnButton = ((FunctionButton)v).getText();
-// 		if(txtOnButton.equals(BarFrame.consts.CASH())) {
-// 			BarFrame.payDlg.setTitle(BarFrame.consts.EnterCashPayment());
-// 		}else if(txtOnButton.equals(BarFrame.consts.DEBIT())) {
-// 			BarFrame.payDlg.setTitle(BarFrame.consts.EnterDebitPayment());
-// 		}else if(txtOnButton.equals(BarFrame.consts.VISA()) || txtOnButton.equals(BarFrame.consts.CREDIT())) {
-// 			BarFrame.payDlg.setTitle(BarFrame.consts.EnterVisaPayment());
-// 		}else if(txtOnButton.equals(BarFrame.consts.MASTER())) {
-// 			BarFrame.payDlg.setTitle(BarFrame.consts.EnterMasterPayment());
-// 		}else {// if(txtOnButton.equals(BarFrame.consts.GIFTCARD()) || txtOnButton.equals(BarFrame.consts.OTHER())) {	//might be cheque, gift cards.....
-// 			return;
-// 		}
-// 		//init payDialog content base on bill.
-// 		BarFrame.payDlg.initContent(billPanel);
-// 		BarFrame.payDlg.setVisible(true);
+		if (!BarUtil.routineCheckBeforePrintingReceipt()) {
+			return;
+		}
+
+		String title = "";
+		String txtOnButton = ((FunctionButton) v).getText();
+		if (txtOnButton.equals(BarFrame.consts.CASH())) {
+			title = BarFrame.consts.EnterCashPayment();
+		} else if (txtOnButton.equals(BarFrame.consts.DEBIT())) {
+			title = BarFrame.consts.EnterDebitPayment();
+		} else if (txtOnButton.equals(BarFrame.consts.VISA()) || txtOnButton.equals(BarFrame.consts.CREDIT())) {
+			title = BarFrame.consts.EnterVisaPayment();
+		} else if (txtOnButton.equals(BarFrame.consts.MASTER())) {
+			title = BarFrame.consts.EnterMasterPayment();
+		} else {
+			return;
+		}
+
+		// 初始化对话框内容
+		BarFrame.payDlg.setInitialValues(title, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+		BarFrame.payDlg.initContent(billPanel.getBillID());
+
+		// 显示对话框
+		BarFrame.payDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.payDlg.getTitle());
 	}
 }
