@@ -117,7 +117,7 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 		num8 = dialog.findViewById(R.id.num8);
 		num9 = dialog.findViewById(R.id.num9);
 		num0 = dialog.findViewById(R.id.num0);
-		point = dialog.findViewById(R.id.point);
+		point = dialog.findViewById(R.id.num00);//we don't user "." any more. "00" might be more convenient.
 
 		btn10.setOnClickListener(this);
 		btn20.setOnClickListener(this);
