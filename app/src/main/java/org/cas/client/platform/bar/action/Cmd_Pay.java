@@ -67,7 +67,7 @@ public class Cmd_Pay implements SamActionListener {
 		}
 
 		// 初始化对话框内容
-		BarFrame.payDlg.setInitialValues(title, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+//		BarFrame.payDlg.setInitialValues(title, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
 		BarFrame.payDlg.initContent(billPanel.getBillID());
 
 		// 显示对话框

@@ -1,14 +1,13 @@
 package org.cas.client.platform.bar.dialog;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,23 +18,23 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
 
+import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
 
 import java.util.ArrayList;
 
-public class PayDlg extends DialogFragment implements View.OnClickListener {
+public class PayDlg extends SamDialog{
 
-	private Context context;
-	private Button btnExact, ok, back, btn10, btn20, btn30, btn40, btn50, btn100;
-	private Button num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, point;
-	private TextView valCashReceived, valDebitReceived, valVisaReceived, valMasterReceived;
-	private TextView valTotal, valLeft, titleView;
-
+	private Button btn10, btn20, btn30, btn40, btn50, btn100, btnExact;
+	private Button num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, point, ok, back;
+	private Button valCashReceived, valDebitReceived, valVisaReceived, valMasterReceived;
+	private TextView lblCashReceived, lblDebitReceived, lblVisaReceived, lblMasterReceived, lblTotal, lblLeft, valTotal, valLeft, titleView;
 	private EditText tfdNewReceived;
 	public float maxInput;
 	//values got from db record
@@ -59,66 +58,178 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 	private int oldLeft = 0;
 
 	public String inputedContent;
-	private String cashReceived = "0.0";
-	private String debitReceived = "0.0";
-	private String visaReceived = "0.0";
-	private String masterReceived = "0.0";
-	private String total = "0.0";
-	private String left = "0.0";
+//	private String cashReceived = "0.0";
+//	private String debitReceived = "0.0";
+//	private String visaReceived = "0.0";
+//	private String masterReceived = "0.0";
+//	private String total = "0.0";
+//	private String left = "0.0";
 	private String title = "";
 
-	private ArrayList<TextView> labels = new ArrayList<TextView>();
-	private ArrayList<Button> values = new ArrayList<Button>();
-
-	public PayDlg(){
-		onCreateDialog(null);
-	}
 	@NonNull
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		Dialog dialog = new Dialog(BarFrame.instance);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setContentView(R.layout.dialog_pay);
-		dialog.setCancelable(true);
+		initComponents();
+		setAttributes();
 
-		initComponent(dialog);
+		constructLayout(dialog);
+		addListeners();
 		setInitialValues();
-
 		return dialog;
 	}
 
-	private void initComponent(Dialog dialog) {
-		titleView = dialog.findViewById(R.id.title);
-		valCashReceived = dialog.findViewById(R.id.valCashReceived);
-		valDebitReceived = dialog.findViewById(R.id.valDebitReceived);
-		valVisaReceived = dialog.findViewById(R.id.valVisaReceived);
-		valMasterReceived = dialog.findViewById(R.id.valMasterReceived);
-		valTotal = dialog.findViewById(R.id.valTotal);
-		valLeft = dialog.findViewById(R.id.valLeft);
-		tfdNewReceived = dialog.findViewById(R.id.tfdNewReceived);
+	private void initComponents() {
+		titleView = new TextView(BarFrame.instance);
+		lblCashReceived = createLable(BarFrame.consts.CASH().substring(0,2) + ":");
+		lblDebitReceived = createLable(BarFrame.consts.DEBIT().substring(0,2) + ":");
+		lblVisaReceived = createLable(BarFrame.consts.VISA().substring(0,2) + ":");
+		lblMasterReceived = createLable(BarFrame.consts.MASTER().substring(0,2) + ":");
+		lblTotal = createLable(BarFrame.consts.Total() + " : " + BarOption.getMoneySign());
+		lblLeft = createLable(BarFrame.consts.Due() + ":");
+		valCashReceived = createButton("10.00");
+		valDebitReceived = createButton("20.00");
+		valVisaReceived = createButton("30.00");
+		valMasterReceived = createButton("40.00");
+		tfdNewReceived = new EditText(BarFrame.instance);
+		valTotal = new TextView(BarFrame.instance);
+		valLeft = new TextView(BarFrame.instance);
 
-		btn10 = dialog.findViewById(R.id.btn10);
-		btn20 = dialog.findViewById(R.id.btn20);
-		btn30 = dialog.findViewById(R.id.btn30);
-		btn40 = dialog.findViewById(R.id.btn40);
-		btn50 = dialog.findViewById(R.id.btn50);
-		btn100 = dialog.findViewById(R.id.btn100);
-		btnExact = dialog.findViewById(R.id.btnExact);
-		ok = dialog.findViewById(R.id.ok);
-		back = dialog.findViewById(R.id.back);
+		btn10 = createButton("$10");
+		btn20 = createButton("$20");
+		btn30 = createButton("$30");
+		btn40 = createButton("$40");
+		btn50 = createButton("$50");
+		btn100 = createButton("$100");
+		btnExact = createButton("Exact");
 
-		num1 = dialog.findViewById(R.id.num1);
-		num2 = dialog.findViewById(R.id.num2);
-		num3 = dialog.findViewById(R.id.num3);
-		num4 = dialog.findViewById(R.id.num4);
-		num5 = dialog.findViewById(R.id.num5);
-		num6 = dialog.findViewById(R.id.num6);
-		num7 = dialog.findViewById(R.id.num7);
-		num8 = dialog.findViewById(R.id.num8);
-		num9 = dialog.findViewById(R.id.num9);
-		num0 = dialog.findViewById(R.id.num0);
-		point = dialog.findViewById(R.id.num00);//we don't user "." any more. "00" might be more convenient.
+		num1 = createButton("1");
+		num2 = createButton("2");
+		num3 = createButton("3");
+		ok = createButton("✔");
+		num4 = createButton("4");
+		num5 = createButton("5");
+		num6 = createButton("6");
+		num7 = createButton("7");
+		num8 = createButton("8");
+		num9 = createButton("9");
+		num0 = createButton("0");
+		point = createButton("00");
+		back = createButton("←");
+	}
 
+	private void setAttributes() {
+		titleView.setText("Enter Cash Payment");
+		titleView.setTextSize(20);
+		titleView.setTextColor(getResources().getColor(android.R.color.white));
+
+		valCashReceived.setTextSize(20);
+		valDebitReceived.setTextSize(20);
+		valVisaReceived.setTextSize(20);
+		valMasterReceived.setTextSize(20);
+		valTotal.setTextSize(20);
+		valLeft.setTextSize(20);
+
+		tfdNewReceived.setText("0.0");
+		tfdNewReceived.setTextSize(24);
+		tfdNewReceived.setGravity(android.view.Gravity.CENTER);
+	}
+
+	private void constructLayout(Dialog dialog) {
+		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
+		dialog.setContentView(rootLayout);
+		int LABEL_WIDTH = 120;
+		int VALUE_WIDTH = 140;
+		int VALUE_HEIGHT = 70;
+		// Title
+		rootLayout.addView(titleView, getLayout(titleView,16, 16));
+
+		// Payment Details
+		rootLayout.addView(lblCashReceived, getLayout(lblCashReceived,64, 16, LABEL_WIDTH));
+		rootLayout.addView(valCashReceived, getLayout(valCashReceived, lblCashReceived.getTop(), lblCashReceived.getLeft() + lblCashReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
+
+		rootLayout.addView(lblDebitReceived, getLayout(lblDebitReceived, lblCashReceived.getTop(), valCashReceived.getLeft() + valCashReceived.getMinimumWidth() + CustOpts.HOR_GAP, LABEL_WIDTH));
+		rootLayout.addView(valDebitReceived, getLayout(valDebitReceived, lblCashReceived.getTop(), lblDebitReceived.getLeft() + lblDebitReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
+
+		rootLayout.addView(lblVisaReceived, getLayout(lblVisaReceived, lblCashReceived.getTop() + valCashReceived.getMinimumHeight() + CustOpts.VER_GAP, lblCashReceived.getLeft(), LABEL_WIDTH));
+		rootLayout.addView(valVisaReceived, getLayout(valVisaReceived, lblVisaReceived.getTop(), valCashReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
+
+		rootLayout.addView(lblMasterReceived, getLayout(lblMasterReceived, lblVisaReceived.getTop(), lblDebitReceived.getLeft(), LABEL_WIDTH));
+		rootLayout.addView(valMasterReceived, getLayout(valMasterReceived, lblVisaReceived.getTop(), valDebitReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
+
+		rootLayout.addView(tfdNewReceived, getLayout(tfdNewReceived, lblCashReceived.getTop(), valMasterReceived.getLeft() + valMasterReceived.getMinimumWidth() + CustOpts.HOR_GAP, 200));
+
+		rootLayout.addView(valTotal, getLayout(valTotal, lblCashReceived.getTop(), tfdNewReceived.getLeft() + tfdNewReceived.getMinimumWidth() + CustOpts.HOR_GAP, VALUE_HEIGHT));
+		rootLayout.addView(valLeft, getLayout(valLeft, lblMasterReceived.getTop(), valTotal.getLeft(), VALUE_HEIGHT));
+
+		// Buttons
+		constructPaymentButtons(rootLayout);
+	}
+
+	private void constructPaymentButtons(FrameLayout rootLayout) {
+		int topMargin = 320;
+		int leftMargin = 16;
+		rootLayout.addView(btn10, getLayout(btn10, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btn20, getLayout(btn20, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btn30, getLayout(btn30, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btn40, getLayout(btn40, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btn50, getLayout(btn50, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btn100, getLayout(btn100, topMargin, leftMargin));
+		leftMargin += 100;
+		rootLayout.addView(btnExact, getLayout(btnExact, topMargin, leftMargin));
+
+		// Add more buttons similarly...
+
+		// Number buttons
+		topMargin += 100;
+		leftMargin = 16;
+
+		rootLayout.addView(num1, getLayout(num1, topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num2, getLayout(num2,topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num3, getLayout(num3, topMargin, leftMargin));
+
+		// Number buttons
+		topMargin += 100;
+		leftMargin = 16;
+		rootLayout.addView(num4, getLayout(num4,topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num5, getLayout(num5, topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num6, getLayout(num6,topMargin, leftMargin));
+
+		topMargin += 100;
+		leftMargin = 16;
+		rootLayout.addView(num7, getLayout(num7, topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num8, getLayout(num8,topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(num9, getLayout(num9,topMargin, leftMargin));
+
+		topMargin += 100;
+		leftMargin = 16;
+		rootLayout.addView(num0, getLayout(num0, topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(point, getLayout(point,topMargin, leftMargin));
+
+		leftMargin += 100;
+		rootLayout.addView(back, getLayout(back, topMargin, leftMargin));
+
+	}
+
+	private void addListeners() {
 		btn10.setOnClickListener(this);
 		btn20.setOnClickListener(this);
 		btn30.setOnClickListener(this);
@@ -144,22 +255,22 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 
 	private void setInitialValues() {
 		titleView.setText(title);
-		valCashReceived.setText(cashReceived);
-		valDebitReceived.setText(debitReceived);
-		valVisaReceived.setText(visaReceived);
-		valMasterReceived.setText(masterReceived);
-		valTotal.setText(total);
-		valLeft.setText(left);
+//		valCashReceived.setText(cashReceived);
+//		valDebitReceived.setText(debitReceived);
+//		valVisaReceived.setText(visaReceived);
+//		valMasterReceived.setText(masterReceived);
+//		valTotal.setText(total);
+//		valLeft.setText(left);
 	}
 
 	public void setInitialValues(String title, String cashReceived, String debitReceived, String visaReceived, String masterReceived, String total, String left) {
 		this.title = title;
-		this.cashReceived = cashReceived;
-		this.debitReceived = debitReceived;
-		this.visaReceived = visaReceived;
-		this.masterReceived = masterReceived;
-		this.total = total;
-		this.left = left;
+//		this.cashReceived = cashReceived;
+//		this.debitReceived = debitReceived;
+//		this.visaReceived = visaReceived;
+//		this.masterReceived = masterReceived;
+//		this.total = total;
+//		this.left = left;
 
 		// 如果组件已经初始化，则立即设置初始值
 		if (titleView != null) {
@@ -275,14 +386,14 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	private void resetContent() {
-		valCashReceived.setText("0.0");
-		valDebitReceived.setText("0.0");
-		valVisaReceived.setText("0.0");
-		valMasterReceived.setText("0.0");
-		valTotal.setText("0.0");
-		valLeft.setText("0.0");
-		tfdNewReceived.setText("");
-		maxInput = 0f;
+//		valCashReceived.setText("0.0");
+//		valDebitReceived.setText("0.0");
+//		valVisaReceived.setText("0.0");
+//		valMasterReceived.setText("0.0");
+//		valTotal.setText("0.0");
+//		valLeft.setText("0.0");
+//		tfdNewReceived.setText("");
+//		maxInput = 0f;
 	}
 
 	private void updateLeft() {
@@ -327,18 +438,18 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 			rs.moveToNext();
 
 			//save old values
-			oldTotal = DBUtil.getCursorInt(rs, "TOTAL");
-			oldCashReceived = DBUtil.getCursorInt(rs, "cashReceived");
-			oldDebitReceived = DBUtil.getCursorInt(rs, "debitReceived");
-			oldVisaReceived = DBUtil.getCursorInt(rs, "visaReceived");
-			oldMasterReceived = DBUtil.getCursorInt(rs, "masterReceived");
-			oldOtherReceived = DBUtil.getCursorString(rs, "otherReceived");
+			int oldTotal = DBUtil.getCursorInt(rs, "TOTAL");
+			int oldCashReceived = DBUtil.getCursorInt(rs, "cashReceived");
+			int oldDebitReceived = DBUtil.getCursorInt(rs, "debitReceived");
+			int oldVisaReceived = DBUtil.getCursorInt(rs, "visaReceived");
+			int oldMasterReceived = DBUtil.getCursorInt(rs, "masterReceived");
+			String oldOtherReceived = DBUtil.getCursorString(rs, "otherReceived");
 
-			oldCashback = DBUtil.getCursorInt(rs, "CASHBACK"); //cash back is negative in db. so use "+" instead of "-"
-			oldTip = DBUtil.getCursorInt(rs, "TIP");
-			oldStatus = DBUtil.getCursorInt(rs, "STATUS");
-			//cashReceived
-			onSrcCashReceived = oldCashReceived + oldCashback;
+			int oldCashback = DBUtil.getCursorInt(rs, "CASHBACK"); //cash back is negative in db. so use "+" instead of "-"
+			int oldTip = DBUtil.getCursorInt(rs, "TIP");
+			int oldStatus = DBUtil.getCursorInt(rs, "STATUS");
+
+			int onSrcCashReceived = oldCashReceived + oldCashback;
 			if (oldStatus < DBConsts.ORIGINAL) {
 				if (onSrcCashReceived + oldStatus > 0) {
 					onSrcCashReceived += oldStatus;
@@ -349,13 +460,10 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 				}
 			}
 
-			//if the tip is not 0, there must be one receive(debit, visa or master) which is bigger than tip.
-			//@No need to consider the case that status is negative, because if it's refund, when reopenit, a new bill will be generated.
-			//and the payDlg will display of payDlg is base on the new bill.
-			onSrcDebitReceived = oldDebitReceived;
-			onSrcVisaReceived = oldVisaReceived;
-			onSrcMasterReceived = oldMasterReceived;
-			onSrcOtherReceived = oldOtherReceived;
+			int onSrcDebitReceived = oldDebitReceived;
+			int onSrcVisaReceived = oldVisaReceived;
+			int onSrcMasterReceived = oldMasterReceived;
+			String onSrcOtherReceived = oldOtherReceived;
 			if (oldTip > 0) {
 				//debitReceived
 				if (oldDebitReceived > oldTip) {
@@ -375,7 +483,7 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 			//total
 			int total = oldTotal;
 			//left
-			oldLeft = onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 && !"null".equals(onSrcOtherReceived.toLowerCase()) ?
+			int oldLeft = onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 && !"null".equals(onSrcOtherReceived.toLowerCase()) ?
 					0 : total - onSrcCashReceived - onSrcDebitReceived - onSrcVisaReceived - onSrcMasterReceived;
 
 			//set the interface value.
@@ -396,8 +504,6 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 			}
 			valLeft.setText(leftStr);
 
-//          reLayout();
-
 		} catch (Exception e) {
 			ErrorUtil.write(e);
 		}
@@ -415,4 +521,5 @@ public class PayDlg extends DialogFragment implements View.OnClickListener {
 		}
 		return -1;
 	}
+
 }
