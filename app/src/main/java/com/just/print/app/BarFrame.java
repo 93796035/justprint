@@ -252,6 +252,13 @@ public class BarFrame extends BaseFragmentActivity {
         });
     }
 
+    //make output closed and make current bill completed
+    public void completeCurrentBill() {
+        BillPanel billPanel = ((SalesPanel)panels[2]).billPanel;
+        updateOutputStatus(DBConsts.COMPLETED);
+        DBUtil.updateBill(billPanel.getBillID(), "status", DBConsts.COMPLETED);
+    }
+
     private void validateActivation() {
         long timeLeft = checkDaysleft();
         if(timeLeft < 0 || BarOption.getBillHeadInfo() == null

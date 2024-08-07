@@ -2,6 +2,7 @@ package org.cas.client.platform.bar.dialog;
 
 import android.app.Dialog;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -41,15 +42,33 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         return layoutParams;
     }
 
+    public Button createButton() {
+        return createButton("");
+    }
     public Button createButton(String text) {
         Button button = new Button(BarFrame.instance);
         button.setText(text);
+        button.setPadding(0, 0, 0, 0);
         return button;
     }
 
-    public TextView createLable(String s) {
+    public TextView createLabel() {
+        return createLabel("", -1, Gravity.LEFT, Color.WHITE);
+    }
+    public TextView createLabel(String s) {
+        return createLabel(s, -1, Gravity.LEFT, Color.WHITE);
+    }
+    public TextView createLabel(String s, int gravity){
+        return createLabel(s, -1, gravity, Color.WHITE);
+    }
+    public TextView createLabel(String s, int textSize, int gravity, int color) {
         TextView textView = new TextView(BarFrame.instance);
-        textView.setTextColor(Color.WHITE);
+        textView.setTextColor(color);
+        textView.setText(s);
+        if(textSize > 0) {
+            textView.setTextSize(textSize);
+        }
+        textView.setGravity(gravity);
         return textView;
     }
 }

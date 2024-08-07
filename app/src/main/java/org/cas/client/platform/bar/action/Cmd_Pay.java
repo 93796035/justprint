@@ -6,8 +6,6 @@ import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
 
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.dialog.DishDlg;
-import org.cas.client.platform.bar.dialog.PayDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.FunctionButton;
@@ -66,11 +64,9 @@ public class Cmd_Pay implements SamActionListener {
 			return;
 		}
 
-		// 初始化对话框内容
-//		BarFrame.payDlg.setInitialValues(title, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
-		BarFrame.payDlg.initContent(billPanel.getBillID());
-
 		// 显示对话框
+		BarFrame.payDlg.initContent(title, billPanel.getBillID());
 		BarFrame.payDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.payDlg.getTitle());
+
 	}
 }
