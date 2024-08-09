@@ -52,8 +52,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BillPanel extends BaseFragment
-		implements View.OnClickListener, View.OnTouchListener, SamActionListener //, ComponentListener, PIMTableRenderAgent, ListSelectionListener
-{
+		implements View.OnClickListener, View.OnTouchListener, SamActionListener {
 
 	public static final String DISCBILL = "#DISCBILL";
 	public static final String SERVICEFEE = "#SERVICEFEE";
@@ -169,7 +168,7 @@ public class BillPanel extends BaseFragment
 			//generate a bill in db and update the SALE_RECORD with the new bill id
 			String createdTime = BarUtil.df.format(new Date());
 			sql = new StringBuilder(
-	            "INSERT INTO BILL(createdTime, tableName, billIndex, TOTAL, discount, TIP, serviceFee, CASEBACK, userId, COMMENT,")
+	            "INSERT INTO BILL(createdTime, tableName, billIndex, TOTAL, discount, TIP, serviceFee, CASHBACK, userId, COMMENT,")
 	            .append(" openTime, cashReceived, debitReceived, visaReceived, masterReceived, otherReceived, STATUS) VALUES ('")
 				.append(createdTime).append("', '")
 	            .append(tableName == null ? DBUtil.getCursorString(rs, "tableName") : tableName).append("', '")					//table

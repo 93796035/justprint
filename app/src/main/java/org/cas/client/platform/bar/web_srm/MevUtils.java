@@ -925,7 +925,7 @@ public class MevUtils {
 				}else {
 					jsonToSend = jsonToSend.substring(0, jsonToSend.length() - 3);
 				}
-				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, userId) VALUES (")
+				sql = new StringBuilder("INSERT INTO WEBSRMBATCH (_id, jsonToSend, signatransm, emprCertifSEV, strUrlQRCode, userId) VALUES (")
 					.append(billID).append(", '")
 					.append(jsonToSend).append("', '")
 				    .append(signatransm).append("', '")
