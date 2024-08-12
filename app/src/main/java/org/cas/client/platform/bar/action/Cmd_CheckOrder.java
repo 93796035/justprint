@@ -2,7 +2,14 @@ package org.cas.client.platform.bar.action;
 
 import android.view.View;
 
+import com.just.print.app.BarFrame;
+
+import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.statistics.BillingHistoryDlg;
 import org.cas.client.platform.bar.uibeans.ISButton;
+
+import java.util.Date;
 
 public class Cmd_CheckOrder implements SamActionListener {
 
@@ -26,12 +33,7 @@ public class Cmd_CheckOrder implements SamActionListener {
 
 	@Override
 	public void onClick(View v) {
-		
-//    	String endNow = BarUtil.df.format(new Date());
-//		int p = endNow.indexOf(" ");
-//		String startTime = endNow.substring(0, p + 1) + BarOption.getStartTime();
-//		BillingHistoryDlg dlg = new BillingHistoryDlg(BarFrame.instance);
-//		dlg.initContent(startTime, endNow);
-//		dlg.setVisible(true);
+		BillingHistoryDlg dlg = new BillingHistoryDlg();
+		dlg.show(BarFrame.instance.getSupportFragmentManager(), "Order History");
 	}
 }

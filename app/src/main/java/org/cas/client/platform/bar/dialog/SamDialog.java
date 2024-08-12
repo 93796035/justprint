@@ -2,10 +2,12 @@ package org.cas.client.platform.bar.dialog;
 
 import android.app.Dialog;
 import android.graphics.Color;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -14,6 +16,11 @@ import androidx.fragment.app.DialogFragment;
 import com.just.print.app.BarFrame;
 
 public abstract class SamDialog extends DialogFragment implements View.OnClickListener {
+    public int LABEL_WIDTH = 100;
+    public int BUTTON_WIDTH = 100;
+    public int BUTTON_HEIGHT = 100;
+    public int VALUE_WIDTH = 100;
+    public int VALUE_HEIGHT = 70;
     public Dialog dialog;
     public SamDialog(){
         dialog = new Dialog(BarFrame.instance);
@@ -70,5 +77,12 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         }
         textView.setGravity(gravity);
         return textView;
+    }
+
+    public EditText createEditText(){
+        EditText editText = new EditText(BarFrame.instance);
+        editText.setTextSize(16);
+        editText.setPadding(8, 0, 0, 0);
+        return editText;
     }
 }

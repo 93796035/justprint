@@ -78,7 +78,7 @@ public class Cmd_PrintAll implements SamActionListener {
 			//because action will prepare the content and send to the q
 			
 			//update the bill with new createdTime and new comment
-	        //(it pointing to the previous record by the specified billId and createTime and subtotal, which is not in our db, but in mev system), 
+	        //(it pointing to the previous record by the specified billId and createdTime and subtotal, which is not in our db, but in mev system),
 			DBUtil.updateBill(billPanel.getBillID(), "STATUS", DBConsts.BILL_PRINTED);
 			
 			if(BarOption.isCounterMode()) {

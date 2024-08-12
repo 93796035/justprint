@@ -128,9 +128,6 @@ public class PayDlg extends SamDialog {
 	private void relayout(Dialog dialog) {
 		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
 		dialog.setContentView(rootLayout);
-		int LABEL_WIDTH = 120;
-		int VALUE_WIDTH = 100;
-		int VALUE_HEIGHT = 70;
 		// Title
 		rootLayout.addView(titleView, getLayout(titleView, 16, 50, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
 
@@ -449,10 +446,10 @@ public class PayDlg extends SamDialog {
 					//.append(", DebitReceived = 0, VisaReceived = 0, MasterReceived = 0")
 					// why do we need to update create time? because this field no need to indicate how many minutes to display on table anymore,
 					//we use this field to indicate when the bill was really finished, it will determine which batch this bill will display on.)
-					.append(", createTime = '").append(paidTime).append("'")
-					.append(", status = ").append(DBConsts.COMPLETED)
-					.append(", employeeid = ").append(LoginDlg.USERID)
-					.append(" where id = ").append(billId);
+					.append(", createdTime = '").append(paidTime).append("'")
+					.append(", STATUS = ").append(DBConsts.COMPLETED)
+					.append(", userId = ").append(LoginDlg.USERID)
+					.append(" where _id = ").append(billId);
 			AikaPos.db.execSQL(sql.toString());
 			//update the status of relevant outputs.
 			BarFrame.instance.updateOutputStatus(DBConsts.COMPLETED);

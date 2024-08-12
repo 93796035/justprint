@@ -31,6 +31,12 @@ public class L{
         Log.i(tag, msg, e);
     }
 
+    public static void i(Class tag, String msg){
+        if(debug && AppUtils.hasInternet(AikaPos.instance.getApplicationContext())) {
+            sendToServer(Options.getShopName() + "_" + Options.getUserName(), tag.getName() + ":" + msg);
+        }
+        Log.i(tag.getName(), msg);
+    }
     public static void i(String tag, String msg){
         if(debug && AppUtils.hasInternet(AikaPos.instance.getApplicationContext())) {
             sendToServer(Options.getShopName() + "_" + Options.getUserName(), tag + ":" + msg);
