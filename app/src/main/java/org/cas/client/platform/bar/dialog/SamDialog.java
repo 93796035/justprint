@@ -17,7 +17,7 @@ import com.just.print.app.BarFrame;
 
 public abstract class SamDialog extends DialogFragment implements View.OnClickListener {
     public int LABEL_WIDTH = 100;
-    public int BUTTON_WIDTH = 100;
+    public int BUTTON_WIDTH = 120;
     public int BUTTON_HEIGHT = 100;
     public int VALUE_WIDTH = 100;
     public int VALUE_HEIGHT = 70;
