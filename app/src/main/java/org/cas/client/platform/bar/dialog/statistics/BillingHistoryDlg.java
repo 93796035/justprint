@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -27,6 +28,8 @@ import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.dialog.SamDialog;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
+import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
@@ -43,6 +46,10 @@ public class BillingHistoryDlg extends SamDialog {
 
     private TextView selectedBillView; // 用于保存当前选中的行
 
+    // 用于检测三次点击的变量
+    private static final long TRIPLE_CLICK_TIME_INTERVAL = 500; // 500ms 内三次点击判定为三击
+    private int clickCount = 0;
+    private Handler handler = new Handler();
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -176,25 +183,42 @@ public class BillingHistoryDlg extends SamDialog {
     }
 
     private void onApply() {
-        String startDate = tfdYearFrom.getText().toString() + "-" +
-                tfdMonthFrom.getText().toString() + "-" +
-                tfdDayFrom.getText().toString() + " 00:00:00";
+        String billId = tfdBillID.getText().toString();
+        if(billId.length() > 0){
+            initContent(billId);
+        }else {
+            String startDate = tfdYearFrom.getText().toString() + "-" +
+                    tfdMonthFrom.getText().toString() + "-" +
+                    tfdDayFrom.getText().toString() + " 00:00:00";
 
-        String endDate = tfdYearTo.getText().toString() + "-" +
-                tfdMonthTo.getText().toString() + "-" +
-                tfdDayTo.getText().toString() + " 23:59:59";
+            String endDate = tfdYearTo.getText().toString() + "-" +
+                    tfdMonthTo.getText().toString() + "-" +
+                    tfdDayTo.getText().toString() + " 23:59:59";
 
-        // 调用数据库查询并更新界面
-        initContent(startDate, endDate);
+            // 调用数据库查询并更新界面
+            initContent(startDate, endDate);
+        }
     }
 
     private void onPrint() {
-        try {
-            int billId = Integer.parseInt(tfdBillID.getText().toString());
-            // 示例打印逻辑
-            L.i(this.getClass(), "Printing Bill ID: " + billId);
-        } catch (NumberFormatException e) {
-            L.e("BillingHistory", "Unexpected NumberFormatException! ", e);
+        if(selectedBillView != null) {
+            BillData selectedBillData = (BillData) selectedBillView.getTag();
+            try {
+                int billId = selectedBillData.billId;
+                // 示例打印逻辑
+                BillPanel billPanel = ((SalesPanel)BarFrame.instance.panels[2]).billPanel;
+                boolean isToCustomer = false;
+                if(isToCustomer) {
+                    billPanel.expireAndReGenerateBill(null);
+                    //if ckxIsToCustomer not selected, the printReceipt function will know it's a internal bill. while if it's selected,
+                    //then printReceipt will not sure if it's a original print or reprint. so need to give the information out here.
+                    billPanel.setStatus(DBConsts.COMPLETED);
+                }
+                PrintService.printReceipt(billPanel, false, isToCustomer, true);
+
+            } catch (NumberFormatException e) {
+                L.e("BillingHistory", "Unexpected NumberFormatException! ", e);
+            }
         }
     }
 
@@ -203,6 +227,24 @@ public class BillingHistoryDlg extends SamDialog {
         int p = endNow.indexOf(" ");
         String startTime = endNow.substring(0, p + 1) + BarOption.getStartTime();
         initContent(startTime, endNow);
+    }
+
+    private void initContent(String billId){
+        StringBuilder sql = new StringBuilder("SELECT bill._id AS bill_id, user._id AS user_id, bill.createdTime," +
+                "bill.billIndex, bill.tableName, bill.openTime, bill.STATUS, bill.TOTAL, bill.DISCOUNT from bill, user where bill.userId = user._id and bill._id = ")
+                .append(billId);
+
+        // 如果配置了，则不显示其他服务员的记录
+        if (!BarOption.showRecordFromOtherWaiter() && LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
+            sql.append(" and user._id = ").append(LoginDlg.USERID);
+        }
+
+        // 如果是培训模式，不显示相关记录
+        if (!"F".equals(LoginDlg.MODETRANS)) {
+            sql.append(" and bill.comment != 'for training'");
+        }
+
+        fillTableAreaWithResultSet(sql.toString());
     }
 
     private void initContent(String startTime, String endTime) {
@@ -356,6 +398,15 @@ public class BillingHistoryDlg extends SamDialog {
 
         // 获取选中行的 BillData 对象
         BillData selectedBillData = (BillData) billView.getTag();
+
+        // 检测三次点击
+        clickCount++;
+        handler.postDelayed(() -> {
+            if (clickCount == 3) {
+                new OperationLogDlg().show(getChildFragmentManager(), "operationLogDlg");
+            }
+            clickCount = 0; // 重置点击次数
+        }, TRIPLE_CLICK_TIME_INTERVAL);
 
         // 触发相关事件或操作
         showInSalesPanel(selectedBillData);

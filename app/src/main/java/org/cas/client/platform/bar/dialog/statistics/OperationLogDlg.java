@@ -69,7 +69,7 @@ public class OperationLogDlg extends SamDialog {
 
     private void initContent() {
         SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
-        String sql = "SELECT * FROM operationlog, employee WHERE operationlog.employeeId = employee.id AND opentime = '"
+        String sql = "SELECT * FROM operationlog, user WHERE operationlog.userId = user._id AND opentime = '"
                 + BarFrame.instance.valOpenTime.getText() + "' AND BILLIDX = '"
                 + BarFrame.instance.getCurBillIndex() + "' AND tableName = '"
                 + BarFrame.instance.getCurTable() + "'";
