@@ -308,63 +308,9 @@ public class PayDlg extends SamDialog {
 		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 		BillPanel billPanel = salesPanel.billPanel;
 		if (v == ok) {
-			try {
-				if (Float.valueOf(inputedContent) == 0) {
-					return;
-				}
-			} catch (Exception exp) {
-				Toast.makeText(getActivity(), org.cas.client.resources.international.DlgConst.FORMATERROR, Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			int billOldStatus = getBillStatus(billPanel.getBillID());
-			int left = Math.round(Float.valueOf(valLeft.getText().toString()) * 100);
-
-			updateBill(billPanel.getBillID());
-
-			if (left > 0) {
-				((SalesPanel) BarFrame.instance.panels[2]).partialPaid = left < (Float.valueOf(valTotal.getText().toString()) * 100);
-				Toast.makeText(getActivity(), BarFrame.consts.Due() + " : " + BarOption.getMoneySign() + BarUtil.formatMoney(left / 100f), Toast.LENGTH_SHORT).show();
-			} else if (left <= 0) {
-				((SalesPanel) BarFrame.instance.panels[2]).partialPaid = false;
-				showChangeDlg(billPanel, left);
-				if (billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
-					billPanel.expireAndReGenerateBill(null);
-				}
-				addLatestPayIntoComment(billPanel);
-				boolean needToBePrinted = billOldStatus != DBConsts.BILL_PRINTED || !BarOption.isSavePrintInvoiceWhenBilled();
-				PrintService.printReceipt(billPanel, getTitle().equals(BarFrame.consts.EnterCashPayment()), true, needToBePrinted);
-				BarFrame.instance.completeCurrentBill();
-				BarFrame.instance.actionAfterBillClosed();
-			}
-
-			dismiss();
-
+			handleOkClick(billPanel);
 		} else if (v == btnExact) {
-			String strPay = "other";
-			String curTitle = getTitle();
-			if (curTitle.startsWith(BarFrame.consts.EnterCashPayment())) {
-				strPay = "cash";
-			} else if (curTitle.startsWith(BarFrame.consts.EnterDebitPayment())) {
-				strPay = "debit";
-			} else if (curTitle.startsWith(BarFrame.consts.EnterVisaPayment())) {
-				strPay = "visa";
-			} else if (curTitle.startsWith(BarFrame.consts.EnterMasterPayment())) {
-				strPay = "master";
-			}
-			int billOldStatus = getBillStatus(billPanel.getBillID());
-
-			inputedContent = BarUtil.formatMoney(oldLeft / 100.0);
-			if (billPanel.getStatus() > DBConsts.ORIGINAL) {
-				billPanel.expireAndReGenerateBill(null);
-			}
-			addLatestPayIntoComment(billPanel);
-			exactMoney(billPanel.getBillID(), strPay);
-			boolean needToBePrinted = billOldStatus != DBConsts.BILL_PRINTED || !BarOption.isSavePrintInvoiceWhenBilled();
-			PrintService.printReceipt(billPanel, getTitle().equals(BarFrame.consts.EnterCashPayment()), true, needToBePrinted);
-			BarFrame.instance.actionAfterBillClosed();
-			dismiss();
-
+			handleExactClick(billPanel);
 		} else if (v == valCashReceived || v == valDebitReceived || v == valVisaReceived || v == valMasterReceived) {
 			StringBuilder sb = new StringBuilder("update bill set ");
 			if (v == valCashReceived) {
@@ -389,13 +335,7 @@ public class PayDlg extends SamDialog {
 				inputedContent = "";
 
 			if (v == back) {
-				if (inputedContent != null && inputedContent.length() > 0) {
-					tfdNewReceived.setText(inputedContent.substring(0, inputedContent.length() - 1));
-					if (!BarOption.isPointerInputStyle()) {
-						tfdNewReceived.setText("");
-					}
-					updateLeft();
-				}
+				handleBackClick();
 			} else if (v == btn10) {
 				increaseReceived(10);
 			} else if (v == btn20) {
@@ -435,29 +375,6 @@ public class PayDlg extends SamDialog {
 		isAllContentSelected = false;
 	}
 
-	//it's public because there's a menu on salesPane is calling this method. ---didn't find who called it, I changed to private.
-	//the difference between this and close currentBill is that this method close bill with an update of received money
-	private void exactMoney(int billId, String pay) {
-		try {
-			String paidTime = BarUtil.df.format(new Date());
-			//NOTE: should consider might been paid with card, so the new received should be the left not the total..
-			StringBuilder sql = new StringBuilder("update bill set ").append(pay)
-					.append("Received = ").append(Math.round(Float.valueOf(inputedContent) * 100))
-					//.append(", DebitReceived = 0, VisaReceived = 0, MasterReceived = 0")
-					// why do we need to update create time? because this field no need to indicate how many minutes to display on table anymore,
-					//we use this field to indicate when the bill was really finished, it will determine which batch this bill will display on.)
-					.append(", createdTime = '").append(paidTime).append("'")
-					.append(", STATUS = ").append(DBConsts.COMPLETED)
-					.append(", userId = ").append(LoginDlg.USERID)
-					.append(" where _id = ").append(billId);
-			AikaPos.db.execSQL(sql.toString());
-			//update the status of relevant outputs.
-			BarFrame.instance.updateOutputStatus(DBConsts.COMPLETED);
-		}catch(Exception e) {
-			ErrorUtil.write(e);
-		}
-	}
-
 	private void addLatestPayIntoComment(BillPanel billPanel) {
 		//update latest-pay value into db record. because web-mev need to report latest pay, previous pay and due for each time of payment (installment)
 		String comment = billPanel.getComment();
@@ -493,28 +410,35 @@ public class PayDlg extends SamDialog {
 				.show();
 	}
 
-	private void handleOkClick() {
-		inputedContent = tfdNewReceived.getText().toString();
-		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
-		BillPanel billPanel = salesPanel.billPanel;
+	private void handleOkClick(BillPanel billPanel) {
 		try {
 			if (Float.valueOf(inputedContent) == 0) {
 				return;
 			}
 		} catch (Exception exp) {
-			// Show format error dialog
+			Toast.makeText(getActivity(), org.cas.client.resources.international.DlgConst.FORMATERROR, Toast.LENGTH_SHORT).show();
 			return;
 		}
 
-		int billOldStatus = getBillStatus(billPanel.getBillID()); // Simplified for demonstration
+		int billOldStatus = getBillStatus(billPanel.getBillID());
 		int left = Math.round(Float.valueOf(valLeft.getText().toString()) * 100);
 
-		updateBill(billPanel.getBillID()); // Simplified for demonstration
+		updateBill(billPanel.getBillID());
 
 		if (left > 0) {
-			// Show due amount dialog
+			((SalesPanel) BarFrame.instance.panels[2]).partialPaid = left < (Float.valueOf(valTotal.getText().toString()) * 100);
+			Toast.makeText(getActivity(), BarFrame.consts.Due() + " : " + BarOption.getMoneySign() + BarUtil.formatMoney(left / 100f), Toast.LENGTH_SHORT).show();
 		} else if (left <= 0) {
-			// Complete the payment process
+			((SalesPanel) BarFrame.instance.panels[2]).partialPaid = false;
+			showChangeDlg(billPanel, left);
+			if (billPanel.getStatus() >= DBConsts.BILL_PRINTED) {
+				billPanel.expireAndReGenerateBill(null);
+			}
+			addLatestPayIntoComment(billPanel);
+			boolean needToBePrinted = billOldStatus != DBConsts.BILL_PRINTED || !BarOption.isSavePrintInvoiceWhenBilled();
+			PrintService.printReceipt(billPanel, getTitle().equals(BarFrame.consts.EnterCashPayment()), true, needToBePrinted);
+			BarFrame.instance.completeCurrentBill();
+			BarFrame.instance.actionAfterBillClosed();
 		}
 
 		dismiss();
@@ -570,13 +494,61 @@ public class PayDlg extends SamDialog {
 		return Math.round(existingMoney * 100 + newAddedMoney * 100);
 	}
 
-	private void handleExactClick() {
-		// Similar to handleOkClick but with exact payment logic
+	private void handleExactClick(BillPanel billPanel) {
+		String strPay = "other";
+		String curTitle = getTitle();
+		if (curTitle.startsWith(BarFrame.consts.EnterCashPayment())) {
+			strPay = "cash";
+		} else if (curTitle.startsWith(BarFrame.consts.EnterDebitPayment())) {
+			strPay = "debit";
+		} else if (curTitle.startsWith(BarFrame.consts.EnterVisaPayment())) {
+			strPay = "visa";
+		} else if (curTitle.startsWith(BarFrame.consts.EnterMasterPayment())) {
+			strPay = "master";
+		}
+		int billOldStatus = getBillStatus(billPanel.getBillID());
+
+		inputedContent = BarUtil.formatMoney(oldLeft / 100.0);
+		if (billPanel.getStatus() > DBConsts.ORIGINAL) {
+			billPanel.expireAndReGenerateBill(null);
+		}
+		addLatestPayIntoComment(billPanel);
+		exactMoney(billPanel.getBillID(), strPay);
+		boolean needToBePrinted = billOldStatus != DBConsts.BILL_PRINTED || !BarOption.isSavePrintInvoiceWhenBilled();
+		PrintService.printReceipt(billPanel, getTitle().equals(BarFrame.consts.EnterCashPayment()), true, needToBePrinted);
+		BarFrame.instance.actionAfterBillClosed();
+		dismiss();
+	}
+
+	//it's public because there's a menu on salesPane is calling this method. ---didn't find who called it, I changed to private.
+	//the difference between this and close currentBill is that this method close bill with an update of received money
+	private void exactMoney(int billId, String pay) {
+		try {
+			String paidTime = BarUtil.df.format(new Date());
+			//NOTE: should consider might been paid with card, so the new received should be the left not the total..
+			StringBuilder sql = new StringBuilder("update bill set ").append(pay)
+					.append("Received = ").append(Math.round(Float.valueOf(inputedContent) * 100))
+					//.append(", DebitReceived = 0, VisaReceived = 0, MasterReceived = 0")
+					// why do we need to update create time? because this field no need to indicate how many minutes to display on table anymore,
+					//we use this field to indicate when the bill was really finished, it will determine which batch this bill will display on.)
+					.append(", createdTime = '").append(paidTime).append("'")
+					.append(", STATUS = ").append(DBConsts.COMPLETED)
+					.append(", userId = ").append(LoginDlg.USERID)
+					.append(" where _id = ").append(billId);
+			AikaPos.db.execSQL(sql.toString());
+			//update the status of relevant outputs.
+			BarFrame.instance.updateOutputStatus(DBConsts.COMPLETED);
+		}catch(Exception e) {
+			ErrorUtil.write(e);
+		}
 	}
 
 	private void handleBackClick() {
 		if (inputedContent != null && inputedContent.length() > 0) {
 			tfdNewReceived.setText(inputedContent.substring(0, inputedContent.length() - 1));
+			if (!BarOption.isPointerInputStyle()) {
+				tfdNewReceived.setText("");
+			}
 			updateLeft();
 		}
 	}

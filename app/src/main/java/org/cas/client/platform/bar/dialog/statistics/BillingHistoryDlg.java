@@ -200,7 +200,7 @@ public class BillingHistoryDlg extends SamDialog {
     }
     private void initContent(String startTime, String endTime) {
         StringBuilder sql = new StringBuilder("SELECT bill._id AS bill_id, user._id AS user_id, bill.createdTime," +
-                "bill.tableName,  bill.billIndex, bill.openTime,  bill.TOTAL, bill.DISCOUNT from bill, user where bill.userId = user._id and createdTime >= '")
+                "bill.billIndex, bill.tableName, bill.openTime, bill.STATUS, bill.TOTAL, bill.DISCOUNT from bill, user where bill.userId = user._id and createdTime >= '")
                 .append(startTime)
                 .append("' and createdTime <= '")
                 .append(endTime)
@@ -259,14 +259,53 @@ public class BillingHistoryDlg extends SamDialog {
         // 动态加载查询结果
         while (cursor.moveToNext()) {
             StringBuilder billInfo = new StringBuilder();
+
+            // 获取需要的字段值
+            int status = DBUtil.getCursorInt(cursor, "STATUS");
+            int total = DBUtil.getCursorInt(cursor, "TOTAL");
+
+            // 处理 status 逻辑
+            String statusText;
+            switch (status) {
+                case DBConsts.ORIGINAL:
+                    statusText = "to pay";
+                    break;
+                case DBConsts.BILL_PRINTED:
+                    statusText = "billed";
+                    break;
+                case DBConsts.SUSPENDED:
+                    statusText = "suspended";
+                    break;
+                case DBConsts.COMPLETED:
+                    statusText = "paid";
+                    break;
+                case DBConsts.VOIDED:
+                    statusText = "void";
+                    break;
+                case DBConsts.EXPIRED:
+                    statusText = "expired";
+                    break;
+                case DBConsts.DELETED:
+                    statusText = "deleted";
+                    break;
+                default:
+                    if (status < 0 && status + total == 0) {
+                        statusText = "refund";
+                    } else {
+                        statusText = BarUtil.formatMoney(status / 100.0);
+                    }
+                    break;
+            }
+
+            // 构建 billInfo 字符串
             billInfo.append("    ").append(DBUtil.getCursorString(cursor, "bill_id"))
                     .append("              ").append(DBUtil.getCursorString(cursor, "openTime"))
                     .append("              ").append(DBUtil.getCursorString(cursor, "billIndex"))
                     .append("              ").append(DBUtil.getCursorString(cursor, "tableName"))
-                    .append("            ").append(DBUtil.getCursorString(cursor, "STATUS"))
-                    .append("            ").append(BarUtil.formatMoney(DBUtil.getCursorInt(cursor, "TOTAL")/100.0));
+                    .append("            ").append(statusText)  // 使用 statusText 代替原始 STATUS
+                    .append("            ").append(BarUtil.formatMoney(total / 100.0));
 
-            // 为每个账单创建一个TextView，并添加到 fixedLayout 中
+            // 为每个账单创建一个TextView，并添加到 scrollableLayout 中
             TextView billView = createLabel(billInfo.toString(), Gravity.START);
             billView.setTextColor(Color.BLACK);
             scrollableLayout.addView(billView, new LinearLayout.LayoutParams(
