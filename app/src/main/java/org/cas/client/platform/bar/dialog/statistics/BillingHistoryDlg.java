@@ -6,11 +6,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,7 @@ import androidx.annotation.NonNull;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.fragment.LoginDlg;
+import com.just.print.ui.panel.SalesPanel;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
@@ -25,6 +28,7 @@ import org.cas.client.platform.bar.dialog.SamDialog;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.cascustomize.CustOpts;
+import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
 
 import java.util.Date;
@@ -36,6 +40,8 @@ public class BillingHistoryDlg extends SamDialog {
     private Button btnChangeDate, btnPrintInvoice;
     private ScrollView scrollView;
     private LinearLayout scrollableLayout; // 用于放入 ScrollView 的布局
+
+    private TextView selectedBillView; // 用于保存当前选中的行
 
     @NonNull
     @Override
@@ -198,6 +204,7 @@ public class BillingHistoryDlg extends SamDialog {
         String startTime = endNow.substring(0, p + 1) + BarOption.getStartTime();
         initContent(startTime, endNow);
     }
+
     private void initContent(String startTime, String endTime) {
         StringBuilder sql = new StringBuilder("SELECT bill._id AS bill_id, user._id AS user_id, bill.createdTime," +
                 "bill.billIndex, bill.tableName, bill.openTime, bill.STATUS, bill.TOTAL, bill.DISCOUNT from bill, user where bill.userId = user._id and createdTime >= '")
@@ -252,6 +259,7 @@ public class BillingHistoryDlg extends SamDialog {
     private void fillTableAreaWithResultSet(String sql) {
         // 清空现有内容
         scrollableLayout.removeAllViews();
+        selectedBillView = null; // 清空之前选中的行
 
         // 执行SQL查询
         Cursor cursor = AikaPos.db.rawQuery(sql, null);
@@ -263,8 +271,13 @@ public class BillingHistoryDlg extends SamDialog {
             // 获取需要的字段值
             int status = DBUtil.getCursorInt(cursor, "STATUS");
             int total = DBUtil.getCursorInt(cursor, "TOTAL");
+            int billId = DBUtil.getCursorInt(cursor, "bill_id");
+            int billIdx = DBUtil.getCursorInt(cursor, "billIndex");
+            String openTime = DBUtil.getCursorString(cursor, "openTime");
+            String operator = DBUtil.getCursorString(cursor, "operator");
+            int customerId = DBUtil.getCursorInt(cursor, "user_id"); // 示例，假设 user_id 即为 customerId
+            String tableName = DBUtil.getCursorString(cursor, "tableName");
 
-            // 处理 status 逻辑
             String statusText;
             switch (status) {
                 case DBConsts.ORIGINAL:
@@ -296,18 +309,25 @@ public class BillingHistoryDlg extends SamDialog {
                     }
                     break;
             }
+            // 创建 BillData 对象
+            BillData billData = new BillData(billId, billIdx, operator, openTime, statusText, customerId, tableName);
 
             // 构建 billInfo 字符串
-            billInfo.append("    ").append(DBUtil.getCursorString(cursor, "bill_id"))
-                    .append("              ").append(DBUtil.getCursorString(cursor, "openTime"))
-                    .append("              ").append(DBUtil.getCursorString(cursor, "billIndex"))
-                    .append("              ").append(DBUtil.getCursorString(cursor, "tableName"))
+            billInfo.append("    ").append(billId)
+                    .append("              ").append(openTime)
+                    .append("              ").append(billIdx)
+                    .append("              ").append(tableName)
                     .append("            ").append(statusText)  // 使用 statusText 代替原始 STATUS
                     .append("            ").append(BarUtil.formatMoney(total / 100.0));
 
             // 为每个账单创建一个TextView，并添加到 scrollableLayout 中
             TextView billView = createLabel(billInfo.toString(), Gravity.START);
             billView.setTextColor(Color.BLACK);
+            billView.setTag(billData); // 将 BillData 对象作为标签存储到 TextView 中
+
+            // 设置点击事件处理程序
+            billView.setOnClickListener(v -> onBillSelected((TextView) v));
+
             scrollableLayout.addView(billView, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -324,4 +344,66 @@ public class BillingHistoryDlg extends SamDialog {
         cursor.close();
     }
 
+    private void onBillSelected(TextView billView) {
+        if (selectedBillView != null) {
+            // 取消之前选中的行的高亮
+            selectedBillView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        // 高亮当前选中的行
+        billView.setBackgroundColor(Color.LTGRAY);
+        selectedBillView = billView; // 更新当前选中的行
+
+        // 获取选中行的 BillData 对象
+        BillData selectedBillData = (BillData) billView.getTag();
+
+        // 触发相关事件或操作
+        showInSalesPanel(selectedBillData);
+    }
+
+    private boolean showInSalesPanel(BillData billData) {
+        // 使用 BillData 对象中的信息
+        BarFrame.instance.setCurBillIdx(String.valueOf(billData.billIdx));
+        BarFrame.instance.valOperator.setText(billData.operator);
+        BarFrame.instance.valOpenTime.setText(billData.openTime);
+
+        ((SalesPanel)BarFrame.instance.panels[2]).billPanel.setBillID(billData.billId);
+
+        BarFrame.instance.setShowingAnExpiredBill("expired".equals(billData.status));
+        BarFrame.instance.setCurBillID(billData.billId);
+        BarFrame.instance.ignoreItemChange = true;
+        Spinner cmbCurTable = BarFrame.instance.getCmbCurTable();
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) BarFrame.instance.getCmbCurTable().getAdapter(); // 获取Spinner的适配器
+        int position = adapter.getPosition(billData.tableName); // 找到对应tableName的position
+
+        if (position >= 0) {
+            cmbCurTable.setSelection(position); // 设置Spinner选中对应的项
+        } else {
+            // 如果没有找到对应的tableName，可以选择处理这种情况
+            L.e("BillingHistoryDlg", "Table name " + billData.tableName + " not found in Spinner options.", null);
+        }
+        BarFrame.instance.switchMode(2);
+
+        return true;
+    }
+
+    class BillData {
+        int billId;
+        int billIdx;
+        String operator;
+        String openTime;
+        String status;
+        int customerId;
+        String tableName;
+
+        BillData(int billId, int billIdx, String operator, String openTime, String status, int customerId, String tableName) {
+            this.billId = billId;
+            this.billIdx = billIdx;
+            this.operator = operator;
+            this.openTime = openTime;
+            this.status = status;
+            this.customerId = customerId;
+            this.tableName = tableName;
+        }
+    }
 }
