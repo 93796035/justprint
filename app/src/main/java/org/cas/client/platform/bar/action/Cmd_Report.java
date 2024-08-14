@@ -72,7 +72,7 @@ public class Cmd_Report implements SamActionListener {
 	    	}
 	            
 			ReportDlg dlg = new ReportDlg();
-//    		dlg.setVisible(true);
+			dlg.show(BarFrame.instance.getSupportFragmentManager(), "Report");
 		}
 	}
 }
