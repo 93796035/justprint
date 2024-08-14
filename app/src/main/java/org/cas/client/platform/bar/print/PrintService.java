@@ -1060,7 +1060,7 @@ public class PrintService{
         return strAryFR;
     }
     
-    public static ArrayList<String> formatContentForReport(List<Bill> salesAndRefunds, String curPrintIp, String startTime, String endTime, String batchId){
+    public static ArrayList<String> formatContentForReport(List<Bill> salesAndRefunds, String startTime, String endTime, String batchId){
     	ArrayList<String> strAryFR = new ArrayList<String>();
         
         //initContent

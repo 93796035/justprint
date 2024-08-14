@@ -55,6 +55,8 @@ public class MainGenerator {
         user.addStringProperty("noTPS").columnName("noTPS");
         user.addStringProperty("noTVQ").columnName("noTVQ");
         user.addStringProperty("pwd");
+        user.addStringProperty("ANNIVERSARY");
+
 
         // +---------+---------+---------+---------+
         // Printer

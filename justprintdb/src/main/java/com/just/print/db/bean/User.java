@@ -25,6 +25,7 @@ public class User {
     private String noTPS;
     private String noTVQ;
     private String pwd;
+    private String ANNIVERSARY;
     private Integer status;
     private Integer version;
 
@@ -45,7 +46,7 @@ public class User {
         this.id = id;
     }
 
-    public User(Long id, String name, String familyName, String nickName, String address, Integer lang, String joinTime, Integer role, String noTPS, String noTVQ, String pwd, Integer status, Integer version) {
+    public User(Long id, String name, String familyName, String nickName, String address, Integer lang, String joinTime, Integer role, String noTPS, String noTVQ, String pwd, String ANNIVERSARY, Integer status, Integer version) {
         this.id = id;
         this.name = name;
         this.familyName = familyName;
@@ -57,6 +58,7 @@ public class User {
         this.noTPS = noTPS;
         this.noTVQ = noTVQ;
         this.pwd = pwd;
+        this.ANNIVERSARY = ANNIVERSARY;
         this.status = status;
         this.version = version;
     }
@@ -155,6 +157,14 @@ public class User {
         this.pwd = pwd;
     }
 
+    public String getANNIVERSARY() {
+        return ANNIVERSARY;
+    }
+
+    public void setANNIVERSARY(String ANNIVERSARY) {
+        this.ANNIVERSARY = ANNIVERSARY;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -179,7 +189,6 @@ public class User {
         myDao.delete(this);
     }
 
-    /** Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context. */
     public void update() {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
@@ -187,7 +196,6 @@ public class User {
         myDao.update(this);
     }
 
-    /** Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context. */
     public void refresh() {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");

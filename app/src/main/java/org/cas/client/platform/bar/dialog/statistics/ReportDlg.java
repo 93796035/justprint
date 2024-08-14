@@ -306,8 +306,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	private void updatePreviewContent() {
 		List<Bill> salesAndRefunds = queryRelevantCompleteAndRefundBillList(startTime, endTime, cbxShowOnlyMine.isChecked());
-		printerIP = BarFrame.menuPanel.getPrinters()[0].getIp();
-		formattedString = PrintService.formatContentForReport(salesAndRefunds, printerIP, startTime, endTime, valBatchID.getText().toString());
+		formattedString = PrintService.formatContentForReport(salesAndRefunds, startTime, endTime, valBatchID.getText().toString());
 
 		StringBuilder wholeContent = new StringBuilder();
 		for (String content : formattedString) {

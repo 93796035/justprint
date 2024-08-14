@@ -34,8 +34,9 @@ public class UserDao extends AbstractDao<User, Long> {
         public final static Property NoTPS = new Property(8, String.class, "noTPS", false, "noTPS");
         public final static Property NoTVQ = new Property(9, String.class, "noTVQ", false, "noTVQ");
         public final static Property Pwd = new Property(10, String.class, "pwd", false, "PWD");
-        public final static Property Status = new Property(11, Integer.class, "status", false, "STATUS");
-        public final static Property Version = new Property(12, Integer.class, "version", false, "VERSION");
+        public final static Property ANNIVERSARY = new Property(11, String.class, "ANNIVERSARY", false, "ANNIVERSARY");
+        public final static Property Status = new Property(12, Integer.class, "status", false, "STATUS");
+        public final static Property Version = new Property(13, Integer.class, "version", false, "VERSION");
     };
 
     private DaoSession daoSession;
@@ -65,8 +66,9 @@ public class UserDao extends AbstractDao<User, Long> {
                 "'noTPS' TEXT," + // 8: noTPS
                 "'noTVQ' TEXT," + // 9: noTVQ
                 "'PWD' TEXT," + // 10: pwd
-                "'STATUS' INTEGER," + // 11: status
-                "'VERSION' INTEGER);"); // 12: version
+                "'ANNIVERSARY' TEXT," + // 11: ANNIVERSARY
+                "'STATUS' INTEGER," + // 12: status
+                "'VERSION' INTEGER);"); // 13: version
     }
 
     /** Drops the underlying database table. */
@@ -135,14 +137,19 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindString(11, pwd);
         }
  
+        String ANNIVERSARY = entity.getANNIVERSARY();
+        if (ANNIVERSARY != null) {
+            stmt.bindString(12, ANNIVERSARY);
+        }
+ 
         Integer status = entity.getStatus();
         if (status != null) {
-            stmt.bindLong(12, status);
+            stmt.bindLong(13, status);
         }
  
         Integer version = entity.getVersion();
         if (version != null) {
-            stmt.bindLong(13, version);
+            stmt.bindLong(14, version);
         }
     }
 
@@ -173,8 +180,9 @@ public class UserDao extends AbstractDao<User, Long> {
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // noTPS
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // noTVQ
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // pwd
-            cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11), // status
-            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12) // version
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // ANNIVERSARY
+            cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // status
+            cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13) // version
         );
         return entity;
     }
@@ -193,8 +201,9 @@ public class UserDao extends AbstractDao<User, Long> {
         entity.setNoTPS(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setNoTVQ(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
         entity.setPwd(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setStatus(cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11));
-        entity.setVersion(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
+        entity.setANNIVERSARY(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setStatus(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));
+        entity.setVersion(cursor.isNull(offset + 13) ? null : cursor.getInt(offset + 13));
      }
     
     /** @inheritdoc */

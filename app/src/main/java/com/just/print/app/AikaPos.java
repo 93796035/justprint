@@ -94,15 +94,16 @@ public class AikaPos extends Application {
         UserDao userDao = session.getUserDao();
         List<User> users = new ArrayList<>();
         String currentTime = BarUtil.df.format(new Date());
-        users.add(new User(null, "Michael", "Johndan", "ShuaiGe", "10754 l'hotel", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", 0, 0));
-        users.add(new User(null, "Tao", "Jiang", "Operator2","1214 cardinal", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", 0, 0));
-        users.add(new User(null, "Wei", "Hao", "hw", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", 0, 0));
-        users.add(new User(null, "Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", 0, 0));
+        users.add(new User(null, "Michael", "Johndan", "ShuaiGe", "10754 l'hotel", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", "", 0, 0));
+        users.add(new User(null, "Tao", "Jiang", "Operator2","1214 cardinal", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", "", 0, 0));
+        users.add(new User(null, "Wei", "Hao", "hw", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", "", 0, 0));
+        users.add(new User(null, "Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", "", 0, 0));
         userDao.insertInTx(users);
     }
 
     private void initOtherTableWithRawSQL(DaoSession session) {
         insertHardwareData();// 插入硬件设备数据
+        createSystemInfoTable();
         createEvaluationTable(); // 创建评估表
         createBillTable();// 创建Bill表
         createWEBSRMBatchTable();// 创建WEBSRMBatch表
@@ -124,7 +125,12 @@ public class AikaPos extends Application {
         sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P6', 0, 2, '192.168.1.84', 0, 32)";
         db.execSQL(sql);
     }
-
+    private void createSystemInfoTable(){
+        String sql = "CREATE TABLE IF NOT EXISTS systeminfo (" +
+                "_id INTEGER PRIMARY KEY, keyName TEXT, value TEXT, STATUS INTEGER, " +
+                "VERSION INTEGER);";
+        db.execSQL(sql);
+    }
     private void createEvaluationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
                 "_id INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +

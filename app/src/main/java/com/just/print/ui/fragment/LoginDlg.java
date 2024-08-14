@@ -226,7 +226,7 @@ public class LoginDlg extends DialogFragment {
                     // then reset the NextIdx system config file
                     String printerIP = BarFrame.menuPanel.getPrinters()[0].getIp();
                     PrintService.printReport(printerIP, PrintService.formatContentForReport(salesAndRefunds,
-                            printerIP, lastPrintTime, endTime, curBatchIdx));
+                            lastPrintTime, endTime, curBatchIdx));
 
                     String sqlStr = "insert into systeminfo (version) values ('" + endTime + "')";
                     try {
