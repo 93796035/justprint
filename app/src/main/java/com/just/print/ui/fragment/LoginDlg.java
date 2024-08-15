@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -20,7 +19,6 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Bill;
 import com.just.print.db.bean.User;
-import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
 
@@ -34,7 +32,6 @@ import org.cas.client.platform.bar.i18n.BarDlgConst2;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
-import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 

@@ -142,8 +142,8 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	}
 
 	private void initContent() {
-		String endTime = BarUtil.df.format(new Date());
-		String startTime = endTime.substring(0, 11) + BarOption.getStartTime();
+		endTime = BarUtil.df.format(new Date());
+		startTime = endTime.substring(0, 11) + BarOption.getStartTime();
 		StringBuilder sql = new StringBuilder("select ANNIVERSARY from USER where _id = ").append(LoginDlg.USERID);
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
@@ -182,7 +182,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 			valBatchID.setText(curBatchIdx);
 		}
 
-		updateTimeFields(startTime, endTime);
+		updateTimeFields();
 		updatePreviewContent();
 	}
 
@@ -202,7 +202,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 						rs.moveToNext();
 						startTime = DBUtil.getCursorString(rs,"version");
 						endTime = BarUtil.df.format(new Date());
-						updateTimeFields(startTime, endTime);
+						updateTimeFields();
 						updatePreviewContent();
 					} catch (Exception exp) {
 						L.e("ReportDlg ", "Exception when fetching latest record." + sql, exp);
@@ -215,7 +215,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 						endTime = DBUtil.getCursorString(rs,"version");
 						rs.moveToNext();
 						startTime = DBUtil.getCursorString(rs,"version");
-						updateTimeFields(startTime, endTime);
+						updateTimeFields();
 						updatePreviewContent();
 					} catch (Exception exp) {
 						L.e("ReportDlg ", "Exception when fetching last record." + sql, exp);
@@ -271,7 +271,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		Date startDate = calendar.getTime();
 		startTime = BarUtil.df.format(startDate);
 		endTime = BarUtil.df.format(endDate);
-		updateTimeFields(startTime, endTime);
+		updateTimeFields();
 		updatePreviewContent();
 	}
 
@@ -279,7 +279,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		valBatchID.setText("");
 		endTime = BarUtil.df.format(new Date());
 		startTime = endTime.substring(0, 11) + BarOption.getStartTime();
-		updateTimeFields(startTime, endTime);
+		updateTimeFields();
 		updatePreviewContent();
 	}
 
@@ -292,7 +292,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		Date startDate = calendar.getTime();
 		startTime = BarUtil.df.format(startDate);
 		endTime = BarUtil.df.format(endDate);
-		updateTimeFields(startTime, endTime);
+		updateTimeFields();
 		updatePreviewContent();
 	}
 
@@ -300,7 +300,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		valBatchID.setText("");
 		endTime = BarUtil.df.format(new Date());
 		startTime = endTime.substring(0, 8) + "01 " + BarOption.getStartTime();
-		updateTimeFields(startTime, endTime);
+		updateTimeFields();
 		updatePreviewContent();
 	}
 
@@ -315,12 +315,12 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		txpPreview.setText(wholeContent.substring(0, wholeContent.length() - 9));
 	}
 
-	private void updateTimeFields(String startTime, String endNow) {
+	private void updateTimeFields() {
 		stopTriggerEventflag = true;
 		int p;
 		p = startTime.indexOf(" ");
 		if (p < 0) {
-			startTime = endNow;
+			startTime = endTime;
 			p = startTime.indexOf(" ");
 		}
 		String startDate = startTime.substring(0, p);
@@ -340,9 +340,9 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		tfdMinuteFrom.setText(startTime.substring(0, p));
 		tfdSecondFrom.setText(startTime.substring(p + 1));
 
-		p = endNow.indexOf(" ");
-		String endDate = endNow.substring(0, p);
-		endNow = endNow.substring(p + 1);
+		p = endTime.indexOf(" ");
+		String endDate = endTime.substring(0, p);
+		endTime = endTime.substring(p + 1);
 
 		p = endDate.indexOf("-");
 		tfdYearTo.setText(endDate.substring(0, p));
@@ -351,12 +351,12 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		tfdMonthTo.setText(endDate.substring(0, p));
 		tfdDayTo.setText(endDate.substring(p + 1));
 
-		p = endNow.indexOf(":");
-		tfdHourTo.setText(endNow.substring(0, p));
-		endNow = endNow.substring(p + 1);
-		p = endNow.indexOf(":");
-		tfdMinuteTo.setText(endNow.substring(0, p));
-		tfdSecondTo.setText(endNow.substring(p + 1));
+		p = endTime.indexOf(":");
+		tfdHourTo.setText(endTime.substring(0, p));
+		endTime = endTime.substring(p + 1);
+		p = endTime.indexOf(":");
+		tfdMinuteTo.setText(endTime.substring(0, p));
+		tfdSecondTo.setText(endTime.substring(p + 1));
 
 		stopTriggerEventflag = false;
 	}
