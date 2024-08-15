@@ -2,7 +2,6 @@ package com.just.print.app;
 
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -18,7 +17,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.just.print.R;
-import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.Dish;
 import com.just.print.db.bean.User;
 import com.just.print.ui.ViewUtils;
@@ -28,8 +26,6 @@ import com.just.print.ui.panel.SalesPanel;
 import com.just.print.ui.panel.SettingPanel;
 import com.just.print.ui.panel.TablesPanel;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.StringUtils;
-import com.just.print.util.ToastUtil;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XViewByID;
 
@@ -65,10 +61,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;

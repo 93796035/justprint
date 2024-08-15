@@ -13,7 +13,6 @@ import com.just.print.db.dao.DishDao;
 import com.just.print.db.dao.MarkDao;
 import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.SaleRecordDao;
-import com.just.print.db.dao.UserDao;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,10 +22,6 @@ import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.query.QueryBuilder;
 
 public final class DaoExpand {
-
-    static public <T, K> List<T> queryAllNotDeletedUsers(AbstractDao<T, K> dao) {
-        return dao.queryBuilder().where(UserDao.Properties.Status.lt(State.DELETED)).list();
-    }
 
     static public <T, K> List<T> queryNotDeletedAll(AbstractDao<T, K> dao) {
         return queryAllNotDeleted(dao).list();

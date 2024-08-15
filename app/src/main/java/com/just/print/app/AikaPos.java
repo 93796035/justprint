@@ -5,33 +5,24 @@ import com.just.print.R;
 import android.app.Application;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
 
 import com.just.print.db.bean.DiningTable;
 import com.just.print.db.bean.User;
 import com.just.print.db.dao.DaoMaster;
 import com.just.print.db.dao.DaoSession;
 import com.just.print.db.dao.DiningTableDao;
-import com.just.print.db.dao.UserDao;
 import com.just.print.ui.fragment.LoginDlg;
 
 import org.cas.client.platform.bar.BarUtil;
-import org.cas.client.platform.bar.web_srm.MevUtils;
-import org.cas.client.platform.casutil.L;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class AikaPos extends Application {
 
@@ -91,19 +82,18 @@ public class AikaPos extends Application {
     }
 
     private void insertInitialUsers(DaoSession session) {
-        UserDao userDao = session.getUserDao();
-        List<User> users = new ArrayList<>();
+        String sql = "insert into user (name, familyName, nickName, address, lang, joinTime, role, noTPS, noTVQ, pwd, ANNIVERSARY, status, version) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
         String currentTime = BarUtil.df.format(new Date());
-        users.add(new User(null, "Michael", "Johndan", "ShuaiGe", "10754 l'hotel", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", "", 0, 0));
-        users.add(new User(null, "Tao", "Jiang", "Operator2","1214 cardinal", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", "", 0, 0));
-        users.add(new User(null, "Wei", "Hao", "hw", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", "", 0, 0));
-        users.add(new User(null, "Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", "", 0, 0));
-        userDao.insertInTx(users);
+        db.execSQL(sql, new Object[]{"Michael", "Johndan", "ShuaiGe", "10754 l'hotel", 0, currentTime, LoginDlg.USER_STATUS, "", "", "1111", "", 0, 0});
+        db.execSQL(sql, new Object[]{"Tao", "Jiang", "Operator2","1214 cardinal", 1, currentTime, LoginDlg.USER_STATUS, "", "", "2222", "", 0, 0});
+        db.execSQL(sql, new Object[]{"Wei", "Hao", "hw", "Manager", 2, currentTime, LoginDlg.ADMIN_STATUS, "", "", "3333", "", 0, 0});
+        db.execSQL(sql, new Object[]{"Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", "", 0, 0});
     }
 
     private void initOtherTableWithRawSQL(DaoSession session) {
         insertHardwareData();// 插入硬件设备数据
         createSystemInfoTable();
+        createUserTable();
         createEvaluationTable(); // 创建评估表
         createBillTable();// 创建Bill表
         createWEBSRMBatchTable();// 创建WEBSRMBatch表
@@ -131,6 +121,14 @@ public class AikaPos extends Application {
                 "VERSION INTEGER);";
         db.execSQL(sql);
     }
+
+    private void createUserTable(){
+        String sql = "CREATE TABLE IF NOT EXISTS USER (" +
+                "_id INTEGER PRIMARY KEY, name TEXT, familyName TEXT, nickName TEXT, address TEXT, " +
+                "lang INTEGER, joinTime TEXT, role INTEGER, noTPS TEXT, noTVQ TEXT, pwd TEXT, ANNIVERSARY TEXT);";
+        db.execSQL(sql);
+    }
+
     private void createEvaluationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
                 "_id INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +

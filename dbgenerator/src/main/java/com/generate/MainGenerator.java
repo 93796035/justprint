@@ -40,23 +40,22 @@ public class MainGenerator {
 
     protected void create(Schema schema) {
 
-        // +---------+-----------+------------+---------+
-        // USER
-        // +---------+-----------+------------+---------+
-        Entity user = schema.addEntity("User");
-        user.addIdProperty();
-        user.addStringProperty("name").columnName("name");
-        user.addStringProperty("familyName").columnName("familyName");
-        user.addStringProperty("nickName").columnName("nickName");
-        user.addStringProperty("address").columnName("address");
-        user.addIntProperty("lang");
-        user.addStringProperty("joinTime").columnName("joinTime");
-        user.addIntProperty("role");// 1 is the biggest
-        user.addStringProperty("noTPS").columnName("noTPS");
-        user.addStringProperty("noTVQ").columnName("noTVQ");
-        user.addStringProperty("pwd");
-        user.addStringProperty("ANNIVERSARY");
-
+//        // +---------+-----------+------------+---------+
+//        // USER
+//        // +---------+-----------+------------+---------+
+//        Entity user = schema.addEntity("User");
+//        user.addIdProperty();
+//        user.addStringProperty("name").columnName("name");
+//        user.addStringProperty("familyName").columnName("familyName");
+//        user.addStringProperty("nickName").columnName("nickName");
+//        user.addStringProperty("address").columnName("address");
+//        user.addIntProperty("lang");
+//        user.addStringProperty("joinTime").columnName("joinTime");
+//        user.addIntProperty("role");// 1 is the biggest
+//        user.addStringProperty("noTPS").columnName("noTPS");
+//        user.addStringProperty("noTVQ").columnName("noTVQ");
+//        user.addStringProperty("pwd");
+//        user.addStringProperty("ANNIVERSARY");
 
         // +---------+---------+---------+---------+
         // Printer

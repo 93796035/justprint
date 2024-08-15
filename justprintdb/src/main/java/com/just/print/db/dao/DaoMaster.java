@@ -8,7 +8,6 @@ import android.util.Log;
 import de.greenrobot.dao.AbstractDaoMaster;
 import de.greenrobot.dao.identityscope.IdentityScopeType;
 
-import com.just.print.db.dao.UserDao;
 import com.just.print.db.dao.PrinterDao;
 import com.just.print.db.dao.DiningTableDao;
 import com.just.print.db.dao.CategoryDao;
@@ -20,7 +19,6 @@ import com.just.print.db.dao.M2M_SaleRecordMarkDao;
 import com.just.print.db.dao.BillDao;
 import com.just.print.db.dao.CustomizationsDao;
 import com.just.print.db.dao.CustomizedRuleDao;
-import com.just.print.db.dao.WebsrmBatchDao;
 import com.just.print.db.dao.DeviceDao;
 import com.just.print.db.dao.LogDao;
 
@@ -33,7 +31,6 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(SQLiteDatabase db, boolean ifNotExists) {
-        UserDao.createTable(db, ifNotExists);
         PrinterDao.createTable(db, ifNotExists);
         DiningTableDao.createTable(db, ifNotExists);
         CategoryDao.createTable(db, ifNotExists);
@@ -45,14 +42,12 @@ public class DaoMaster extends AbstractDaoMaster {
         BillDao.createTable(db, ifNotExists);
         CustomizationsDao.createTable(db, ifNotExists);
         CustomizedRuleDao.createTable(db, ifNotExists);
-        WebsrmBatchDao.createTable(db, ifNotExists);
         DeviceDao.createTable(db, ifNotExists);
         LogDao.createTable(db, ifNotExists);
     }
     
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(SQLiteDatabase db, boolean ifExists) {
-        UserDao.dropTable(db, ifExists);
         PrinterDao.dropTable(db, ifExists);
         DiningTableDao.dropTable(db, ifExists);
         CategoryDao.dropTable(db, ifExists);
@@ -64,7 +59,6 @@ public class DaoMaster extends AbstractDaoMaster {
         BillDao.dropTable(db, ifExists);
         CustomizationsDao.dropTable(db, ifExists);
         CustomizedRuleDao.dropTable(db, ifExists);
-        WebsrmBatchDao.dropTable(db, ifExists);
         DeviceDao.dropTable(db, ifExists);
         LogDao.dropTable(db, ifExists);
     }
@@ -98,7 +92,6 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(SQLiteDatabase db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(UserDao.class);
         registerDaoClass(PrinterDao.class);
         registerDaoClass(DiningTableDao.class);
         registerDaoClass(CategoryDao.class);
@@ -110,7 +103,6 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(BillDao.class);
         registerDaoClass(CustomizationsDao.class);
         registerDaoClass(CustomizedRuleDao.class);
-        registerDaoClass(WebsrmBatchDao.class);
         registerDaoClass(DeviceDao.class);
         registerDaoClass(LogDao.class);
     }
