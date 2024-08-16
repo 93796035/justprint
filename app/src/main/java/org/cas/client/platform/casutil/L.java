@@ -2,8 +2,8 @@ package org.cas.client.platform.casutil;
 
 import android.util.Log;
 
-import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
+import com.just.print.app.Options;
 import com.just.print.sys.server.DataSyncService;
 import com.just.print.util.AppUtils;
 

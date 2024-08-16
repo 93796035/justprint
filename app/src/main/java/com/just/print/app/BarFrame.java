@@ -124,7 +124,7 @@ public class BarFrame extends BaseFragmentActivity {
 
 //        working time check
 //        if(isOutOfWorkingTime()
-//                && StringUtils.isBlank(Options.getCustomData(Options.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
+//                && StringUtils.isBlank(com.just.print.app.Options.getCustomData(com.just.print.app.Options.sendSM))){ //only when it's not used for sending sms, care about it's night or day version.
 //            ToastUtil.showToast("Invalidate operation detected, please contact info@ShareTheGoodOnes.com for technique support!");
 //            finish();   //No need to add thread to make it stay. even the app quit, the showToast will still on screen for a few seconds.
 //            return;
@@ -540,8 +540,8 @@ public class BarFrame extends BaseFragmentActivity {
 
 //    private boolean isOutOfWorkingTime(){
 //
-//        String startTime = Options.getCustomData(Options.startTime);
-//        String endTime = Options.getCustomData(Options.endTime);
+//        String startTime = com.just.print.app.Options.getCustomData(com.just.print.app.Options.startTime);
+//        String endTime = com.just.print.app.Options.getCustomData(com.just.print.app.Options.endTime);
 //        String curTime = "";
 //
 //        DateFormat df = new SimpleDateFormat("HHmm");

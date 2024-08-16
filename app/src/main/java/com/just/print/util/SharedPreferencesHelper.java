@@ -7,8 +7,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Base64;
 
-import com.alibaba.fastjson.JSON;
-
 import org.cas.client.platform.casutil.L;
 
 import java.io.ByteArrayInputStream;
@@ -113,26 +111,6 @@ public class SharedPreferencesHelper {
         return getSharedPreferences().getInt(key, defValue);
     }
 
-    public <T> T getJSON(Class<?> key, Class<T> clazz) {
-        return getJSON(key.getName(), clazz);
-
-    }
-
-    public <T> T getJSON(Class<T> clazz) {
-        return getJSON(clazz, clazz);
-
-    }
-
-    public <T> T getJSON(String key, Class<T> clazz) {
-        try {
-            return JSON.parseObject(getString((key)), clazz);
-        } catch (Exception e) {
-            L.w(tag, "getJSON", e);
-            return null;
-        }
-
-    }
-
     /**
      * 测试中的方法,从xml里取出序列化的对象
      *
@@ -187,29 +165,6 @@ public class SharedPreferencesHelper {
         commitPreferences(editor);
         return this;
 
-    }
-
-    public SharedPreferencesHelper putJSON(Class<?> key, Object value) {
-
-        putJSON(key.getName(), value);
-        return this;
-    }
-
-    public SharedPreferencesHelper putJSON(Object value) {
-
-        putJSON(value.getClass().getName(), value);
-        return this;
-    }
-
-    public SharedPreferencesHelper putJSON(String key, Object value) {
-        Editor editor = edit();
-        editor.putString(
-                getKey(key),
-                value instanceof CharSequence ? value.toString() : JSON
-                        .toJSONString(value));
-
-        commitPreferences(editor);
-        return this;
     }
 
     public SharedPreferencesHelper putLon(String key, long value) {

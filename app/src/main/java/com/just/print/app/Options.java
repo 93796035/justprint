@@ -1,25 +1,22 @@
 package com.just.print.app;
 
+import static com.just.print.util.ToastUtil.showToast;
+
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.widget.TextView;
 
-import com.just.print.db.bean.Bill;
-import com.just.print.db.expand.DaoExpand;
 import com.just.print.ui.fragment.RegisterFragment;
-import org.cas.client.platform.casutil.L;
 import com.just.print.util.NetUtils;
 import com.just.print.util.SharedPreferencesHelper;
 import com.just.print.util.StringUtils;
 
+import org.cas.client.platform.casutil.L;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.List;
-
-import static com.just.print.util.ToastUtil.showToast;
 
 public class Options {
     public static final String DEFAULT_LABELPRINTER_SIZE = "40,30";
@@ -332,17 +329,6 @@ public class Options {
         return true;
     }
 
-    //=============================================================
-    //return the current billIdx saved in config. if not set yet, then check the bill ids in db, then give a next one.
-    public static String getCurrentBillIdx() {
-        String billIdx = Options.getCustomData(Options.billIdx);
-        if(StringUtils.isBlank(billIdx)){   //if no billIdx set in configuration, then give on
-            List<Bill> orders = DaoExpand.queryRecentBill(
-                    AikaPos.daoSession.getBillDao(),1);
-            billIdx = String.valueOf(orders.size() > 0? orders.get(0).getId() : 0 + 1);
-        }
-        return billIdx;
-    }
 
     public static boolean notifyCheck(int idx, String reportContent, boolean isReset) {
         String email = Options.getCustomData(Options.email_address_report);

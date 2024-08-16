@@ -1,22 +1,13 @@
 package com.just.print.ui.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
 import com.just.print.R;
-
 import com.just.print.app.BarFrame;
-import com.just.print.app.Options;
 import com.just.print.app.BaseFragment;
-import com.just.print.net.UDPService;
-import com.just.print.sys.model.AbsModel;
-import com.just.print.sys.model.QueryShopResult;
-import com.just.print.ui.panel.OrderFragmentActivity;
-import com.just.print.util.Base64Util;
-import com.just.print.util.DbUtil;
-import com.just.print.util.DbUtil;
+import com.just.print.app.Options;
 import com.just.print.util.NetUtils;
 import com.just.print.util.StringUtils;
 import com.stupid.method.reflect.StupidReflect;
@@ -24,13 +15,11 @@ import com.stupid.method.reflect.annotation.XClick;
 import com.stupid.method.reflect.annotation.XGetValueByView;
 import com.stupid.method.reflect.annotation.XViewByID;
 
-import org.cas.client.platform.bar.model.DBUtil;
-
 
 /**
  * the interface is for inputting shop name and user name.
  */
-public class RegisterFragment extends BaseFragment implements UDPService.UDPCallback {
+public class RegisterFragment extends BaseFragment{
     private static String registeredName;
     public static String getUserName() {
         return registeredName;
@@ -74,38 +63,6 @@ public class RegisterFragment extends BaseFragment implements UDPService.UDPCall
 //        }
 //    }
 
-
-    @Override
-    public boolean onCallback(final boolean status, final int requestCode, AbsModel result) {
-        switch (requestCode) {
-            case 1:
-                final QueryShopResult result2 = result == null ? null : (QueryShopResult) result;
-                if (status && result2 != null && result2.isExists()) {
-
-                    byte[] datas = Base64Util.decode(result2.getFileBase64());
-                    DbUtil.writeDBByte(datas);
-                }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (status && result2 != null && result2.isExists()) {
-                            Options.saveShopName(getContext(), result2.getShopName());
-                            //showToast("店铺存在");
-                            startActivity(new Intent(getContext(), OrderFragmentActivity.class));
-                            getActivity().finish();
-                        } else {
-//                            String string = ((TextView) findViewById(R.id.shopName)).getText().toString();
-//                            AppData.saveShopName(getContext(), string);
-//                            AppData.createShopDB(getContext(), string);
-                            findViewById(R.id.createShop).setVisibility(View.VISIBLE);
-                            showToast("store not existing, or no device belongs to this store in network was found");
-                        }
-                    }
-                });
-                break;
-        }
-        return true;
-    }
 
     @XClick({R.id.confirmDeviceId})
     private void onConfirmUserName(View view) {

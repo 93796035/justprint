@@ -12,21 +12,18 @@
         android:gravity="center_vertical">
 
         <Button
-            android:id="@+id/btnLeft"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="&lt;&lt;"
             android:enabled="false" />
 
         <View
-            android:id="@+id/separator"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
         <Button
-            android:id="@+id/btnRight"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="&gt;&gt;"
@@ -35,7 +32,6 @@
 
     <!-- Bill Panels Grid -->
     <GridLayout
-        android:id="@+id/gridBillPanels"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

@@ -4,8 +4,8 @@ import static com.just.print.util.ToastUtil.showToast;
 
 import androidx.annotation.NonNull;
 
-import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
+import com.just.print.app.Options;
 
 import org.cas.client.platform.casutil.L;
 import org.json.JSONException;

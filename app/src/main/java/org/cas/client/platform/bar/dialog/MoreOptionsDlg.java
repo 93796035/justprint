@@ -102,7 +102,7 @@ public class MoreOptionsDlg extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("More Options (internal use only)");
+        dialog.setTitle("More com.just.print.app.Options (internal use only)");
         return dialog;
     }
 

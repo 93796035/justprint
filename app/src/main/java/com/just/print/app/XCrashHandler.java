@@ -20,21 +20,15 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.Looper;
 
-import com.alibaba.fastjson.JSONObject;
 import org.cas.client.platform.casutil.L;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @SuppressLint("SimpleDateFormat")
 public class XCrashHandler implements UncaughtExceptionHandler {
 	private Context mContext;
 
 	private UncaughtExceptionHandler mDefaultHandler;
-
-	private JSONObject devInfo() {
-		JSONObject json = new JSONObject();
-		json.putAll(getSystemInfo());
-		json.putAll(getApplicationInfo());
-		return json;
-	}
 
 	public JSONObject getApplicationInfo() {
 		PackageManager pm = null;
@@ -56,7 +50,7 @@ public class XCrashHandler implements UncaughtExceptionHandler {
 		return json;
 	}
 
-	public JSONObject getSystemInfo() {
+	public JSONObject getSystemInfo() throws JSONException {
 		JSONObject json = new JSONObject();
 		json.put("SYS_SDK_INT", android.os.Build.VERSION.SDK_INT);
 		json.put("SYS_SDK", android.os.Build.VERSION.CODENAME);

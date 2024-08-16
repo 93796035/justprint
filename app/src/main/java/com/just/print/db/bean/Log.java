@@ -1,0 +1,88 @@
+package com.just.print.db.bean;
+
+public class Log {
+
+    private Long id;
+    private String msg;
+    private String name;
+    private java.util.Date date;
+    private Integer logType;
+    private Integer status;
+    private Integer version;
+
+    public Log() {
+    }
+
+    public Log(Long id) {
+        this.id = id;
+    }
+
+    public Log(Long id, String msg, String name, java.util.Date date, Integer logType, Integer status, Integer version) {
+        this.id = id;
+        this.msg = msg;
+        this.name = name;
+        this.date = date;
+        this.logType = logType;
+        this.status = status;
+        this.version = version;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public java.util.Date getDate() {
+        return date;
+    }
+
+    public void setDate(java.util.Date date) {
+        this.date = date;
+    }
+
+    public Integer getLogType() {
+        return logType;
+    }
+
+    public void setLogType(Integer logType) {
+        this.logType = logType;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+}

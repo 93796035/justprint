@@ -1,30 +1,22 @@
 package com.just.print.sys.server;
 
 import android.Manifest;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.gsm.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.just.print.app.Options;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragmentActivity;
+import com.just.print.app.Options;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.Dish;
-import com.just.print.db.bean.M2M_MenuPrint;
 import com.just.print.db.bean.Mark;
-import com.just.print.db.bean.Printer;
-import com.just.print.db.dao.CategoryDao;
-import com.just.print.db.dao.DishDao;
-import com.just.print.db.dao.M2M_MenuPrintDao;
-import com.just.print.db.dao.MarkDao;
-import com.just.print.db.dao.PrinterDao;
-import com.just.print.db.expand.State;
 import com.just.print.sys.model.SelectionDetail;
 import com.just.print.ui.panel.OrderFragmentActivity;
 import com.just.print.util.AppUtils;
@@ -125,20 +117,14 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {//得到服务端的返回码是否连接成功
                         String jsonStr = NetUtils.readBackFromConnection(urlConnection);
                         jsonStr = new JSONObject(jsonStr).getString("body");
-                        DishDao menuDao = AikaPos.daoSession.getDishDao();
-                        PrinterDao printerDao = AikaPos.daoSession.getPrinterDao();
                         if(jsonStr.length() > 0) {
                             JSONArray jsonObject = new JSONArray(jsonStr);
 //                            List<Printer> printers = absorbPrinters(new JSONArray((String)jsonObject.get(0)), printerDao);
 //                            List<Mark> marks = absorbMarksAndTables(new JSONArray((String)jsonObject.get(1)), new JSONArray((String)jsonObject.get(2)));
-                            List<String> autoPopUpMenus = absorbDishes(
-                                    new JSONArray((String)jsonObject.get(4)),
-                                    absorbCategories(new JSONArray((String)jsonObject.get(3))), menuDao);
-                            Options.putCustomData(Options.forcePopUpMenuList, autoPopUpMenus.toString());
+//                            com.just.print.app.Options.putCustomData(com.just.print.app.Options.forcePopUpMenuList, autoPopUpMenus.toString());
                             Options.updataeLastModifyTime((String)jsonObject.get(5));
                         }
                         //add relation between dish and mark and printers
-                        createRelationShip(menuDao, printerDao);
                         if(lastSelection != null) {
                             lastSelection.clear();
                         }
@@ -222,25 +208,6 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
         }
     }
 
-    private void createRelationShip(DishDao menuDao, PrinterDao printerDao) {
-        List<Dish> menus = menuDao.loadAll();
-        List<Printer> printers = printerDao.loadAll();
-        M2M_MenuPrintDao menu2PrinterDao = AikaPos.daoSession.getM2M_MenuPrintDao();
-        menu2PrinterDao.deleteAll();
-        for(Dish menu : menus){                         //go through each menu
-            String strPrinters = menu.getPrinterIds();    //fetch out the printers property in it.
-            if(strPrinters != null){
-                String[] printerIdxs = strPrinters.split(",");      //split the string to get each index of the printer.
-                for(String id : printerIdxs){                               //go through each index.
-                    M2M_MenuPrint m2m_MenuPrint = new M2M_MenuPrint();
-                    m2m_MenuPrint.setDishId(menu.getId());
-                    m2m_MenuPrint.setPrint(printers.get(Integer.valueOf(id)));
-                    menu2PrinterDao.insert(m2m_MenuPrint);                      //create relation between the menu and printers.
-                }
-            }
-        }
-    }
-
 //    private List<Printer> absorbPrinters(JSONArray jsonPrinters, PrinterDao printerDao) throws JSONException {
 //        printerDao.deleteAll();
 //        List<Printer> printers = new ArrayList<>();
@@ -261,78 +228,6 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
 //        }
 //        return printers;
 //    }
-
-    private List<Mark> absorbMarksAndTables(JSONArray jsonMarks, JSONArray jsonTables) throws JSONException {
-        MarkDao markDao = AikaPos.daoSession.getMarkDao();
-        markDao.deleteAll();
-        List<Mark> marks = new ArrayList<>();
-        if (jsonMarks.length() > 0) {
-            for (int i = 0; i < jsonMarks.length(); i++) {
-                JSONObject jo = jsonMarks.getJSONObject(i);
-                Mark mark = new Mark();
-                mark.setName1(jo.getString("name"));
-                mark.setVersion((int)(jo.getDouble("price") * 100));
-                mark.setStatus(State.OPENNED);
-                mark.setId(markDao.insert(mark));
-                marks.add(mark);
-            }
-        }
-        //absorb the tables.
-        if (jsonTables.length() > 0) {
-            for (int i = 0; i < jsonTables.length(); i++) {
-                JSONObject jo = jsonTables.getJSONObject(i);
-                Mark table = new Mark();
-                table.setName1(jo.getString("name"));
-                table.setStatus(jo.getInt("displayIdx"));
-                table.setVersion(-1);
-                table.setId(markDao.insert(table));
-            }
-        }
-
-//         table.setVersion(Long.valueOf(State.def));
-//         table.setId(markDao.insert(table));
-        return marks;
-    }
-
-    private List<Category> absorbCategories(JSONArray jsonCategories) throws JSONException {
-        CategoryDao categoryDao = AikaPos.daoSession.getCategoryDao();
-        categoryDao.deleteAll();
-        List<Category> categories = new ArrayList<>();
-        if (jsonCategories.length() > 0) {
-            for (int i = 0; i < jsonCategories.length(); i++) {
-                JSONObject jo = jsonCategories.getJSONObject(i);
-                Category category = new Category();
-                category.setName1(jo.getString("name"));
-                category.setDisplayIdx(Integer.valueOf(jo.getString("dspIndex")));
-                category.setStatus(State.OPENNED);
-                category.setId(categoryDao.insert(category));
-                categories.add(category);
-            }
-        }
-        return categories;
-    }
-
-    private List<String> absorbDishes(JSONArray dishes, List<Category> categories, DishDao menuDao) throws JSONException {
-        menuDao.deleteAll();
-        List<String> autoPompMenus = new ArrayList<>();
-        if (dishes.length() > 0) {
-//            for (int i = 0; i < dishes.length(); i++) {
-//                JSONObject jo = dishes.getJSONObject(i);
-//                Dish menu = new Dish();
-//                menu.setId(jo.getString("MName"));
-//                menu.setName1(jo.getString("MName"));
-//                menu.setPrinter(jo.getString("printer"));
-//                menu.setPrice(Double.valueOf(jo.getInt("price"))/100);
-//                menu.setState(State.ACTIVE);
-//                menu.setCid(getCategoryId(jo.getString("CATEGORY"), categories));
-//                menuDao.insert(menu);
-//                if(jo.getBoolean("prompMenu")){
-//                    autoPompMenus.add(menu.getName1());
-//                }
-//            }
-        }
-        return autoPompMenus;
-    }
 
     private Long getCategoryId(String categoryName, List<Category> categories) {
         for(Category category : categories){
@@ -403,15 +298,15 @@ public class DataSyncService extends BaseFragmentActivity implements Runnable{
                     Intent itDeliver = new Intent(SMS_DELIVERED_ACTION);
 
                     /* sentIntent参数为传送后接受的广播信息PendingIntent */
-                    PendingIntent mSendPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itSend, 0);
-
-                    /* deliveryIntent参数为送达后接受的广播信息PendingIntent */
-                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itDeliver, 0);
-                    List<String> divideContents = smsManager.divideMessage(content);
-                    for (String text:divideContents) {
-                        /* 发送SMS短信，注意倒数的两个PendingIntent参数 */
-                        smsManager.sendTextMessage(phoneNumber, null, text, mSendPI, mDeliverPI);
-                    }
+//                    PendingIntent mSendPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itSend, 0);
+//
+//                    /* deliveryIntent参数为送达后接受的广播信息PendingIntent */
+//                    PendingIntent mDeliverPI = PendingIntent.getBroadcast(AikaPos.instance.getApplicationContext(), 0, itDeliver, 0);
+//                    List<String> divideContents = smsManager.divideMessage(content);
+//                    for (String text:divideContents) {
+//                        /* 发送SMS短信，注意倒数的两个PendingIntent参数 */
+//                        smsManager.sendTextMessage(phoneNumber, null, text, mSendPI, mDeliverPI);
+//                    }
 
                 }catch(Exception e) {
                     Toast.makeText(DataSyncService.this, "SMS Failed to Send, Please try again", Toast.LENGTH_SHORT).show();

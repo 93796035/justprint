@@ -61,7 +61,7 @@ public interface DlgConst
         "0.5 days",   "1 day",     "2 days"
     };
     /* calendar button to enter calendar dialog */
-    String CALENDAR_BUTTON = "Calendar Options...";
+    String CALENDAR_BUTTON = "Calendar com.just.print.app.Options...";
     
     /* full name of week day */
     String[] DAY_NAME =

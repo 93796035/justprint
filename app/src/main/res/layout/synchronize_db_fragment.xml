@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/synchronizedb"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
@@ -16,7 +15,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/notice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="You can modify the host name to synchronize from an other store. Please be noticed that if the modification date of local database is later than the data on server, the database on server will be replaced by local database." />

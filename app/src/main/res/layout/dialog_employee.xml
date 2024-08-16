@@ -12,7 +12,6 @@
         android:orientation="horizontal"
         android:gravity="start|center_vertical">
         <TextView
-            android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -22,7 +21,6 @@
             android:textColor="@android:color/white"
             android:paddingBottom="8dp" />
         <TextView
-            android:id="@+id/tvIdLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ID:"
@@ -51,7 +49,6 @@
         android:orientation="horizontal"
         android:gravity="start|center_vertical">
         <TextView
-            android:id="@+id/tvNNameLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nick Name"
@@ -67,7 +64,6 @@
             android:inputType="text"/>
 
         <TextView
-            android:id="@+id/tvPwd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pass Code"
@@ -83,7 +79,6 @@
             android:inputType="textPassword"/>
 
         <TextView
-            android:id="@+id/tvNameLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Name"
@@ -99,7 +94,6 @@
             android:inputType="text"/>
 
         <TextView
-            android:id="@+id/tvfamilyNameLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Family Name"
@@ -133,7 +127,6 @@
             android:checkedButton="@+id/radioEn"> <!-- 默认选中第二个RadioButton -->
 
             <TextView
-                android:id="@+id/tvLangLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Lang"
@@ -176,7 +169,6 @@
             android:checkedButton="@+id/radioEmployee">
 
             <TextView
-                android:id="@+id/tvRoleLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Role"
@@ -218,7 +210,6 @@
         android:gravity="start|center_vertical">
 
         <TextView
-            android:id="@+id/tvNoTVQLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TVQ"
@@ -235,7 +226,6 @@
             android:inputType="text"/>
 
         <TextView
-            android:id="@+id/tvNoTPSLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TPS"
@@ -260,7 +250,6 @@
         android:gravity="start|center_vertical">
 
         <TextView
-            android:id="@+id/tvAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Address"
@@ -277,7 +266,6 @@
             android:inputType="text" />
 
         <TextView
-            android:id="@+id/tvJoinTimeLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Join Time"

@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/menuPanelRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="0dp">
@@ -13,7 +12,6 @@
 
         <!-- Left Arrow Button for Category -->
         <Button
-            android:id="@+id/categoryPageUp"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_left"
@@ -40,7 +38,6 @@
 
         <!-- Right Arrow Button for Category -->
         <Button
-            android:id="@+id/categoryPageDown"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_right"
@@ -58,7 +55,6 @@
 
     <!-- Menu Buttons and Page Controls Container -->
     <RelativeLayout
-        android:id="@+id/menuContainerWrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/categoryContainerWrapper"
@@ -66,7 +62,6 @@
 
         <!-- Left Arrow Button for Menu -->
         <Button
-            android:id="@+id/menuPageUp"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_left"
@@ -93,7 +88,6 @@
 
         <!-- Right Arrow Button for Menu -->
         <Button
-            android:id="@+id/menuPageDown"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="@drawable/triangle_right"

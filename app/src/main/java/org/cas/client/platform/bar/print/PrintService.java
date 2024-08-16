@@ -28,13 +28,11 @@ import org.cas.client.platform.bar.web_srm.ValuePossible;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesECDSA;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesQRCode;
 import org.cas.client.platform.cascustomize.CustOpts;
-import org.cas.client.platform.casutil.CASUtility;
 import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

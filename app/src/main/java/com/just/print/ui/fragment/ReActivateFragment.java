@@ -5,9 +5,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.just.print.R;
-import com.just.print.app.Options;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BaseFragment;
+import com.just.print.app.Options;
 import com.just.print.util.AppUtils;
 import com.stupid.method.reflect.StupidReflect;
 import com.stupid.method.reflect.annotation.XClick;

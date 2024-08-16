@@ -180,7 +180,6 @@
         android:paddingBottom="8dp">
         <!-- Size Section -->
         <TextView
-            android:id="@+id/sptSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffff"
@@ -203,31 +202,26 @@
                 android:textColor="#ffffff"
                 android:text="Size 1" />
             <RadioButton
-                android:id="@+id/rdbSize2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
                 android:text="Size 2" />
             <RadioButton
-                android:id="@+id/rdbSize3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
                 android:text="Size 3" />
             <RadioButton
-                android:id="@+id/rdbSize4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
                 android:text="Size 4" />
             <RadioButton
-                android:id="@+id/rdbSize5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
                 android:text="Size 5" />
             <RadioButton
-                android:id="@+id/rdbSize6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
@@ -235,7 +229,6 @@
         </RadioGroup>
         <!-- Printer Support Section -->
         <TextView
-            android:id="@+id/sptPrinter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffff"
@@ -295,7 +288,6 @@
         android:layout_weight="1">
         <!-- Other Section -->
         <TextView
-            android:id="@+id/sptOther"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffff"

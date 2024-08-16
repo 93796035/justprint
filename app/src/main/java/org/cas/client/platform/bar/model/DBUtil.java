@@ -18,7 +18,6 @@ import org.cas.client.platform.casutil.L;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
 //import org.cas.client.platform.bar.pannel.BillPanel;
 //import org.cas.client.platform.bar.print.PrintService;

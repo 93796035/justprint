@@ -28,8 +28,6 @@ import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Dish;
 
 import org.cas.client.platform.bar.model.DBUtil;
-import org.cas.client.platform.bar.panel.MenuPanel;
-import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
 
 public class DishDlg extends DialogFragment implements View.OnClickListener {

@@ -11,16 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
-import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
-import com.just.print.app.BaseFragment;
 import com.just.print.db.bean.Category;
 import com.just.print.db.bean.CustomizedRule;
 import com.just.print.db.bean.Dish;
@@ -28,7 +25,6 @@ import com.just.print.db.bean.Printer;
 import com.just.print.ui.panel.PicturePane;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
-import com.just.print.util.StringUtils;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;

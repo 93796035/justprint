@@ -5,6 +5,7 @@ import android.util.Base64;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.Options;
+import com.just.print.db.bean.Bill;
 
 import org.cas.client.platform.casutil.L;
 import org.json.JSONObject;
@@ -150,7 +151,7 @@ public class DbUtil extends Thread{
                         writeDBByte(receivedContent);
                         ToastUtil.showToast("menu in this device has been refreshed successfully.");
                         //clean the bills
-                        AikaPos.daoSession.getBillDao().deleteAll();
+                        Bill.deleteAll();
                     }else{
                         ToastUtil.showToast("Menu is saved onto server successfully.");
                     }

@@ -2,7 +2,6 @@ package org.cas.client.platform.bar.action;
 
 import android.database.Cursor;
 import android.view.View;
-import android.widget.Toast;
 
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
