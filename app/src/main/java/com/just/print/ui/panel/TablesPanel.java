@@ -132,7 +132,7 @@ public class TablesPanel extends PicturePane implements View.OnClickListener, Vi
                             DBUtil.getCursorString(rs, "createdTime"),
                             type,
                             DBUtil.getCursorInt(rs, "s2") > tableToggleButton.getStatus() ? DBUtil.getCursorInt(rs, "s2") : tableToggleButton.getStatus(), //make sure the status of table are updated to the biggest status of the bill.
-                            DBUtil.getCursorString(rs, "NAME"));
+                            DBUtil.getCursorString(rs, "Name"));
                     //THIS ROUND STOP HERE!!!!!!!!
                     continue;
                 }else {

@@ -31,12 +31,30 @@ public class AikaPos extends Application {
     public void initDaoMaster() {
         MyDatabaseHelper helper = new MyDatabaseHelper(this);
         db = helper.getWritableDatabase();//database file is generated now
-        // 检查User表是否为空
-        if (isTableEmpty(db, "USER")) {
-            insertInitialUsers(); //this is the right way, which access db with a list in one shot.
-            initOtherTableWithRawSQL(); //this is for quicket migration from Windows.
-            copyKeystoreToInternalStorage();
+        // 先检查User表是否存在
+        if (isTableExists(db, "USER")) {
+            // 如果User表存在，检查是否为空
+            if (isTableEmpty(db, "USER")) {
+                insertInitialUsers(); // Insert initial users if the table is empty
+            }
+        } else {
+            createTables(); // 假设有一个方法来创建User表
+            insertInitialData(); // 添加其他初始化数据
+            insertHardwareData();// 插入硬件设备数据
+            insertInitialUsers(); // 然后插入初始数据
         }
+        copyKeystoreToInternalStorage();
+    }
+
+    // 检查表是否存在的方法
+    private boolean isTableExists(SQLiteDatabase db, String tableName) {
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+                new String[]{tableName}
+        );
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
     }
 
     public void copyKeystoreToInternalStorage() {
@@ -77,17 +95,6 @@ public class AikaPos extends Application {
         db.execSQL(sql, new Object[]{"Eric", "Jiang", "Admin","1210 cardinal", 1, currentTime, LoginDlg.SUPER_ADMIN, "", "", "4444", "", 0, 0});
     }
 
-    private void initOtherTableWithRawSQL() {
-        insertHardwareData();// 插入硬件设备数据
-        createSystemInfoTable();
-        createUserTable();
-        createEvaluationTable(); // 创建评估表
-        createBillTable();// 创建Bill表
-        createWEBSRMBatchTable();// 创建WEBSRMBatch表
-        createOperationLogTable();// 创建操作日志表
-        insertInitialData(); // 添加其他初始化数据
-    }
-
     private void insertHardwareData() {
         String sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P1', 0, 0, 'mev', 1, 42)";
         db.execSQL(sql);
@@ -102,53 +109,78 @@ public class AikaPos extends Application {
         sql = "INSERT INTO PRINTER (NAME, CATEGORY, LANGTYPE, IP, STYLE, STATUS) VALUES ('P6', 0, 2, '192.168.1.84', 0, 32)";
         db.execSQL(sql);
     }
-    private void createSystemInfoTable(){
-        String sql = "CREATE TABLE IF NOT EXISTS systeminfo (" +
-                "_id INTEGER PRIMARY KEY, keyName TEXT, value TEXT, STATUS INTEGER, " +
-                "VERSION INTEGER);";
-        db.execSQL(sql);
-    }
 
-    private void createUserTable(){
-        String sql = "CREATE TABLE IF NOT EXISTS USER (" +
-                "_id INTEGER PRIMARY KEY, name TEXT, familyName TEXT, nickName TEXT, address TEXT, " +
-                "lang INTEGER, joinTime TEXT, role INTEGER, noTPS TEXT, noTVQ TEXT, pwd TEXT, ANNIVERSARY TEXT);";
-        db.execSQL(sql);
-    }
+    private void createTables(){
+        //user
+        db.execSQL("CREATE TABLE IF NOT EXISTS USER (_id INTEGER PRIMARY KEY, NAME TEXT, familyName TEXT, nickName TEXT, ADDRESS TEXT, " +
+                "LANG INTEGER, joinTime TEXT, ROLE INTEGER, noTPS TEXT, noTVQ TEXT, PWD TEXT, ANNIVERSARY TEXT, STATUS INTEGER, VERSION INTEGER);");
 
-    private void createEvaluationTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS evaluation (" +
-                "_id INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
-                "tableName TEXT, receive INTEGER, target INTEGER, profit INTEGER);";
-        db.execSQL(sql);
-    }
+        //printer
+        db.execSQL("CREATE TABLE IF NOT EXISTS PRINTER (_id INTEGER PRIMARY KEY, IP TEXT, NAME TEXT, STYLE INTEGER, CATEGORY INTEGER, " +
+                "langType INTEGER, STATUS INTEGER, VERSION INTEGER);");
 
-    private void createBillTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS Bill (" +
-                "_id INTEGER PRIMARY KEY, createdtime TEXT, tableName TEXT, BillIndex TEXT, " +
-                "total INTEGER, discount INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
+        //DiningTable
+        db.execSQL("CREATE TABLE IF NOT EXISTS DINING_TABLE (_id INTEGER PRIMARY KEY, NAME TEXT, openTime TEXT, displayIdx INTEGER, posX INTEGER, " +
+                "posY INTEGER, WIDTH INTEGER, HEIGHT INTEGER, TYPE INTEGER, STATUS INTEGER, VERSION INTEGER);");
+        //SystemInfo
+        db.execSQL("CREATE TABLE IF NOT EXISTS SYSTEMINFO (_id INTEGER PRIMARY KEY, keyName TEXT, VALUE TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        //evaluation
+        db.execSQL("CREATE TABLE IF NOT EXISTS EVALUATION (_id INTEGER PRIMARY KEY, startTime TEXT, endTime TEXT, userId INTEGER, " +
+                    "tableName TEXT, RECEIVE INTEGER, TARGET INTEGER, PROFIT INTEGER, STATUS INTEGER, VERSION INTEGER);");
+
+        //Bill
+        db.execSQL("CREATE TABLE IF NOT EXISTS BILL (_id INTEGER PRIMARY KEY, createdTime TEXT, tableName TEXT, billIndex TEXT, " +
+                "TOTAL INTEGER, DISCOUNT INTEGER, serviceFee INTEGER, cashReceived INTEGER, " +
                 "debitReceived INTEGER, visaReceived INTEGER, masterReceived INTEGER, " +
-                "otherReceived TEXT, tip INTEGER, cashback INTEGER, STATUS INTEGER, " +
-                "userId INTEGER, Comment TEXT, openTime TEXT, invoiceId INTEGER);";
-        db.execSQL(sql);
-    }
+                "otherReceived TEXT, TIP INTEGER, CASHBACK INTEGER, STATUS INTEGER, " +
+                "userId INTEGER, COMMENT TEXT, openTime TEXT, invoiceId INTEGER, VERSION INTEGER);");
 
-    private void createWEBSRMBatchTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS WEBSRMBATCH (" +
-                "_id INTEGER PRIMARY KEY, userId INTEGER, jsonToSend TEXT, " +
-                "signatransm TEXT, emprCertifSEV TEXT, strUrlQRCode TEXT);";
-        db.execSQL(sql);
-    }
+        //WEBSRMBATCH
+        db.execSQL("CREATE TABLE IF NOT EXISTS WEBSRMBATCH (" +
+                "_id INTEGER PRIMARY KEY, userId INTEGER, jsonToSend TEXT, signatransm TEXT, emprCertifSEV TEXT, strUrlQRCode TEXT);");
 
-    private void createOperationLogTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS OPERATIONLOG (" +
-                "_id INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
+        //OPERATIONLOG
+        db.execSQL("CREATE TABLE IF NOT EXISTS OPERATIONLOG (_id INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
                 "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tablename TEXT, " +
                 "openTime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
                 "orderTime TEXT, operationTime TEXT, other1 INTEGER, other2 INTEGER, " +
-                "other3 TEXT, other4 TEXT);";
-        db.execSQL(sql);
+                "other3 TEXT, other4 TEXT);");
+
+        // Category
+        db.execSQL("CREATE TABLE IF NOT EXISTS CATEGORY (" +
+                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, displayIdx INTEGER, STATUS INTEGER, VERSION INTEGER);");
+
+        //Dish
+        db.execSQL("CREATE TABLE IF NOT EXISTS DISH (" +
+                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, PRICE INTEGER,"
+                + "GST TEXT, QST TEXT, SIZE TEXT, printerIds TEXT, displayIdx INTEGER, pricePomp BOOLEAN,"
+                + "menuPomp BOOLEAN, ModifyPomp BOOLEAN, CATEGORY TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        //Mark
+        db.execSQL("CREATE TABLE IF NOT EXISTS MARK (" +
+                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, TYPE INTEGER, STATUS INTEGER, VERSION INTEGER);");
+
+        //SaleRecord
+        db.execSQL("CREATE TABLE IF NOT EXISTS SALERECORD (" +
+                "_id INTEGER PRIMARY KEY, tableName TEXT, billIndex TEXT, openTime TEXT, productId INTEGER," +
+                "AMOUT FLOAT, totalPrice FLOAT, DISCOUNT, FLOAT, MODIFICATIONS TEXT, userId INTEGER, billId INTEGER, createdTime TEXT," +
+                "modifiedTime TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        //Customizations
+        db.execSQL("CREATE TABLE IF NOT EXISTS CUSTOMIZATIONS (_id INTEGER PRIMARY KEY, key TEXT, VALUE TEXT, TYPE TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        // CustomizedRule
+        db.execSQL("CREATE TABLE IF NOT EXISTS CUSTOMIZED_RULE (_id INTEGER PRIMARY KEY, ruleName TEXT, CONTENT TEXT," +
+                " ACTION INTEGER, displayIdx INTEGER, ext1 TEXT, ext2 TEXT, ext3 TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        // Device
+        db.execSQL("CREATE TABLE IF NOT EXISTS DEVICE (_id INTEGER PRIMARY KEY, IP TEXT, userName TEXT, STATUS INTEGER, VERSION INTEGER);");
+
+        // Logs
+        db.execSQL("CREATE TABLE IF NOT EXISTS LOG (_id INTEGER PRIMARY KEY, MSG TEXT, NAME TEXT, logType INTEGER, STATUS INTEGER, VERSION INTEGER);");
     }
+
 
     private void insertInitialData() {
         String sql = "INSERT INTO customizations (key, value) VALUES ('NextOrderId', 0)";
@@ -156,7 +188,7 @@ public class AikaPos extends Application {
         sql = "INSERT INTO Bill (tableName, total) VALUES ('default', 0)";
         db.execSQL(sql);
         // More initial data as needed...
-        sql = "Insert into diningTable (name, openTime, dspIdx, posX, posY, width, height, type, status, version) values (?,?,?,?,?,?,?,?,?,?)";
+        sql = "Insert into dining_Table (NAME, openTime, displayIdx, posX, posY, width, height, type, status, version) values (?,?,?,?,?,?,?,?,?,?)";
         db.execSQL(sql, new Object[]{"01", "", 1, 100, 50, 40, 40, 11, 0, 0});
         db.execSQL(sql, new Object[]{"02", "", 2, 400, 50, 40, 40, 22, 0, 0});
         db.execSQL(sql, new Object[]{"03", "", 3, 600, 50, 40, 40, 33, 0, 0});
@@ -168,200 +200,3 @@ public class AikaPos extends Application {
     }
 
 }
-//    // +---------+---------+---------+---------+
-//    // Printer
-//    // +---------+---------+---------+---------+
-//    Entity printer = schema.addEntity("Printer");
-//        printer.addIdProperty();
-//                printer.addStringProperty("ip");
-//                printer.addStringProperty("name");
-//                printer.addIntProperty("style");
-//                printer.addIntProperty("category");
-//                printer.addIntProperty("langType").columnName("langType");
-//
-//                // +---------+-----------+------------+---------+
-//                // DiningTable
-//                // +---------+-----------+------------+---------+
-//                Entity dinningTable = schema.addEntity("DiningTable");
-//                dinningTable.addIdProperty();
-//                dinningTable.addStringProperty("name");
-//                dinningTable.addStringProperty("openTime").columnName("openTime");
-//                dinningTable.addIntProperty("displayIdx").columnName("displayIdx");
-//                dinningTable.addIntProperty("posX").columnName("posX");
-//                dinningTable.addIntProperty("posY").columnName("posY");
-//                dinningTable.addIntProperty("width");
-//                dinningTable.addIntProperty("height");
-//                dinningTable.addIntProperty("type");
-//
-//                // +---------+---------+-------------+
-//                // Category
-//                // +---------+---------+-------------+
-//                Entity category = schema.addEntity("Category");
-//                category.addIdProperty();
-//                category.addStringProperty("name1").columnName("NAME1");
-//                category.addStringProperty("name2").columnName("NAME2");
-//                category.addStringProperty("name3").columnName("NAME3");
-//                category.addIntProperty("displayIdx").columnName("displayIdx");
-//
-//                //  @table Menu
-//                //  @pk id
-//                //  @fk pid, category
-//                //  pid->Printer.id;
-//                //  category->Category.id;
-//                // +---------+---------+---------+---------+
-//                // Dish
-//                // +---------+---------+---------+---------+
-//                Entity dish = schema.addEntity("Dish");//category->dish
-//                dish.addIdProperty();
-//                dish.addStringProperty("name1").columnName("NAME1");
-//                dish.addStringProperty("name2").columnName("NAME2");
-//                dish.addStringProperty("name3").columnName("NAME3");
-//                dish.addIntProperty("price");
-//                dish.addIntProperty("gst");
-//                dish.addIntProperty("qst");
-//                dish.addIntProperty("size");
-//                dish.addStringProperty("printerIds").columnName("printerIds");
-//                dish.addIntProperty("displayIdx").columnName("displayIdx");//size
-//                dish.addBooleanProperty("pricePomp").columnName("pricePomp");//size
-//                dish.addBooleanProperty("menuPomp").columnName("menuPomp");//size
-//                dish.addBooleanProperty("ModifyPomp").columnName("ModifyPomp");//size
-//                dish.addStringProperty("category").columnName("category");
-//
-//                // +---------+---------+---------+---------+
-//                // M2M_MenuPrint
-//                // +---------+---------+---------+---------+
-//                // printer and dish are multi to multi, add a dish table.
-//                Entity menuPrint = schema.addEntity("M2M_MenuPrint");
-//                menuPrint.addIdProperty();
-//                Property.PropertyBuilder printerId = menuPrint.addLongProperty("printerId").columnName("printerId");
-//                Property.PropertyBuilder menuId = menuPrint.addLongProperty("dishId").columnName("dishId");
-//                menuPrint.addToOne(printer, printerId.getProperty(), "print");
-//                menuPrint.addToOne(dish, menuId.getProperty(), "dish");
-//                dish.addToMany(menuPrint, menuId.getProperty());
-//
-//                // +---------+---------+---------+---------+
-//                // Mark
-//                // +---------+---------+---------+---------+
-//                //  @table Mark
-//                Entity mark = schema.addEntity("Mark");
-//                mark.addIdProperty();
-//                mark.addStringProperty("name1").columnName("NAME1").unique();
-//                mark.addStringProperty("name2").columnName("NAME2").unique();
-//                mark.addStringProperty("name3").columnName("NAME3").unique();
-//                mark.addIntProperty("type");
-//
-//                // @table SaleRecord
-//                //  @pk id
-//                // +---------+-----------+------------+---------+
-//                // SaleRecord
-//                // +---------+-----------+------------+---------+
-//                Entity saleRecord = schema.addEntity("SaleRecord");
-//                saleRecord.addIdProperty();
-//                saleRecord.addStringProperty("tableName").columnName("tableName");
-//                saleRecord.addStringProperty("billIndex").columnName("billIndex");
-//                saleRecord.addStringProperty("openTime").columnName("openTime");
-//
-//                saleRecord.addIntProperty("productId").columnName("productId");
-//                saleRecord.addFloatProperty("amount");
-//                saleRecord.addFloatProperty("totalPrice").columnName("totalPrice");
-//                saleRecord.addFloatProperty("discount");
-//                saleRecord.addStringProperty("modifications");
-//                saleRecord.addIntProperty("userId").columnName("userId");
-//                saleRecord.addIntProperty("billId").columnName("billId");
-//                saleRecord.addStringProperty("createdTime").columnName("createdTime");
-//                saleRecord.addStringProperty("modifiedTime").columnName("modifiedTime");
-//
-//                // +---------+---------+---------+---------+
-//                // M2M_SaleRecordMark
-//                // +---------+---------+---------+---------+
-//                // printer and dish are multi to multi, add a dish table.
-//                Entity saleRecordMark = schema.addEntity("M2M_SaleRecordMark");
-//                saleRecordMark.addIdProperty();
-//                Property.PropertyBuilder saleRecId = saleRecordMark.addLongProperty("saleRecId").columnName("saleRecId");
-//                Property.PropertyBuilder markId = saleRecordMark.addLongProperty("markId").columnName("markId");
-//                saleRecordMark.addToOne(saleRecord, saleRecId.getProperty(), "saleRecord");
-//                saleRecordMark.addToOne(mark, markId.getProperty(), "mark");
-//                dish.addToMany(saleRecordMark, markId.getProperty());
-//
-//                // +---------+---------+---------+---------+
-//                // Bill
-//                // +---------+---------+---------+---------+
-//                Entity bill = schema.addEntity("Bill");
-//                bill.addIdProperty();
-//                bill.addStringProperty("createdTime").columnName("createdTime");
-//                bill.addStringProperty("tableName").columnName("tableName");
-//                bill.addStringProperty("billIndex").columnName("billIndex");
-//                bill.addStringProperty("openTime").columnName("openTime");
-//                bill.addIntProperty("Total");
-//                bill.addIntProperty("discount");
-//                bill.addIntProperty("serviceFee").columnName("serviceFee");
-//                bill.addIntProperty("cashReceived").columnName("cashReceived");
-//                bill.addIntProperty("debitReceived").columnName("debitReceived");
-//                bill.addIntProperty("visaReceived").columnName("visaReceived");
-//                bill.addIntProperty("masterReceived").columnName("masterReceived");
-//                bill.addStringProperty("otherReceived").columnName("otherReceived");
-//                bill.addIntProperty("tip");
-//                bill.addIntProperty("cashback");
-//                bill.addIntProperty("userId").columnName("userId");
-//                bill.addStringProperty("comment");
-//                bill.addIntProperty("invoiceId").columnName("invoiceId");
-//
-//                // +---------+-----------+Customizations+---------+
-//                // Customizations
-//                // +---------+-----------+------------+---------+
-//                Entity customizations = schema.addEntity("Customizations");
-//                customizations.addIdProperty();
-//                customizations.addStringProperty("key");
-//                customizations.addStringProperty("value");
-//                customizations.addStringProperty("type");
-//
-//
-//                // +---------+-----------+Customizations+---------+
-//                // CustomizedRule
-//                // +---------+-----------+------------+---------+
-//                Entity customizedRule = schema.addEntity("CustomizedRule");
-//                customizedRule.addIdProperty();
-//                customizedRule.addStringProperty("rulename");
-//                customizedRule.addStringProperty("content");
-//                customizedRule.addIntProperty("action");
-//                customizedRule.addIntProperty("dispIdx");
-//                customizedRule.addStringProperty("ext1");
-//                customizedRule.addStringProperty("ext2");
-//                customizedRule.addStringProperty("ext3");
-//
-////        // +---------+--------WebsrmBatch---+------------+---------+
-////        // WebsrmBatch
-////        // +---------+-----------+------------+---------+
-////        Entity websrmBatch = schema.addEntity("WebsrmBatch");
-////        websrmBatch.addIdProperty();
-////        websrmBatch.addStringProperty("jsonToSend").columnName("jsonToSend");
-////        websrmBatch.addStringProperty("signatransm");
-////        websrmBatch.addStringProperty("emprCertifSev").columnName("emprCertifSev");
-////        websrmBatch.addStringProperty("strUrlQRCode").columnName("strUrlQRCode");
-////        websrmBatch.addIntProperty("userId").columnName("userId");
-//
-//                // +---------+-----------+------------+---------+
-//                // Device
-//                // +---------+-----------+------------+---------+
-//                Entity device = schema.addEntity("Device");//在线设备
-//                device.addStringProperty("ip");
-//                device.addStringProperty("userName").columnName("userName");
-//
-//                // +---------+---------+---------+---------+
-//                // Log
-//                // +---------+---------+---------+---------+
-//                //  @table Log
-//                Entity log = schema.addEntity("Log");
-//                log.setTableName("Logs");
-//                log.addIdProperty();
-//                log.addStringProperty("msg");
-//                log.addStringProperty("name").columnName("name");
-//                log.addDateProperty("date");
-//                log.addIntProperty("logType").columnName("logType");
-//
-//                //-------------添加,state,version---------------
-//                for (Entity en : schema.getEntities()) {
-//                en.addIntProperty("status");// default:0, del:1,
-//                en.addIntProperty("version");
-//                }
-//                }

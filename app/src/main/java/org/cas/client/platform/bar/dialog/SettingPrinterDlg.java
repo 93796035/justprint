@@ -43,7 +43,7 @@ public class SettingPrinterDlg extends DialogFragment {
 
         // 初始化视图
         for (int i = 0; i < 6; i++) {
-            int nameId = getResources().getIdentifier("tfdName" + (i + 1), "id", requireActivity().getPackageName());
+            int nameId = getResources().getIdentifier("tfdName" + (i + 1+1), "id", requireActivity().getPackageName());
             int ipId = getResources().getIdentifier("tfdIP" + (i + 1), "id", requireActivity().getPackageName());
             int styleId = getResources().getIdentifier("cmbStyle" + (i + 1), "id", requireActivity().getPackageName());
             int languageId = getResources().getIdentifier("cmbLanguage" + (i + 1), "id", requireActivity().getPackageName());

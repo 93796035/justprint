@@ -183,7 +183,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	public void initRules() {
 		int tmpPos;
 		//load all printers--------------------------
-		String sql = "select * from Customized_Rule where STATUS != -100 order by disp_Idx";
+		String sql = "select * from Customized_Rule where STATUS != -100 order by displayIdx";
 		try {
 			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			tmpPos = rs.getCount();
@@ -192,10 +192,10 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 			while (rs.moveToNext()) {
 				rules[tmpPos] = new CustomizedRule();
 				rules[tmpPos].setId(Long.valueOf(DBUtil.getCursorInt(rs, "_id")));
-				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "RULENAME"));
+				rules[tmpPos].setRulename(DBUtil.getCursorString(rs, "ruleName"));
 				rules[tmpPos].setContent(DBUtil.getCursorString(rs, "CONTENT"));
 				rules[tmpPos].setAction(DBUtil.getCursorInt(rs, "ACTION")); // discount price( it's an int formatted)
-				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs, "DISP_IDX"));
+				rules[tmpPos].setDispIdx(DBUtil.getCursorInt(rs, "displayIdx"));
 				tmpPos++;
 			}
 			rs.close();
