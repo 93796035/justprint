@@ -513,12 +513,15 @@ public class BarFrame extends BaseFragmentActivity {
         }
         //time of last open, @note:if existing last open time is not valid, then use lastSuccess will not be set.
         long timepassed = 0l;
-        String lastsuccessStr = BarOption.getLastSuccessStr(); L.d("lastSuccessStr:",lastsuccessStr);
-        try{
-            Long lastSuccess= Long.valueOf(lastsuccessStr);
-            timepassed = new Date().getTime() - lastSuccess;            L.d("timePassed:",timepassed);        //time passed since last open.
-        }catch(Exception e){
-            L.e("MainActivity", "the lastsuccessStr is not valid long", e);
+        String lastsuccessStr = BarOption.getLastSuccessStr();
+        if(lastsuccessStr != null){
+            L.d("lastSuccessStr:",lastsuccessStr);
+            try{
+                Long lastSuccess= Long.valueOf(lastsuccessStr);
+                timepassed = new Date().getTime() - lastSuccess;            L.d("timePassed:",timepassed);        //time passed since last open.
+            }catch(Exception e){
+                L.e("MainActivity", "the lastsuccessStr is not valid long", e);
+            }
         }
 
         //if timeLeftStr is valid, then it has a chance to turn the timeLeft to be a number bigger than 0.

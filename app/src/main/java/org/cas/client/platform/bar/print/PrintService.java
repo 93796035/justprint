@@ -1130,7 +1130,7 @@ public class PrintService{
 		        try {
 		            Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
 		            if(rs.moveToNext()) {
-		            	String category = NetUtil.trimContentFromHTML(DBUtil.getCursorString(rs,"category"));
+		            	String category = NetUtil.trimContentFromHTML(DBUtil.getCursorString(rs,"CATEGORY"));
 		            	if(categoryQTMap.containsKey(category)) {
 		            		categoryQTMap.put(category, categoryQTMap.get(category) + num);
 		            		categoryTotalMap.put(category, (int)(categoryTotalMap.get(category) + num * dish.getPrice()) * 100);

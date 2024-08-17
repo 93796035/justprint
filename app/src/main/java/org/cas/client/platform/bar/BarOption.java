@@ -676,7 +676,7 @@ public class BarOption {
 		Cursor cursor = AikaPos.db.rawQuery(sql.toString(), null);
 		try {
 			if (cursor != null && cursor.moveToFirst()) {
-				int columnIndex = cursor.getColumnIndex("value");
+				int columnIndex = cursor.getColumnIndex("VALUE");
 				if (columnIndex != -1) { // 确保索引值是有效的
 					valueInDB = cursor.getInt(columnIndex);
 				} else {

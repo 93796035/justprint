@@ -270,7 +270,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 				dishAry[tmpPos].setQst(DBUtil.getCursorInt(rs, "QST"));
 				dishAry[tmpPos].setSize(DBUtil.getCursorInt(rs, "SIZE"));
 				dishAry[tmpPos].setPrinterIds(DBUtil.getCursorString(rs, "printerIds"));
-				dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "category"));
+				dishAry[tmpPos].setCategory(DBUtil.getCursorString(rs, "CATEGORY"));
 				dishAry[tmpPos].setPricePomp(Boolean.valueOf(DBUtil.getCursorString(rs, "pricePomp")));
 				dishAry[tmpPos].setMenuPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "menuPomp")));
 				dishAry[tmpPos].setModifyPomp(Boolean.valueOf(DBUtil.getCursorString(rs, "ModifyPomp")));
@@ -464,6 +464,9 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 	}
 
 	private String getTextForDsp(String s) {
+		if(s == null){
+			s = "";
+		}
 		if(!s.contains("\n")){
 			s += "\n";
 		}

@@ -149,22 +149,22 @@ public class AikaPos extends Application {
 
         // Category
         db.execSQL("CREATE TABLE IF NOT EXISTS CATEGORY (" +
-                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, displayIdx INTEGER, STATUS INTEGER, VERSION INTEGER);");
+                "_id INTEGER PRIMARY KEY, NAME1 TEXT, NAME2 TEXT, NAME3 TEXT, displayIdx INTEGER, STATUS INTEGER, VERSION INTEGER);");
 
         //Dish
         db.execSQL("CREATE TABLE IF NOT EXISTS DISH (" +
-                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, PRICE INTEGER,"
+                "_id INTEGER PRIMARY KEY, NAME1 TEXT, NAME2 TEXT, NAME3 TEXT, PRICE INTEGER,"
                 + "GST TEXT, QST TEXT, SIZE TEXT, printerIds TEXT, displayIdx INTEGER, pricePomp BOOLEAN,"
                 + "menuPomp BOOLEAN, ModifyPomp BOOLEAN, CATEGORY TEXT, STATUS INTEGER, VERSION INTEGER);");
 
         //Mark
         db.execSQL("CREATE TABLE IF NOT EXISTS MARK (" +
-                "_id INTEGER PRIMARY KEY, name1 TEXT, name2 TEXT, name3 TEXT, TYPE INTEGER, STATUS INTEGER, VERSION INTEGER);");
+                "_id INTEGER PRIMARY KEY, NAME1 TEXT, NAME2 TEXT, NAME3 TEXT, TYPE INTEGER, STATUS INTEGER, VERSION INTEGER);");
 
-        //SaleRecord
-        db.execSQL("CREATE TABLE IF NOT EXISTS SALERECORD (" +
+        //SALE_RECORD
+        db.execSQL("CREATE TABLE IF NOT EXISTS SALE_RECORD (" +
                 "_id INTEGER PRIMARY KEY, tableName TEXT, billIndex TEXT, openTime TEXT, productId INTEGER," +
-                "AMOUT FLOAT, totalPrice FLOAT, DISCOUNT, FLOAT, MODIFICATIONS TEXT, userId INTEGER, billId INTEGER, createdTime TEXT," +
+                "AMOUNT FLOAT, totalPrice FLOAT, DISCOUNT, FLOAT, MODIFICATIONS TEXT, userId INTEGER, billId INTEGER, createdTime TEXT," +
                 "modifiedTime TEXT, STATUS INTEGER, VERSION INTEGER);");
 
         //Customizations
