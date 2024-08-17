@@ -283,7 +283,7 @@ public class PayDlg extends SamDialog {
 				}
 			}
 			//left
-			int oldLeft = onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 && !"null".equals(onSrcOtherReceived.toLowerCase()) ?
+			oldLeft = onSrcOtherReceived != null && onSrcOtherReceived.length() > 0 && !"null".equals(onSrcOtherReceived.toLowerCase()) ?
 					0 : oldTotal - onSrcCashReceived - onSrcDebitReceived - onSrcVisaReceived - onSrcMasterReceived;
 
 			//set the interface value.
