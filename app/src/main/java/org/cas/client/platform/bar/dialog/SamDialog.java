@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -85,4 +86,13 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         editText.setPadding(8, 0, 0, 0);
         return editText;
     }
+
+    public CheckBox createCheckBox(String text) {
+        CheckBox checkBox = new CheckBox(getContext());
+        checkBox.setText(text);
+        checkBox.setTextColor(Color.WHITE); // 设置文字颜色
+        checkBox.setPadding(8, 8, 8, 8);    // 设置内边距
+        return checkBox;
+    }
+
 }

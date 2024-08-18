@@ -84,7 +84,7 @@ public class OperationLogDlg extends SamDialog {
         Cursor cursor = AikaPos.db.rawQuery(sql, null);
 
         while (cursor.moveToNext()) {
-            String employeeName = DBUtil.getCursorString(cursor, "employee.nName");
+            String employeeName = DBUtil.getCursorString(cursor, "USER.NAME");
             String operationType = DBUtil.getCursorInt(cursor, "OperationType") == 1 ? "add" : "remove";
             String dishName = DBUtil.getCursorString(cursor, "dishName");
             String operationTime = DBUtil.getCursorString(cursor, "OPERATIONTIME");

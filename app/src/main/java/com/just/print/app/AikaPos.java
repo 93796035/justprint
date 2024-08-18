@@ -142,7 +142,7 @@ public class AikaPos extends Application {
 
         //OPERATIONLOG
         db.execSQL("CREATE TABLE IF NOT EXISTS OPERATIONLOG (_id INTEGER PRIMARY KEY, OperationType INTEGER, userId INTEGER, " +
-                "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tablename TEXT, " +
+                "BILLSTATUS INTEGER, BILLID INTEGER, OUTPUTID INTEGER, tableName TEXT, " +
                 "openTime TEXT, billIdx TEXT, dishName TEXT, dishPrice INTEGER, " +
                 "orderTime TEXT, operationTime TEXT, other1 INTEGER, other2 INTEGER, " +
                 "other3 TEXT, other4 TEXT);");

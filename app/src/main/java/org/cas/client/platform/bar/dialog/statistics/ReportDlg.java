@@ -1,21 +1,22 @@
 package org.cas.client.platform.bar.dialog.statistics;
 
+import android.app.Dialog;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 
-import com.just.print.R;
 import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.db.bean.Bill;
@@ -25,6 +26,7 @@ import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.BarUtil;
+import org.cas.client.platform.bar.dialog.SamDialog;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.print.PrintService;
@@ -37,7 +39,6 @@ import org.cas.client.platform.bar.web_srm.utiles.UtilesFormatterDonnees;
 import org.cas.client.platform.bar.web_srm.utiles.UtilesJSON;
 import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.L;
-import org.json.JSONException;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -49,87 +50,109 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class ReportDlg extends DialogFragment implements View.OnClickListener {
+public class ReportDlg extends SamDialog implements View.OnClickListener {
 
+	private EditText valBatchID, tfdYearFrom, tfdMonthFrom, tfdDayFrom, tfdYearTo, tfdMonthTo, tfdDayTo;
+	private EditText tfdHourFrom, tfdMinuteFrom, tfdSecondFrom, tfdHourTo, tfdMinuteTo, tfdSecondTo;
+	private TextView txpPreview, titleView;
+	private CheckBox cbxShowOnlyMine, cbxIsSilendMode;
+	private Button btnSendDocument, btnPrint, btnLeftDay, btnToday, btnRightDay, btnLeftMonth, btnThisMonth, btnRightMonth;
 	private List<String> formattedString;
-	private String startTime;
-	private String endTime;
-	private String printerIP;
-
-	private Integer year;
-	private Integer month;
-	private Integer day;
-	private Integer hrs;
-	private Integer min;
-	private Integer sec;
-	private String curBatchIdx = "";
-
+	private Integer year, month, day, hrs, min, sec;
 	private boolean stopTriggerEventflag;
+	private String startTime, endTime, printerIP, curBatchIdx;
 
-	private EditText valBatchID;
-	private EditText tfdYearFrom;
-	private EditText tfdMonthFrom;
-	private EditText tfdDayFrom;
-	private EditText tfdYearTo;
-	private EditText tfdMonthTo;
-	private EditText tfdDayTo;
-	private EditText tfdHourFrom;
-	private EditText tfdMinuteFrom;
-	private EditText tfdSecondFrom;
-	private EditText tfdHourTo;
-	private EditText tfdMinuteTo;
-	private EditText tfdSecondTo;
-	private TextView txpPreview;
-	private CheckBox cbxShowOnlyMine;
-	private CheckBox cbxIsSilendMode;
-	private Button btnSendDocument;
-	private Button btnPrint;
-	private Button btnLeftDay;
-	private Button btnToday;
-	private Button btnRightDay;
-	private Button btnLeftMonth;
-	private Button btnThisMonth;
-	private Button btnRightMonth;
-
-	public ReportDlg() {
-	}
-
-	@Nullable
+	@NonNull
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.dialog_report, container, false);
-
-		initViews(view);
+	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		initComponents();
+		relayout(dialog);
 		initContent();
-		return view;
+		return dialog;
 	}
 
-	private void initViews(View view) {
-		valBatchID = view.findViewById(R.id.valBatchID);
-		tfdYearFrom = view.findViewById(R.id.tfdYearFrom);
-		tfdMonthFrom = view.findViewById(R.id.tfdMonthFrom);
-		tfdDayFrom = view.findViewById(R.id.tfdDayFrom);
-		tfdYearTo = view.findViewById(R.id.tfdYearTo);
-		tfdMonthTo = view.findViewById(R.id.tfdMonthTo);
-		tfdDayTo = view.findViewById(R.id.tfdDayTo);
-		tfdHourFrom = view.findViewById(R.id.tfdHourFrom);
-		tfdMinuteFrom = view.findViewById(R.id.tfdMinuteFrom);
-		tfdSecondFrom = view.findViewById(R.id.tfdSecondFrom);
-		tfdHourTo = view.findViewById(R.id.tfdHourTo);
-		tfdMinuteTo = view.findViewById(R.id.tfdMinuteTo);
-		tfdSecondTo = view.findViewById(R.id.tfdSecondTo);
-		txpPreview = view.findViewById(R.id.txpPreview);
-		cbxShowOnlyMine = view.findViewById(R.id.cbxShowOnlyMine);
-		cbxIsSilendMode = view.findViewById(R.id.cbxIsSilendMode);
-		btnSendDocument = view.findViewById(R.id.btnSendDocument);
-		btnPrint = view.findViewById(R.id.btnPrint);
-		btnLeftDay = view.findViewById(R.id.btnLeftDay);
-		btnToday = view.findViewById(R.id.btnToday);
-		btnRightDay = view.findViewById(R.id.btnRightDay);
-		btnLeftMonth = view.findViewById(R.id.btnLeftMonth);
-		btnThisMonth = view.findViewById(R.id.btnThisMonth);
-		btnRightMonth = view.findViewById(R.id.btnRightMonth);
+	private void initComponents() {
+		titleView = createLabel("Report", 22, Gravity.LEFT, Color.WHITE);
 
+		valBatchID = new EditText(getContext());
+		tfdYearFrom = new EditText(getContext());
+		tfdMonthFrom = new EditText(getContext());
+		tfdDayFrom = new EditText(getContext());
+		tfdYearTo = new EditText(getContext());
+		tfdMonthTo = new EditText(getContext());
+		tfdDayTo = new EditText(getContext());
+		tfdHourFrom = new EditText(getContext());
+		tfdMinuteFrom = new EditText(getContext());
+		tfdSecondFrom = new EditText(getContext());
+		tfdHourTo = new EditText(getContext());
+		tfdMinuteTo = new EditText(getContext());
+		tfdSecondTo = new EditText(getContext());
+
+		txpPreview = createLabel("", -1, Gravity.LEFT, Color.BLACK);
+		txpPreview.setTextSize(14);
+		txpPreview.setBackgroundColor(Color.WHITE);
+
+		cbxShowOnlyMine = createCheckBox("Show Only Mine");
+		cbxIsSilendMode = createCheckBox("Silent Mode");
+
+		btnSendDocument = createButton("Send Document");
+		btnPrint = createButton("Print");
+		btnLeftDay = createButton("<<<");
+		btnToday = createButton("Today");
+		btnRightDay = createButton(">>>");
+		btnLeftMonth = createButton("<<<");
+		btnThisMonth = createButton("This Month");
+		btnRightMonth = createButton(">>>");
+
+		addListeners();
+	}
+
+	private void relayout(Dialog dialog) {
+		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
+		dialog.setContentView(rootLayout);
+		// Title
+		rootLayout.addView(titleView, getLayout(titleView, 16, 16, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
+
+		// 创建并添加滚动视图
+		ScrollView scrollView = new ScrollView(getContext());
+		scrollView.addView(txpPreview);
+		rootLayout.addView(scrollView, getLayout(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, titleView.getLeft(),
+				650, 1200));
+
+		// 添加各个控制按钮和复选框
+		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, scrollView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
+				400, VALUE_HEIGHT));
+
+		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP, cbxShowOnlyMine.getLeft(),
+				cbxShowOnlyMine.getMinimumWidth(), VALUE_HEIGHT));
+
+
+		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, cbxIsSilendMode.getTop() + cbxIsSilendMode.getMinimumHeight() + CustOpts.HOR_GAP, cbxIsSilendMode.getLeft(),
+				BUTTON_WIDTH * 3,  BUTTON_HEIGHT));
+		rootLayout.addView(btnPrint, getLayout(btnPrint, btnSendDocument.getTop() + btnSendDocument.getMinimumHeight() + CustOpts.HOR_GAP, btnSendDocument.getLeft(),
+				btnSendDocument.getMinimumWidth(), BUTTON_HEIGHT));
+
+		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, btnPrint.getTop() + btnPrint.getMinimumHeight() + CustOpts.VER_GAP, btnPrint.getLeft(),
+				200, 100));
+
+		rootLayout.addView(btnToday, getLayout(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.HOR_GAP,
+				200, 100));
+
+		rootLayout.addView(btnRightDay, getLayout(btnRightDay, btnToday.getTop(), btnToday.getLeft() + btnToday.getMinimumWidth() + CustOpts.VER_GAP,
+				200, 100));
+
+		//line 2
+		rootLayout.addView(btnLeftMonth, getLayout(btnLeftMonth, btnLeftDay.getTop() + btnLeftDay.getMinimumHeight() + CustOpts.VER_GAP, btnLeftDay.getLeft(),
+				200, 100)) ;
+
+		rootLayout.addView(btnThisMonth, getLayout(btnThisMonth, btnLeftMonth.getTop(), btnToday.getLeft(),
+				200, 100));
+
+		rootLayout.addView(btnRightMonth, getLayout(btnRightMonth, btnThisMonth.getTop(), btnRightDay.getLeft(),
+				200, 100));
+	}
+
+	private void addListeners() {
 		btnLeftDay.setOnClickListener(this);
 		btnToday.setOnClickListener(this);
 		btnRightDay.setOnClickListener(this);
@@ -144,11 +167,12 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 	private void initContent() {
 		endTime = BarUtil.df.format(new Date());
 		startTime = endTime.substring(0, 11) + BarOption.getStartTime();
-		StringBuilder sql = new StringBuilder("select ANNIVERSARY from USER where _id = ").append(LoginDlg.USERID);
+
+		String sql = "select ANNIVERSARY from USER where _id = " + LoginDlg.USERID;
 		try {
-			Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+			Cursor rs = AikaPos.db.rawQuery(sql, null);
 			if (rs.moveToNext()) {
-				String lastPrintTime = DBUtil.getCursorString(rs,"ANNIVERSARY");
+				String lastPrintTime = DBUtil.getCursorString(rs, "ANNIVERSARY");
 				if (lastPrintTime != null && lastPrintTime.length() > 10) {
 					startTime = lastPrintTime;
 					if (startTime.indexOf(".") > 0) {
@@ -157,13 +181,13 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				}
 			}
 		} catch (Exception exp) {
-			L.e("ReportDlg ", "Exception when fetching ANNIVERSARY." + sql, exp);
+			L.e("ReportDlg", "Exception when fetching ANNIVERSARY." + sql, exp);
 		}
 
 		if (LoginDlg.getUSERTYPE() >= LoginDlg.ADMIN_STATUS) {
-			sql = new StringBuilder("select * from systeminfo where version >= '").append(startTime).append("' order by _id desc");
+			sql = "select * from systeminfo where version >= '" + startTime + "' order by _id desc";
 			try {
-				Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
+				Cursor rs = AikaPos.db.rawQuery(sql, null);
 				curBatchIdx = "1";
 				while (rs.moveToNext()) {
 					if (LoginDlg.getUSERTYPE() == LoginDlg.ADMIN_STATUS) {
@@ -231,36 +255,27 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()) {
-			case R.id.btnLeftDay:
-				adjustDate(-1);
-				break;
-			case R.id.btnToday:
-				setToday();
-				break;
-			case R.id.btnRightDay:
-				adjustDate(1);
-				break;
-			case R.id.btnLeftMonth:
-				adjustMonth(-1);
-				break;
-			case R.id.btnThisMonth:
-				setThisMonth();
-				break;
-			case R.id.btnRightMonth:
-				adjustMonth(1);
-				break;
-			case R.id.btnSendDocument:
-				PrintService.sendDocument(cbxIsSilendMode.isChecked());
-				break;
-			case R.id.btnPrint:
-				printReport();
-				break;
-			case R.id.cbxShowOnlyMine:
-				updatePreviewContent();
-				break;
+		if (v == btnLeftDay) {
+			adjustDate(-1);
+		} else if (v == btnToday) {
+			setToday();
+		} else if (v == btnRightDay) {
+			adjustDate(1);
+		} else if (v == btnLeftMonth) {
+			adjustMonth(-1);
+		} else if (v == btnThisMonth) {
+			setThisMonth();
+		} else if (v == btnRightMonth) {
+			adjustMonth(1);
+		} else if (v == btnSendDocument) {
+			PrintService.sendDocument(cbxIsSilendMode.isChecked());
+		} else if (v == btnPrint) {
+			printReport();
+		} else if (v == cbxShowOnlyMine) {
+			updatePreviewContent();
 		}
 	}
+
 
 	private void adjustDate(int days) {
 		valBatchID.setText("");
@@ -391,9 +406,9 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 				bill.setTip(DBUtil.getCursorInt(rs, "TIP"));
 				bill.setCashback(DBUtil.getCursorInt(rs, "CASHBACK"));
 				bill.setStatus(DBUtil.getCursorInt(rs, "STATUS"));
-				bill.setUserId(DBUtil.getCursorInt(rs, "USER.nName"));
+				bill.setUserId(DBUtil.getCursorInt(rs, "USER.NAME"));
 				bill.setComment(DBUtil.getCursorString(rs, "COMMENT"));
-				bill.setOpenTime(DBUtil.getCursorString(rs, "OpenTime"));
+				bill.setOpenTime(DBUtil.getCursorString(rs, "openTime"));
 				salesAndRefunds.add(bill);
 			}
 			rs.close();
@@ -484,7 +499,7 @@ public class ReportDlg extends DialogFragment implements View.OnClickListener {
 		}
 	}
 
-	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException, JSONException {
+	public static void printDocument(int userId, String name, String address, int year, int monthTo, int dayTo, String gst, String qst) throws ParseException{
 		String recentLoginTime = null;
 		String sql = "select * from evaluation where userId = " + userId + " order by startTime desc";
 		try {

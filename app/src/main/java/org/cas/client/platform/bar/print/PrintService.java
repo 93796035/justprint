@@ -1232,7 +1232,7 @@ public class PrintService{
             	totalSales += total;
             	String totalStr = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - totalStr.length(), " ")).append(totalStr).append("    ");
-//            	content.append(DBUtil.getCursorString(rs,"OpenTime"));
+//            	content.append(DBUtil.getCursorString(rs,"openTime"));
             	content.append("\n");
             }
             rs.close();// 关闭
@@ -2301,25 +2301,27 @@ public class PrintService{
 		content.append("Bill#     Time   Table  Dish       Qt   Price").append("\n");
 		content.append(BarUtil.getSeperatorLine(0, width)).append("\n");
 
-		StringBuilder sql = new StringBuilder("Select * from SALE_RECORD, DISH, BILL where BILL.STATUS != ").append(DBConsts.VOIDED)
+		StringBuilder sql = new StringBuilder("Select SALE_RECORD._id as ID, SALE_RECORD.createdTime AS createdTime, " +
+				"SALE_RECORD.tableName as tableName, DISH.NAME1, SALE_RECORD.AMOUNT, SALE_RECORD.totalPrice" +
+				" from SALE_RECORD, DISH, BILL where BILL.STATUS != ").append(DBConsts.VOIDED)
 				.append(" and SALE_RECORD.STATUS = ").append(DBConsts.VOIDED)
-				.append(" and createdTime >= '").append(startDateStr).append("' and createdTime <= '").append(endDateStr)
-				.append("' and SALE_RECORD.productId = DISH._id and SALE_RECORD.billId = bill._id");
+				.append(" and SALE_RECORD.createdTime >= '").append(startDateStr).append("' and SALE_RECORD.createdTime <= '").append(endDateStr)
+				.append("' and SALE_RECORD.productId = DISH._id and SALE_RECORD.billId = BILL._id");
         if(LoginDlg.getUSERTYPE() < LoginDlg.ADMIN_STATUS) {
-        	sql.append(" and userId = ").append(LoginDlg.USERID);
+        	sql.append(" and SALE_RECORD.userId = ").append(LoginDlg.USERID);
         }
         
         try {
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             float totalSales = 0f;
             while (rs.moveToNext()) {
-            	String billId = DBUtil.getCursorString(rs,"SALE_RECORD._id");
+            	String billId = DBUtil.getCursorString(rs,"ID");
                 content.append(billId);	//remove the year to make it shorter.
                 
-                String time = DBUtil.getCursorString(rs,"SALE_RECORD.createdTime");
+                String time = DBUtil.getCursorString(rs,"createdTime");
                 content.append(BarUtil.generateString(6 - billId.toString().length(), " ")).append(time.substring(5, 16));	//remove the year to make it shorter.
                 
-                String table = DBUtil.getCursorString(rs,"SALE_RECORD.tableName");
+                String table = DBUtil.getCursorString(rs,"tableName");
                 content.append(BarUtil.generateString(4 - table.length(), " ")).append(table);
         		
                 String product = DBUtil.getCursorString(rs,"DISH.NAME1");
@@ -2385,7 +2387,7 @@ public class PrintService{
             	totalSales += total;
             	String formattedTotal = BarUtil.formatMoney(total);
             	content.append(BarUtil.generateString(12 - formattedTotal.length(), " ")).append(formattedTotal);
-//            	content.append("    ").append(DBUtil.getCursorString(rs,"OpenTime"));
+//            	content.append("    ").append(DBUtil.getCursorString(rs,"openTime"));
             	content.append("\n");
             }
             rs.close();// 关闭
