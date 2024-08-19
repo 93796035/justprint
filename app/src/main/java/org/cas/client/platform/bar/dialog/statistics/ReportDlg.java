@@ -52,11 +52,16 @@ import java.util.List;
 
 public class ReportDlg extends SamDialog implements View.OnClickListener {
 
-	private EditText valBatchID, tfdYearFrom, tfdMonthFrom, tfdDayFrom, tfdYearTo, tfdMonthTo, tfdDayTo;
+	private EditText valBatchID;
+	private EditText tfdYearFrom, tfdMonthFrom, tfdDayFrom, tfdYearTo, tfdMonthTo, tfdDayTo;
 	private EditText tfdHourFrom, tfdMinuteFrom, tfdSecondFrom, tfdHourTo, tfdMinuteTo, tfdSecondTo;
 	private TextView txpPreview, titleView;
+	private TextView lblCloseBatch, lblFrom, lblYearFrom, lblMonthFrom, lblDayFrom, lblHourFrom, lblMinuteFrom, lblSecondFrom;
+	private TextView lblTo, lblYearTo, lblMonthTo, lblDayTo, lblHourTo, lblMinuteTo, lblSecondTo;
 	private CheckBox cbxShowOnlyMine, cbxIsSilendMode;
-	private Button btnSendDocument, btnPrint, btnLeftDay, btnToday, btnRightDay, btnLeftMonth, btnThisMonth, btnRightMonth;
+	private Button btnSendDocument, btnPrint;
+	private Button btnLeftDay, btnToday, btnRightDay;
+	private Button btnLeftMonth, btnThisMonth, btnRightMonth;
 	private List<String> formattedString;
 	private Integer year, month, day, hrs, min, sec;
 	private boolean stopTriggerEventflag;
@@ -74,23 +79,42 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 	private void initComponents() {
 		titleView = createLabel("Report", 22, Gravity.LEFT, Color.WHITE);
 
-		valBatchID = new EditText(getContext());
-		tfdYearFrom = new EditText(getContext());
-		tfdMonthFrom = new EditText(getContext());
-		tfdDayFrom = new EditText(getContext());
-		tfdYearTo = new EditText(getContext());
-		tfdMonthTo = new EditText(getContext());
-		tfdDayTo = new EditText(getContext());
-		tfdHourFrom = new EditText(getContext());
-		tfdMinuteFrom = new EditText(getContext());
-		tfdSecondFrom = new EditText(getContext());
-		tfdHourTo = new EditText(getContext());
-		tfdMinuteTo = new EditText(getContext());
-		tfdSecondTo = new EditText(getContext());
-
 		txpPreview = createLabel("", -1, Gravity.LEFT, Color.BLACK);
 		txpPreview.setTextSize(14);
 		txpPreview.setBackgroundColor(Color.WHITE);
+
+		valBatchID = new EditText(getContext());
+
+		// 初始化日期和时间选择组件
+		tfdYearFrom = createEditText();
+		tfdMonthFrom = createEditText();
+		tfdDayFrom = createEditText();
+		tfdYearTo = createEditText();
+		tfdMonthTo = createEditText();
+		tfdDayTo = createEditText();
+		tfdHourFrom = createEditText();
+		tfdMinuteFrom = createEditText();
+		tfdSecondFrom = createEditText();
+		tfdHourTo = createEditText();
+		tfdMinuteTo = createEditText();
+		tfdSecondTo = createEditText();
+
+		// 初始化标签
+		lblCloseBatch = createLabel("Close Batch");
+		lblFrom = createLabel("From");
+		lblYearFrom = createLabel("Year", Gravity.CENTER);
+		lblMonthFrom = createLabel("Month", Gravity.CENTER);
+		lblDayFrom = createLabel("Day", Gravity.CENTER);
+		lblHourFrom = createLabel("Hour", Gravity.CENTER);
+		lblMinuteFrom = createLabel("Minute", Gravity.CENTER);
+		lblSecondFrom = createLabel("Second", Gravity.CENTER);
+		lblTo = createLabel("To");
+		lblYearTo = createLabel("Year", Gravity.CENTER);
+		lblMonthTo = createLabel("Month", Gravity.CENTER);
+		lblDayTo = createLabel("Day", Gravity.CENTER);
+		lblHourTo = createLabel("Hour", Gravity.CENTER);
+		lblMinuteTo = createLabel("Minute", Gravity.CENTER);
+		lblSecondTo = createLabel("Second", Gravity.CENTER);
 
 		cbxShowOnlyMine = createCheckBox("Show Only Mine");
 		cbxIsSilendMode = createCheckBox("Silent Mode");
@@ -110,46 +134,111 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 	private void relayout(Dialog dialog) {
 		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
 		dialog.setContentView(rootLayout);
-		// Title
+
+		// 添加标题
 		rootLayout.addView(titleView, getLayout(titleView, 16, 16, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
 
 		// 创建并添加滚动视图
 		ScrollView scrollView = new ScrollView(getContext());
 		scrollView.addView(txpPreview);
-		rootLayout.addView(scrollView, getLayout(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, titleView.getLeft(),
+		rootLayout.addView(scrollView, getLayout(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, 16,
 				650, 1200));
 
-		// 添加各个控制按钮和复选框
-		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, scrollView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
-				400, VALUE_HEIGHT));
+		// 添加"关闭批次"标签和批次ID输入框=========================================
+		rootLayout.addView(lblCloseBatch, getLayout(lblCloseBatch, titleView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
+				150, VALUE_HEIGHT));
+		rootLayout.addView(valBatchID, getLayout(valBatchID, lblCloseBatch.getTop(), lblCloseBatch.getLeft() + lblCloseBatch.getMinimumWidth() + CustOpts.HOR_GAP,
+				VALUE_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP, cbxShowOnlyMine.getLeft(),
-				cbxShowOnlyMine.getMinimumWidth(), VALUE_HEIGHT));
+		// 添加时间选择组件
+		// "From" Label 和 其对应的日期/时间输入框
+		rootLayout.addView(lblFrom, getLayout(lblFrom, lblCloseBatch.getTop() + lblCloseBatch.getMinimumHeight() * 2 + CustOpts.VER_GAP * 4, lblCloseBatch.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
 
+		rootLayout.addView(lblYearFrom, getLayout(lblYearFrom, valBatchID.getTop() + valBatchID.getMinimumHeight() + CustOpts.VER_GAP * 2, lblFrom.getLeft() + lblFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdYearFrom, getLayout(tfdYearFrom, lblYearFrom.getTop() + lblYearFrom.getMinimumHeight() - CustOpts.VER_GAP, lblYearFrom.getLeft(),
+				lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
+		rootLayout.addView(lblMonthFrom, getLayout(lblMonthFrom, lblYearFrom.getTop(), lblYearFrom.getLeft() + lblYearFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdMonthFrom, getLayout(tfdMonthFrom, tfdYearFrom.getTop(), lblMonthFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblDayFrom, getLayout(lblDayFrom, lblMonthFrom.getTop(), lblMonthFrom.getLeft() + lblMonthFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdDayFrom, getLayout(tfdDayFrom, tfdMonthFrom.getTop(), lblDayFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, cbxIsSilendMode.getTop() + cbxIsSilendMode.getMinimumHeight() + CustOpts.HOR_GAP, cbxIsSilendMode.getLeft(),
-				BUTTON_WIDTH * 3,  BUTTON_HEIGHT));
-		rootLayout.addView(btnPrint, getLayout(btnPrint, btnSendDocument.getTop() + btnSendDocument.getMinimumHeight() + CustOpts.HOR_GAP, btnSendDocument.getLeft(),
-				btnSendDocument.getMinimumWidth(), BUTTON_HEIGHT));
+		rootLayout.addView(lblHourFrom, getLayout(lblHourFrom, tfdYearFrom.getTop() + tfdYearFrom.getMinimumHeight(), lblYearFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdHourFrom, getLayout(tfdHourFrom, lblHourFrom.getTop() + lblHourFrom.getMinimumHeight() - CustOpts.VER_GAP, lblHourFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblMinuteFrom, getLayout(lblMinuteFrom, lblHourFrom.getTop(), lblHourFrom.getLeft() + lblHourFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdMinuteFrom, getLayout(tfdMinuteFrom, tfdHourFrom.getTop(), lblMinuteFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblSecondFrom, getLayout(lblSecondFrom, lblMinuteFrom.getTop(), lblMinuteFrom.getLeft() + lblMinuteFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdSecondFrom, getLayout(tfdSecondFrom, tfdMinuteFrom.getTop(), lblSecondFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, btnPrint.getTop() + btnPrint.getMinimumHeight() + CustOpts.VER_GAP, btnPrint.getLeft(),
-				200, 100));
+		// "To" Label 和 其对应的日期/时间输入框
+		rootLayout.addView(lblTo, getLayout(lblTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() * 2 + CustOpts.VER_GAP * 4, lblFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(btnToday, getLayout(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.HOR_GAP,
-				200, 100));
+		rootLayout.addView(lblYearTo, getLayout(lblYearTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() + CustOpts.VER_GAP * 2, lblYearFrom.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdYearTo, getLayout(tfdYearTo, lblYearTo.getTop() + lblYearTo.getMinimumHeight() - CustOpts.VER_GAP, lblYearTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblMonthTo, getLayout(lblMonthTo, lblYearTo.getTop(), lblYearTo.getLeft() + lblYearTo.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdMonthTo, getLayout(tfdMonthTo, tfdYearTo.getTop(), lblMonthTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblDayTo, getLayout(lblDayTo, lblMonthTo.getTop(), lblMonthTo.getLeft() + lblMonthTo.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdDayTo, getLayout(tfdDayTo, tfdMonthTo.getTop(), lblDayTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
 
+		rootLayout.addView(lblHourTo, getLayout(lblHourTo, tfdDayTo.getTop() + tfdDayTo.getMinimumHeight(), lblYearTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdHourTo, getLayout(tfdHourTo, lblHourTo.getTop() + lblHourTo.getMinimumHeight() - CustOpts.VER_GAP, lblHourTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblMinuteTo, getLayout(lblMinuteTo, lblHourTo.getTop(), lblHourTo.getLeft() + lblHourTo.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdMinuteTo, getLayout(tfdMinuteTo, tfdHourTo.getTop(), lblMinuteTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblSecondTo, getLayout(lblSecondTo, lblMinuteTo.getTop(), lblMinuteTo.getLeft() + lblMinuteTo.getMinimumWidth() + CustOpts.HOR_GAP,
+				LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(tfdSecondTo, getLayout(tfdSecondTo, tfdMinuteTo.getTop(), lblSecondTo.getLeft(),
+				LABEL_WIDTH, VALUE_HEIGHT));
+
+		// 添加日期调整按钮
+		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, tfdSecondTo.getTop() + tfdSecondTo.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft(),
+				BUTTON_WIDTH, BUTTON_HEIGHT));
+		rootLayout.addView(btnToday, getLayout(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.VER_GAP,
+				200, BUTTON_HEIGHT));
 		rootLayout.addView(btnRightDay, getLayout(btnRightDay, btnToday.getTop(), btnToday.getLeft() + btnToday.getMinimumWidth() + CustOpts.VER_GAP,
-				200, 100));
+				BUTTON_WIDTH, BUTTON_HEIGHT));
 
-		//line 2
-		rootLayout.addView(btnLeftMonth, getLayout(btnLeftMonth, btnLeftDay.getTop() + btnLeftDay.getMinimumHeight() + CustOpts.VER_GAP, btnLeftDay.getLeft(),
-				200, 100)) ;
+		// 添加月份调整按钮
+		rootLayout.addView(btnLeftMonth, getLayout(btnLeftMonth, btnRightDay.getTop() + btnRightDay.getMinimumHeight() + CustOpts.VER_GAP, btnLeftDay.getLeft(),
+				BUTTON_WIDTH, BUTTON_HEIGHT));
+		rootLayout.addView(btnThisMonth, getLayout(btnThisMonth, btnLeftMonth.getTop(), btnLeftMonth.getLeft() + btnLeftMonth.getMinimumWidth() + CustOpts.VER_GAP,
+				200, BUTTON_HEIGHT));
+		rootLayout.addView(btnRightMonth, getLayout(btnRightMonth, btnThisMonth.getTop(), btnThisMonth.getLeft() + btnThisMonth.getMinimumWidth() + CustOpts.VER_GAP,
+				BUTTON_WIDTH, BUTTON_HEIGHT));
 
-		rootLayout.addView(btnThisMonth, getLayout(btnThisMonth, btnLeftMonth.getTop(), btnToday.getLeft(),
-				200, 100));
+		// 添加复选框
+		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, btnRightMonth.getTop() + btnRightMonth.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft(),
+				FrameLayout.LayoutParams.WRAP_CONTENT, BUTTON_HEIGHT));
+		rootLayout.addView(btnPrint, getLayout(btnPrint, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP, cbxShowOnlyMine.getLeft(),
+				BUTTON_WIDTH * 2, BUTTON_HEIGHT));
 
-		rootLayout.addView(btnRightMonth, getLayout(btnRightMonth, btnThisMonth.getTop(), btnRightDay.getLeft(),
-				200, 100));
+		// 添加发送文档和打印按钮
+		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, btnPrint.getTop() + btnPrint.getMinimumHeight() + CustOpts.VER_GAP,
+				btnPrint.getLeft(), BUTTON_WIDTH * 2, BUTTON_HEIGHT));
+		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, btnSendDocument.getTop(), btnSendDocument.getLeft() + btnSendDocument.getMinimumWidth(),
+				FrameLayout.LayoutParams.WRAP_CONTENT, BUTTON_HEIGHT / 2));
+
 	}
 
 	private void addListeners() {
