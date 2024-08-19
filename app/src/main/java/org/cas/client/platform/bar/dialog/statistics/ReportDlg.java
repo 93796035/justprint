@@ -81,6 +81,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 
 		txpPreview = createLabel("", -1, Gravity.LEFT, Color.BLACK);
 		txpPreview.setTextSize(14);
+		txpPreview.setPadding(20, 20, 20, 20);
 		txpPreview.setBackgroundColor(Color.WHITE);
 
 		valBatchID = new EditText(getContext());
@@ -119,7 +120,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		cbxShowOnlyMine = createCheckBox("Show Only Mine");
 		cbxIsSilendMode = createCheckBox("Silent Mode");
 
-		btnSendDocument = createButton("Send Document");
+		btnSendDocument = createButton("Send");
 		btnPrint = createButton("Print");
 		btnLeftDay = createButton("<<<");
 		btnToday = createButton("Today");
@@ -144,18 +145,23 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		rootLayout.addView(scrollView, getLayout(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, 16,
 				650, 1200));
 
-		// 添加"关闭批次"标签和批次ID输入框=========================================
-		rootLayout.addView(lblCloseBatch, getLayout(lblCloseBatch, titleView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
+		// batch ID
+		rootLayout.addView(lblCloseBatch, getLayout(lblCloseBatch, scrollView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
 				150, VALUE_HEIGHT));
-		rootLayout.addView(valBatchID, getLayout(valBatchID, lblCloseBatch.getTop(), lblCloseBatch.getLeft() + lblCloseBatch.getMinimumWidth() + CustOpts.HOR_GAP,
-				VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valBatchID, getLayout(valBatchID, lblCloseBatch.getTop() - CustOpts.VER_GAP * 2, lblCloseBatch.getLeft() + lblCloseBatch.getMinimumWidth() + CustOpts.HOR_GAP,
+				250, VALUE_HEIGHT));
 
-		// 添加时间选择组件
-		// "From" Label 和 其对应的日期/时间输入框
-		rootLayout.addView(lblFrom, getLayout(lblFrom, lblCloseBatch.getTop() + lblCloseBatch.getMinimumHeight() * 2 + CustOpts.VER_GAP * 4, lblCloseBatch.getLeft(),
+		// ----------------------------------------------------
+		View separator1 = new View(getContext());
+		separator1.setBackgroundColor(Color.GRAY);
+		rootLayout.addView(separator1, getLayout(separator1, lblCloseBatch.getTop() + lblCloseBatch.getMinimumHeight() + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
+				400, 1));
+
+		// from label
+		rootLayout.addView(lblFrom, getLayout(lblFrom, separator1.getTop() + VALUE_HEIGHT + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblYearFrom, getLayout(lblYearFrom, valBatchID.getTop() + valBatchID.getMinimumHeight() + CustOpts.VER_GAP * 2, lblFrom.getLeft() + lblFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblYearFrom, getLayout(lblYearFrom, separator1.getTop() + separator1.getMinimumHeight() + CustOpts.VER_GAP * 2, lblFrom.getLeft() + lblFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
 		rootLayout.addView(tfdYearFrom, getLayout(tfdYearFrom, lblYearFrom.getTop() + lblYearFrom.getMinimumHeight() - CustOpts.VER_GAP, lblYearFrom.getLeft(),
 				lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
@@ -182,10 +188,10 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 				LABEL_WIDTH, VALUE_HEIGHT));
 
 		// "To" Label 和 其对应的日期/时间输入框
-		rootLayout.addView(lblTo, getLayout(lblTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() * 2 + CustOpts.VER_GAP * 4, lblFrom.getLeft(),
+		rootLayout.addView(lblTo, getLayout(lblTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() * 2 + CustOpts.VER_GAP * 6, lblFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblYearTo, getLayout(lblYearTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() + CustOpts.VER_GAP * 2, lblYearFrom.getLeft(),
+		rootLayout.addView(lblYearTo, getLayout(lblYearTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() + CustOpts.VER_GAP * 4, lblYearFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 		rootLayout.addView(tfdYearTo, getLayout(tfdYearTo, lblYearTo.getTop() + lblYearTo.getMinimumHeight() - CustOpts.VER_GAP, lblYearTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
@@ -212,7 +218,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 				LABEL_WIDTH, VALUE_HEIGHT));
 
 		// 添加日期调整按钮
-		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, tfdSecondTo.getTop() + tfdSecondTo.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft(),
+		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, tfdSecondTo.getTop() + tfdSecondTo.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
 				BUTTON_WIDTH, BUTTON_HEIGHT));
 		rootLayout.addView(btnToday, getLayout(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.VER_GAP,
 				200, BUTTON_HEIGHT));
@@ -227,19 +233,26 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		rootLayout.addView(btnRightMonth, getLayout(btnRightMonth, btnThisMonth.getTop(), btnThisMonth.getLeft() + btnThisMonth.getMinimumWidth() + CustOpts.VER_GAP,
 				BUTTON_WIDTH, BUTTON_HEIGHT));
 
-		// 添加复选框
-		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, btnRightMonth.getTop() + btnRightMonth.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft(),
+		// show only mine checkbox
+		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, btnRightMonth.getTop() + btnRightMonth.getMinimumHeight() + CustOpts.VER_GAP, lblTo.getLeft() - 30,
 				FrameLayout.LayoutParams.WRAP_CONTENT, BUTTON_HEIGHT));
-		rootLayout.addView(btnPrint, getLayout(btnPrint, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP, cbxShowOnlyMine.getLeft(),
-				BUTTON_WIDTH * 2, BUTTON_HEIGHT));
 
-		// 添加发送文档和打印按钮
-		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, btnPrint.getTop() + btnPrint.getMinimumHeight() + CustOpts.VER_GAP,
-				btnPrint.getLeft(), BUTTON_WIDTH * 2, BUTTON_HEIGHT));
-		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, btnSendDocument.getTop(), btnSendDocument.getLeft() + btnSendDocument.getMinimumWidth(),
-				FrameLayout.LayoutParams.WRAP_CONTENT, BUTTON_HEIGHT / 2));
+		// -----------------------
+		View separator2 = new View(getContext());
+		separator2.setBackgroundColor(Color.GRAY);
+		rootLayout.addView(separator2, getLayout(separator2, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
+				400, 1));
+
+		// 添加发送文档和静默模式按钮
+		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, separator2.getTop() + separator2.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft() - 20,
+				200, BUTTON_HEIGHT));
+		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, cbxIsSilendMode.getTop(),cbxIsSilendMode.getLeft() + cbxIsSilendMode.getMinimumWidth() - CustOpts.HOR_GAP * 4,
+				BUTTON_WIDTH + 20, BUTTON_HEIGHT));
+		rootLayout.addView(btnPrint, getLayout(btnPrint, btnSendDocument.getTop(), btnSendDocument.getLeft() + btnSendDocument.getMinimumWidth() + CustOpts.HOR_GAP,
+				BUTTON_WIDTH + 20, BUTTON_HEIGHT));
 
 	}
+
 
 	private void addListeners() {
 		btnLeftDay.setOnClickListener(this);

@@ -92,6 +92,8 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         checkBox.setText(text);
         checkBox.setTextColor(Color.WHITE); // 设置文字颜色
         checkBox.setPadding(8, 8, 8, 8);    // 设置内边距
+        checkBox.setScaleX(0.8f);
+        checkBox.setScaleY(0.8f);
         return checkBox;
     }
 
