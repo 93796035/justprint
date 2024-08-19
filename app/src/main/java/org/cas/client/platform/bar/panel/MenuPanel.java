@@ -73,6 +73,7 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 
 	public MenuPanel(String image) {
 		super(image);
+		initPrinters();
 	}
 
 	@Override
@@ -113,7 +114,6 @@ public class MenuPanel extends PicturePane implements View.OnClickListener {
 		btnPageUpMenu.setOnClickListener(this);
 		btnPageDownMenu.setOnClickListener(this);
 
-		initPrinters();
 		initCategoryAndDishes();
 		initRules();
 	}
