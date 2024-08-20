@@ -2,6 +2,7 @@ package com.just.print.ui.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -325,5 +327,24 @@ public class LoginDlg extends DialogFragment {
                 ((DialogFragment) fragment).dismiss();
             }
         }
+    }
+
+    //on login dismiss listener--------------
+    private OnLoginDismissListener dismissListener;
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (dismissListener != null) {
+            dismissListener.onLoginDismiss();
+        }
+    }
+
+    public void setOnLoginDismissListener(OnLoginDismissListener listener) {
+        this.dismissListener = listener;
+    }
+
+    public interface OnLoginDismissListener {
+        void onLoginDismiss();
     }
 }

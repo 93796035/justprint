@@ -509,7 +509,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 				bill.setTip(DBUtil.getCursorInt(rs, "TIP"));
 				bill.setCashback(DBUtil.getCursorInt(rs, "CASHBACK"));
 				bill.setStatus(DBUtil.getCursorInt(rs, "STATUS"));
-				bill.setUserId(DBUtil.getCursorInt(rs, "USER.NAME"));
+				bill.setUserId(DBUtil.getCursorInt(rs, "NAME"));
 				bill.setComment(DBUtil.getCursorString(rs, "COMMENT"));
 				bill.setOpenTime(DBUtil.getCursorString(rs, "openTime"));
 				salesAndRefunds.add(bill);

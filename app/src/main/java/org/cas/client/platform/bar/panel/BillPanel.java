@@ -1080,6 +1080,9 @@ public class BillPanel extends BaseFragment
 			tValues[3] =  BarOption.getMoneySign() + dish.getTotalPrice() / 100f;
 			datas[i] = tValues;
 		}
+		if(myAdapter == null){
+			myAdapter = new MyAdapter(this, new String[][]{});
+		}
 		myAdapter.data = datas;
 		// may need this if throw exception: myAdapter.notifyDataSetChanged();
 
