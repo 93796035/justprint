@@ -308,7 +308,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 			valBatchID.setText(curBatchIdx);
 		}
 
-		updateTimeFields();
+		updateTimeFields(startTime, endTime);
 		updatePreviewContent();
 	}
 
@@ -328,7 +328,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 						rs.moveToNext();
 						startTime = DBUtil.getCursorString(rs,"version");
 						endTime = BarUtil.df.format(new Date());
-						updateTimeFields();
+						updateTimeFields(startTime, endTime);
 						updatePreviewContent();
 					} catch (Exception exp) {
 						L.e("ReportDlg ", "Exception when fetching latest record." + sql, exp);
@@ -341,7 +341,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 						endTime = DBUtil.getCursorString(rs,"version");
 						rs.moveToNext();
 						startTime = DBUtil.getCursorString(rs,"version");
-						updateTimeFields();
+						updateTimeFields(startTime, endTime);
 						updatePreviewContent();
 					} catch (Exception exp) {
 						L.e("ReportDlg ", "Exception when fetching last record." + sql, exp);
@@ -388,7 +388,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		Date startDate = calendar.getTime();
 		startTime = BarUtil.df.format(startDate);
 		endTime = BarUtil.df.format(endDate);
-		updateTimeFields();
+		updateTimeFields(startTime, endTime);
 		updatePreviewContent();
 	}
 
@@ -396,7 +396,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		valBatchID.setText("");
 		endTime = BarUtil.df.format(new Date());
 		startTime = endTime.substring(0, 11) + BarOption.getStartTime();
-		updateTimeFields();
+		updateTimeFields(startTime, endTime);
 		updatePreviewContent();
 	}
 
@@ -409,7 +409,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		Date startDate = calendar.getTime();
 		startTime = BarUtil.df.format(startDate);
 		endTime = BarUtil.df.format(endDate);
-		updateTimeFields();
+		updateTimeFields(startTime, endTime);
 		updatePreviewContent();
 	}
 
@@ -417,7 +417,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		valBatchID.setText("");
 		endTime = BarUtil.df.format(new Date());
 		startTime = endTime.substring(0, 8) + "01 " + BarOption.getStartTime();
-		updateTimeFields();
+		updateTimeFields(startTime, endTime);
 		updatePreviewContent();
 	}
 
@@ -433,7 +433,7 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		txpPreview.setText(wholeContent.substring(0, wholeContent.length() - 9));
 	}
 
-	private void updateTimeFields() {
+	private void updateTimeFields(String startTime, String endTime) {
 		stopTriggerEventflag = true;
 		int p;
 		p = startTime.indexOf(" ");

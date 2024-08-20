@@ -777,29 +777,33 @@ public class BillPanel extends BaseFragment
 			return false;
 		}
 	}
+	public void updateTotalArea(boolean skipSavingToDB) {
+		BillPanelBean billPanelBean = getBillPanelBean(skipSavingToDB);
+		updateLabelValues(billPanelBean);
+	}
 
-    public void updateTotalArea(boolean skipSavingToDB) {
-    	float gstRate = BarOption.getGST();
-    	float qstRate = BarOption.getQST();
-    	totalGst = 0;
-    	totalQst = 0;
-    	subTotal = 0;
+	public BillPanelBean getBillPanelBean(boolean skipSavingToDB) {
+		float gstRate = BarOption.getGST();
+		float qstRate = BarOption.getQST();
+		totalGst = 0;
+		totalQst = 0;
+		subTotal = 0;
 
-    	for(Dish dish: getOrderedDishAry()) {
-    		//get out the num.
-    		int num = dish.getNum();
-    		int pK = num /(BarOption.MaxQTY * 100);
-    		if(num > BarOption.MaxQTY * 100) {
-    			num = num %(BarOption.MaxQTY * 100);
-    		}
-    		int pS = num /BarOption.MaxQTY;
-    		if(num > BarOption.MaxQTY) {
-    			num = num % BarOption.MaxQTY;
-    		}
+		for (Dish dish : getOrderedDishAry()) {
+			//get out the num.
+			int num = dish.getNum();
+			int pK = num / (BarOption.MaxQTY * 100);
+			if (num > BarOption.MaxQTY * 100) {
+				num = num % (BarOption.MaxQTY * 100);
+			}
+			int pS = num / BarOption.MaxQTY;
+			if (num > BarOption.MaxQTY) {
+				num = num % BarOption.MaxQTY;
+			}
 
-    		int totalPrice = dish.getTotalPrice();
-    		float gst = totalPrice * (dish.getGst() * gstRate / 100f);	//an item could have a different tax rate.
-    		float qst = totalPrice * (dish.getQst() * qstRate / 100f);
+			int totalPrice = dish.getTotalPrice();
+			float gst = totalPrice * (dish.getGst() * gstRate / 100f);    //an item could have a different tax rate.
+			float qst = totalPrice * (dish.getQst() * qstRate / 100f);
 
 //@NOTE: the price is already the final item totalprice (even the discount calculated), so no need to devide again.
 //    		if(pS > 0) {
@@ -813,31 +817,38 @@ public class BillPanel extends BaseFragment
 //    			qst /= pK;
 //    		}
 
-    		subTotal += totalPrice;
-    		totalGst += gst;
-    		totalQst += qst;
-    	}
+			subTotal += totalPrice;
+			totalGst += gst;
+			totalQst += qst;
+		}
 
-    	subTotal -= discount;
-    	subTotal += serviceFee;
+		subTotal -= discount;
+		subTotal += serviceFee;
 
-    	if(BarOption.isDiscountAffectTax()) {
-    		totalGst -= Math.round(discount * gstRate / 100f);
-    		totalQst -= Math.round(discount * qstRate / 100f);
-    	}
+		if (BarOption.isDiscountAffectTax()) {
+			totalGst -= Math.round(discount * gstRate / 100f);
+			totalQst -= Math.round(discount * qstRate / 100f);
+		}
 
-    	if(BarOption.isServiceFeeAffectTax()) {
-    		totalGst += Math.round(serviceFee * gstRate / 100f);
-    		totalQst += Math.round(serviceFee * qstRate / 100f);
-    	}
-    	totalGst = Math.round(totalGst);
-    	totalQst = Math.round(totalQst);
-    	this.updateLabelValues(discount, serviceFee, subTotal, totalGst, totalQst);
+		if (BarOption.isServiceFeeAffectTax()) {
+			totalGst += Math.round(serviceFee * gstRate / 100f);
+			totalQst += Math.round(serviceFee * qstRate / 100f);
+		}
+		totalGst = Math.round(totalGst);
+		totalQst = Math.round(totalQst);
+		return new BillPanelBean(discount, serviceFee, subTotal, totalGst, totalQst, totalOnBill, tip);
+	}
+
+	public void updateLabelValues(BillPanelBean bean){
+		if(valTotlePrice == null) {
+			return;
+		}
+    	this.updateLabelValues(bean.discount, (int)bean.serviceFee, bean.subTotal, bean.totalGst, bean.totalQst);
     	String totalPrice = BarUtil.formatMoney((subTotal + totalGst + totalQst)/100f);
-    	if(totalOnBill > 0 && totalOnBill != subTotal + totalGst + totalQst) { //this can happen in split bill pane, when moving a dish to another bill.
+    	if(bean.totalOnBill > 0 && bean.totalOnBill != bean.subTotal + bean.totalGst + bean.totalQst) { //this can happen in split bill pane, when moving a dish to another bill.
     		valTotlePrice.setText(BarUtil.canadianPennyRound(totalPrice));
             BarFrame.setStatusMes("!!!" + BarFrame.consts.DISCOUNT_BILL() + BarFrame.consts.Applied() + "!!! " + BarFrame.consts.getPennyRounded() + totalPrice + " ");
-    		totalOnBill = 0;
+			totalOnBill = 0;
     		//no need to log error, because when add dish to a printed bill, will cause this case.
     		//L.e("BillPanel ", totalPrice + "the calculated total price are different from the total OnBill!" + totalOnBill, null);
     	}else {
@@ -858,6 +869,9 @@ public class BillPanel extends BaseFragment
     }
 
 	public void updateLabelValues(float discount, int serviceFee, float subTotal, float totalGst, float totalQst) {
+		if(lblDiscount == null){ //TODO:when changed to absolute layout, should be able to make sure the
+			return;
+		}
 		lblDiscount.setText(discount > 0 ? BarFrame.consts.Discount() + ":-" + BarUtil.formatMoney((discount)/100f) : "");
     	lblServiceFee.setText(serviceFee > 0 ? BarFrame.consts.Serv() + ":" + BarUtil.formatMoney((serviceFee)/100f) : "");
     	lblSubTotle.setText(BarFrame.consts.Subtotal() + ":" + BarUtil.formatMoney(subTotal/100f));
@@ -924,29 +938,35 @@ public class BillPanel extends BaseFragment
 		}
 
 		updateTotalArea(skipSavingToDB);
+		if(valTotlePrice == null) {
+			return;
+		}
+		int color = Color.WHITE;
 		switch (status) {
 		case DBConsts.BILL_PRINTED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.GREEN);
+			color = Color.GREEN;
 			break;
 		case DBConsts.SUSPENDED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.RED);
+			color = Color.RED;
 			break;
 		case DBConsts.COMPLETED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.GRAY);
+			color = Color.GRAY;
 			break;
 		case DBConsts.VOIDED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.DKGRAY);
+			color = Color.DKGRAY;
 			break;
 		case DBConsts.EXPIRED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.YELLOW);
+			color = Color.YELLOW;
 			break;
 		case DBConsts.DELETED:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.BLACK);
+			color = Color.BLACK;
 			break;
 
 		default:
-			findViewById(R.id.tableListView).setBackgroundColor(Color.TRANSPARENT);
+			color = Color.TRANSPARENT;
 		}
+
+		findViewById(R.id.tableListView).setBackgroundColor(color);
 
 		if(salesPanel != null && customerFrame == null && billButton == null) {
 			CmdBtnsManagerDlg.refreshBtnStatusForSalesPanel(status);
@@ -1608,5 +1628,18 @@ public class BillPanel extends BaseFragment
 
 	public interface OnItemClickListener {
 		void onItemClick(int position);
+	}
+}
+
+ class BillPanelBean {
+	public float discount, serviceFee, subTotal, totalGst, totalQst, tip, totalOnBill;
+	public BillPanelBean(float discount, float serviceFee, float subTotal, float totalGst, float totalQst, float tip, float totalOnBill){
+		this.discount = discount;
+		this.serviceFee = serviceFee;
+		this.subTotal = subTotal;
+		this.totalGst = totalGst;
+		this.totalQst = totalQst;
+		this.tip = tip;
+		this.totalOnBill = totalOnBill;
 	}
 }
