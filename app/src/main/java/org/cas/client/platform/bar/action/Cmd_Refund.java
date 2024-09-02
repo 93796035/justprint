@@ -49,48 +49,52 @@ public class Cmd_Refund implements SamActionListener {
     	}
     	
  		//To make it easier to user, we decided to disable partial refund for now.     		BarFrame.numberPanelDlg.setVisible(true);
-	    Object[] options = {BarFrame.consts.WholeBillRefund(), BarFrame.consts.itemBasedRefund()};
-//		int selection = JOptionPane.showOptionDialog(BarFrame.instance, BarFrame.consts.confirmRefund(), org.cas.client.resources.international.DlgConst.DlgTitle,
-//	                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-//		if(selection == JOptionPane.CLOSED_OPTION ) {
-//			return;
-//		}else if(selection == 1) {
-//			new RefundItemDlg(BarFrame.instance).setVisible(true);
-//		}else if(selection == 0) {
-//			BarFrame.numberPanelDlg.setTitle(BarFrame.consts.Refund());
-// 			BarFrame.numberPanelDlg.setNotice(BarFrame.consts.RefundNotice());
-// 			BarFrame.numberPanelDlg.setBtnSource(null);
-// 			BarFrame.numberPanelDlg.setFloatSupport(true);
-// 			BarFrame.numberPanelDlg.setPercentSupport(false);
-// 			BarFrame.numberPanelDlg.reLayout();
-// 			BarFrame.numberPanelDlg.setModal(true);
-// 			BarFrame.numberPanelDlg.setContents(billPanel.valTotlePrice.getText());
-// 			BarFrame.numberPanelDlg.setVisible(true);
+	    String[] options = {BarFrame.consts.WholeBillRefund(), BarFrame.consts.itemBasedRefund()};
+		JOptionPane.showOptionDialog(org.cas.client.resources.international.DlgConst.DlgTitle, BarFrame.consts.confirmRefund(),
+				options, new JOptionPane.OptionDialogListener() {
+					@Override
+					public void onOptionSelected(int selection) {
+						if(selection == -1) {
+							return;
+						}else if(selection == 1) {
+//							RefundItemDlg(bitzp).setVisible(true);
+						}else if(selection == 0) {
+//							BarFrame.numberPanelDlg.setTitle(BarFrame.consts.Refund());
+//							BarFrame.numberPanelDlg.setNotice(BarFrame.consts.RefundNotice());
+//							BarFrame.numberPanelDlg.setBtnSource(null);
+//							BarFrame.numberPanelDlg.setFloatSupport(true);
+//							BarFrame.numberPanelDlg.setPercentSupport(false);
+//							BarFrame.numberPanelDlg.reLayout();
+//							BarFrame.numberPanelDlg.setModal(true);
+//							BarFrame.numberPanelDlg.setContents(billPanel.valTotlePrice.getText());
+//							BarFrame.numberPanelDlg.setVisible(true);
 //
-// 			String curContent = BarFrame.numberPanelDlg.curContent;
-// 			if(StringUtil.isEmpty(curContent)){	//if numberPanelDlg is not closed by clicking the ok button, but the X button, the curContent will be set to "";
-// 				return;
-//			}
+//							String curContent = BarFrame.numberPanelDlg.curContent;
+//							if(StringUtil.isEmpty(curContent)){	//if numberPanelDlg is not closed by clicking the ok button, but the X button, the curContent will be set to "";
+//								return;
+//							}
 //
-//			float toRefundThisTime = BarFrame.numberPanelDlg.isPercentage ?
-// 				Float.valueOf(billPanel.valTotlePrice.getText()) * Float.valueOf(curContent)
-// 				: Float.valueOf(curContent);
+//							float toRefundThisTime = BarFrame.numberPanelDlg.isPercentage ?
+//								Float.valueOf(billPanel.valTotlePrice.getText()) * Float.valueOf(curContent)
+//								: Float.valueOf(curContent);
 //
-// 			if(toRefundThisTime > Float.valueOf(billPanel.valTotlePrice.getText())) {
-// 				JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
-// 			    return;
-// 			}
+//							if(toRefundThisTime > Float.valueOf(billPanel.valTotlePrice.getText())) {
+//								JOptionPane.showMessageDialog(BarFrame.instance, BarFrame.consts.InvalidInput());
+//								return;
+//							}
 //
-// 			int refundedLifeTime = billPanel.getStatus();
+//							int refundedLifeTime = billPanel.getStatus();
 //
-// 			//user modified item/items, will be treated as partial refund, which will need to expire also the outputs records.
-// 		    refundedLifeTime = checkRefundAmount(toRefundThisTime, refundedLifeTime);
-// 			if(Integer.MAX_VALUE == refundedLifeTime) {
-// 				return;
-// 			}
+//							//user modified item/items, will be treated as partial refund, which will need to expire also the outputs records.
+//							refundedLifeTime = checkRefundAmount(toRefundThisTime, refundedLifeTime);
+//							if(Integer.MAX_VALUE == refundedLifeTime) {
+//								return;
+//							}
 //
-// 			refundRoutineSteps(billPanel, toRefundThisTime, refundedLifeTime);
-//		}
+//							refundRoutineSteps(billPanel, toRefundThisTime, refundedLifeTime);
+						}
+					}
+				});
 	}
 	
 	public static int checkRefundAmount(float refund, int refundAmount) {

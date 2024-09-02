@@ -20,10 +20,10 @@ import java.util.Date;
 
 public class BarOption {
 
-//	public static Font bigFont = Font.Builder("Dialog", Font.PLAIN, 48);
-//	public static Font lessBigFont = new Font("Dialog", Font.PLAIN, 36);
-//	public static Font moderateBigFont = new Font("Dialog", Font.PLAIN, 24);
-//	public static Font normalFont = new Font("Dialog", Font.BOLD, 14);
+	public static float bigFont = 48;
+	public static float lessBigFont = 36;
+	public static float moderateBigFont = 24;
+	public static float normalFont = 14;
 	public static final String DELETE_CMD = "~delete~";
 	
 	private static final String SUMMER_UTC = "-05:00A";

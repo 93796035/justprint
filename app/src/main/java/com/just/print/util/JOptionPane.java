@@ -2,11 +2,14 @@ package com.just.print.util;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.text.InputType;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 
-import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 
 import org.cas.client.platform.bar.panel.BillPanel;
@@ -17,21 +20,7 @@ public class JOptionPane {
     public static final int YES_NO_OPTION = 0;
 
     public static void showMessageDialog(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance); // 使用当前Activity的上下文创建Builder
-        builder.setTitle("Notice"); // 设置对话框标题
-        builder.setMessage(message); // 设置对话框显示的消息
-
-        // 设置确认按钮
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss(); // 关闭对话框
-            }
-        });
-
-        // 创建AlertDialog对象并显示
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        showMessageDialog(message, null);
     }
     public static void showMessageDialog(String message, ConfirmDialogCallback callback) {
         AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance); // 使用当前Activity的上下文创建Builder
@@ -43,7 +32,9 @@ public class JOptionPane {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss(); // 关闭对话框
-                callback.onResult(true);
+                if(callback != null) {
+                    callback.onResult(true);
+                }
             }
         });
 
@@ -76,6 +67,43 @@ public class JOptionPane {
         // 创建并显示对话框
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static boolean showConfirmDialog(String content, String title) {
+        final boolean[] result = {false};
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
+        builder.setTitle(title);
+        builder.setMessage(content);
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                result[0] = true;
+                latch.countDown();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                result[0] = false;
+                latch.countDown();
+            }
+        });
+
+        // 显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return result[0];
     }
 
     public static void showInputDialog(String title, String message, InputDialogListener listener) {
@@ -157,44 +185,52 @@ public class JOptionPane {
         return result[0];
     }
 
-
-    public static boolean showConfirmDialog(String content, String title) {
-        final boolean[] result = {false};
-        final CountDownLatch latch = new CountDownLatch(1);
-
+    public static void showOptionDialog(String title, String message, String[] options, OptionDialogListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(BarFrame.instance);
-        builder.setTitle(title);
-        builder.setMessage(content);
+        builder.setTitle(title); // 设置对话框标题
 
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                result[0] = true;
-                latch.countDown();
-            }
-        });
+        LinearLayout layout = new LinearLayout(BarFrame.instance);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(20, 20, 20, 20);
 
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                result[0] = false;
-                latch.countDown();
-            }
-        });
-
-        // 显示对话框
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (message != null && !message.isEmpty()) {
+            TextView messageView = new TextView(BarFrame.instance);
+            messageView.setText(message);
+            messageView.setTextColor(Color.WHITE); // 设置前景色为白色
+            messageView.setPadding(0, 0, 0, 20);
+            layout.addView(messageView);
         }
 
-        return result[0];
+        Spinner spinner = new Spinner(BarFrame.instance);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(BarFrame.instance, android.R.layout.simple_spinner_item, options);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        layout.addView(spinner);
+        builder.setView(layout);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int selectedPosition = spinner.getSelectedItemPosition();
+                listener.onOptionSelected(selectedPosition);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                listener.onOptionSelected(-1); // 返回 -1 表示用户选择了取消
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
+    // 退款选择的监听接口
+    public interface OptionDialogListener {
+        void onOptionSelected(int selection);
+    }
+    
     // 输入监听器接口
     public interface InputDialogListener {
         void onInputReceived(String input);
