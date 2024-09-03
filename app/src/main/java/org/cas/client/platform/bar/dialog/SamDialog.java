@@ -16,6 +16,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.just.print.app.BarFrame;
 
+import org.cas.client.platform.bar.uibeans.NumButton;
+
 public abstract class SamDialog extends DialogFragment implements View.OnClickListener {
     public int LABEL_WIDTH = 100;
     public int BUTTON_WIDTH = 120;
@@ -23,6 +25,8 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
     public int VALUE_WIDTH = 100;
     public int VALUE_HEIGHT = 70;
     public Dialog dialog;
+    protected String title;
+
     public SamDialog(){
         dialog = new Dialog(BarFrame.instance);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -58,6 +62,13 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         button.setText(text);
         button.setPadding(0, 0, 0, 0);
         return button;
+    }
+
+    public NumButton createNumButton(String text) {
+        NumButton btn = new NumButton(getActivity());
+        btn.setText(text);
+        btn.setGravity(Gravity.CENTER);
+        return btn;
     }
 
     public TextView createLabel() {

@@ -64,9 +64,7 @@ public class Cmd_Pay implements SamActionListener {
 			return;
 		}
 
-		// 显示对话框
 		BarFrame.payDlg.initContent(title, billPanel.getBillID());
 		BarFrame.payDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.payDlg.getTitle());
-
 	}
 }

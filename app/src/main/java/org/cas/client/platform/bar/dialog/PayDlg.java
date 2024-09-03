@@ -76,7 +76,7 @@ public class PayDlg extends SamDialog {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		initComponents();
-		relayout(dialog);
+		relayout();
 		initContent();
 		return dialog;
 	}
@@ -125,7 +125,7 @@ public class PayDlg extends SamDialog {
 		addListeners();
 	}
 
-	private void relayout(Dialog dialog) {
+	private void relayout() {
 		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
 		dialog.setContentView(rootLayout);
 		// Title

@@ -249,7 +249,7 @@ public class BillingHistoryDlg extends SamDialog {
 
     private void initContent(String startTime, String endTime) {
         StringBuilder sql = new StringBuilder("SELECT bill._id AS bill_id, user._id AS user_id, bill.createdTime," +
-                "bill.billIndex, bill.tableName, bill.openTime, bill.STATUS, bill.TOTAL, bill.DISCOUNT from bill, user where bill.userId = user._id and createdTime >= '")
+                "bill.billIndex, bill.tableName, bill.openTime, bill.STATUS, bill.TOTAL, bill.DISCOUNT, user.nickName as operator from bill, user where bill.userId = user._id and createdTime >= '")
                 .append(startTime)
                 .append("' and createdTime <= '")
                 .append(endTime)
