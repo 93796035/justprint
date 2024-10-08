@@ -7,8 +7,11 @@ import com.just.print.app.AikaPos;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
 import com.just.print.util.JOptionPane;
+import com.just.print.util.StringUtils;
 
 import org.cas.client.platform.bar.BarOption;
+import org.cas.client.platform.bar.dialog.DialogCloseCallback;
+import org.cas.client.platform.bar.dialog.NumberPanelDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
@@ -54,10 +57,38 @@ public class Cmd_Refund implements SamActionListener {
 				options, new JOptionPane.OptionDialogListener() {
 					@Override
 					public void onOptionSelected(int selection) {
-						if(selection == -1) {
-							return;
-						}else if(selection == 0) {
-							BarFrame.numberPanelDlg.initContent(BarFrame.consts.Refund(), BarFrame.consts.RefundNotice());
+						if(selection == 0) {
+							NumberPanelDlg numberPanelDlg = BarFrame.numberPanelDlg;
+							numberPanelDlg.initContent(BarFrame.consts.Refund(), BarFrame.consts.RefundNotice());
+							numberPanelDlg.setCloseCallback(new DialogCloseCallback() {
+								@Override
+								public void onDialogClose() {
+									if (numberPanelDlg.confirmed) {
+										if (StringUtils.isBlank(numberPanelDlg.curContent)) {    //if numberPanelDlg is not closed by clicking the ok button, but the X button, the curContent will be set to "";
+											return;
+										}
+
+										float toRefundThisTime = numberPanelDlg.isPercentage ?
+												Float.valueOf(billPanel.valTotlePrice.getText().toString()) * Float.valueOf(numberPanelDlg.curContent)
+												: Float.valueOf(BarFrame.numberPanelDlg.curContent);
+
+										if (toRefundThisTime > Float.valueOf(billPanel.valTotlePrice.getText().toString())) {
+											JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
+											return;
+										}
+
+										int refundedLifeTime = billPanel.getStatus();
+
+										//user modified item/items, will be treated as partial refund, which will need to expire also the outputs records.
+										refundedLifeTime = checkRefundAmount(toRefundThisTime, refundedLifeTime);
+										if (Integer.MAX_VALUE == refundedLifeTime) {
+											return;
+										}
+
+										refundRoutineSteps(billPanel, toRefundThisTime, refundedLifeTime);
+									}
+								}
+							});
 							BarFrame.numberPanelDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.consts.Refund());
 						}else if(selection == 1) {
 //							RefundItemDlg(bitzp).setVisible(true);

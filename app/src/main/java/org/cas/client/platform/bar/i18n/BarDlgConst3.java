@@ -178,7 +178,7 @@ public class BarDlgConst3 implements BarDlgConst{
     @Override
 	public String VISA() {return "VISA";}
     @Override
-	public String MASTER() {return "MASTER";}
+	public String MASTER() {return "MAST";}
     @Override
 	public String CANCEL_ALL() {return "取消新输入";}
     @Override

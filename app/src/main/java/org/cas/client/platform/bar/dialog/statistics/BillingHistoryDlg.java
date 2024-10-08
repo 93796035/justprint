@@ -31,7 +31,6 @@ import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.print.PrintService;
 import org.cas.client.platform.cascustomize.CustOpts;
-import org.cas.client.platform.casutil.ErrorUtil;
 import org.cas.client.platform.casutil.L;
 
 import java.util.Date;
@@ -102,71 +101,71 @@ public class BillingHistoryDlg extends SamDialog {
         FrameLayout rootLayout = new FrameLayout(getContext());
         dialog.setContentView(rootLayout);
 
-        rootLayout.addView(colBillId, getLayout(colBillId, 50, 50,
+        rootLayout.addView(colBillId, getLayoutParams(colBillId, 50, 50,
                 100, 50));
-        rootLayout.addView(colOpenTime, getLayout(colOpenTime, colBillId.getTop(), colBillId.getLeft() + colBillId.getMinimumWidth(),
+        rootLayout.addView(colOpenTime, getLayoutParams(colOpenTime, colBillId.getTop(), colBillId.getLeft() + colBillId.getMinimumWidth(),
                 350, colBillId.getMinimumHeight()));
-        rootLayout.addView(colCustomer, getLayout(colCustomer, colBillId.getTop(), colOpenTime.getLeft() + colOpenTime.getMinimumWidth(),
+        rootLayout.addView(colCustomer, getLayoutParams(colCustomer, colBillId.getTop(), colOpenTime.getLeft() + colOpenTime.getMinimumWidth(),
                 150, colBillId.getMinimumHeight()));
-        rootLayout.addView(colTable, getLayout(colTable, colBillId.getTop(), colCustomer.getLeft() + colCustomer.getMinimumWidth(),
+        rootLayout.addView(colTable, getLayoutParams(colTable, colBillId.getTop(), colCustomer.getLeft() + colCustomer.getMinimumWidth(),
                 100, colBillId.getMinimumHeight()));
-        rootLayout.addView(colStatus, getLayout(colStatus, colBillId.getTop(), colTable.getLeft() + colTable.getMinimumWidth(),
+        rootLayout.addView(colStatus, getLayoutParams(colStatus, colBillId.getTop(), colTable.getLeft() + colTable.getMinimumWidth(),
                 100, colBillId.getMinimumHeight()));
-        rootLayout.addView(colTotal, getLayout(colTotal, colBillId.getTop(),colStatus.getLeft() + colStatus.getMinimumWidth(),
+        rootLayout.addView(colTotal, getLayoutParams(colTotal, colBillId.getTop(),colStatus.getLeft() + colStatus.getMinimumWidth(),
                 150, colBillId.getMinimumHeight()));
 
-        rootLayout.addView(scrollView, getLayout(scrollView, colBillId.getTop() + colBillId.getMinimumHeight(), colBillId.getLeft(),
+        rootLayout.addView(scrollView, getLayoutParams(scrollView, colBillId.getTop() + colBillId.getMinimumHeight(), colBillId.getLeft(),
                 1020, 800));
 
-        rootLayout.addView(lblBillID, getLayout(lblBillID, scrollView.getTop() + scrollView.getMinimumHeight() + CustOpts.VER_GAP, scrollView.getLeft(),
+        rootLayout.addView(lblBillID, getLayoutParams(lblBillID, scrollView.getTop() + scrollView.getMinimumHeight() + CustOpts.VER_GAP, scrollView.getLeft(),
                 LABEL_WIDTH + CustOpts.HOR_GAP * 2, VALUE_HEIGHT));
-        rootLayout.addView(tfdBillID, getLayout(tfdBillID, lblBillID.getTop() + lblBillID.getMinimumHeight() - 20, lblBillID.getLeft(),
+        rootLayout.addView(tfdBillID, getLayoutParams(tfdBillID, lblBillID.getTop() + lblBillID.getMinimumHeight() - 20, lblBillID.getLeft(),
                 lblBillID.getMinimumWidth(), VALUE_HEIGHT));
 
         View verticalLine = new View(BarFrame.instance);
         verticalLine.setBackgroundColor(Color.WHITE); // 设置竖线的颜色
-        rootLayout.addView(verticalLine, getLayout(verticalLine, lblBillID.getTop() + 24 , lblBillID.getLeft() + lblBillID.getMinimumWidth() + CustOpts.HOR_GAP, 1, BUTTON_HEIGHT));
+        rootLayout.addView(verticalLine, getLayoutParams(verticalLine, lblBillID.getTop() + 24 , lblBillID.getLeft() + lblBillID.getMinimumWidth() + CustOpts.HOR_GAP, 1, BUTTON_HEIGHT));
 
-        rootLayout.addView(lblYearFrom, getLayout(lblYearFrom, lblBillID.getTop(), verticalLine.getLeft() + verticalLine.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblYearFrom, getLayoutParams(lblYearFrom, lblBillID.getTop(), verticalLine.getLeft() + verticalLine.getMinimumWidth() + CustOpts.HOR_GAP,
                 LABEL_WIDTH, VALUE_HEIGHT));
-        rootLayout.addView(tfdYearFrom, getLayout(tfdYearFrom, tfdBillID.getTop(), lblYearFrom.getLeft(), lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
+        rootLayout.addView(tfdYearFrom, getLayoutParams(tfdYearFrom, tfdBillID.getTop(), lblYearFrom.getLeft(), lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
 
-        rootLayout.addView(lblMonthFrom, getLayout(lblMonthFrom, lblBillID.getTop(), lblYearFrom.getLeft() + lblYearFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblMonthFrom, getLayoutParams(lblMonthFrom, lblBillID.getTop(), lblYearFrom.getLeft() + lblYearFrom.getMinimumWidth() + CustOpts.HOR_GAP,
                 LABEL_WIDTH - CustOpts.HOR_GAP * 4, VALUE_HEIGHT));
-        rootLayout.addView(tfdMonthFrom, getLayout(tfdMonthFrom, tfdBillID.getTop(), lblMonthFrom.getLeft(),
+        rootLayout.addView(tfdMonthFrom, getLayoutParams(tfdMonthFrom, tfdBillID.getTop(), lblMonthFrom.getLeft(),
                 lblMonthFrom.getMinimumWidth(), VALUE_HEIGHT));
 
-        rootLayout.addView(lblDayFrom, getLayout(lblDayFrom, lblBillID.getTop(), lblMonthFrom.getLeft() + lblMonthFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblDayFrom, getLayoutParams(lblDayFrom, lblBillID.getTop(), lblMonthFrom.getLeft() + lblMonthFrom.getMinimumWidth() + CustOpts.HOR_GAP,
                 lblMonthFrom.getMinimumWidth(), VALUE_HEIGHT));
-        rootLayout.addView(tfdDayFrom, getLayout(tfdDayFrom, tfdBillID.getTop(), lblDayFrom.getLeft(),
+        rootLayout.addView(tfdDayFrom, getLayoutParams(tfdDayFrom, tfdBillID.getTop(), lblDayFrom.getLeft(),
                 lblDayFrom.getMinimumWidth(), VALUE_HEIGHT));
 
-        rootLayout.addView(lblTo, getLayout(lblTo, tfdDayFrom.getTop(), lblDayFrom.getLeft() + lblDayFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblTo, getLayoutParams(lblTo, tfdDayFrom.getTop(), lblDayFrom.getLeft() + lblDayFrom.getMinimumWidth() + CustOpts.HOR_GAP,
                 40, VALUE_HEIGHT ));
 
-        rootLayout.addView(lblYearTo, getLayout(lblYearTo, lblBillID.getTop(), lblTo.getLeft() + lblTo.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblYearTo, getLayoutParams(lblYearTo, lblBillID.getTop(), lblTo.getLeft() + lblTo.getMinimumWidth() + CustOpts.HOR_GAP,
                 lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
-        rootLayout.addView(tfdYearTo, getLayout(tfdYearTo, tfdBillID.getTop(), lblYearTo.getLeft(),
+        rootLayout.addView(tfdYearTo, getLayoutParams(tfdYearTo, tfdBillID.getTop(), lblYearTo.getLeft(),
                 lblYearTo.getMinimumWidth(), VALUE_HEIGHT));
 
-        rootLayout.addView(lblMonthTo, getLayout(lblMonthTo, lblBillID.getTop(), lblYearTo.getLeft() + lblYearTo.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblMonthTo, getLayoutParams(lblMonthTo, lblBillID.getTop(), lblYearTo.getLeft() + lblYearTo.getMinimumWidth() + CustOpts.HOR_GAP,
                 LABEL_WIDTH, VALUE_HEIGHT));
-        rootLayout.addView(tfdMonthTo, getLayout(tfdMonthTo, tfdBillID.getTop(), lblMonthTo.getLeft(),
+        rootLayout.addView(tfdMonthTo, getLayoutParams(tfdMonthTo, tfdBillID.getTop(), lblMonthTo.getLeft(),
                 LABEL_WIDTH, VALUE_HEIGHT));
 
-        rootLayout.addView(lblDayTo, getLayout(lblDayTo, lblBillID.getTop(), lblMonthTo.getLeft() + lblMonthTo.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(lblDayTo, getLayoutParams(lblDayTo, lblBillID.getTop(), lblMonthTo.getLeft() + lblMonthTo.getMinimumWidth() + CustOpts.HOR_GAP,
                 LABEL_WIDTH, VALUE_HEIGHT));
-        rootLayout.addView(tfdDayTo, getLayout(tfdDayTo, tfdBillID.getTop(), lblDayTo.getLeft(),
+        rootLayout.addView(tfdDayTo, getLayoutParams(tfdDayTo, tfdBillID.getTop(), lblDayTo.getLeft(),
                 LABEL_WIDTH, VALUE_HEIGHT));
 
         View verticalLine2 = new View(BarFrame.instance);
         verticalLine2.setBackgroundColor(Color.WHITE); // 设置竖线的颜色
-        rootLayout.addView(verticalLine2, getLayout(verticalLine2, lblBillID.getTop() + 24 , tfdDayTo.getLeft() + tfdDayTo.getMinimumWidth() + CustOpts.HOR_GAP, 1, BUTTON_HEIGHT));
+        rootLayout.addView(verticalLine2, getLayoutParams(verticalLine2, lblBillID.getTop() + 24 , tfdDayTo.getLeft() + tfdDayTo.getMinimumWidth() + CustOpts.HOR_GAP, 1, BUTTON_HEIGHT));
 
         // 将按钮添加到滚动区域的底部
-        rootLayout.addView(btnChangeDate, getLayout(btnChangeDate, verticalLine2.getTop(), verticalLine2.getLeft() + verticalLine2.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(btnChangeDate, getLayoutParams(btnChangeDate, verticalLine2.getTop(), verticalLine2.getLeft() + verticalLine2.getMinimumWidth() + CustOpts.HOR_GAP,
                 BUTTON_WIDTH, BUTTON_HEIGHT));
-        rootLayout.addView(btnPrintInvoice, getLayout(btnPrintInvoice,  btnChangeDate.getTop(), btnChangeDate.getLeft() + btnChangeDate.getMinimumWidth() + CustOpts.HOR_GAP,
+        rootLayout.addView(btnPrintInvoice, getLayoutParams(btnPrintInvoice,  btnChangeDate.getTop(), btnChangeDate.getLeft() + btnChangeDate.getMinimumWidth() + CustOpts.HOR_GAP,
                 BUTTON_WIDTH, btnChangeDate.getMinimumHeight()));
 
         FrameLayout.LayoutParams params =  (FrameLayout.LayoutParams) btnPrintInvoice.getLayoutParams();

@@ -129,25 +129,25 @@ public class PayDlg extends SamDialog {
 		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
 		dialog.setContentView(rootLayout);
 		// Title
-		rootLayout.addView(titleView, getLayout(titleView, 16, 50, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
+		rootLayout.addView(titleView, getLayoutParams(titleView, 16, 50, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
 
 		// Payment Details
-		rootLayout.addView(lblCashReceived, getLayout(lblCashReceived, 100, 50, LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valCashReceived, getLayout(valCashReceived, lblCashReceived.getTop(), lblCashReceived.getLeft() + lblCashReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblDebitReceived, getLayout(lblDebitReceived, lblCashReceived.getTop(), valCashReceived.getLeft() + valCashReceived.getMinimumWidth() + CustOpts.HOR_GAP, LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valDebitReceived, getLayout(valDebitReceived, lblCashReceived.getTop(), lblDebitReceived.getLeft() + lblDebitReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblCashReceived, getLayoutParams(lblCashReceived, 100, 50, LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valCashReceived, getLayoutParams(valCashReceived, lblCashReceived.getTop(), lblCashReceived.getLeft() + lblCashReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblDebitReceived, getLayoutParams(lblDebitReceived, lblCashReceived.getTop(), valCashReceived.getLeft() + valCashReceived.getMinimumWidth() + CustOpts.HOR_GAP, LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valDebitReceived, getLayoutParams(valDebitReceived, lblCashReceived.getTop(), lblDebitReceived.getLeft() + lblDebitReceived.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblVisaReceived, getLayout(lblVisaReceived, lblCashReceived.getTop() + valCashReceived.getMinimumHeight() - CustOpts.VER_GAP * 3, lblCashReceived.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valVisaReceived, getLayout(valVisaReceived, lblVisaReceived.getTop(), valCashReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblMasterReceived, getLayout(lblMasterReceived, lblVisaReceived.getTop(), lblDebitReceived.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valMasterReceived, getLayout(valMasterReceived, lblVisaReceived.getTop(), valDebitReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblVisaReceived, getLayoutParams(lblVisaReceived, lblCashReceived.getTop() + valCashReceived.getMinimumHeight() - CustOpts.VER_GAP * 3, lblCashReceived.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valVisaReceived, getLayoutParams(valVisaReceived, lblVisaReceived.getTop(), valCashReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblMasterReceived, getLayoutParams(lblMasterReceived, lblVisaReceived.getTop(), lblDebitReceived.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valMasterReceived, getLayoutParams(valMasterReceived, lblVisaReceived.getTop(), valDebitReceived.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(tfdNewReceived, getLayout(tfdNewReceived, lblCashReceived.getTop(), valMasterReceived.getLeft() + valMasterReceived.getMinimumWidth() + CustOpts.HOR_GAP, 300));
+		rootLayout.addView(tfdNewReceived, getLayoutParams(tfdNewReceived, lblCashReceived.getTop(), valMasterReceived.getLeft() + valMasterReceived.getMinimumWidth() + CustOpts.HOR_GAP, 300));
 
-		rootLayout.addView(lblTotal, getLayout(lblTotal, lblCashReceived.getTop(), tfdNewReceived.getLeft() + tfdNewReceived.getMinimumWidth() + CustOpts.HOR_GAP, LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valTotal, getLayout(valTotal, lblTotal.getTop(), lblTotal.getLeft() + lblTotal.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblLeft, getLayout(lblLeft, lblMasterReceived.getTop(), lblTotal.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(valLeft, getLayout(valLeft, lblLeft.getTop(), valTotal.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblTotal, getLayoutParams(lblTotal, lblCashReceived.getTop(), tfdNewReceived.getLeft() + tfdNewReceived.getMinimumWidth() + CustOpts.HOR_GAP, LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valTotal, getLayoutParams(valTotal, lblTotal.getTop(), lblTotal.getLeft() + lblTotal.getMinimumWidth(), VALUE_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(lblLeft, getLayoutParams(lblLeft, lblMasterReceived.getTop(), lblTotal.getLeft(), LABEL_WIDTH, VALUE_HEIGHT));
+		rootLayout.addView(valLeft, getLayoutParams(valLeft, lblLeft.getTop(), valTotal.getLeft(), VALUE_WIDTH, VALUE_HEIGHT));
 
 		// Buttons
 		constructPaymentButtons(rootLayout);
@@ -157,34 +157,34 @@ public class PayDlg extends SamDialog {
 
 		int BUTTON_WIDTH = 110;
 
-		rootLayout.addView(btn10, getLayout(btn10, valVisaReceived.getTop() + valVisaReceived.getMinimumHeight() + CustOpts.VER_GAP * 2, lblVisaReceived.getLeft(),
+		rootLayout.addView(btn10, getLayoutParams(btn10, valVisaReceived.getTop() + valVisaReceived.getMinimumHeight() + CustOpts.VER_GAP * 2, lblVisaReceived.getLeft(),
 				BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btn20, getLayout(btn20, btn10.getTop(), btn10.getLeft() + btn10.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btn30, getLayout(btn30, btn10.getTop() + btn10.getMinimumHeight() + CustOpts.VER_GAP, btn10.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btn40, getLayout(btn40, btn30.getTop(), btn20.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btn50, getLayout(btn50, btn30.getTop() + btn30.getMinimumHeight() + CustOpts.VER_GAP, btn30.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btn100, getLayout(btn100, btn50.getTop(), btn40.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
-		rootLayout.addView(btnExact, getLayout(btnExact, btn50.getTop() + btn50.getMinimumHeight() + CustOpts.VER_GAP, btn50.getLeft(),
+		rootLayout.addView(btn20, getLayoutParams(btn20, btn10.getTop(), btn10.getLeft() + btn10.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(btn30, getLayoutParams(btn30, btn10.getTop() + btn10.getMinimumHeight() + CustOpts.VER_GAP, btn10.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(btn40, getLayoutParams(btn40, btn30.getTop(), btn20.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(btn50, getLayoutParams(btn50, btn30.getTop() + btn30.getMinimumHeight() + CustOpts.VER_GAP, btn30.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(btn100, getLayoutParams(btn100, btn50.getTop(), btn40.getLeft(), BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(btnExact, getLayoutParams(btnExact, btn50.getTop() + btn50.getMinimumHeight() + CustOpts.VER_GAP, btn50.getLeft(),
 				btn100.getMinimumWidth() * 2 + CustOpts.HOR_GAP, BUTTON_WIDTH));
 
 		// Number buttons
-		rootLayout.addView(num1, getLayout(num1, btn10.getTop(), btn20.getLeft() + btn20.getMinimumWidth() + CustOpts.HOR_GAP * 2, BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num2, getLayout(num2, btn10.getTop(), num1.getLeft() + num1.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num3, getLayout(num3, btn10.getTop(), num2.getLeft() + num2.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num1, getLayoutParams(num1, btn10.getTop(), btn20.getLeft() + btn20.getMinimumWidth() + CustOpts.HOR_GAP * 2, BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num2, getLayoutParams(num2, btn10.getTop(), num1.getLeft() + num1.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num3, getLayoutParams(num3, btn10.getTop(), num2.getLeft() + num2.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH + 20, BUTTON_WIDTH));
 
-		rootLayout.addView(num4, getLayout(num4, btn30.getTop(), num1.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num5, getLayout(num5, num4.getTop(), num2.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num6, getLayout(num6, num4.getTop(), num3.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num4, getLayoutParams(num4, btn30.getTop(), num1.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num5, getLayoutParams(num5, num4.getTop(), num2.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num6, getLayoutParams(num6, num4.getTop(), num3.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
 
-		rootLayout.addView(num7, getLayout(num7, btn50.getTop(), num4.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num8, getLayout(num8, num7.getTop(), num5.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(num9, getLayout(num9, num7.getTop(), num6.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num7, getLayoutParams(num7, btn50.getTop(), num4.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num8, getLayoutParams(num8, num7.getTop(), num5.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num9, getLayoutParams(num9, num7.getTop(), num6.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
 
-		rootLayout.addView(num0, getLayout(num0, btnExact.getTop(), num7.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(point, getLayout(point, num0.getTop(), num8.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
-		rootLayout.addView(back, getLayout(back, num0.getTop(), num9.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(num0, getLayoutParams(num0, btnExact.getTop(), num7.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(point, getLayoutParams(point, num0.getTop(), num8.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
+		rootLayout.addView(back, getLayoutParams(back, num0.getTop(), num9.getLeft(), BUTTON_WIDTH + 20, BUTTON_WIDTH));
 
-		rootLayout.addView(ok, getLayout(ok, num1.getTop(), num3.getLeft() + num3.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(ok, getLayoutParams(ok, num1.getTop(), num3.getLeft() + num3.getMinimumWidth() + CustOpts.HOR_GAP,
 				BUTTON_WIDTH + 20, back.getTop() - num1.getTop() + BUTTON_WIDTH));
 		FrameLayout.LayoutParams params =  (FrameLayout.LayoutParams) ok.getLayoutParams();
 		params.setMargins(params.leftMargin, params.topMargin, 50, 50);

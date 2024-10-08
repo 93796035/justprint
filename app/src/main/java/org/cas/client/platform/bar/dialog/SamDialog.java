@@ -1,8 +1,8 @@
 package org.cas.client.platform.bar.dialog;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
-import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -33,15 +33,23 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         dialog.setCancelable(true);
     }
 
-    public FrameLayout.LayoutParams getLayout(View view, int topMargin, int leftMargin) {
-        return getLayout(view, topMargin, leftMargin, FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (closeCallback != null) {
+            closeCallback.onDialogClose();
+        }
     }
 
-    public FrameLayout.LayoutParams getLayout(View view, int topMargin, int leftMargin, int width) {
-        return getLayout(view, topMargin, leftMargin, width, FrameLayout.LayoutParams.WRAP_CONTENT);
+    public FrameLayout.LayoutParams getLayoutParams(View view, int topMargin, int leftMargin) {
+        return getLayoutParams(view, topMargin, leftMargin, FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
     }
 
-    public FrameLayout.LayoutParams getLayout(View view, int topMargin, int leftMargin, int width, int height) {
+    public FrameLayout.LayoutParams getLayoutParams(View view, int topMargin, int leftMargin, int width) {
+        return getLayoutParams(view, topMargin, leftMargin, width, FrameLayout.LayoutParams.WRAP_CONTENT);
+    }
+
+    public FrameLayout.LayoutParams getLayoutParams(View view, int topMargin, int leftMargin, int width, int height) {
         view.setTop(topMargin);
         view.setLeft(leftMargin);
         view.setMinimumWidth(width);
@@ -108,4 +116,9 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
         return checkBox;
     }
 
+    private DialogCloseCallback closeCallback;
+
+    public void setCloseCallback(DialogCloseCallback closeCallback) {
+        this.closeCallback = closeCallback;
+    }
 }

@@ -1,15 +1,10 @@
 package org.cas.client.platform.bar.dialog;
 
-import static org.cas.client.platform.bar.action.Cmd_Refund.checkRefundAmount;
-import static org.cas.client.platform.bar.action.Cmd_Refund.refundRoutineSteps;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -18,12 +13,12 @@ import androidx.annotation.NonNull;
 
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
-import com.just.print.util.JOptionPane;
 
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.panel.BillPanel;
 import org.cas.client.platform.bar.uibeans.ISButton;
 import org.cas.client.platform.bar.uibeans.NumButton;
+import org.cas.client.platform.cascustomize.CustOpts;
 import org.cas.client.platform.casutil.ErrorUtil;
 
 public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
@@ -43,7 +38,9 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		initComponent();
-		reLayout();
+		if (lblQTY.getMinimumHeight() != BUTTON_WIDTH * 2) {
+			reLayout();
+		}
 		return dialog;
 	}
 
@@ -53,8 +50,8 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 	}
 
 	private void initComponent() {
-		tfdQTY = new EditText(getActivity());
-		lblQTY = new TextView(getActivity());
+		tfdQTY = new EditText(BarFrame.instance);
+
 		ok = createNumButton("✔");
 		back = createNumButton("←");
 		num1 = createNumButton("1");
@@ -70,42 +67,18 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 		point = createNumButton(".");
 		percent = createNumButton("%");
 
-		lblQTY.setText("Enter Quantity:");
-
 		if(BarFrame.consts.Refund().equals(title)){
+			lblQTY = createLabel(message);
 			SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
 			BillPanel billPanel = salesPanel.billPanel;
 
 			setBtnSource(null);
-			setFloatSupport(true);
 			setPercentSupport(false);
+			setFloatSupport(true);
 			setContents(billPanel.valTotlePrice.getText().toString());
-
-			if(curContent == null || curContent.isEmpty()){	//if numberPanelDlg is not closed by clicking the ok button, but the X button, the curContent will be set to "";
-				return;
-			}
-
-			float toRefundThisTime = isPercentage ?
-				Float.valueOf(billPanel.valTotlePrice.getText().toString()) * Float.valueOf(curContent)
-				: Float.valueOf(curContent);
-
-			if(toRefundThisTime > Float.valueOf(billPanel.valTotlePrice.getText().toString())) {
-				JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
-				return;
-			}
-
-			int refundedLifeTime = billPanel.getStatus();
-
-			//user modified item/items, will be treated as partial refund, which will need to expire also the outputs records.
-			refundedLifeTime = checkRefundAmount(toRefundThisTime, refundedLifeTime);
-			if(Integer.MAX_VALUE == refundedLifeTime) {
-				return;
-			}
-
-			refundRoutineSteps(billPanel, toRefundThisTime, refundedLifeTime);
+		}else{
+			lblQTY = createLabel("Enter Quantity:");
 		}
-		ok.setOnClickListener(this);
-		back.setOnClickListener(this);
 		num1.setOnClickListener(this);
 		num2.setOnClickListener(this);
 		num3.setOnClickListener(this);
@@ -117,58 +90,40 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 		num9.setOnClickListener(this);
 		num0.setOnClickListener(this);
 		point.setOnClickListener(this);
+		back.setOnClickListener(this);
 		percent.setOnClickListener(this);
+		ok.setOnClickListener(this);
 	}
 
 	public void reLayout() {
-		FrameLayout rootLayout = new FrameLayout(getActivity());
-		int padding = 16;
-		int buttonSize = 200;
-
-		rootLayout.setPadding(padding, padding, padding, padding);
-
-		FrameLayout.LayoutParams params;
-
-		params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		params.topMargin = padding;
-		lblQTY.setLayoutParams(params);
-
-		params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		params.topMargin = padding * 2;
-		tfdQTY.setLayoutParams(params);
-
-		int yPosition = padding * 5;
-		int xPosition = padding;
-
-		for (Button btn : new Button[]{num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, point, percent, back, ok}) {
-			params = new FrameLayout.LayoutParams(buttonSize, buttonSize);
-			params.topMargin = yPosition;
-			params.leftMargin = xPosition;
-			btn.setLayoutParams(params);
-			xPosition += buttonSize + padding;
-			if (xPosition >= rootLayout.getWidth() - padding) {
-				xPosition = padding;
-				yPosition += buttonSize + padding;
-			}
-		}
-
-		rootLayout.addView(tfdQTY);
-		rootLayout.addView(lblQTY);
-		rootLayout.addView(ok);
-		rootLayout.addView(back);
-		rootLayout.addView(num1);
-		rootLayout.addView(num2);
-		rootLayout.addView(num3);
-		rootLayout.addView(num4);
-		rootLayout.addView(num5);
-		rootLayout.addView(num6);
-		rootLayout.addView(num7);
-		rootLayout.addView(num8);
-		rootLayout.addView(num9);
-		rootLayout.addView(num0);
-		rootLayout.addView(point);
-		rootLayout.addView(percent);
+		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
 		dialog.setContentView(rootLayout);
+
+		rootLayout.addView(lblQTY, getLayoutParams(lblQTY, CustOpts.VER_GAP, CustOpts.VER_GAP, BUTTON_WIDTH * 2, BUTTON_WIDTH));
+		rootLayout.addView(tfdQTY, getLayoutParams(tfdQTY, lblQTY.getTop(), lblQTY.getLeft() + lblQTY.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH * 2, BUTTON_WIDTH));
+
+		rootLayout.addView(num1, getLayoutParams(num1, lblQTY.getTop() + lblQTY.getMinimumHeight() + CustOpts.VER_GAP,  lblQTY.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num2, getLayoutParams(num2, num1.getTop(), num1.getLeft() + num1.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num3, getLayoutParams(num3, num2.getTop(), num2.getLeft() + num2.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num4, getLayoutParams(num4, num1.getTop() + num1.getMinimumHeight() + CustOpts.VER_GAP, num1.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num5, getLayoutParams(num5, num4.getTop(), num4.getLeft() + num4.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num6, getLayoutParams(num6, num5.getTop(), num5.getLeft() + num5.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num7, getLayoutParams(num7, num4.getTop() + num4.getMinimumHeight() + CustOpts.VER_GAP, num4.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num8, getLayoutParams(num8, num7.getTop(), num7.getLeft() + num7.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num9, getLayoutParams(num9, num8.getTop(), num8.getLeft() + num8.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(num0, getLayoutParams(num0, num7.getTop() + num7.getMinimumHeight() + CustOpts.VER_GAP, num4.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH));
+		rootLayout.addView(point, getLayoutParams(point, num0.getTop(), num0.getLeft() + num0.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		if(point.isVisible())
+			rootLayout.addView(back, getLayoutParams(back, point.getTop(), point.getLeft() + point.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		else
+			rootLayout.addView(back, getLayoutParams(back, point.getTop(), point.getLeft(), BUTTON_WIDTH * 2 + CustOpts.HOR_GAP, BUTTON_WIDTH));
+		rootLayout.addView(percent, getLayoutParams(percent, num3.getTop(), num3.getLeft() + num3.getMinimumWidth() + CustOpts.HOR_GAP, BUTTON_WIDTH, BUTTON_WIDTH));
+		if(percent.isVisible())
+			rootLayout.addView(ok, getLayoutParams(ok, percent.getTop() + percent.getMinimumHeight() + CustOpts.VER_GAP, percent.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH * 3 + CustOpts.VER_GAP * 2));
+		else
+			rootLayout.addView(ok, getLayoutParams(ok, percent.getTop(), percent.getLeft(), BUTTON_WIDTH, BUTTON_WIDTH * 4 + CustOpts.VER_GAP * 3));
+
+		rootLayout.setPadding(20, 20, 20, 20);
 	}
 
 	@Override
@@ -201,6 +156,7 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 		}
 
 		if (isAllContentSelected) {
+			tfdQTY.setText("");
 			curContent = "";
 		}
 
@@ -320,7 +276,6 @@ public class NumberPanelDlg extends SamDialog implements View.OnClickListener {
 
 	public void setFloatSupport(boolean setFloatSupport) {
 		point.setVisibility(setFloatSupport ? View.VISIBLE : View.GONE);
-		reLayout();
 	}
 
 	public void setPercentSupport(boolean setPercentSupport) {

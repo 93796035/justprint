@@ -29,7 +29,7 @@ public class NumButton extends Button {
 	private void init() {
 		String bgColor = BarOption.getBK("NumBtn");
 		if (bgColor == null) { // Assuming 0 is returned when the color is not found
-			bgColor = "#32618d";
+			return;
 		}
 		setBackgroundColor(Color.parseColor(bgColor));
 

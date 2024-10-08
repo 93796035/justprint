@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -137,118 +136,118 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		dialog.setContentView(rootLayout);
 
 		// 添加标题
-		rootLayout.addView(titleView, getLayout(titleView, 16, 16, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
+		rootLayout.addView(titleView, getLayoutParams(titleView, 16, 16, FrameLayout.LayoutParams.WRAP_CONTENT, 100));
 
 		// 创建并添加滚动视图
 		ScrollView scrollView = new ScrollView(getContext());
 		scrollView.addView(txpPreview);
-		rootLayout.addView(scrollView, getLayout(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, 16,
+		rootLayout.addView(scrollView, getLayoutParams(scrollView, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.VER_GAP, 16,
 				650, 1200));
 
 		// batch ID
-		rootLayout.addView(lblCloseBatch, getLayout(lblCloseBatch, scrollView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblCloseBatch, getLayoutParams(lblCloseBatch, scrollView.getTop(), scrollView.getLeft() + scrollView.getMinimumWidth() + CustOpts.HOR_GAP,
 				150, VALUE_HEIGHT));
-		rootLayout.addView(valBatchID, getLayout(valBatchID, lblCloseBatch.getTop() - CustOpts.VER_GAP * 2, lblCloseBatch.getLeft() + lblCloseBatch.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(valBatchID, getLayoutParams(valBatchID, lblCloseBatch.getTop() - CustOpts.VER_GAP * 2, lblCloseBatch.getLeft() + lblCloseBatch.getMinimumWidth() + CustOpts.HOR_GAP,
 				250, VALUE_HEIGHT));
 
 		// ----------------------------------------------------
 		View separator1 = new View(getContext());
 		separator1.setBackgroundColor(Color.GRAY);
-		rootLayout.addView(separator1, getLayout(separator1, lblCloseBatch.getTop() + lblCloseBatch.getMinimumHeight() + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
+		rootLayout.addView(separator1, getLayoutParams(separator1, lblCloseBatch.getTop() + lblCloseBatch.getMinimumHeight() + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
 				400, 1));
 
 		// from label
-		rootLayout.addView(lblFrom, getLayout(lblFrom, separator1.getTop() + VALUE_HEIGHT + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
+		rootLayout.addView(lblFrom, getLayoutParams(lblFrom, separator1.getTop() + VALUE_HEIGHT + CustOpts.VER_GAP * 2, lblCloseBatch.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblYearFrom, getLayout(lblYearFrom, separator1.getTop() + separator1.getMinimumHeight() + CustOpts.VER_GAP * 2, lblFrom.getLeft() + lblFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblYearFrom, getLayoutParams(lblYearFrom, separator1.getTop() + separator1.getMinimumHeight() + CustOpts.VER_GAP * 2, lblFrom.getLeft() + lblFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdYearFrom, getLayout(tfdYearFrom, lblYearFrom.getTop() + lblYearFrom.getMinimumHeight() - CustOpts.VER_GAP, lblYearFrom.getLeft(),
+		rootLayout.addView(tfdYearFrom, getLayoutParams(tfdYearFrom, lblYearFrom.getTop() + lblYearFrom.getMinimumHeight() - CustOpts.VER_GAP, lblYearFrom.getLeft(),
 				lblYearFrom.getMinimumWidth(), VALUE_HEIGHT));
-		rootLayout.addView(lblMonthFrom, getLayout(lblMonthFrom, lblYearFrom.getTop(), lblYearFrom.getLeft() + lblYearFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblMonthFrom, getLayoutParams(lblMonthFrom, lblYearFrom.getTop(), lblYearFrom.getLeft() + lblYearFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdMonthFrom, getLayout(tfdMonthFrom, tfdYearFrom.getTop(), lblMonthFrom.getLeft(),
+		rootLayout.addView(tfdMonthFrom, getLayoutParams(tfdMonthFrom, tfdYearFrom.getTop(), lblMonthFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblDayFrom, getLayout(lblDayFrom, lblMonthFrom.getTop(), lblMonthFrom.getLeft() + lblMonthFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblDayFrom, getLayoutParams(lblDayFrom, lblMonthFrom.getTop(), lblMonthFrom.getLeft() + lblMonthFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdDayFrom, getLayout(tfdDayFrom, tfdMonthFrom.getTop(), lblDayFrom.getLeft(),
+		rootLayout.addView(tfdDayFrom, getLayoutParams(tfdDayFrom, tfdMonthFrom.getTop(), lblDayFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblHourFrom, getLayout(lblHourFrom, tfdYearFrom.getTop() + tfdYearFrom.getMinimumHeight(), lblYearFrom.getLeft(),
+		rootLayout.addView(lblHourFrom, getLayoutParams(lblHourFrom, tfdYearFrom.getTop() + tfdYearFrom.getMinimumHeight(), lblYearFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdHourFrom, getLayout(tfdHourFrom, lblHourFrom.getTop() + lblHourFrom.getMinimumHeight() - CustOpts.VER_GAP, lblHourFrom.getLeft(),
+		rootLayout.addView(tfdHourFrom, getLayoutParams(tfdHourFrom, lblHourFrom.getTop() + lblHourFrom.getMinimumHeight() - CustOpts.VER_GAP, lblHourFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblMinuteFrom, getLayout(lblMinuteFrom, lblHourFrom.getTop(), lblHourFrom.getLeft() + lblHourFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblMinuteFrom, getLayoutParams(lblMinuteFrom, lblHourFrom.getTop(), lblHourFrom.getLeft() + lblHourFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdMinuteFrom, getLayout(tfdMinuteFrom, tfdHourFrom.getTop(), lblMinuteFrom.getLeft(),
+		rootLayout.addView(tfdMinuteFrom, getLayoutParams(tfdMinuteFrom, tfdHourFrom.getTop(), lblMinuteFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblSecondFrom, getLayout(lblSecondFrom, lblMinuteFrom.getTop(), lblMinuteFrom.getLeft() + lblMinuteFrom.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblSecondFrom, getLayoutParams(lblSecondFrom, lblMinuteFrom.getTop(), lblMinuteFrom.getLeft() + lblMinuteFrom.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdSecondFrom, getLayout(tfdSecondFrom, tfdMinuteFrom.getTop(), lblSecondFrom.getLeft(),
+		rootLayout.addView(tfdSecondFrom, getLayoutParams(tfdSecondFrom, tfdMinuteFrom.getTop(), lblSecondFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
 		// "To" Label 和 其对应的日期/时间输入框
-		rootLayout.addView(lblTo, getLayout(lblTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() * 2 + CustOpts.VER_GAP * 6, lblFrom.getLeft(),
+		rootLayout.addView(lblTo, getLayoutParams(lblTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() * 2 + CustOpts.VER_GAP * 6, lblFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblYearTo, getLayout(lblYearTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() + CustOpts.VER_GAP * 4, lblYearFrom.getLeft(),
+		rootLayout.addView(lblYearTo, getLayoutParams(lblYearTo, tfdSecondFrom.getTop() + tfdSecondFrom.getMinimumHeight() + CustOpts.VER_GAP * 4, lblYearFrom.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdYearTo, getLayout(tfdYearTo, lblYearTo.getTop() + lblYearTo.getMinimumHeight() - CustOpts.VER_GAP, lblYearTo.getLeft(),
+		rootLayout.addView(tfdYearTo, getLayoutParams(tfdYearTo, lblYearTo.getTop() + lblYearTo.getMinimumHeight() - CustOpts.VER_GAP, lblYearTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblMonthTo, getLayout(lblMonthTo, lblYearTo.getTop(), lblYearTo.getLeft() + lblYearTo.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblMonthTo, getLayoutParams(lblMonthTo, lblYearTo.getTop(), lblYearTo.getLeft() + lblYearTo.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdMonthTo, getLayout(tfdMonthTo, tfdYearTo.getTop(), lblMonthTo.getLeft(),
+		rootLayout.addView(tfdMonthTo, getLayoutParams(tfdMonthTo, tfdYearTo.getTop(), lblMonthTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblDayTo, getLayout(lblDayTo, lblMonthTo.getTop(), lblMonthTo.getLeft() + lblMonthTo.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblDayTo, getLayoutParams(lblDayTo, lblMonthTo.getTop(), lblMonthTo.getLeft() + lblMonthTo.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdDayTo, getLayout(tfdDayTo, tfdMonthTo.getTop(), lblDayTo.getLeft(),
+		rootLayout.addView(tfdDayTo, getLayoutParams(tfdDayTo, tfdMonthTo.getTop(), lblDayTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
-		rootLayout.addView(lblHourTo, getLayout(lblHourTo, tfdDayTo.getTop() + tfdDayTo.getMinimumHeight(), lblYearTo.getLeft(),
+		rootLayout.addView(lblHourTo, getLayoutParams(lblHourTo, tfdDayTo.getTop() + tfdDayTo.getMinimumHeight(), lblYearTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdHourTo, getLayout(tfdHourTo, lblHourTo.getTop() + lblHourTo.getMinimumHeight() - CustOpts.VER_GAP, lblHourTo.getLeft(),
+		rootLayout.addView(tfdHourTo, getLayoutParams(tfdHourTo, lblHourTo.getTop() + lblHourTo.getMinimumHeight() - CustOpts.VER_GAP, lblHourTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblMinuteTo, getLayout(lblMinuteTo, lblHourTo.getTop(), lblHourTo.getLeft() + lblHourTo.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblMinuteTo, getLayoutParams(lblMinuteTo, lblHourTo.getTop(), lblHourTo.getLeft() + lblHourTo.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdMinuteTo, getLayout(tfdMinuteTo, tfdHourTo.getTop(), lblMinuteTo.getLeft(),
+		rootLayout.addView(tfdMinuteTo, getLayoutParams(tfdMinuteTo, tfdHourTo.getTop(), lblMinuteTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(lblSecondTo, getLayout(lblSecondTo, lblMinuteTo.getTop(), lblMinuteTo.getLeft() + lblMinuteTo.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(lblSecondTo, getLayoutParams(lblSecondTo, lblMinuteTo.getTop(), lblMinuteTo.getLeft() + lblMinuteTo.getMinimumWidth() + CustOpts.HOR_GAP,
 				LABEL_WIDTH, VALUE_HEIGHT));
-		rootLayout.addView(tfdSecondTo, getLayout(tfdSecondTo, tfdMinuteTo.getTop(), lblSecondTo.getLeft(),
+		rootLayout.addView(tfdSecondTo, getLayoutParams(tfdSecondTo, tfdMinuteTo.getTop(), lblSecondTo.getLeft(),
 				LABEL_WIDTH, VALUE_HEIGHT));
 
 		// 添加日期调整按钮
-		rootLayout.addView(btnLeftDay, getLayout(btnLeftDay, tfdSecondTo.getTop() + tfdSecondTo.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
+		rootLayout.addView(btnLeftDay, getLayoutParams(btnLeftDay, tfdSecondTo.getTop() + tfdSecondTo.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
 				BUTTON_WIDTH, BUTTON_HEIGHT));
-		rootLayout.addView(btnToday, getLayout(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.VER_GAP,
+		rootLayout.addView(btnToday, getLayoutParams(btnToday, btnLeftDay.getTop(), btnLeftDay.getLeft() + btnLeftDay.getMinimumWidth() + CustOpts.VER_GAP,
 				200, BUTTON_HEIGHT));
-		rootLayout.addView(btnRightDay, getLayout(btnRightDay, btnToday.getTop(), btnToday.getLeft() + btnToday.getMinimumWidth() + CustOpts.VER_GAP,
+		rootLayout.addView(btnRightDay, getLayoutParams(btnRightDay, btnToday.getTop(), btnToday.getLeft() + btnToday.getMinimumWidth() + CustOpts.VER_GAP,
 				BUTTON_WIDTH, BUTTON_HEIGHT));
 
 		// 添加月份调整按钮
-		rootLayout.addView(btnLeftMonth, getLayout(btnLeftMonth, btnRightDay.getTop() + btnRightDay.getMinimumHeight() + CustOpts.VER_GAP, btnLeftDay.getLeft(),
+		rootLayout.addView(btnLeftMonth, getLayoutParams(btnLeftMonth, btnRightDay.getTop() + btnRightDay.getMinimumHeight() + CustOpts.VER_GAP, btnLeftDay.getLeft(),
 				BUTTON_WIDTH, BUTTON_HEIGHT));
-		rootLayout.addView(btnThisMonth, getLayout(btnThisMonth, btnLeftMonth.getTop(), btnLeftMonth.getLeft() + btnLeftMonth.getMinimumWidth() + CustOpts.VER_GAP,
+		rootLayout.addView(btnThisMonth, getLayoutParams(btnThisMonth, btnLeftMonth.getTop(), btnLeftMonth.getLeft() + btnLeftMonth.getMinimumWidth() + CustOpts.VER_GAP,
 				200, BUTTON_HEIGHT));
-		rootLayout.addView(btnRightMonth, getLayout(btnRightMonth, btnThisMonth.getTop(), btnThisMonth.getLeft() + btnThisMonth.getMinimumWidth() + CustOpts.VER_GAP,
+		rootLayout.addView(btnRightMonth, getLayoutParams(btnRightMonth, btnThisMonth.getTop(), btnThisMonth.getLeft() + btnThisMonth.getMinimumWidth() + CustOpts.VER_GAP,
 				BUTTON_WIDTH, BUTTON_HEIGHT));
 
 		// show only mine checkbox
-		rootLayout.addView(cbxShowOnlyMine, getLayout(cbxShowOnlyMine, btnRightMonth.getTop() + btnRightMonth.getMinimumHeight() + CustOpts.VER_GAP, lblTo.getLeft() - 30,
+		rootLayout.addView(cbxShowOnlyMine, getLayoutParams(cbxShowOnlyMine, btnRightMonth.getTop() + btnRightMonth.getMinimumHeight() + CustOpts.VER_GAP, lblTo.getLeft() - 30,
 				FrameLayout.LayoutParams.WRAP_CONTENT, BUTTON_HEIGHT));
 
 		// -----------------------
 		View separator2 = new View(getContext());
 		separator2.setBackgroundColor(Color.GRAY);
-		rootLayout.addView(separator2, getLayout(separator2, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
+		rootLayout.addView(separator2, getLayoutParams(separator2, cbxShowOnlyMine.getTop() + cbxShowOnlyMine.getMinimumHeight() + CustOpts.VER_GAP * 8, lblTo.getLeft(),
 				400, 1));
 
 		// 添加发送文档和静默模式按钮
-		rootLayout.addView(cbxIsSilendMode, getLayout(cbxIsSilendMode, separator2.getTop() + separator2.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft() - 20,
+		rootLayout.addView(cbxIsSilendMode, getLayoutParams(cbxIsSilendMode, separator2.getTop() + separator2.getMinimumHeight() + CustOpts.VER_GAP * 4, lblTo.getLeft() - 20,
 				200, BUTTON_HEIGHT));
-		rootLayout.addView(btnSendDocument, getLayout(btnSendDocument, cbxIsSilendMode.getTop(),cbxIsSilendMode.getLeft() + cbxIsSilendMode.getMinimumWidth() - CustOpts.HOR_GAP * 4,
+		rootLayout.addView(btnSendDocument, getLayoutParams(btnSendDocument, cbxIsSilendMode.getTop(),cbxIsSilendMode.getLeft() + cbxIsSilendMode.getMinimumWidth() - CustOpts.HOR_GAP * 4,
 				BUTTON_WIDTH + 20, BUTTON_HEIGHT));
-		rootLayout.addView(btnPrint, getLayout(btnPrint, btnSendDocument.getTop(), btnSendDocument.getLeft() + btnSendDocument.getMinimumWidth() + CustOpts.HOR_GAP,
+		rootLayout.addView(btnPrint, getLayoutParams(btnPrint, btnSendDocument.getTop(), btnSendDocument.getLeft() + btnSendDocument.getMinimumWidth() + CustOpts.HOR_GAP,
 				BUTTON_WIDTH + 20, BUTTON_HEIGHT));
 
 	}
