@@ -1241,8 +1241,8 @@ public class PrintService{
         }
         
         content.append(BarUtil.getSeperatorLine(1, width)).append("\n");
-		String toltal = BarUtil.formatMoney(totalSales);
-		content.append(BarUtil.generateString(24 - toltal.length(), " ")).append(toltal).append("\n");
+		String total = BarUtil.formatMoney(totalSales);
+		content.append(BarUtil.generateString(24 - total.length(), " ")).append(total).append("\n");
 		
 		strAryFR.add(content.toString());
 	}
@@ -2278,9 +2278,9 @@ public class PrintService{
             }	
             
     		content.append(BarUtil.getSeperatorLine(1, width)).append("\n");
-    		String toltal = BarUtil.formatMoney(totalSales);
-    		content.append(BarUtil.generateString(32 - toltal.length(), " "))
-    		.append(toltal).append("\n");
+    		String total = BarUtil.formatMoney(totalSales);
+    		content.append(BarUtil.generateString(32 - total.length(), " "))
+    		.append(total).append("\n");
     		
     		strAryFR.add(content.toString());
 
@@ -2336,16 +2336,16 @@ public class PrintService{
                 String displayableNum = DBUtil.getDisplayableNum(i).toString();
                 content.append(BarUtil.generateString(3 - displayableNum.length(), " ")).append(displayableNum);
                 
-                float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"SALE_RECORD.toltalPrice") / 100.0));
+                float f = Float.valueOf((float) (DBUtil.getCursorInt(rs,"SALE_RECORD.totalPrice") / 100.0));
                 String money = BarUtil.formatMoney(f);
                 content.append(BarUtil.generateString(width - 38 - money.length(), " ")).append(money).append("\n");
                 totalSales += f;
             }
             
     		content.append(BarUtil.getSeperatorLine(1, width)).append("\n");
-    		String toltal = BarUtil.formatMoney(totalSales);
-    		content.append(BarUtil.generateString(width - toltal.length(), " "))
-    		.append(toltal).append("\n");
+    		String total = BarUtil.formatMoney(totalSales);
+    		content.append(BarUtil.generateString(width - total.length(), " "))
+    		.append(total).append("\n");
     		
     		strAryFR.add(content.toString());
 
@@ -2396,8 +2396,8 @@ public class PrintService{
         }
         
         content.append(BarUtil.getSeperatorLine(1, width)).append("\n");
-		String toltal = BarUtil.formatMoney(totalSales);
-		content.append(BarUtil.generateString(24 - toltal.length(), " ")).append(toltal).append("\n");
+		String total = BarUtil.formatMoney(totalSales);
+		content.append(BarUtil.generateString(24 - total.length(), " ")).append(total).append("\n");
 		
 		strAryFR.add(content.toString());
 		strAryFR.add(" ");

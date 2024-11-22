@@ -26,6 +26,9 @@ public abstract class SamDialog extends DialogFragment implements View.OnClickLi
     public int VALUE_HEIGHT = 70;
     public Dialog dialog;
     protected String title;
+    protected void setTitle(String title){
+        this.title = title;
+    }
 
     public SamDialog(){
         dialog = new Dialog(BarFrame.instance);

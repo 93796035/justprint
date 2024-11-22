@@ -1238,7 +1238,7 @@ public class BillPanel extends BaseFragment
 					int newOutputId = DBUtil.createOutput(originalDish, BarFrame.instance.getCurBillIndex(), originalDish.getOrderedTime());
 					//为啥dish中记录的是要退还de钱，不是还剩下的钱呢？可能是为了打印时方便？现在为了算出来剩余的钱给新生成的output，必须做些调整：
 					sql = new StringBuilder("update SALE_RECORD set amount = ").append(originalDish.getNum())
-							.append(", toltalPrice = ").append(originalDish.getTotalPrice())
+							.append(", totalPrice = ").append(originalDish.getTotalPrice())
 							.append(", discount = ").append(originalDish.getDiscount())
 							.append(", STATUS = ").append(status)
 							.append(", createdTime = '").append(BarUtil.df.format(new Date()))

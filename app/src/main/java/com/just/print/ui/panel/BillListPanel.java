@@ -250,10 +250,10 @@ public class BillListPanel extends PicturePane implements View.OnClickListener{
         try {
             //get the SALE_RECORD price of the moving dish, it will be used to adjust the total of two bill.
             int outputTotalPrice = 0;
-            StringBuilder sql = new StringBuilder("select toltalPrice from SALE_RECORD where _id = ").append(BarFrame.instance.curDish.getOutputID());
+            StringBuilder sql = new StringBuilder("select totalPrice from SALE_RECORD where _id = ").append(BarFrame.instance.curDish.getOutputID());
             Cursor rs = AikaPos.db.rawQuery(sql.toString(), null);
             while (rs.moveToNext()) {
-                outputTotalPrice = DBUtil.getCursorInt(rs, "toltalPrice");
+                outputTotalPrice = DBUtil.getCursorInt(rs, "totalPrice");
                 break;
             }
             rs.close();// 关闭

@@ -2,16 +2,16 @@ package org.cas.client.platform.bar.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -19,15 +19,20 @@ import com.just.print.R;
 import com.just.print.app.BarFrame;
 import com.just.print.ui.panel.SalesPanel;
 
+import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.action.Cmd_Refund;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.panel.BillPanel;
+import org.cas.client.platform.cascustomize.CustOpts;
 
-public class RefundItemDlg extends DialogFragment {
+public class RefundItemDlg extends SamDialog {
 
 	private SalesPanel salesPanel;
 	private BillPanel billPanel;
+	private TextView titleView;
 	private Button ok;
+	private FrameLayout billContainer;
+
 	private float oldSubTotal;
 
 	public RefundItemDlg(SalesPanel salesPanel) {
@@ -38,23 +43,33 @@ public class RefundItemDlg extends DialogFragment {
 	@NonNull
 	@Override
 	public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-		Dialog dialog = super.onCreateDialog(savedInstanceState);
-		dialog.setTitle(BarFrame.consts.Refund());
+		setTitle(BarFrame.consts.Refund());
+		initComponent();
+		reLayout();
+
 		return dialog;
 	}
 
-	@Nullable
-	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.dialog_refund_item, container, false);
+	private void initComponent() {
+		titleView = createLabel(title, 22, Gravity.LEFT, Color.WHITE);
+		ok = createNumButton(BarFrame.consts.OK());
+		billContainer = new FrameLayout(getContext());
+		billContainer.setId(View.generateViewId());
+		ok.setOnClickListener(this);
+		// 获取旧的总价
+		oldSubTotal = Float.parseFloat(billPanel.valTotlePrice.getText().toString());
+	}
 
-		ok = view.findViewById(R.id.okButton);
-		ok.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				performRefund();
-			}
-		});
+	private void reLayout() {
+		FrameLayout rootLayout = new FrameLayout(BarFrame.instance);
+		dialog.setContentView(rootLayout);
+
+		rootLayout.addView(titleView, getLayoutParams(titleView, 16, 50, FrameLayout.LayoutParams.WRAP_CONTENT, 60));
+		rootLayout.addView(billContainer, getLayoutParams(billContainer, titleView.getTop() + titleView.getMinimumHeight() + CustOpts.HOR_GAP,
+				CustOpts.VER_GAP, billPanel.getView().getWidth(), billPanel.getView().getHeight()));
+		rootLayout.addView(ok, getLayoutParams(ok, billContainer.getTop() + billContainer.getMinimumHeight() + CustOpts.VER_GAP * 2,
+				billContainer.getMinimumWidth()/2 + CustOpts.HOR_GAP - BUTTON_WIDTH,
+				BUTTON_WIDTH * 2, BUTTON_WIDTH));
 
 		// 初始化 BillPanel
 		if (BarFrame.menuPanel.isAdded()) { // 加载 BillPanel 和 MenuPanel
@@ -66,18 +81,14 @@ public class RefundItemDlg extends DialogFragment {
 			}
 		}
 		FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-		transaction.replace(R.id.billPanelContainer, billPanel);
+		transaction.replace(billContainer.getId(), billPanel);
 		transaction.commit();
-
-		// 获取旧的总价
-		oldSubTotal = Float.parseFloat(billPanel.valTotlePrice.getText().toString());
-
-		return view;
+		rootLayout.setPadding(20, 20, 20, 20);
 	}
 
 	private void performRefund() {
 		String curContent = String.valueOf(billPanel.subTotal);
-		if (curContent == null || curContent.isEmpty()) {
+		if (curContent.isEmpty()) {
 			return;
 		}
 
@@ -98,27 +109,22 @@ public class RefundItemDlg extends DialogFragment {
 		}
 
 		Cmd_Refund.refundRoutineSteps(billPanel, toRefundThisTime, refundedLifeTime);
-
-		// 将 BillPanel 返回到 SalesPanel
-		// 使用 FragmentTransaction 将 BillPanel 返回到 SalesPanel
-		FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-		transaction.remove(billPanel);
-		transaction.commit();
-
-		// 假设 salesPanel 是一个容器 Fragment，可以通过父 Activity 获取
-		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
-		if (salesPanel != null) {
-			salesPanel.billPanel = billPanel; // 你需要在 SalesPanel 中实现 addBillPanel 方法来处理 Fragment 的添加
-		}
-
-		dismiss();
 	}
 
+	@Override
+	public void onClick(View v) {
+		if (v == ok) {
+			performRefund();//should be done here or in outside?
+			dismiss();
+		}
+	}
 
 	@Override
 	public void onDismiss(@NonNull DialogInterface dialog) {
 		super.onDismiss(dialog);
-		// 将 BillPanel 返回到 SalesPanel
+		// 如果用户点击旁边区域关闭refund dialog, 需要将 BillPanel 返回到 SalesPanel
+		SalesPanel salesPanel = (SalesPanel) BarFrame.instance.panels[2];
+		salesPanel.billPanel = billPanel; // 你需要在 SalesPanel 中实现 addBillPanel 方法来处理 Fragment 的添加
 		salesPanel.reLayout();
 	}
 }

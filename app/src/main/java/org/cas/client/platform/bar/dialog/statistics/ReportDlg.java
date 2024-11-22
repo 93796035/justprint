@@ -656,11 +656,11 @@ public class ReportDlg extends SamDialog implements View.OnClickListener {
 		docRUT.setSF(UtilesFormatterDonnees.formatterMontant(gstTotal));
 		String qstTotall = line.substring(pQst + "QST".length(), PSeparater).trim();
 		docRUT.setSP(UtilesFormatterDonnees.formatterMontant(qstTotall));
-		float toltal = Float.valueOf(beforeTax) + Float.valueOf(gstTotal) + Float.valueOf(qstTotall);
-		docRUT.setST(UtilesFormatterDonnees.formatterMontant(toltal));
+		float total = Float.valueOf(beforeTax) + Float.valueOf(gstTotal) + Float.valueOf(qstTotall);
+		docRUT.setST(UtilesFormatterDonnees.formatterMontant(total));
 		float adjustedAmount = getRefoundTotal(line);
 		docRUT.setSA(UtilesFormatterDonnees.formatterMontant(adjustedAmount));
-		float afterTaxAmount = toltal + adjustedAmount;
+		float afterTaxAmount = total + adjustedAmount;
 		docRUT.setSD(UtilesFormatterDonnees.formatterMontant(afterTaxAmount));
 
 		docRUT.setIA(BarOption.getCertifiedDeviceId());

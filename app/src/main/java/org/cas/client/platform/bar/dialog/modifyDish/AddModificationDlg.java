@@ -1123,7 +1123,7 @@ public class AddModificationDlg extends DialogFragment
 //     	//update the database
 //     	int outputID = BarFrame.instance.curDish.getOutputID();
 //     	if(outputID >= 0) {
-//     		String sql = "update SALE_RECORD set toltalPrice = " + BarFrame.instance.curDish.getTotalPrice() + " where _id = " + outputID;
+//     		String sql = "update SALE_RECORD set totalPrice = " + BarFrame.instance.curDish.getTotalPrice() + " where _id = " + outputID;
 //     		try {
 //     			PIMDBModel.getStatement().executeUpdate(sql);
 //     		}catch(Exception exp) {

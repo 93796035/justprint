@@ -12,6 +12,7 @@ import com.just.print.util.StringUtils;
 import org.cas.client.platform.bar.BarOption;
 import org.cas.client.platform.bar.dialog.DialogCloseCallback;
 import org.cas.client.platform.bar.dialog.NumberPanelDlg;
+import org.cas.client.platform.bar.dialog.RefundItemDlg;
 import org.cas.client.platform.bar.model.DBConsts;
 import org.cas.client.platform.bar.model.DBUtil;
 import org.cas.client.platform.bar.panel.BillPanel;
@@ -69,10 +70,10 @@ public class Cmd_Refund implements SamActionListener {
 										}
 
 										float toRefundThisTime = numberPanelDlg.isPercentage ?
-												Float.valueOf(billPanel.valTotlePrice.getText().toString()) * Float.valueOf(numberPanelDlg.curContent)
-												: Float.valueOf(BarFrame.numberPanelDlg.curContent);
+												Float.parseFloat(billPanel.valTotlePrice.getText().toString()) * Float.parseFloat(numberPanelDlg.curContent)
+												: Float.parseFloat(BarFrame.numberPanelDlg.curContent);
 
-										if (toRefundThisTime > Float.valueOf(billPanel.valTotlePrice.getText().toString())) {
+										if (toRefundThisTime > Float.parseFloat(billPanel.valTotlePrice.getText().toString())) {
 											JOptionPane.showMessageDialog(BarFrame.consts.InvalidInput());
 											return;
 										}
@@ -91,7 +92,8 @@ public class Cmd_Refund implements SamActionListener {
 							});
 							BarFrame.numberPanelDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.consts.Refund());
 						}else if(selection == 1) {
-//							RefundItemDlg(bitzp).setVisible(true);
+							RefundItemDlg refundItemDlg  = new RefundItemDlg(salesPanel);
+							refundItemDlg.show(BarFrame.instance.getSupportFragmentManager(), BarFrame.consts.Refund());
 						}
 					}
 				});
