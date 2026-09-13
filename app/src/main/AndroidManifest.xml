@@ -14,14 +14,14 @@
     <application
         android:allowBackup="false"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:icon="@drawable/start1"
-        android:label="Echo Post Client"
+        android:icon="@drawable/aikapos_logo"
+        android:label="SimClient"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="com.just.print.echo.EchoPostActivity"
+        <activity android:name="com.just.print.simclient.SimClientActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleTask">
