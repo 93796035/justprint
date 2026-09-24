@@ -3,13 +3,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--uses-permission android:name="android.permission.READ_PHONE_STATE_PERMISSION" />
-    <uses-permission android:name="android.permission.READ_SMS" /-->
-    <uses-permission android:name="android.permission.SEND_SMS" />
-
-    <!-- doesn't work, still can not write file to /storage/...folder
-     uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /-->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
 
     <application
         android:allowBackup="false"
@@ -21,7 +16,7 @@
 
         <activity android:name="com.just.print.simclient.SimClientActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar"
+            android:theme="@style/SimClientTheme"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleTask">
@@ -32,11 +27,17 @@
 
         </activity>
 
-        <activity android:name="com.just.print.app.BarFrame" android:exported="false" />
+        <activity android:name="com.just.print.simclient.CameraCaptureActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
 
-        <service android:name="com.just.print.net.UDPService" />
+        <provider android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.agecheck.files"
+            android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/age_check_paths" />
+        </provider>
+
     </application>
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 </manifest>

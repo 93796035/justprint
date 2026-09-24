@@ -28,7 +28,7 @@ import org.cas.client.platform.cascustomize.CustOpts;
 public class MoreOptionsDlg extends DialogFragment {
 
     private EditText batchReportAddress, billNumberStartStr, moneySign, expiredWarningDays, serverIp;
-    private CheckBox counterMode, closeBatchWithUnclosedTable, displayVisaAsCredit, showProcessingBill,
+    private CheckBox counterMode, depanneurMode, closeBatchWithUnclosedTable, displayVisaAsCredit, showProcessingBill,
             serviceFeeAffectTax, trainingMode, multiLineCellRender, noticeWhenOvertime, sameNameForbidden;
 
     @Nullable
@@ -52,6 +52,7 @@ public class MoreOptionsDlg extends DialogFragment {
         serverIp = view.findViewById(R.id.serverIp);
 
         counterMode = view.findViewById(R.id.CounterMode);
+        depanneurMode = view.findViewById(R.id.DepanneurMode);
         closeBatchWithUnclosedTable = view.findViewById(R.id.CloseBatchWithUnclosedTable);
         displayVisaAsCredit = view.findViewById(R.id.DisplayVisaAsCredit);
         showProcessingBill = view.findViewById(R.id.ShowProcessingBill);
@@ -114,6 +115,7 @@ public class MoreOptionsDlg extends DialogFragment {
         serverIp.setText(BarOption.getServerIp());
 
         counterMode.setChecked(BarOption.isCounterMode());
+        depanneurMode.setChecked(BarOption.isDepanneur());
         closeBatchWithUnclosedTable.setChecked(BarOption.CloseBatchWithUnclosedTable());
         displayVisaAsCredit.setChecked(BarOption.isCredit());
         showProcessingBill.setChecked(BarOption.isShowProcessingBill());
@@ -161,6 +163,12 @@ public class MoreOptionsDlg extends DialogFragment {
 
     private void addCheckboxChangeListeners() {
         counterMode.setOnCheckedChangeListener((buttonView, isChecked) -> BarOption.setCounterMode(isChecked));
+        depanneurMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            BarOption.setDepanneur(isChecked);
+            if (isChecked) {
+                counterMode.setChecked(true);
+            }
+        });
         closeBatchWithUnclosedTable.setOnCheckedChangeListener((buttonView, isChecked) -> CustOpts.custOps.setKeyAndValue("CloseBatchWithUnclosedTable", String.valueOf(isChecked)));
         displayVisaAsCredit.setOnCheckedChangeListener((buttonView, isChecked) ->
                 CustOpts.custOps.setKeyAndValue("DisplayVisaAsCredit", String.valueOf(isChecked)));

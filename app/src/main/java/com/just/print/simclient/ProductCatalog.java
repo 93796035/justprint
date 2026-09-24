@@ -9,6 +9,18 @@ import java.util.Locale;
 
 /** Validated, immutable snapshots shared by local search and durable storage. */
 public final class ProductCatalog {
+    public static int moneyCents(String text) {
+        if (!text.matches("[0-9]+(?:[.,][0-9]{1,2})?"))
+            throw new IllegalArgumentException("Enter a non-negative amount with up to 2 decimal places");
+        try { return new java.math.BigDecimal(text.replace(',', '.')).movePointRight(2).intValueExact(); }
+        catch (ArithmeticException ex) { throw new IllegalArgumentException("Amount is out of range"); }
+    }
+    /** POS stores prices as integer cents; missing old-cache values are not zero prices. */
+    public static String money(JSONObject row, String key) {
+        Object value = row.opt(key);
+        if (!(value instanceof Number) || !value.toString().matches("-?[0-9]+")) return "—";
+        return new java.math.BigDecimal(value.toString()).movePointLeft(2).setScale(2).toPlainString();
+    }
     public static final class Product {
         public final int id;
         public final String name, code, category;
@@ -105,7 +117,7 @@ public final class ProductCatalog {
     private static boolean tobaccoRoot(String category) {
         return category.equals("TOBACCO") || category.equals("TABAC");
     }
-    private static boolean matchesCategory(String selected, String actual) {
+    static boolean matchesCategory(String selected, String actual) {
         if (selected == null) return true;
         String root = normalizeCategory(selected), child = normalizeCategory(actual);
         if (root.equals(child)) return true;
@@ -156,7 +168,11 @@ public final class ProductCatalog {
         JSONArray rows = new JSONArray();
         boolean found = false;
         for (Product product : products) {
-            if (product.id == replacement.id) { rows.put(replacement.row()); found = true; }
+            if (product.id == replacement.id) {
+                JSONObject saved = replacement.row(), previous = product.row();
+                if (!saved.has("movingSales") && previous.has("movingSales")) saved.put("movingSales", previous.get("movingSales"));
+                rows.put(saved); found = true;
+            }
             else rows.put(product.row());
         }
         if (!found) throw new IllegalArgumentException("Updated product is not in the local catalog");

@@ -1,4 +1,16 @@
 <resources>
+    <style name="SimClientTheme" parent="SimClientThemeBase" />
+    <style name="SimClientThemeBase" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:colorAccent">#087F8C</item>
+        <item name="android:colorControlActivated">#087F8C</item>
+        <item name="android:windowBackground">#F0F8FA</item>
+        <item name="android:statusBarColor">#112D46</item>
+        <item name="android:navigationBarColor">#112D46</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColorPrimary">#16344B</item>
+        <item name="android:textColorSecondary">#547184</item>
+    </style>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Light.NoTitleBar">

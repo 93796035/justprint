@@ -160,6 +160,11 @@
             android:layout_height="wrap_content"
             android:text="Counter Mode" />
         <CheckBox
+            android:id="@+id/DepanneurMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Depanneur Mode" />
+        <CheckBox
             android:id="@+id/CloseBatchWithUnclosedTable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

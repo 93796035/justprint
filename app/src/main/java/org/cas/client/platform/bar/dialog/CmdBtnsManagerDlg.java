@@ -15,7 +15,9 @@ import org.cas.client.platform.bar.BarUtil;
 import org.cas.client.platform.bar.action.Cmd_AddBill;
 import org.cas.client.platform.bar.action.Cmd_AddTable;
 import org.cas.client.platform.bar.action.Cmd_BillFoot;
+import org.cas.client.platform.bar.action.Cmd_BottlePay;
 import org.cas.client.platform.bar.action.Cmd_CancelAll;
+import org.cas.client.platform.bar.action.Cmd_CategorySell;
 import org.cas.client.platform.bar.action.Cmd_ChangePrice;
 import org.cas.client.platform.bar.action.Cmd_ChangeTable;
 import org.cas.client.platform.bar.action.Cmd_CheckInOut;
@@ -29,7 +31,12 @@ import org.cas.client.platform.bar.action.Cmd_Employee;
 import org.cas.client.platform.bar.action.Cmd_EqualBill;
 import org.cas.client.platform.bar.action.Cmd_GiftCard;
 import org.cas.client.platform.bar.action.Cmd_GiftCardSetting;
+import org.cas.client.platform.bar.action.Cmd_Hold;
+import org.cas.client.platform.bar.action.Cmd_InstantPay;
+import org.cas.client.platform.bar.action.Cmd_Inventory;
 import org.cas.client.platform.bar.action.Cmd_Lang;
+import org.cas.client.platform.bar.action.Cmd_LoanOut;
+import org.cas.client.platform.bar.action.Cmd_LotoPay;
 import org.cas.client.platform.bar.action.Cmd_Menu;
 import org.cas.client.platform.bar.action.Cmd_Modify;
 import org.cas.client.platform.bar.action.Cmd_ModifySetting;
@@ -45,15 +52,20 @@ import org.cas.client.platform.bar.action.Cmd_Printer;
 import org.cas.client.platform.bar.action.Cmd_QTY;
 import org.cas.client.platform.bar.action.Cmd_Refund;
 import org.cas.client.platform.bar.action.Cmd_RemoveItem;
+import org.cas.client.platform.bar.action.Cmd_Repayment;
 import org.cas.client.platform.bar.action.Cmd_Report;
 import org.cas.client.platform.bar.action.Cmd_Return;
+import org.cas.client.platform.bar.action.Cmd_SalesHistory;
 import org.cas.client.platform.bar.action.Cmd_Send;
 import org.cas.client.platform.bar.action.Cmd_ServiceFee;
+import org.cas.client.platform.bar.action.Cmd_Settlement;
 import org.cas.client.platform.bar.action.Cmd_Setting;
 import org.cas.client.platform.bar.action.Cmd_SettingCoupon;
 import org.cas.client.platform.bar.action.Cmd_SettingRule;
 import org.cas.client.platform.bar.action.Cmd_SplitBill;
 import org.cas.client.platform.bar.action.Cmd_SplitItem;
+import org.cas.client.platform.bar.action.Cmd_Statistic;
+import org.cas.client.platform.bar.action.Cmd_StockIn;
 import org.cas.client.platform.bar.action.Cmd_Suspend;
 import org.cas.client.platform.bar.action.Cmd_SuspendAll;
 import org.cas.client.platform.bar.action.Cmd_Table;
@@ -454,6 +466,17 @@ public class CmdBtnsManagerDlg extends DialogFragment
         btnCheckInOutList = new FunctionButton(BarFrame.consts.WORK_LOG());
         btnVoidReason = new FunctionButton(BarFrame.consts.VoidReason());
         btnChangeTable = new FunctionToggleButton(BarFrame.consts.ChangeTable());
+        btnDailySettlement = new FunctionButton("End Shift");
+        btnStockIn = new FunctionButton("Stock In");
+        btnHoldOrder = new FunctionButton("Hold");
+        btnInventory = new FunctionButton("Inventory");
+        btnStatistic = new FunctionButton("Statistic");
+        btnBottlePay = new FunctionButton("Bottle Pay");
+        btnLoanOut = new FunctionButton("Loan Out");
+        btnRepayment = new FunctionButton("Repayment");
+        btnCategorySell = new FunctionButton("Category Sell");
+        btnInstantPay = new FunctionButton("Instant Pay");
+        btnLotoPay = new FunctionButton("Loto Pay");
 
         buttons = new ISButton[] {
         		btnAddTable,	//0
@@ -513,14 +536,25 @@ public class CmdBtnsManagerDlg extends DialogFragment
         		btnCheckInOutList,
         		btnQTY,
         		btnVoidReason,
-        		btnChangeTable
+        		btnChangeTable,
+                btnDailySettlement, //50
+                btnStockIn,
+                btnHoldOrder,
+                btnInventory,
+                btnStatistic,
+                btnBottlePay, //55
+                btnLoanOut,
+                btnRepayment,
+                btnCategorySell,
+                btnInstantPay,
+                btnLotoPay
         		};
 
 
         //listener------------------------------
         //tablePanel
         btnAddTable.addActionListener(Cmd_AddTable.getInstance());
-        btnOrderManage.addActionListener(Cmd_CheckOrder.getInstance());
+        btnOrderManage.addActionListener(Cmd_SalesHistory.getInstance());
         //btnWaiterReport.addActionListener(this);
         btnSetting.addActionListener(Cmd_Setting.getInstance());
         btnReport.addActionListener(Cmd_Report.getInstance());
@@ -565,7 +599,7 @@ public class CmdBtnsManagerDlg extends DialogFragment
 		btnFR.addActionListener(Cmd_Lang.getInstance());
 		btnCN.addActionListener(Cmd_Lang.getInstance());
 		btnSuspend.addActionListener(Cmd_Suspend.getInstance());
-		btnCheckOrder.addActionListener(Cmd_CheckOrder.getInstance());
+		btnCheckOrder.addActionListener(Cmd_SalesHistory.getInstance());
 		btnCheckOut.addActionListener(Cmd_CheckInOut.getInstance());
         //
         btnEmployee.addActionListener(Cmd_Employee.getInstance());
@@ -582,6 +616,17 @@ public class CmdBtnsManagerDlg extends DialogFragment
         btnQTY.addActionListener(Cmd_QTY.getInstance());
         btnVoidReason.addActionListener(Cmd_VoidReason.getInstance());
         btnChangeTable.addActionListener(Cmd_ChangeTable.getInstance());
+        btnDailySettlement.addActionListener(Cmd_Settlement.getInstance());
+        btnStockIn.addActionListener(Cmd_StockIn.getInstance());
+        btnHoldOrder.addActionListener(Cmd_Hold.getInstance());
+        btnInventory.addActionListener(Cmd_Inventory.getInstance());
+        btnStatistic.addActionListener(Cmd_Statistic.getInstance());
+        btnBottlePay.addActionListener(Cmd_BottlePay.getInstance());
+        btnLoanOut.addActionListener(Cmd_LoanOut.getInstance());
+        btnRepayment.addActionListener(Cmd_Repayment.getInstance());
+        btnCategorySell.addActionListener(Cmd_CategorySell.getInstance());
+        btnInstantPay.addActionListener(Cmd_InstantPay.getInstance());
+        btnLotoPay.addActionListener(Cmd_LotoPay.getInstance());
         groupButtons();
 	}
     
@@ -680,6 +725,12 @@ public class CmdBtnsManagerDlg extends DialogFragment
 	        groupedButtons[3].add(btnColor);
 	        groupedButtons[3].add(btnCheckInOutList);
 	        groupedButtons[3].add(btnVoidReason);
+            groupedButtons[3].add(btnDailySettlement);
+            groupedButtons[3].add(btnStockIn);
+            groupedButtons[3].add(btnInventory);
+            groupedButtons[3].add(btnStatistic);
+            groupedButtons[3].add(btnLoanOut);
+            groupedButtons[3].add(btnRepayment);
 		}
 	}
 
@@ -771,6 +822,17 @@ public class CmdBtnsManagerDlg extends DialogFragment
 	private static FunctionButton btnCheckOut;
 	private static FunctionButton btnSuspend;
 	private static FunctionButton btnCheckOrder;
+    private static FunctionButton btnDailySettlement;
+    private static FunctionButton btnStockIn;
+    private static FunctionButton btnHoldOrder;
+    private static FunctionButton btnInventory;
+    private static FunctionButton btnStatistic;
+    private static FunctionButton btnBottlePay;
+    private static FunctionButton btnLoanOut;
+    private static FunctionButton btnRepayment;
+    private static FunctionButton btnCategorySell;
+    private static FunctionButton btnInstantPay;
+    private static FunctionButton btnLotoPay;
 	
 	//setting panels
     private static FunctionButton btnEmployee;

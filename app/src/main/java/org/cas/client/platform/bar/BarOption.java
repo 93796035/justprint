@@ -104,8 +104,27 @@ public class BarOption {
     	CustOpts.custOps.setKeyAndValue("DeleteTableWhenClose", String.valueOf(isCounterMode));
     }
     public static boolean isCounterMode() {
+        if (isDepanneur()) {
+            return true;
+        }
     	return CustOpts.custOps.getValue("CounterMode") == null ? 
     			false : "true".equalsIgnoreCase((String)CustOpts.custOps.getValue("CounterMode"));
+    }
+
+    public static void setDepanneur(boolean isDepanneur) {
+        CustOpts.custOps.setKeyAndValue("isDepanneur", String.valueOf(isDepanneur));
+        if (isDepanneur) {
+            setCounterMode(true);
+        }
+    }
+
+    public static boolean isDepanneur() {
+        Object value = CustOpts.custOps.getValue("isDepanneur");
+        return value == null ? true : Boolean.valueOf(String.valueOf(value));
+    }
+
+    public static boolean isPreviewAndReceiptMode() {
+        return !isDepanneur();
     }
 
     //why do we need a kitchenBillIdx? we want to make it clear that kitchen bill is not lost?

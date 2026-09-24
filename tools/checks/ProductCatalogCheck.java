@@ -50,6 +50,17 @@ public class ProductCatalogCheck {
         ProductCatalog restored = new ProductCatalog(new JSONArray(mixed.serialize()));
         check(restored.search("BUD", "BIÈRE").get(0).row().getInt("price") == 1299
                 && restored.search("BUD", "BIÈRE").get(0).row().getInt("cost") == 875, "Prices survive persistence");
+        JSONObject priced = restored.search("BUD", "BIÈRE").get(0).row();
+        check(ProductCatalog.money(priced, "price").equals("12.99") && ProductCatalog.money(priced, "cost").equals("8.75"), "Persisted cents display as money");
+        check(ProductCatalog.money(new JSONObject().put("price", 0), "price").equals("0.00"), "Zero price is displayed");
+        check(ProductCatalog.money(new JSONObject(), "price").equals("—")
+                && ProductCatalog.money(new JSONObject().put("price", JSONObject.NULL), "price").equals("—"), "Missing price is not zero");
+        check(ProductCatalog.moneyCents("12.99") == 1299 && ProductCatalog.moneyCents("8,75") == 875
+                && ProductCatalog.moneyCents("0") == 0 && ProductCatalog.moneyCents("21474836.47") == Integer.MAX_VALUE, "Exact decimal price input");
+        for (String invalid : new String[]{"", "-1", "1.001", "NaN", "21474836.48"}) {
+            try { ProductCatalog.moneyCents(invalid); throw new AssertionError("Invalid price accepted: " + invalid); }
+            catch (IllegalArgumentException expected) {}
+        }
         JSONArray groupedRows = new JSONArray();
         String[] groups = {"BIÈRE", "LABATT", "MOLSON", "SLEEMAN", "POPPERS", "TABAC", "IMPERIAL", "JTI MD", "BENSON", "SUPPLIES",
                 "TABAC KIT", "EPICERIE TAX", "FRITO", "QUECAN", "MONDOUX", "BREYERS", "EPICERIE", "LAIT", "PAIN", "INSTANT", "LOTO"};

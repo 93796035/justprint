@@ -33,18 +33,36 @@ public class SimClientActivity extends Activity {
     private final EditText[] quantities = new EditText[4];
     private final String[] keys = {"stock1", "stock2", "stock3", "monque"};
     private TextView status;
+    private final EditText[] prices = new EditText[2];
+    private final String[] priceKeys = {"cost", "price"};
     private LinearLayout refreshProgress;
     private ProgressBar refreshProgressBar;
     private TextView refreshProgressText;
-    private Button submit, connection, refresh;
+    private Button moving;
+    private ImageButton connection, refresh;
+    private Button editingTab;
+    private ImageButton idTab;
+    private FrameLayout pages;
+    private View editingPage, movingPage, idPage;
+    private IdCheckingPage idChecking;
+    private LocalMovingPlanPage movingPlan;
+    private boolean showingMoving;
+    private boolean showingId;
+    private Integer requestedProductId;
     private ProductCatalog catalog;
     private JSONObject selected;
+    private Integer editedFromProductId;
     private String server;
-    private boolean settingText, saving;
+    private boolean settingText, settingValues, saving;
+    private final java.util.LinkedHashMap<String, AutoSaveRequest> pendingAutoSaves = new java.util.LinkedHashMap<>();
+    private AutoSaveRequest autoSaveInFlight;
     private volatile boolean closed;
     private int generation;
     private Runnable pendingSearch;
+    private final CompletionEchoGuard completionEcho = new CompletionEchoGuard();
 
+    // This Activity deliberately uses the platform Material theme, not AppCompat.
+    @android.annotation.SuppressLint("AppCompatCustomView")
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         setTitle("SimClient");
@@ -55,29 +73,47 @@ public class SimClientActivity extends Activity {
         int pad = dp(18);
         root.setPadding(pad, pad, pad, pad);
         TextView title = new TextView(this);
-        title.setText("Inventory Editor");
-        title.setTextSize(21);
-        connection = new Button(this);
-        connection.setText("Settings");
-        connection.setMinWidth(0);
-        connection.setMinimumWidth(0);
+        android.text.SpannableString brand = new android.text.SpannableString("SimClient");
+        brand.setSpan(new android.text.style.ForegroundColorSpan(0xff64e5ce), 0, 3, 0);
+        brand.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD_ITALIC), 0, 9, 0);
+        title.setText(brand);
+        title.setTextColor(0xffffffff);
+        title.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        title.setLetterSpacing(0.035f);
+        title.setSingleLine(true);
+        title.setContentDescription("SimClient");
+        title.setGravity(android.view.Gravity.CENTER);
+        title.setAutoSizeTextTypeUniformWithConfiguration(16, 28, 1, android.util.TypedValue.COMPLEX_UNIT_SP);
+        LinearLayout brandBlock = column();
+        brandBlock.setGravity(android.view.Gravity.CENTER);
+        brandBlock.addView(title, new LinearLayout.LayoutParams(-1, dp(36)));
+        TextView tagline = new TextView(this);
+        tagline.setText("--Twins of AikaPos");
+        tagline.setTextSize(12);
+        tagline.setTextColor(0xffa6d9da);
+        tagline.setGravity(android.view.Gravity.CENTER);
+        tagline.setSingleLine(true);
+        tagline.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        brandBlock.addView(tagline, full());
+        connection = toolbarIcon(com.just.print.R.drawable.ic_sim_settings, "Settings");
         connection.setOnClickListener(v -> configure());
-        refresh = new Button(this);
-        refresh.setText("Refresh");
+        refresh = toolbarIcon(com.just.print.R.drawable.ic_sim_refresh, "Refresh");
         refresh.setOnClickListener(v -> refreshCatalog());
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        for (Button button : new Button[]{connection, refresh}) {
-            button.setTextSize(13);
-            button.setAllCaps(false);
-            button.setMinWidth(0);
-            button.setMinimumWidth(0);
-            button.setPadding(dp(10), 0, dp(10), 0);
-        }
-        toolbar.addView(connection, new LinearLayout.LayoutParams(-2, dp(48)));
-        toolbar.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
-        toolbar.addView(refresh, new LinearLayout.LayoutParams(-2, dp(48)));
-        root.addView(toolbar, full());
+        toolbar.addView(connection, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        toolbar.addView(brandBlock, new LinearLayout.LayoutParams(0, -2, 1));
+        toolbar.addView(refresh, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        toolbar.setPadding(dp(12), dp(4), dp(12), dp(4));
+        toolbar.setMinimumHeight(dp(76));
+        toolbar.setBackground(new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{0xff112d46, 0xff17465a}));
+        toolbar.setElevation(dp(4));
+        moving = new Button(this);
+        moving.setText("Stock Moving");
+        moving.setAllCaps(false);
+        moving.setOnClickListener(v -> openMovingPlans());
         refreshProgress = column();
         refreshProgressText = new TextView(this);
         refreshProgressText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -86,13 +122,16 @@ public class SimClientActivity extends Activity {
         refreshProgress.addView(refreshProgressText, full());
         refreshProgress.addView(refreshProgressBar, full());
         refreshProgress.setVisibility(View.GONE);
-        root.addView(refreshProgress, full());
-        root.addView(title, full());
+
         TextView categoryLabel = new TextView(this);
         categoryLabel.setText("Category");
-        root.addView(categoryLabel, full());
+        LinearLayout categoryBar = new LinearLayout(this);
+        categoryBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        categoryBar.addView(categoryLabel, new LinearLayout.LayoutParams(dp(80), dp(48)));
+        categoryLabel.setGravity(android.view.Gravity.CENTER_VERTICAL);
         category = new Spinner(this);
-        root.addView(category, full());
+        styleDropdown(this, category);
+        categoryBar.addView(category, new LinearLayout.LayoutParams(0, dp(48), 1));
         category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onNothingSelected(AdapterView<?> parent) {}
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -106,17 +145,37 @@ public class SimClientActivity extends Activity {
             }
         });
         product = new AutoCompleteTextView(this) {
+            @Override protected void onSelectionChanged(int start, int end) {
+                super.onSelectionChanged(start, end);
+                if (!settingText && (start != length() || end != length())) completionEcho.reset();
+            }
             @Override protected void performFiltering(CharSequence text, int keyCode) {
                 // Local catalog handles substring matching instead of Android's prefix filter.
             }
             @Override protected void replaceText(CharSequence text) {
+                completionEcho.reset();
                 settingText = true;
                 try { super.replaceText(text); } finally { settingText = false; }
             }
         };
         product.setHint("Enter product name");
         product.setSingleLine(true);
+        product.setSelectAllOnFocus(true);
         product.setThreshold(1);
+        product.setFilters(new android.text.InputFilter[]{(source, start, end, dest, dstart, dend) -> {
+            if (settingText) return null;
+            int consumed = completionEcho.consume(dest.toString(), dstart, dend,
+                    source.subSequence(start, end).toString(), android.os.SystemClock.uptimeMillis());
+            return consumed == 0 ? null : source.subSequence(start + consumed, end);
+        }});
+        product.setOnTouchListener((view, event) -> {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) completionEcho.reset();
+            return false;
+        });
+        product.setOnFocusChangeListener((view, focused) -> {
+            if (focused) product.post(() -> { if (product.hasFocus()) product.selectAll(); });
+            else completionEcho.reset();
+        });
         styleInput(product);
         product.setTextSize(20);
         product.setMinHeight(dp(64));
@@ -131,31 +190,75 @@ public class SimClientActivity extends Activity {
             stocks.addView(field, new LinearLayout.LayoutParams(0, -2, 1));
         }
         root.addView(stocks, full());
-        root.addView(numberField(3, "Monque"), full());
-        submit = new Button(this);
-        submit.setText("Submit");
-        submit.setOnClickListener(v -> save());
-        root.addView(submit, full());
+        LinearLayout details = new LinearLayout(this);
+        details.addView(numberField(3, "Monque"), new LinearLayout.LayoutParams(0, -2, 1));
+        details.addView(priceField(0, "Cost"), new LinearLayout.LayoutParams(0, -2, 1));
+        details.addView(priceField(1, "Price"), new LinearLayout.LayoutParams(0, -2, 1));
+        root.addView(details, full());
+        // Category belongs below all editable inventory fields and above the status text.
+        LinearLayout.LayoutParams categoryParams = full();
+        categoryParams.topMargin = dp(12);
+        root.addView(categoryBar, categoryParams);
         status = new TextView(this);
         status.setTextSize(14);
+        status.setPadding(0, dp(18), 0, dp(8));
         status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         root.addView(status, full());
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(0xfff5f7fa);
+        scroll.setBackgroundColor(0xfff0f8fa);
         scroll.addView(root);
-        setContentView(scroll);
+        editingPage = scroll;
+        LinearLayout shell = column();
+        shell.addView(toolbar, full());
+        shell.addView(refreshProgress, full());
+        pages = new FrameLayout(this);
+        pages.addView(editingPage, new FrameLayout.LayoutParams(-1, -1));
+        shell.addView(pages, new LinearLayout.LayoutParams(-1, 0, 1));
+        View divider = new View(this); divider.setBackgroundColor(0xffd9ecef);
+        shell.addView(divider, new LinearLayout.LayoutParams(-1, dp(1)));
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setPadding(0, 0, 0, dp(8));
+        tabs.setBackgroundColor(0xffffffff);
+        tabs.setElevation(dp(8));
+        editingTab = new Button(this); editingTab.setText("Product Editing");
+        editingTab.setAllCaps(false); editingTab.setOnClickListener(v -> showEditingPage(null));
+        idTab = new ImageButton(this);
+        idTab.setImageResource(com.just.print.R.drawable.ic_sim_camera);
+        idTab.setScaleType(ImageView.ScaleType.CENTER);
+        idTab.setContentDescription("Camera: find product or check ID");
+        idTab.setTooltipText("Camera");
+        idTab.setOnClickListener(v -> showIdPage(null));
+        for (View tab : new View[]{editingTab, moving, idTab}) {
+            if (tab instanceof Button) {
+                Button label = (Button) tab;
+                label.setTextSize(13); label.setMinWidth(0); label.setMinimumWidth(0);
+                label.setMaxLines(2);
+            }
+            tab.setPadding(dp(4), dp(4), dp(4), dp(4));
+            LinearLayout.LayoutParams tabLayout = new LinearLayout.LayoutParams(0, dp(56), 1);
+            tabLayout.setMargins(0, 0, 0, 0);
+            tabs.addView(tab, tabLayout);
+        }
+        shell.addView(tabs, full());
+        setContentView(shell);
+        updateTabs();
         getWindow().setLayout(-1, -1);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         enableValues(false);
         product.addTextChangedListener(new TextWatcher() {
             private boolean appended;
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            private String previous;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                previous = s.toString();
+            }
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!settingText) appended = count > 0 && start + count == s.length();
             }
             public void afterTextChanged(Editable text) {
                 if (settingText) return;
+                if (text.toString().equals(previous)) return;
+                if (selected != null) editedFromProductId = selected.optInt("id", -1);
                 invalidateSelection();
                 String query = text.toString().trim();
                 if (query.isEmpty()) { message("Type a name, then select a product from the list.", false); return; }
@@ -177,13 +280,16 @@ public class SimClientActivity extends Activity {
         });
         message(server.isEmpty() ? "Open Settings to enter the POS address." : "Type a name, then select a product from the list.", false);
         product.requestFocus();
-        loadCatalog();
+        loadCatalog(true);
+        if (state != null && state.getBoolean("showingId")) showIdPage(state);
     }
 
     private void invalidateSelection() {
+        completionEcho.reset();
         generation++;
         if (pendingSearch != null) main.removeCallbacks(pendingSearch);
         selected = null;
+        for (EditText field : prices) field.setText("");
         enableValues(false);
         for (EditText field : quantities) field.setText("");
         product.dismissDropDown();
@@ -193,8 +299,22 @@ public class SimClientActivity extends Activity {
     private void search(String query, int current, boolean complete) {
         if (catalog == null || catalog.size() == 0) { message("No local products. Set the POS address, then tap Refresh.", false); return; }
         java.util.List<Product> matches = selectedCategory == null ? new ArrayList<>() : catalog.search(query, selectedCategory);
+        if (ProductAutoSelection.shouldSelect(matches.size(), matches.isEmpty() ? -1 : matches.get(0).id, editedFromProductId)) {
+            Product match = matches.get(0);
+            generation++;
+            if (pendingSearch != null) main.removeCallbacks(pendingSearch);
+            completionEcho.reset();
+            try {
+                fillProduct(match.row());
+                product.dismissDropDown();
+                message("Product selected automatically: " + match.name, false);
+            } catch (Exception ex) { message("Invalid cached product. Tap Refresh.", false); }
+            return;
+        }
         Editable input = product.getText();
-        if (complete && product.hasFocus() && product.getSelectionStart() == input.length()
+        boolean uniqueCurrentProduct = matches.size() == 1 && editedFromProductId != null
+                && matches.get(0).id == editedFromProductId;
+        if (!uniqueCurrentProduct && complete && product.hasFocus() && product.getSelectionStart() == input.length()
                 && product.getSelectionEnd() == input.length()
                 && android.view.inputmethod.BaseInputConnection.getComposingSpanStart(input) < 0) {
             String typed = input.toString();
@@ -204,6 +324,7 @@ public class SimClientActivity extends Activity {
                 try {
                     product.setText(completed, false);
                     product.setSelection(completed.length());
+                    completionEcho.arm(typed, completed, android.os.SystemClock.uptimeMillis());
                 } finally { settingText = false; }
             }
         }
@@ -246,14 +367,21 @@ public class SimClientActivity extends Activity {
 
     private void busy(boolean value) {
         saving = value;
+        if (movingPlan != null) movingPlan.setExternalBusy(value);
         product.setEnabled(!value);
         category.setEnabled(!value && !categories.isEmpty());
         connection.setEnabled(!value);
         refresh.setEnabled(!value);
+        moving.setEnabled(!value);
+        updateTabs();
         enableValues(!value && selected != null);
     }
 
     private void loadCatalog() {
+        loadCatalog(false);
+    }
+
+    private void loadCatalog(boolean refreshAfterLoad) {
         invalidateSelection();
         catalog = null;
         busy(true);
@@ -277,6 +405,15 @@ public class SimClientActivity extends Activity {
                 updateCategories(true);
                 busy(false);
                 message(text, false);
+                // Load the cache first for offline fallback, then fetch current POS data.
+                if (refreshAfterLoad && !base.isEmpty()) {
+                    refreshCatalog();
+                    return;
+                }
+                if (requestedProductId != null) {
+                    int id = requestedProductId; requestedProductId = null;
+                    selectProductById(id);
+                }
             });
         });
     }
@@ -318,15 +455,19 @@ public class SimClientActivity extends Activity {
                 if (result != null) { catalog = result; updateCategories(false); }
                 refreshProgress.setVisibility(View.GONE);
                 busy(false);
-                product.requestFocus(); product.selectAll();
+                if (showingMoving && movingPlan != null) {
+                    if (result != null) movingPlan.activate();
+                } else { product.requestFocus(); product.selectAll(); }
                 message(text, true);
             });
         });
     }
 
     private void fillProduct(JSONObject row) {
+        settingValues = true;
         try {
             selected = row;
+            editedFromProductId = null;
             settingText = true;
             String name = row.optString("mnemonic", "").trim();
             if (name.isEmpty()) name = row.optString("subject", "").trim();
@@ -334,69 +475,163 @@ public class SimClientActivity extends Activity {
             product.setText(name, false);
             settingText = false;
             for (int i = 0; i < keys.length; i++) quantities[i].setText(String.valueOf(row.getInt(keys[i])));
+            for (int i = 0; i < priceKeys.length; i++) {
+                String amount = ProductCatalog.money(row, priceKeys[i]);
+                prices[i].setText(amount.equals("—") ? "" : amount);
+                prices[i].setHint(row.has(priceKeys[i]) ? "Not set" : "Refresh");
+            }
             enableValues(true);
-            message("Stock loaded locally. Quantities use POS inventory units.", false);
+            message("Changes save automatically when you leave a field.", false);
         } catch (Exception ex) { settingText = false; invalidateSelection(); message(ex.getMessage(), false); }
+        finally { settingValues = false; }
     }
 
-    private void save() {
-        if (saving || selected == null) return;
-        final JSONObject payload = new JSONObject();
-        try {
-            payload.put("productId", selected.getInt("id"));
-            JSONObject values = new JSONObject(), expected = new JSONObject();
-            for (int i = 0; i < keys.length; i++) {
-                String value = quantities[i].getText().toString().trim();
-                if (!value.matches("-?[0-9]+")) { quantities[i].setError("Enter a whole number"); quantities[i].requestFocus(); return; }
-                int count;
-                try { count = Integer.parseInt(value); }
-                catch (NumberFormatException ex) { quantities[i].setError("Quantity is out of range"); return; }
-                if (count == Integer.MIN_VALUE) { quantities[i].setError("Quantity is out of range"); return; }
-                values.put(keys[i], count);
-                expected.put(keys[i], selected.getInt(keys[i]));
+    private static final class AutoSaveRequest {
+        final int productId;
+        final EditText field;
+        final String key;
+        final boolean price;
+        AutoSaveRequest(int productId, EditText field, String key, boolean price) {
+            this.productId = productId; this.field = field; this.key = key; this.price = price;
+        }
+    }
+
+    private JSONObject autoSavePayload(AutoSaveRequest request) throws Exception {
+        JSONObject payload = new JSONObject().put("productId", request.productId);
+        JSONObject values = new JSONObject(), expected = new JSONObject();
+        String edited = request.field.getText().toString().trim();
+        for (String key : keys) {
+            int value = selected.getInt(key);
+            if (!request.price && request.key.equals(key)) {
+                if (!edited.matches("-?[0-9]+")) throw new IllegalArgumentException("Enter a whole number");
+                try { value = Integer.parseInt(edited); }
+                catch (NumberFormatException ex) { throw new IllegalArgumentException("Quantity is out of range"); }
+                if (value == Integer.MIN_VALUE) throw new IllegalArgumentException("Quantity is out of range");
             }
-            payload.put("values", values).put("expected", expected);
-        } catch (Exception ex) { message(ex.getMessage(), false); return; }
-        busy(true);
+            values.put(key, value);
+            expected.put(key, selected.getInt(key));
+        }
+        if (request.price) {
+            values.put(request.key, ProductCatalog.moneyCents(edited));
+            expected.put(request.key, selected.get(request.key));
+        }
+        return payload.put("values", values).put("expected", expected);
+    }
+
+    private void startAutoSave(AutoSaveRequest request) {
+        if (saving || selected == null || selected.optInt("id", -1) != request.productId) return;
+        final JSONObject payload;
+        try {
+            payload = autoSavePayload(request);
+        } catch (Exception ex) {
+            request.field.setError(ex.getMessage());
+            request.field.requestFocus();
+            message(ex.getMessage(), false);
+            return;
+        }
+        autoSaveInFlight = request;
+        productSaveBusy(true);
         product.dismissDropDown();
         generation++;
         if (pendingSearch != null) main.removeCallbacks(pendingSearch);
-        product.setEnabled(false);
-        connection.setEnabled(false);
-        enableValues(false);
-        message("Submitting…", false);
+        message("Saving " + request.field.getContentDescription() + "…", false);
         String base = server;
         ProductCatalog snapshot = catalog;
+        String submittedText = request.field.getText().toString().trim();
         io.execute(() -> {
             String feedback;
             ProductCatalog updated = null;
+            JSONObject storedProduct = null;
+            boolean verified = false;
             try {
                 // Write the recovery marker before sending: a process death must never silently
                 // expose pre-submit quantities as current after a potentially successful update.
                 if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
                         .putBoolean("pending:" + base, true).commit())
                     throw new IOException("Unable to save recovery state. Nothing was submitted.");
-                JSONObject result = request(base, "/AikaPos/stockProducts", payload);
+                JSONObject submitted = payload;
+                boolean stockOnlyCompatibility = false;
                 try {
-                    updated = snapshot.updated(result.getJSONObject("product"));
-                    persistCatalog(base, updated);
-                    feedback = "Inventory updated successfully. Local data saved.";
+                    request(base, "/AikaPos/stockProducts", payload);
+                } catch (RequestException failure) {
+                    if (!ProductSyncCompatibility.needsStockOnlyRetry(failure.code, failure.getMessage(), payload))
+                        throw failure;
+                    submitted = ProductSyncCompatibility.stockOnly(payload);
+                    request(base, "/AikaPos/stockProducts", submitted);
+                    stockOnlyCompatibility = true;
+                }
+                JSONObject stored = request(base, "/AikaPos/stockProducts?id="
+                        + payload.getInt("productId"), null).getJSONObject("product");
+                ProductSyncVerification.verify(submitted, stored);
+                verified = true;
+                storedProduct = stored;
+                try {
+                    ProductCatalog saved = snapshot.updated(stored);
+                    updated = saved;
+                    persistCatalog(base, saved);
+                    feedback = (stockOnlyCompatibility
+                            ? "Stock saved and verified. This AikaPos version did not save Cost/Price. "
+                            : "Saved and verified on AikaPos. ")
+                            + "Stock 1: " + stored.getInt("stock1") + ", Stock 2: "
+                            + stored.getInt("stock2") + ", Stock 3: " + stored.getInt("stock3");
                 } catch (Exception ex) {
                     feedback = "POS updated, but local storage could not be saved. Tap Refresh before continuing.";
                 }
             } catch (Exception ex) { feedback = ex.getMessage() + " Tap Refresh to load the current stock."; }
             String finalFeedback = feedback;
             ProductCatalog finalUpdated = updated;
+            JSONObject finalStoredProduct = storedProduct;
+            boolean finalVerified = verified;
             main.post(() -> {
                 if (closed) return;
-                catalog = finalUpdated;
-                busy(false);
-                invalidateSelection();
-                product.requestFocus();
-                product.selectAll();
-                message(finalFeedback, true);
+                if (finalUpdated != null && finalStoredProduct != null) {
+                    catalog = finalUpdated;
+                    selected = finalStoredProduct;
+                    if (request.field.getText().toString().trim().equals(submittedText)) {
+                        settingValues = true;
+                        try {
+                            request.field.setText(request.price
+                                    ? (finalStoredProduct.isNull(request.key) ? "" : ProductCatalog.money(finalStoredProduct, request.key))
+                                    : String.valueOf(finalStoredProduct.getInt(request.key)));
+                        } catch (Exception ignored) {}
+                        finally { settingValues = false; }
+                    }
+                }
+                productSaveBusy(false);
+                autoSaveInFlight = null;
+                message(finalFeedback, false);
+                if (!finalVerified) new AlertDialog.Builder(this).setTitle("Sync not confirmed")
+                        .setMessage(finalFeedback + "\n\nPOS: " + base)
+                        .setPositiveButton("Refresh", (dialog, which) -> refreshCatalog())
+                        .setNegativeButton("Close", null).show();
+                main.post(this::drainAutoSaves);
             });
         });
+    }
+
+    private void productSaveBusy(boolean value) {
+        saving = value;
+        if (movingPlan != null) movingPlan.setExternalBusy(value);
+        product.setEnabled(!value);
+        category.setEnabled(!value && !categories.isEmpty());
+        connection.setEnabled(!value);
+        refresh.setEnabled(!value);
+        moving.setEnabled(!value);
+        updateTabs();
+        // Keep the six value fields enabled and visible while the network request runs.
+    }
+
+    private void drainAutoSaves() {
+        if (saving || selected == null) return;
+        java.util.Iterator<java.util.Map.Entry<String, AutoSaveRequest>> iterator = pendingAutoSaves.entrySet().iterator();
+        while (iterator.hasNext()) {
+            AutoSaveRequest request = iterator.next().getValue();
+            iterator.remove();
+            if (request.productId != selected.optInt("id", -1)) continue;
+            if (!ProductFieldChange.changed(selected, request.key, request.field.getText().toString(), request.price)) continue;
+            startAutoSave(request);
+            return;
+        }
     }
 
     private void showRefreshProgress(String text, int percent) {
@@ -409,7 +644,7 @@ public class SimClientActivity extends Activity {
         void update(String text, int percent);
     }
 
-    private static JSONObject request(String base, String path, JSONObject body) throws Exception {
+    static JSONObject request(String base, String path, JSONObject body) throws Exception {
         return request(base, path, body, null);
     }
 
@@ -418,6 +653,7 @@ public class SimClientActivity extends Activity {
         c.setConnectTimeout(5000);
         c.setReadTimeout(10000);
         c.setInstanceFollowRedirects(false);
+        c.setUseCaches(false);
 
         try {
             if (body != null) {
@@ -450,8 +686,12 @@ public class SimClientActivity extends Activity {
             if (progress != null) progress.update("Reading downloaded products…", -1);
             JSONObject result;
             try { result = new JSONObject(new String(bytes.toByteArray(), StandardCharsets.UTF_8)); }
-            catch (Exception ex) { throw new IOException("HTTP " + code + ": Check that POS supports the inventory API"); }
-            if (code != 200) throw new IOException("HTTP " + code + ": " + httpError(code));
+            catch (Exception ex) {
+                if (code >= 400) throw new RequestException(code, "HTTP " + code + ": " + httpError(code));
+                throw new IOException("HTTP " + code + ": Check that POS supports the inventory API");
+            }
+            if (code != 200) throw new RequestException(code, "HTTP " + code + ": "
+                    + result.optString("error", httpError(code)));
             return result;
         } catch (java.net.SocketTimeoutException ex) {
             throw new IOException(body == null ? "Connection timed out" : "Response timed out. Update status is unconfirmed", ex);
@@ -467,6 +707,7 @@ public class SimClientActivity extends Activity {
         ipLabel.setText("AikaPos computer IP (default port: 8880)");
         box.addView(ipLabel);
         address.setHint("Enter POS computer IP"); address.setSingleLine(); address.setText(server);
+        selectAllOnFocus(address);
 
         box.addView(address);
         Button viewLocal = new Button(this);
@@ -512,7 +753,15 @@ public class SimClientActivity extends Activity {
                         return;
                     }
                     server = savedAddress;
-                    loadCatalog();
+                    if (movingPlan != null) { movingPlan.dispose(); movingPlan = null; }
+                    if (movingPage != null) { pages.removeView(movingPage); movingPage = null; }
+                    showingMoving = false;
+                    showingId = false;
+                    if (idPage != null) idPage.setVisibility(View.GONE);
+                    if (idChecking != null) idChecking.deactivate();
+                    editingPage.setVisibility(View.VISIBLE);
+                    updateTabs();
+                    loadCatalog(true);
                     dialog.dismiss();
                     Toast.makeText(this, "Connection saved: " + server, Toast.LENGTH_LONG).show();
                     product.requestFocus(); product.selectAll();
@@ -520,6 +769,172 @@ public class SimClientActivity extends Activity {
             });
         }));
         dialog.show();
+    }
+
+    private void openMovingPlans() {
+        if (saving || showingMoving || (idChecking != null && idChecking.isBusy())
+                || (movingPlan != null && movingPlan.isBusy())) return;
+        if (server.isEmpty()) { configure(); return; }
+        product.dismissDropDown();
+        generation++;
+        if (pendingSearch != null) main.removeCallbacks(pendingSearch);
+        hideKeyboard();
+        if (movingPlan == null) {
+            String base = server;
+            movingPlan = new LocalMovingPlanPage(this, base, () -> {
+                if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
+                        .putBoolean("pending:" + base, true).commit())
+                    throw new IOException("Unable to save recovery state. Nothing was submitted.");
+            }, id -> showEditingPage(id), this::updateTabs);
+            movingPage = movingPlan.createView();
+            pages.addView(movingPage, new FrameLayout.LayoutParams(-1, -1));
+        }
+        showingMoving = true;
+        showingId = false;
+        if (idPage != null) idPage.setVisibility(View.GONE);
+        if (idChecking != null) idChecking.deactivate();
+        editingPage.setVisibility(View.GONE); movingPage.setVisibility(View.VISIBLE);
+        updateTabs();
+        movingPlan.activate();
+    }
+
+    private void showEditingPage(Integer productId) {
+        if (saving || (idChecking != null && idChecking.isBusy()) || (movingPlan != null && movingPlan.isBusy())) return;
+        if (!showingMoving && !showingId && productId == null) return;
+        if (movingPlan != null && !movingPlan.flushQuantity()) return;
+        showingMoving = false;
+        showingId = false;
+        if (idPage != null) idPage.setVisibility(View.GONE);
+        if (idChecking != null) idChecking.deactivate();
+        if (movingPlan != null) movingPlan.deactivate();
+        if (movingPage != null) movingPage.setVisibility(View.GONE);
+        editingPage.setVisibility(View.VISIBLE);
+        hideKeyboard(); updateTabs();
+        if (movingPlan != null && movingPlan.consumeInventoryChange()) {
+            requestedProductId = productId;
+            loadCatalog();
+        } else if (productId != null) selectProductById(productId);
+    }
+
+    private void showIdPage(Bundle saved) {
+        if (saved == null && (saving || (movingPlan != null && movingPlan.isBusy())
+                || (idChecking != null && idChecking.isBusy()))) return;
+        if (showingId) {
+            if (saved == null) idChecking.capture();
+            return;
+        }
+        if (showingMoving && movingPlan != null && !movingPlan.flushQuantity()) return;
+        product.dismissDropDown();
+        generation++;
+        if (pendingSearch != null) main.removeCallbacks(pendingSearch);
+        hideKeyboard();
+        if (movingPlan != null) movingPlan.deactivate();
+        if (idChecking == null) {
+            idChecking = new IdCheckingPage(this, this::updateTabs, () -> {
+                java.util.List<PhotoProductMatcher.Item> items = new ArrayList<>();
+                if (catalog != null) for (Product item : catalog.all()) {
+                    items.add(new PhotoProductMatcher.Item(item.id, item.name, item.category, item.code,
+                            ProductCatalog.matchesCategory(selectedCategory, item.category)));
+                }
+                return items;
+            }, this::showEditingPage, this::showEditingSearch);
+            idPage = idChecking.createView(saved);
+            pages.addView(idPage, new FrameLayout.LayoutParams(-1, -1));
+        }
+        showingMoving = false;
+        showingId = true;
+        editingPage.setVisibility(View.GONE);
+        if (movingPage != null) movingPage.setVisibility(View.GONE);
+        idPage.setVisibility(View.VISIBLE);
+        idChecking.activate();
+        updateTabs();
+        if (saved == null) idChecking.capture();
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (idChecking != null) idChecking.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putBoolean("showingId", showingId);
+        if (idChecking != null) idChecking.onSaveInstanceState(state);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (showingId && idChecking != null) idChecking.activate();
+    }
+
+    private void selectProductById(int id) {
+        if (catalog != null) for (Product item : catalog.all()) {
+            if (item.id != id) continue;
+            invalidateSelection();
+            selectedCategory = item.category;
+            int position = categories.indexOf(item.category);
+            if (position >= 0) category.setSelection(position);
+            try { fillProduct(item.row()); }
+            catch (Exception ex) { message("Unable to open product. Tap Refresh.", true); }
+            ((ScrollView) editingPage).smoothScrollTo(0, 0);
+            return;
+        }
+        invalidateSelection();
+        message("Product is not available in verified local inventory. Tap Refresh.", true);
+    }
+
+    private void hideKeyboard() {
+        ((android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(pages.getWindowToken(), 0);
+    }
+
+    static void styleDropdown(Activity activity, Spinner spinner) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable border = new android.graphics.drawable.GradientDrawable();
+        border.setColor(0xffffffff); border.setCornerRadius(12 * density);
+        border.setStroke(Math.max(1, Math.round(density)), 0xffb6d5df);
+        // Keep the platform dropdown arrow above the new outline.
+        android.graphics.drawable.Drawable arrow = spinner.getBackground();
+        spinner.setBackground(new android.graphics.drawable.LayerDrawable(
+                new android.graphics.drawable.Drawable[]{border, arrow}));
+    }
+
+    private void updateTabs() {
+        if (editingTab == null) return;
+        boolean enabled = !saving && (movingPlan == null || !movingPlan.isBusy())
+                && (idChecking == null || !idChecking.isBusy());
+        editingTab.setEnabled(enabled); moving.setEnabled(enabled); idTab.setEnabled(enabled);
+        connection.setEnabled(enabled); refresh.setEnabled(enabled);
+        View[] tabs = {editingTab, moving, idTab};
+        for (int i = 0; i < tabs.length; i++) {
+            boolean active = i == (showingId ? 2 : showingMoving ? 1 : 0);
+            tabs[i].setSelected(active);
+            if (tabs[i] instanceof Button) ((Button) tabs[i]).setTypeface(
+                    android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+            android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
+            float bottomRadius = dp(14);
+            background.setCornerRadii(new float[]{0, 0, 0, 0,
+                    bottomRadius, bottomRadius, bottomRadius, bottomRadius});
+            if (active) background.setColors(new int[]{0xff087f8c, 0xff146783});
+            else background.setColor(0xfff0f8fa);
+            background.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT);
+            int color = active ? 0xffffffff : 0xff3e6579;
+            if (tabs[i] instanceof Button) ((Button) tabs[i]).setTextColor(color);
+            else ((ImageButton) tabs[i]).setImageTintList(android.content.res.ColorStateList.valueOf(color));
+            tabs[i].setElevation(dp(active ? 3 : 0));
+            tabs[i].setBackground(new android.graphics.drawable.RippleDrawable(
+                    android.content.res.ColorStateList.valueOf(0x2270dccc), background, null));
+        }
+    }
+
+    @Override public void onBackPressed() {
+        if (showingMoving || showingId) { showEditingPage(null); return; }
+        super.onBackPressed();
+    }
+
+    static final class RequestException extends IOException {
+        final int code;
+        RequestException(int code, String message) { super(message); this.code = code; }
     }
 
     private void viewLocalInventory() {
@@ -533,11 +948,28 @@ public class SimClientActivity extends Activity {
         EditText filter = new EditText(this);
         filter.setHint("Filter saved products");
         filter.setSingleLine(true);
+        selectAllOnFocus(filter);
         styleInput(filter);
         filter.setEnabled(false);
         content.addView(filter, full());
         ListView list = new ListView(this);
-        content.addView(list, new LinearLayout.LayoutParams(-1, 0, 1));
+        list.setDivider(new android.graphics.drawable.ColorDrawable(0xffd9ecef));
+        list.setDividerHeight(dp(1));
+        HorizontalScrollView tableScroll = new HorizontalScrollView(this);
+        tableScroll.setFillViewport(true);
+        LinearLayout table = column();
+        table.addView(localInventoryRow(new String[]{"Product", "Category", "Stock\n1", "Stock\n2", "Stock\n3", "Cost", "Price"}, true), full());
+        table.addView(list, new LinearLayout.LayoutParams(-1, 0, 1));
+        TextView empty = new TextView(this);
+        empty.setText("No matching products.");
+        empty.setPadding(dp(12), dp(24), dp(12), dp(24));
+        empty.setVisibility(View.GONE);
+        table.addView(empty, full());
+        list.setEmptyView(empty);
+        tableScroll.addView(table, new android.widget.FrameLayout.LayoutParams(dp(612), -1));
+        LinearLayout.LayoutParams tableLayout = new LinearLayout.LayoutParams(-1, 0, 1);
+        tableLayout.topMargin = dp(12);
+        content.addView(tableScroll, tableLayout);
         AlertDialog viewer = new AlertDialog.Builder(this).setTitle("Local Inventory")
                 .setView(content).setPositiveButton("Close", null).create();
         viewer.show();
@@ -552,9 +984,9 @@ public class SimClientActivity extends Activity {
                 boolean pending = prefs.getBoolean("pending:" + base, false);
                 main.post(() -> {
                     if (closed || !viewer.isShowing()) return;
-                    summary.setText(saved.size() + " saved products\n" + (base.isEmpty() ? "No server configured" : base)
+                    summary.setText(saved.size() + " saved products · Swipe table for more columns"
                             + (pending ? "\nAn update was interrupted. Tap Refresh to verify these saved values."
-                            : saved.size() == 0 ? "\nTap Refresh on the main screen to download products." : "\nStored on this phone. No server request."));
+                            : saved.size() == 0 ? "\nTap Refresh on the main screen to download products." : ""));
                     filter.setEnabled(true);
                     showLocalRows(list, saved.all());
                     filter.addTextChangedListener(new TextWatcher() {
@@ -572,20 +1004,81 @@ public class SimClientActivity extends Activity {
     }
 
     private void showLocalRows(ListView list, java.util.List<Product> rows) {
-        java.util.List<java.util.Map<String, String>> items = new ArrayList<>();
+        java.util.List<String[]> items = new ArrayList<>();
         for (Product item : rows) {
-            java.util.Map<String, String> entry = new java.util.HashMap<>();
-            entry.put("name", item.name);
+            String[] entry = {item.name, item.category, "—", "—", "—", "—", "—"};
             try {
                 JSONObject row = item.row();
-                entry.put("details", "ID: " + item.id + "   SKU: " + item.code
-                        + "\nStock1: " + row.getInt("stock1") + "   Stock2: " + row.getInt("stock2")
-                        + "   Stock3: " + row.getInt("stock3") + "\nMonque: " + row.getInt("monque"));
-            } catch (Exception ex) { entry.put("details", "Invalid saved record. Tap Refresh."); }
+                for (int i = 0; i < 3; i++) entry[i + 2] = String.valueOf(row.getInt("stock" + (i + 1)));
+                entry[5] = ProductCatalog.money(row, "cost");
+                entry[6] = ProductCatalog.money(row, "price");
+            } catch (Exception ex) { entry[0] += " (Invalid record — refresh)"; }
             items.add(entry);
         }
-        list.setAdapter(new SimpleAdapter(this, items, android.R.layout.simple_list_item_2,
-                new String[]{"name", "details"}, new int[]{android.R.id.text1, android.R.id.text2}));
+        list.setAdapter(new BaseAdapter() {
+            public int getCount() { return items.size(); }
+            public Object getItem(int position) { return items.get(position); }
+            public long getItemId(int position) { return position; }
+            public View getView(int position, View recycled, android.view.ViewGroup parent) {
+                LinearLayout row = recycled instanceof LinearLayout ? (LinearLayout) recycled
+                        : localInventoryRow(new String[7], false);
+                String[] values = items.get(position);
+                for (int i = 0; i < values.length; i++) {
+                    TextView cell = (TextView) row.getChildAt(i);
+                    cell.setText(values[i]);
+                    cell.setTooltipText(values[i]);
+                }
+                row.setBackgroundColor(position % 2 == 0 ? 0xffffffff : 0xffedf7f8);
+                return row;
+            }
+        });
+    }
+
+    private void showEditingSearch(String query) {
+        showEditingPage(null);
+        editedFromProductId = null;
+        invalidateSelection();
+        if (catalog != null) {
+            String beerCategory = catalog.defaultCategory();
+            int beerPosition = categories.indexOf(beerCategory);
+            if (beerPosition >= 0) {
+                selectedCategory = beerCategory;
+                category.setSelection(beerPosition);
+            }
+        }
+        String value = query == null ? "" : query.trim();
+        settingText = true;
+        product.setText(value);
+        product.setSelection(value.length());
+        settingText = false;
+        product.requestFocus();
+        if (!value.isEmpty()) search(value, generation, false);
+        else message("Beer detected. Enter its barcode or product name.", false);
+    }
+
+    private LinearLayout localInventoryRow(String[] values, boolean heading) {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight(dp(52));
+        int[] widths = {200, 96, 52, 52, 52, 80, 80};
+        if (heading) row.setBackgroundColor(0xffdceff2);
+        for (int i = 0; i < widths.length; i++) {
+            TextView cell = new TextView(this);
+            cell.setText(values[i]);
+            cell.setTextSize(heading ? 12 : 14);
+            cell.setTextColor(0xff16344b);
+            cell.setPadding(dp(6), dp(8), dp(6), dp(8));
+            cell.setGravity(android.view.Gravity.CENTER_VERTICAL | (i < 2 ? android.view.Gravity.LEFT
+                    : i < 5 ? android.view.Gravity.CENTER_HORIZONTAL : android.view.Gravity.RIGHT));
+            if (i < 2) {
+                cell.setMaxLines(2);
+                cell.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            }
+            if (heading) cell.setTypeface(null, android.graphics.Typeface.BOLD);
+            else if (i >= 2) cell.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+            row.addView(cell, new LinearLayout.LayoutParams(dp(widths[i]), -2));
+        }
+        return row;
     }
 
     private void report(Exception ex, int current) {
@@ -600,21 +1093,46 @@ public class SimClientActivity extends Activity {
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
         input.setSelectAllOnFocus(true); input.setContentDescription(name);
         LinearLayout.LayoutParams inputLayout = full();
-        if (index == 3) {
-            inputLayout.width = (int) Math.ceil(label.getPaint().measureText(name));
-            input.setPadding(dp(4), dp(12), dp(4), dp(12));
-        }
-        quantities[index] = input; field.addView(input, inputLayout); return field;
+        quantities[index] = input;
+        input.setOnFocusChangeListener((view, focused) -> {
+            if (focused) input.post(() -> { if (input.hasFocus()) input.selectAll(); });
+            else autoSaveIfChanged(input, keys[index], false);
+        });
+        field.addView(input, inputLayout); return field;
     }
-    private void enableValues(boolean enabled) { for (EditText field : quantities) field.setEnabled(enabled); submit.setEnabled(enabled); }
+    private LinearLayout priceField(int index, String name) {
+        LinearLayout field = column();
+        field.setPadding(dp(4), dp(16), dp(4), dp(8));
+        TextView label = new TextView(this); label.setText(name); field.addView(label);
+        EditText input = new EditText(this); input.setSingleLine(); styleInput(input);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        input.setSelectAllOnFocus(true); input.setContentDescription(name);
+        prices[index] = input;
+        input.setOnFocusChangeListener((view, focused) -> {
+            if (focused) input.post(() -> { if (input.hasFocus()) input.selectAll(); });
+            else autoSaveIfChanged(input, priceKeys[index], true);
+        });
+        field.addView(input, full()); return field;
+    }
+    private void autoSaveIfChanged(EditText field, String key, boolean price) {
+        if (settingValues || selected == null || !field.isEnabled()
+                || !ProductFieldChange.changed(selected, key, field.getText().toString(), price)) return;
+        AutoSaveRequest request = new AutoSaveRequest(selected.optInt("id", -1), field, key, price);
+        pendingAutoSaves.put(key, request);
+        main.post(this::drainAutoSaves);
+    }
+    private void enableValues(boolean enabled) {
+        for (EditText field : quantities) field.setEnabled(enabled);
+        for (int i = 0; i < prices.length; i++) prices[i].setEnabled(enabled && selected != null && selected.has(priceKeys[i]));
+    }
     private void styleInput(EditText input) {
         android.graphics.drawable.StateListDrawable backgrounds = new android.graphics.drawable.StateListDrawable();
         int[][] states = {new int[]{-android.R.attr.state_enabled}, new int[]{android.R.attr.state_focused}, new int[]{}};
-        int[] borders = {0xffcbd5e1, 0xff167d8d, 0xff8899aa};
+        int[] borders = {0xffcde5eb, 0xff087f8c, 0xffb6d5df};
         for (int i = 0; i < states.length; i++) {
             android.graphics.drawable.GradientDrawable box = new android.graphics.drawable.GradientDrawable();
-            box.setColor(i == 0 ? 0xffe9eef3 : 0xffffffff);
-            box.setCornerRadius(dp(8));
+            box.setColor(i == 0 ? 0xffe4f1f5 : 0xffffffff);
+            box.setCornerRadius(dp(12));
             box.setStroke(dp(i == 1 ? 2 : 1), borders[i]);
             backgrounds.addState(states[i], box);
         }
@@ -635,11 +1153,54 @@ public class SimClientActivity extends Activity {
         }
     }
     private void message(String text, boolean toast) {
-        status.setText(text); submit.setTooltipText(text);
+        status.setText(text);
         if (toast) Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+    }
+    private ImageButton toolbarIcon(int drawable, String label) {
+        ImageButton button = new ImageButton(this);
+        button.setImageResource(drawable);
+        button.setImageTintList(new android.content.res.ColorStateList(
+                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[]{}},
+                new int[]{0xff688797, 0xffd8faf4}));
+        button.setContentDescription(label);
+        button.setTooltipText(label);
+        button.setScaleType(ImageView.ScaleType.CENTER);
+        android.util.TypedValue background = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, background, true);
+        button.setBackgroundResource(background.resourceId);
+        return button;
+    }
+    private void selectAllOnFocus(EditText input) {
+        input.setSelectAllOnFocus(true);
+        input.setOnFocusChangeListener((view, focused) -> {
+            if (focused) input.post(() -> { if (input.hasFocus()) input.selectAll(); });
+        });
+    }
+    static void stylePrimaryButton(Activity activity, Button button) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable enabled = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, new int[]{0xff087f8c, 0xff146783});
+        enabled.setCornerRadius(12 * density);
+        android.graphics.drawable.GradientDrawable disabled = new android.graphics.drawable.GradientDrawable();
+        disabled.setColor(0xffcce5ea); disabled.setCornerRadius(12 * density);
+        android.graphics.drawable.StateListDrawable backgrounds = new android.graphics.drawable.StateListDrawable();
+        backgrounds.addState(new int[]{-android.R.attr.state_enabled}, disabled);
+        backgrounds.addState(new int[]{}, enabled);
+        button.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(0x3370dccc), backgrounds, null));
+        button.setTextColor(new android.content.res.ColorStateList(
+                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[]{}}, new int[]{0xff4b7180, 0xffffffff}));
+        button.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        button.setAllCaps(false);
+        button.setMinHeight(Math.round(52 * density));
     }
     private LinearLayout column() { LinearLayout view = new LinearLayout(this); view.setOrientation(LinearLayout.VERTICAL); return view; }
     private LinearLayout.LayoutParams full() { return new LinearLayout.LayoutParams(-1, -2); }
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
-    @Override protected void onDestroy() { closed = true; main.removeCallbacksAndMessages(null); io.shutdown(); super.onDestroy(); }
+    @Override protected void onDestroy() {
+        closed = true;
+        if (movingPlan != null) movingPlan.dispose();
+        if (idChecking != null) idChecking.dispose();
+        main.removeCallbacksAndMessages(null); io.shutdown(); super.onDestroy();
+    }
 }

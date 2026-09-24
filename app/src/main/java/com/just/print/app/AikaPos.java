@@ -31,8 +31,11 @@ public class AikaPos extends Application {
     public void initDaoMaster() {
         MyDatabaseHelper helper = new MyDatabaseHelper(this);
         db = helper.getWritableDatabase();//database file is generated now
+        boolean userTableExists = isTableExists(db, "USER");
+        createTables();
+        ensureSecurityCompatibleSchema();
         // 先检查User表是否存在
-        if (isTableExists(db, "USER")) {
+        if (userTableExists) {
             // 如果User表存在，检查是否为空
             if (isTableEmpty(db, "USER")) {
                 insertInitialUsers(); // Insert initial users if the table is empty
@@ -181,6 +184,102 @@ public class AikaPos extends Application {
         db.execSQL("CREATE TABLE IF NOT EXISTS LOG (_id INTEGER PRIMARY KEY, MSG TEXT, NAME TEXT, logType INTEGER, STATUS INTEGER, VERSION INTEGER);");
     }
 
+
+    private void ensureSecurityCompatibleSchema() {
+        ensureColumnExists("BILL", "customerId", "INTEGER");
+        ensureColumnExists("BILL", "last_modified", "TEXT DEFAULT '1900-01-01 00:00:00'");
+        ensureColumnExists("BILL", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("BILL", "vipAppliedDue", "INTEGER DEFAULT 0");
+        ensureColumnExists("BILL", "ownerTerminal", "TEXT");
+        ensureColumnExists("BILL", "plan_note", "TEXT");
+
+        ensureColumnExists("DINING_TABLE", "last_modified", "TEXT DEFAULT '1900-01-01 00:00:00'");
+        ensureColumnExists("DINING_TABLE", "cloud_sync_status", "INTEGER DEFAULT 0");
+
+        ensureColumnExists("CATEGORY", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("CATEGORY", "last_modified", "TEXT DEFAULT '1900-01-01 00:00:00'");
+
+        ensureColumnExists("DISH", "code", "TEXT");
+        ensureColumnExists("DISH", "unit", "TEXT");
+        ensureColumnExists("DISH", "brand", "TEXT");
+        ensureColumnExists("DISH", "cost", "INTEGER DEFAULT 0");
+        ensureColumnExists("DISH", "stock", "INTEGER DEFAULT 0");
+        ensureColumnExists("DISH", "coverDays", "REAL DEFAULT 0");
+        ensureColumnExists("DISH", "weekly_sales_qty", "INTEGER DEFAULT 0");
+        ensureColumnExists("DISH", "monthly_sales_qty", "INTEGER DEFAULT 0");
+        ensureColumnExists("DISH", "case_qty", "INTEGER");
+        ensureColumnExists("DISH", "last_modified", "TEXT DEFAULT '1900-01-01 00:00:00'");
+        ensureColumnExists("DISH", "cloud_sync_status", "INTEGER DEFAULT 0");
+
+        ensureColumnExists("CUSTOMIZATIONS", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("CUSTOMIZED_RULE", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("USER", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("PRINTER", "cloud_sync_status", "INTEGER DEFAULT 0");
+        ensureColumnExists("SYSTEMINFO", "cloud_sync_status", "INTEGER DEFAULT 0");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS MODIFICATION (" +
+                "_id INTEGER PRIMARY KEY, LANG1 TEXT, LANG2 TEXT, LANG3 TEXT, LANG4 TEXT, LANG5 TEXT, LANG6 TEXT, " +
+                "TYPE INTEGER, STATUS INTEGER, VERSION INTEGER);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS TODO (" +
+                "_id INTEGER PRIMARY KEY, TASK TEXT, SCHEDULE TEXT, DONE INTEGER DEFAULT 0, CREATED_AT TEXT, " +
+                "DELETED INTEGER DEFAULT 0, DONE_AT TEXT, cloud_sync_status INTEGER DEFAULT 0);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS CLOUDSYNC_META (" +
+                "_id INTEGER PRIMARY KEY, ENTITY TEXT, LAST_SYNC_AT TEXT, LAST_ERROR TEXT, STATUS INTEGER DEFAULT 0);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS PRODUCT_PRICE_HISTORY (" +
+                "_id INTEGER PRIMARY KEY, PRODUCT_ID INTEGER, PRODUCT_CODE TEXT, PRODUCT_NAME TEXT, OLD_PRICE INTEGER, " +
+                "NEW_PRICE INTEGER, OLD_COST INTEGER, NEW_COST INTEGER, CHANGE_TYPE TEXT, EMPLOYEE_ID INTEGER, " +
+                "CHANGED_AT TEXT, NOTE TEXT);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS PRODUCT (" +
+                "_id INTEGER PRIMARY KEY, CODE TEXT, MNEMONIC TEXT, SUBJECT TEXT, PRICE INTEGER, COST INTEGER DEFAULT 0, " +
+                "BRAND TEXT, UNIT TEXT, PRODUCAREA TEXT, CONTENT TEXT, CATEGORY TEXT, FOLDERID INTEGER, QST INTEGER, " +
+                "STOCK INTEGER DEFAULT 0, COVERDAYS REAL DEFAULT 0, WEEKLY_SALES_QTY INTEGER DEFAULT 0, " +
+                "MONTHLY_SALES_QTY INTEGER DEFAULT 0, CASE_QTY INTEGER, displayIdx INTEGER, STATUS INTEGER, VERSION INTEGER, " +
+                "last_modified TEXT DEFAULT '1900-01-01 00:00:00', cloud_sync_status INTEGER DEFAULT 0);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS OUTPUT (" +
+                "_id INTEGER PRIMARY KEY, SUBJECT TEXT, CONTACTID INTEGER, PRODUCTID INTEGER, AMOUNT FLOAT, TOTALPRICE FLOAT, " +
+                "DISCOUNT FLOAT, CONTENT TEXT, EMPLOYEEID INTEGER, TIME TEXT, CATEGORY TEXT, FOLDERID INTEGER, " +
+                "DELETED INTEGER DEFAULT 0, STATUS INTEGER, VERSION INTEGER);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS EMPLOYEE (" +
+                "_id INTEGER PRIMARY KEY, NAME TEXT, ROLE INTEGER, STATUS INTEGER, VERSION INTEGER, cloud_sync_status INTEGER DEFAULT 0);");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS HARDWARE (" +
+                "_id INTEGER PRIMARY KEY, NAME TEXT, IP TEXT, CATEGORY INTEGER, STYLE INTEGER, STATUS INTEGER, VERSION INTEGER, " +
+                "cloud_sync_status INTEGER DEFAULT 0);");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_BILL_TABLE_OPENTIME_STATUS ON BILL (tableName, openTime, STATUS);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_SALE_RECORD_BILL ON SALE_RECORD (billId, STATUS);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_SALE_RECORD_TABLE_TIME ON SALE_RECORD (tableName, openTime, STATUS);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_DISH_CATEGORY_DISPLAY ON DISH (CATEGORY, STATUS, displayIdx);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_PRODUCT_CATEGORY_DISPLAY ON PRODUCT (CATEGORY, STATUS, displayIdx);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_OUTPUT_SUBJECT_TIME_DELETED ON OUTPUT (SUBJECT, TIME, DELETED);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS IDX_PRODUCT_PRICE_HISTORY_PRODUCT ON PRODUCT_PRICE_HISTORY (PRODUCT_ID, CHANGED_AT);");
+    }
+
+    private void ensureColumnExists(String tableName, String columnName, String columnDef) {
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
+            while (cursor.moveToNext()) {
+                String existingName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                if (columnName.equalsIgnoreCase(existingName)) {
+                    return;
+                }
+            }
+            db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + columnDef);
+        } catch (Exception exp) {
+            exp.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
     private void insertInitialData() {
         String sql = "INSERT INTO customizations (key, value) VALUES ('NextOrderId', 0)";
