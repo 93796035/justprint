@@ -587,6 +587,10 @@ public class SimClientActivity extends Activity {
                 if (finalUpdated != null && finalStoredProduct != null) {
                     catalog = finalUpdated;
                     selected = finalStoredProduct;
+                    // Stock Moving keeps its own calculated input/draft while it
+                    // is hidden.  Invalidate that snapshot after a verified edit
+                    // so the next tab switch cannot calculate from old Manque.
+                    if (movingPlan != null) movingPlan.invalidateForInventoryChange();
                     if (request.field.getText().toString().trim().equals(submittedText)) {
                         settingValues = true;
                         try {

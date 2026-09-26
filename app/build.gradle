@@ -26,7 +26,15 @@ android {
     }
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java/com/just/print/simclient', 'src/main/java/org/cas/shared/inventory']
+            // Keep the real Java package root so Android Studio resolves package
+            // declarations and same-package classes (for example IdCheckingPage)
+            // correctly. Exclude the legacy POS branch from this standalone app.
+            java.srcDirs = ['src/main/java']
+            java.exclude 'com/just/print/app/**', 'com/just/print/db/**',
+                    'com/just/print/echo/**', 'com/just/print/net/**',
+                    'com/just/print/printer/**', 'com/just/print/sys/**',
+                    'com/just/print/ui/**', 'com/just/print/util/**',
+                    'org/cas/client/**'
             // AGP's lint model also scans Kotlin's default Java roots unless cleared.
             kotlin.srcDirs = []
             res.srcDirs = [simClientResources.get().asFile]
@@ -64,6 +72,9 @@ android {
         def stageApk = tasks.register("stage${variant.name.capitalize()}SimClientApk") {
             group = 'distribution'
             description = "Prepare ${variant.name} APK as SimClient.apk for upload."
+            // Package the variant before staging its APK. Do not depend on
+            // assemble here because assemble already depends on this staging
+            // task below, which would create a cycle.
             dependsOn variant.packageApplicationProvider
             doLast {
                 def directory = layout.buildDirectory.dir("outputs/apk/${variant.dirName}").get().asFile
@@ -87,23 +98,6 @@ android {
                     rename { 'SimClient.apk' }
                 }
                 logger.lifecycle("APK ready: ${new File(destination, 'SimClient.apk')}")
-            }
-        }
-        // Dependencies run only after successful packaging, never after a failed build.
-        variant.assembleProvider.configure {
-            dependsOn stageApk
-            doLast {
-                if (providers.gradleProperty('simClientSkipUpload').getOrElse('false').toBoolean()) {
-                    logger.lifecycle('APK upload skipped by -PsimClientSkipUpload=true')
-                    return
-                }
-                def artifact = layout.buildDirectory.file("outputs/publish/${variant.name}/SimClient.apk").get().asFile
-                def signer = new File(android.sdkDirectory, "build-tools/${android.buildToolsVersion}/apksigner.bat")
-                project.exec {
-                    commandLine 'powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-                            '-File', rootProject.file('tools/publish-apk.ps1').absolutePath,
-                            '-ApkPath', artifact.absolutePath, '-ApkSigner', signer.absolutePath
-                }
             }
         }
     }

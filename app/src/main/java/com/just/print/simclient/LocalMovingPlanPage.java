@@ -93,6 +93,19 @@ final class LocalMovingPlanPage {
         render();
     }
     boolean consumeInventoryChange() { boolean changed = inventoryTouched; inventoryTouched = false; return changed; }
+    /**
+     * The editing page may have changed Manque/stock while this page was hidden.
+     * Do not let the next activation reuse the old locally calculated inputs or
+     * draft.  The next load will download/read the verified catalog and build a
+     * new plan from it.
+     */
+    void invalidateForInventoryChange() {
+        if (pending != null) return; // an already submitted request must remain retryable
+        input = null;
+        draft = null;
+        fresh = false;
+        prefs.edit().remove("inputs:" + base).remove("draft:" + base).commit();
+    }
     void dispose() { closed = true; io.shutdown(); main.removeCallbacksAndMessages(null); }
 
     private JSONObject read(String key) throws Exception {
