@@ -100,7 +100,7 @@ final class StockingPlanPage {
         }
         ArrayList<String> options = new ArrayList<>();
         String[] allowed = {"LABATT", "MOLSON", "SLEEMAN", "POPPERS", "BENSON", "IMPERIAL", "JTI MD",
-                "LAIT", "COSTCO", "MONDOUX", "QUECAN"};
+                "COSTCO", "LAIT", "QUECAN", "MONDOUX"};
         for (String name : names) for (String wanted : allowed)
             if (name.equalsIgnoreCase(wanted)) { options.add(name); break; }
         if (selectedCategory == null || !options.contains(selectedCategory) || ProductCatalog.categoryColor(selectedCategory) != 0) {
