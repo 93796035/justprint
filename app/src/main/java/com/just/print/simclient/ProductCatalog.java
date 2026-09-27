@@ -83,11 +83,12 @@ public final class ProductCatalog {
     }
     public static int categoryColor(String name) {
         String key = normalizeCategory(name);
-        if (beerRoot(key)) return 0xffffd700;
-        if (tobaccoRoot(key)) return 0xff6495ed;
-        if (key.equals("EPICERIE TAX")) return 0xffdc143c;
-        if (key.equals("EPICERIE")) return 0xff228b22;
-        if (key.equals("OTHER")) return 0xffa9a9a9;
+        if (beerRoot(key) || key.equals("MOLSON") || key.equals("LABATT") || key.equals("SLEEMAN") || key.equals("POPPERS")) return 0xffffd700;
+        if (tobaccoRoot(key) || key.equals("BENSON") || key.equals("IMPERIAL") || key.equals("JTI") || key.equals("JTI MD")) return 0xff6495ed;
+        if (key.equals("LAIT")) return 0xff8bc34a;
+        if (key.equals("COSTCO")) return 0xffe67e22;
+        if (key.equals("MONDOUX")) return 0xff9b59b6;
+        if (key.equals("QUECAN")) return 0xffc0392b;
         return 0;
     }
     public String defaultCategory() {
