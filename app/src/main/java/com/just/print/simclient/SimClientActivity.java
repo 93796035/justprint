@@ -39,14 +39,18 @@ public class SimClientActivity extends Activity {
     private ProgressBar refreshProgressBar;
     private TextView refreshProgressText;
     private Button moving;
+    private Button stocking;
     private ImageButton connection, refresh;
     private Button editingTab;
     private ImageButton idTab;
     private FrameLayout pages;
     private View editingPage, movingPage, idPage;
+    private View stockingPage;
+    private StockingPlanPage stockingPlan;
     private IdCheckingPage idChecking;
     private LocalMovingPlanPage movingPlan;
     private boolean showingMoving;
+    private boolean showingStocking;
     private boolean showingId;
     private Integer requestedProductId;
     private ProductCatalog catalog;
@@ -56,6 +60,10 @@ public class SimClientActivity extends Activity {
     private boolean settingText, settingValues, saving;
     private final java.util.LinkedHashMap<String, AutoSaveRequest> pendingAutoSaves = new java.util.LinkedHashMap<>();
     private AutoSaveRequest autoSaveInFlight;
+    private AutoSaveRequest failedAutoSave;
+    private JSONObject failedAutoSavePayload;
+    private boolean openMovingAfterSave;
+    private boolean optimisticLocalPending;
     private volatile boolean closed;
     private int generation;
     private Runnable pendingSearch;
@@ -221,15 +229,17 @@ public class SimClientActivity extends Activity {
         tabs.setPadding(0, 0, 0, dp(8));
         tabs.setBackgroundColor(0xffffffff);
         tabs.setElevation(dp(8));
-        editingTab = new Button(this); editingTab.setText("Product Editing");
+        editingTab = new Button(this); editingTab.setText("Product");
         editingTab.setAllCaps(false); editingTab.setOnClickListener(v -> showEditingPage(null));
+        stocking = new Button(this); stocking.setText("Stocking"); stocking.setAllCaps(false);
+        stocking.setOnClickListener(v -> showStockingPage());
         idTab = new ImageButton(this);
         idTab.setImageResource(com.just.print.R.drawable.ic_sim_camera);
         idTab.setScaleType(ImageView.ScaleType.CENTER);
         idTab.setContentDescription("Camera: find product or check ID");
         idTab.setTooltipText("Camera");
         idTab.setOnClickListener(v -> showIdPage(null));
-        for (View tab : new View[]{editingTab, moving, idTab}) {
+        for (View tab : new View[]{editingTab, moving, stocking, idTab}) {
             if (tab instanceof Button) {
                 Button label = (Button) tab;
                 label.setTextSize(13); label.setMinWidth(0); label.setMinimumWidth(0);
@@ -367,7 +377,7 @@ public class SimClientActivity extends Activity {
 
     private void busy(boolean value) {
         saving = value;
-        if (movingPlan != null) movingPlan.setExternalBusy(value);
+        if (movingPlan != null) movingPlan.setExternalBusy(value && !optimisticLocalPending);
         product.setEnabled(!value);
         category.setEnabled(!value && !categories.isEmpty());
         connection.setEnabled(!value);
@@ -519,10 +529,14 @@ public class SimClientActivity extends Activity {
     }
 
     private void startAutoSave(AutoSaveRequest request) {
+        startAutoSave(request, null);
+    }
+
+    private void startAutoSave(AutoSaveRequest request, JSONObject retryPayload) {
         if (saving || selected == null || selected.optInt("id", -1) != request.productId) return;
         final JSONObject payload;
         try {
-            payload = autoSavePayload(request);
+            payload = retryPayload == null ? autoSavePayload(request) : new JSONObject(retryPayload.toString());
         } catch (Exception ex) {
             request.field.setError(ex.getMessage());
             request.field.requestFocus();
@@ -530,6 +544,24 @@ public class SimClientActivity extends Activity {
             return;
         }
         autoSaveInFlight = request;
+        // Apply the user's edit locally before the network call. Stock Moving must
+        // calculate from what the user entered, even while POS sync is in flight.
+        try {
+            JSONObject optimistic = new JSONObject(selected.toString());
+            JSONObject values = payload.getJSONObject("values");
+            for (String key : keys) if (values.has(key)) optimistic.put(key, values.get(key));
+            ProductCatalog localUpdated = catalog.updated(optimistic);
+            persistCatalog(server, localUpdated);
+            catalog = localUpdated;
+            selected = optimistic;
+            optimisticLocalPending = true;
+            if (movingPlan != null) movingPlan.invalidateForInventoryChange();
+            message("Local inventory updated. Calculating Stock Moving from the new values…", false);
+        } catch (Exception ex) {
+            autoSaveInFlight = null;
+            message("Could not update the local inventory before syncing: " + detail(ex), false);
+            return;
+        }
         productSaveBusy(true);
         product.dismissDropDown();
         generation++;
@@ -544,6 +576,7 @@ public class SimClientActivity extends Activity {
             JSONObject storedProduct = null;
             boolean verified = false;
             try {
+                main.post(() -> { if (!closed) message("Preparing local recovery state…", false); });
                 // Write the recovery marker before sending: a process death must never silently
                 // expose pre-submit quantities as current after a potentially successful update.
                 if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
@@ -551,6 +584,7 @@ public class SimClientActivity extends Activity {
                     throw new IOException("Unable to save recovery state. Nothing was submitted.");
                 JSONObject submitted = payload;
                 boolean stockOnlyCompatibility = false;
+                main.post(() -> { if (!closed) message("Saving changes to AikaPos…", false); });
                 try {
                     request(base, "/AikaPos/stockProducts", payload);
                 } catch (RequestException failure) {
@@ -560,24 +594,30 @@ public class SimClientActivity extends Activity {
                     request(base, "/AikaPos/stockProducts", submitted);
                     stockOnlyCompatibility = true;
                 }
+                main.post(() -> { if (!closed) message("AikaPos saved the change. Verifying the saved product…", false); });
                 JSONObject stored = request(base, "/AikaPos/stockProducts?id="
                         + payload.getInt("productId"), null).getJSONObject("product");
                 ProductSyncVerification.verify(submitted, stored);
                 verified = true;
                 storedProduct = stored;
                 try {
+                    main.post(() -> { if (!closed) message("AikaPos verified. Updating the local inventory cache…", false); });
                     ProductCatalog saved = snapshot.updated(stored);
                     updated = saved;
                     persistCatalog(base, saved);
+                    main.post(() -> { if (!closed) message("Local inventory updated. Recalculating Stock Moving on next open…", false); });
                     feedback = (stockOnlyCompatibility
                             ? "Stock saved and verified. This AikaPos version did not save Cost/Price. "
                             : "Saved and verified on AikaPos. ")
                             + "Stock 1: " + stored.getInt("stock1") + ", Stock 2: "
                             + stored.getInt("stock2") + ", Stock 3: " + stored.getInt("stock3");
                 } catch (Exception ex) {
-                    feedback = "POS updated, but local storage could not be saved. Tap Refresh before continuing.";
+                    feedback = "POS updated and verified, but saving the local product cache failed: "
+                            + detail(ex) + ". Tap Refresh before continuing.";
                 }
-            } catch (Exception ex) { feedback = ex.getMessage() + " Tap Refresh to load the current stock."; }
+            } catch (Exception ex) {
+                feedback = "Product sync failed: " + detail(ex) + ". Tap Refresh to load the current stock.";
+            }
             String finalFeedback = feedback;
             ProductCatalog finalUpdated = updated;
             JSONObject finalStoredProduct = storedProduct;
@@ -603,13 +643,51 @@ public class SimClientActivity extends Activity {
                 }
                 productSaveBusy(false);
                 autoSaveInFlight = null;
-                message(finalFeedback, false);
+                optimisticLocalPending = false;
+                if (!finalVerified) {
+                    failedAutoSave = request;
+                    failedAutoSavePayload = payload;
+                } else {
+                    failedAutoSave = null;
+                    failedAutoSavePayload = null;
+                }
+                if (showingMoving && movingPlan != null && finalUpdated != null && finalVerified) {
+                    movingPlan.activate();
+                }
+                if (!finalVerified) messageRetry(finalFeedback + "  Tap here to retry sync.");
+                else message(finalFeedback, false);
                 if (!finalVerified) new AlertDialog.Builder(this).setTitle("Sync not confirmed")
                         .setMessage(finalFeedback + "\n\nPOS: " + base)
                         .setPositiveButton("Refresh", (dialog, which) -> refreshCatalog())
                         .setNegativeButton("Close", null).show();
                 main.post(this::drainAutoSaves);
+                if (openMovingAfterSave && pendingAutoSaves.isEmpty() && finalUpdated != null && finalVerified) {
+                    openMovingAfterSave = false;
+                    main.post(this::openMovingPlans);
+                } else if (openMovingAfterSave && pendingAutoSaves.isEmpty()) {
+                    openMovingAfterSave = false;
+                    message("Product sync did not complete. Stock Moving was not opened; refresh or retry before recalculating.", false);
+                }
             });
+        });
+    }
+
+    private static String detail(Exception ex) {
+        String message = ex.getMessage();
+        return message == null || message.trim().isEmpty() ? ex.getClass().getSimpleName() : message;
+    }
+
+    private void messageRetry(String text) {
+        message(text, false);
+        status.setTextColor(0xff087f8c);
+        status.setOnClickListener(v -> {
+            if (failedAutoSave != null && failedAutoSavePayload != null && !saving) {
+                AutoSaveRequest retry = failedAutoSave;
+                JSONObject payload = failedAutoSavePayload;
+                failedAutoSave = null;
+                failedAutoSavePayload = null;
+                startAutoSave(retry, payload);
+            }
         });
     }
 
@@ -620,7 +698,7 @@ public class SimClientActivity extends Activity {
         category.setEnabled(!value && !categories.isEmpty());
         connection.setEnabled(!value);
         refresh.setEnabled(!value);
-        moving.setEnabled(!value);
+        moving.setEnabled(!value || optimisticLocalPending);
         updateTabs();
         // Keep the six value fields enabled and visible while the network request runs.
     }
@@ -776,8 +854,14 @@ public class SimClientActivity extends Activity {
     }
 
     private void openMovingPlans() {
-        if (saving || showingMoving || (idChecking != null && idChecking.isBusy())
+        if ((saving && !optimisticLocalPending) || showingMoving || (idChecking != null && idChecking.isBusy())
                 || (movingPlan != null && movingPlan.isBusy())) return;
+        if (!optimisticLocalPending && (autoSaveInFlight != null || !pendingAutoSaves.isEmpty())) {
+            openMovingAfterSave = true;
+            message("Saving the product changes to AikaPos first… Stock Moving will calculate after sync completes.", false);
+            drainAutoSaves();
+            return;
+        }
         if (server.isEmpty()) { configure(); return; }
         product.dismissDropDown();
         generation++;
@@ -794,24 +878,51 @@ public class SimClientActivity extends Activity {
             pages.addView(movingPage, new FrameLayout.LayoutParams(-1, -1));
         }
         showingMoving = true;
+        showingStocking = false;
         showingId = false;
         if (idPage != null) idPage.setVisibility(View.GONE);
+        if (stockingPage != null) stockingPage.setVisibility(View.GONE);
         if (idChecking != null) idChecking.deactivate();
         editingPage.setVisibility(View.GONE); movingPage.setVisibility(View.VISIBLE);
         updateTabs();
         movingPlan.activate();
     }
 
+    private void showStockingPage() {
+        if (saving || showingStocking || (movingPlan != null && movingPlan.isBusy())
+                || (idChecking != null && idChecking.isBusy())) return;
+        if (stockingPage == null) {
+            stockingPlan = new StockingPlanPage(this, server, () -> {
+                String saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(server, "[]");
+                return new JSONArray(saved);
+            }, plan -> {
+                JSONObject result = request(server, "/AikaPos/stockingPlan", plan);
+                if (result.optInt("billId", -1) < 0) throw new IOException("POS did not return a stocking plan ID");
+            });
+            stockingPage = stockingPlan.view();
+            pages.addView(stockingPage, new FrameLayout.LayoutParams(-1, -1));
+        }
+        showingMoving = false; showingStocking = true; showingId = false;
+        if (movingPage != null) movingPage.setVisibility(View.GONE);
+        if (idPage != null) idPage.setVisibility(View.GONE);
+        editingPage.setVisibility(View.GONE); stockingPage.setVisibility(View.VISIBLE);
+        stockingPlan.activate();
+        if (idChecking != null) idChecking.deactivate();
+        updateTabs();
+    }
+
     private void showEditingPage(Integer productId) {
         if (saving || (idChecking != null && idChecking.isBusy()) || (movingPlan != null && movingPlan.isBusy())) return;
-        if (!showingMoving && !showingId && productId == null) return;
+        if (!showingMoving && !showingStocking && !showingId && productId == null) return;
         if (movingPlan != null && !movingPlan.flushQuantity()) return;
         showingMoving = false;
+        showingStocking = false;
         showingId = false;
         if (idPage != null) idPage.setVisibility(View.GONE);
         if (idChecking != null) idChecking.deactivate();
         if (movingPlan != null) movingPlan.deactivate();
         if (movingPage != null) movingPage.setVisibility(View.GONE);
+        if (stockingPage != null) stockingPage.setVisibility(View.GONE);
         editingPage.setVisibility(View.VISIBLE);
         hideKeyboard(); updateTabs();
         if (movingPlan != null && movingPlan.consumeInventoryChange()) {
@@ -907,11 +1018,12 @@ public class SimClientActivity extends Activity {
         if (editingTab == null) return;
         boolean enabled = !saving && (movingPlan == null || !movingPlan.isBusy())
                 && (idChecking == null || !idChecking.isBusy());
-        editingTab.setEnabled(enabled); moving.setEnabled(enabled); idTab.setEnabled(enabled);
+        editingTab.setEnabled(enabled); moving.setEnabled(enabled); stocking.setEnabled(enabled); idTab.setEnabled(enabled);
         connection.setEnabled(enabled); refresh.setEnabled(enabled);
-        View[] tabs = {editingTab, moving, idTab};
+        View[] tabs = {editingTab, moving, stocking, idTab};
+        int[] tabColors = {0xff1976d2, 0xffef8b2c, 0xff2e9d61, 0xff8e5bb7};
         for (int i = 0; i < tabs.length; i++) {
-            boolean active = i == (showingId ? 2 : showingMoving ? 1 : 0);
+            boolean active = i == (showingId ? 3 : showingStocking ? 2 : showingMoving ? 1 : 0);
             tabs[i].setSelected(active);
             if (tabs[i] instanceof Button) ((Button) tabs[i]).setTypeface(
                     android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
@@ -919,16 +1031,32 @@ public class SimClientActivity extends Activity {
             float bottomRadius = dp(14);
             background.setCornerRadii(new float[]{0, 0, 0, 0,
                     bottomRadius, bottomRadius, bottomRadius, bottomRadius});
-            if (active) background.setColors(new int[]{0xff087f8c, 0xff146783});
-            else background.setColor(0xfff0f8fa);
+            int tabColor = tabColors[i];
+            if (active) background.setColors(new int[]{tabColor, darken(tabColor, 0.72f)});
+            else background.setColor(blend(tabColor, 0xffffffff, 0.86f));
             background.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT);
-            int color = active ? 0xffffffff : 0xff3e6579;
+            int color = active ? 0xffffffff : darken(tabColor, 0.78f);
             if (tabs[i] instanceof Button) ((Button) tabs[i]).setTextColor(color);
             else ((ImageButton) tabs[i]).setImageTintList(android.content.res.ColorStateList.valueOf(color));
             tabs[i].setElevation(dp(active ? 3 : 0));
             tabs[i].setBackground(new android.graphics.drawable.RippleDrawable(
                     android.content.res.ColorStateList.valueOf(0x2270dccc), background, null));
         }
+    }
+
+    private static int darken(int color, float factor) {
+        int r = (int) (((color >> 16) & 0xff) * factor);
+        int g = (int) (((color >> 8) & 0xff) * factor);
+        int b = (int) ((color & 0xff) * factor);
+        return 0xff000000 | (r << 16) | (g << 8) | b;
+    }
+
+    private static int blend(int foreground, int background, float backgroundWeight) {
+        float foregroundWeight = 1f - backgroundWeight;
+        int r = (int) (((foreground >> 16) & 0xff) * foregroundWeight + ((background >> 16) & 0xff) * backgroundWeight);
+        int g = (int) (((foreground >> 8) & 0xff) * foregroundWeight + ((background >> 8) & 0xff) * backgroundWeight);
+        int b = (int) ((foreground & 0xff) * foregroundWeight + (background & 0xff) * backgroundWeight);
+        return 0xff000000 | (r << 16) | (g << 8) | b;
     }
 
     @Override public void onBackPressed() {
@@ -1153,11 +1281,14 @@ public class SimClientActivity extends Activity {
             case 404: return "Inventory endpoint not found. Check the POS server version.";
             case 409: return "Stock changed or POS is busy. Finish editing on POS, then tap Refresh.";
             case 413: return "Request is too large.";
+            case 500: return "POS reached the moving-plan service, but the service failed internally. Check the POS server log; the phone did submit the request.";
             default: return "Server request failed. Check POS and reload stock before retrying.";
         }
     }
     private void message(String text, boolean toast) {
         status.setText(text);
+        status.setTextColor(0xff16344b);
+        status.setOnClickListener(null);
         if (toast) Toast.makeText(this, text, Toast.LENGTH_LONG).show();
     }
     private ImageButton toolbarIcon(int drawable, String label) {
