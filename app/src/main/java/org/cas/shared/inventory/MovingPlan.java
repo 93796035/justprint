@@ -26,9 +26,17 @@ public final class MovingPlan {
             JSONObject best = null;
             long shortage = 0;
             TreeMap<String, Long> sales = new TreeMap<>();
+            JSONArray shortageBreakdown = new JSONArray();
             for (JSONObject p : entry.getValue()) {
                 JSONObject facts = p.getJSONObject("moving");
-                shortage = Math.addExact(shortage, Math.multiplyExact(Math.max(0L, p.getLong("monque")), facts.getLong("shortageBottles")));
+                long shortageCount = Math.max(0L, p.getLong("monque"));
+                long shortageUnits = Math.multiplyExact(shortageCount, facts.getLong("shortageBottles"));
+                shortage = Math.addExact(shortage, shortageUnits);
+                if (shortageCount > 0) shortageBreakdown.put(new JSONObject()
+                        .put("name", facts.getString("name"))
+                        .put("count", shortageCount)
+                        .put("unitsPerItem", facts.getLong("shortageBottles"))
+                        .put("units", shortageUnits));
                 JSONObject days = p.optJSONObject("movingSales");
                 if (days != null) for (Iterator<String> it = days.keys(); it.hasNext();) {
                     String date = it.next();
@@ -52,7 +60,7 @@ public final class MovingPlan {
                 if (cases > 0) candidate = new JSONObject().put("group", key).put("productId", best.getInt("id"))
                         .put("name", facts.getString("name")).put("code", best.optString("code"))
                         .put("cases", cases).put("unitsPerCase", units).put("units", Math.multiplyExact(cases, units))
-                        .put("shortage", shortage).put("state", "pending");
+                        .put("shortage", shortage).put("shortageBreakdown", shortageBreakdown).put("state", "pending");
             }
             if (saved != null && saved.getString("state").equals("skipped")) {
                 if (candidate == null) candidate = new JSONObject(saved.toString());

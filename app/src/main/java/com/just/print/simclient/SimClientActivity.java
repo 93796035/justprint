@@ -27,12 +27,17 @@ public class SimClientActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private AutoCompleteTextView product;
+    private Button editProductName;
+    private boolean editingProductName;
     private Spinner category;
+    private Button editCategory;
+    private boolean editingCategory;
     private java.util.List<String> categories = new ArrayList<>();
     private String selectedCategory;
     private final EditText[] quantities = new EditText[4];
     private final String[] keys = {"stock1", "stock2", "stock3", "monque"};
     private TextView status;
+    private TextView weeklySales;
     private final EditText[] prices = new EditText[2];
     private final String[] priceKeys = {"cost", "price"};
     private LinearLayout refreshProgress;
@@ -140,12 +145,23 @@ public class SimClientActivity extends Activity {
         category = new Spinner(this);
         styleDropdown(this, category);
         categoryBar.addView(category, new LinearLayout.LayoutParams(0, dp(48), 1));
+        editCategory = new Button(this);
+        editCategory.setText("✎"); editCategory.setTextSize(24); editCategory.setAllCaps(false);
+        editCategory.setContentDescription("Edit category"); editCategory.setEnabled(false);
+        editCategory.setOnClickListener(v -> { if (selected != null && !saving) { editingCategory = true; editCategory.setSelected(true); category.setEnabled(true); } });
+        categoryBar.addView(editCategory, new LinearLayout.LayoutParams(dp(58), dp(48)));
         category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onNothingSelected(AdapterView<?> parent) {}
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position >= categories.size()) return;
                 String value = categories.get(position);
                 if (value.equals(selectedCategory)) return;
+                if (editingCategory && selected != null && !settingValues) {
+                    editingCategory = false; editCategory.setSelected(false);
+                    selectedCategory = value;
+                    saveCategory(value);
+                    return;
+                }
                 selectedCategory = value;
                 invalidateSelection();
                 String query = product.getText().toString().trim();
@@ -182,7 +198,15 @@ public class SimClientActivity extends Activity {
         });
         product.setOnFocusChangeListener((view, focused) -> {
             if (focused) product.post(() -> { if (product.hasFocus()) product.selectAll(); });
-            else completionEcho.reset();
+            else {
+                completionEcho.reset();
+                if (editingProductName) {
+                    editingProductName = false;
+                    editProductName.setSelected(false);
+                    product.setEnabled(false);
+                    autoSaveIfChanged(product, "mnemonic", false, true);
+                }
+            }
         });
         styleInput(product);
         product.setTextSize(20);
@@ -191,7 +215,26 @@ public class SimClientActivity extends Activity {
         productLabel.setText("Product name");
         productLabel.setPadding(0, dp(20), 0, dp(8));
         root.addView(productLabel, full());
-        root.addView(product, full());
+        LinearLayout productRow = new LinearLayout(this);
+        productRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        productRow.addView(product, new LinearLayout.LayoutParams(0, -2, 1));
+        editProductName = new Button(this);
+        editProductName.setText("✎");
+        editProductName.setTextSize(24);
+        editProductName.setAllCaps(false);
+        editProductName.setContentDescription("Edit product name");
+        editProductName.setTooltipText("Edit product name");
+        editProductName.setEnabled(false);
+        editProductName.setOnClickListener(v -> {
+            if (selected == null || saving) return;
+            editingProductName = true;
+            editProductName.setSelected(true);
+            product.setEnabled(true);
+            product.requestFocus();
+            product.selectAll();
+        });
+        productRow.addView(editProductName, new LinearLayout.LayoutParams(dp(58), dp(64)));
+        root.addView(productRow, full());
         LinearLayout stocks = new LinearLayout(this);
         for (int i = 0; i < 3; i++) {
             LinearLayout field = numberField(i, "Stock" + (i + 1));
@@ -203,6 +246,13 @@ public class SimClientActivity extends Activity {
         details.addView(priceField(0, "Cost"), new LinearLayout.LayoutParams(0, -2, 1));
         details.addView(priceField(1, "Price"), new LinearLayout.LayoutParams(0, -2, 1));
         root.addView(details, full());
+        weeklySales = new TextView(this);
+        weeklySales.setText("Weekly sales: —");
+        weeklySales.setTextSize(16);
+        weeklySales.setTextColor(0xff48636d);
+        weeklySales.setPadding(0, dp(8), 0, dp(8));
+        weeklySales.setContentDescription("Weekly sales, read only");
+        root.addView(weeklySales, full());
         // Category belongs below all editable inventory fields and above the status text.
         LinearLayout.LayoutParams categoryParams = full();
         categoryParams.topMargin = dp(12);
@@ -219,12 +269,12 @@ public class SimClientActivity extends Activity {
         editingPage = scroll;
         LinearLayout shell = column();
         shell.addView(toolbar, full());
-        shell.addView(refreshProgress, full());
         pages = new FrameLayout(this);
         pages.addView(editingPage, new FrameLayout.LayoutParams(-1, -1));
         shell.addView(pages, new LinearLayout.LayoutParams(-1, 0, 1));
         View divider = new View(this); divider.setBackgroundColor(0xffd9ecef);
         shell.addView(divider, new LinearLayout.LayoutParams(-1, dp(1)));
+        shell.addView(refreshProgress, full());
         LinearLayout tabs = new LinearLayout(this);
         tabs.setPadding(0, 0, 0, dp(8));
         tabs.setBackgroundColor(0xffffffff);
@@ -266,7 +316,7 @@ public class SimClientActivity extends Activity {
                 if (!settingText) appended = count > 0 && start + count == s.length();
             }
             public void afterTextChanged(Editable text) {
-                if (settingText) return;
+                if (settingText || editingProductName) return;
                 if (text.toString().equals(previous)) return;
                 if (selected != null) editedFromProductId = selected.optInt("id", -1);
                 invalidateSelection();
@@ -477,6 +527,11 @@ public class SimClientActivity extends Activity {
         settingValues = true;
         try {
             selected = row;
+            editingCategory = false;
+            if (editCategory != null) { editCategory.setSelected(false); editCategory.setEnabled(true); }
+            weeklySales.setText("Weekly sales: " + weeklySales(row));
+            editingProductName = false;
+            if (editProductName != null) { editProductName.setSelected(false); editProductName.setEnabled(true); }
             editedFromProductId = null;
             settingText = true;
             String name = row.optString("mnemonic", "").trim();
@@ -501,8 +556,16 @@ public class SimClientActivity extends Activity {
         final EditText field;
         final String key;
         final boolean price;
+        final boolean name;
+        final boolean category;
         AutoSaveRequest(int productId, EditText field, String key, boolean price) {
-            this.productId = productId; this.field = field; this.key = key; this.price = price;
+            this(productId, field, key, price, false);
+        }
+        AutoSaveRequest(int productId, EditText field, String key, boolean price, boolean name) {
+            this(productId, field, key, price, name, false);
+        }
+        AutoSaveRequest(int productId, EditText field, String key, boolean price, boolean name, boolean category) {
+            this.productId = productId; this.field = field; this.key = key; this.price = price; this.name = name; this.category = category;
         }
     }
 
@@ -525,11 +588,43 @@ public class SimClientActivity extends Activity {
             values.put(request.key, ProductCatalog.moneyCents(edited));
             expected.put(request.key, selected.get(request.key));
         }
+        if (request.name) {
+            if (edited.isEmpty()) throw new IllegalArgumentException("Product name cannot be empty");
+            values.put("mnemonic", edited);
+            values.put("subject", edited);
+            expected.put("mnemonic", selected.optString("mnemonic", ""));
+            expected.put("subject", selected.optString("subject", ""));
+        }
+        if (request.category) {
+            values.put("category", edited);
+            expected.put("category", selected.optString("category", ""));
+        }
         return payload.put("values", values).put("expected", expected);
     }
 
     private void startAutoSave(AutoSaveRequest request) {
         startAutoSave(request, null);
+    }
+
+    private int weeklySales(JSONObject row) {
+        int weekly = Math.max(row.optInt("weekly_sales_qty", row.optInt("weeklySalesQty", 0)),
+                row.optInt("lastSevenDaysQty", 0));
+        JSONObject sales = row.optJSONObject("movingSales");
+        if (sales != null) {
+            int recent = 0;
+            for (java.util.Iterator<String> it = sales.keys(); it.hasNext();) recent += Math.max(0, sales.optInt(it.next(), 0));
+            weekly = Math.max(weekly, recent);
+        }
+        return weekly;
+    }
+
+    private void saveCategory(String value) {
+        if (selected == null || value.equals(selected.optString("category", ""))) return;
+        EditText field = new EditText(this);
+        field.setText(value);
+        AutoSaveRequest request = new AutoSaveRequest(selected.optInt("id", -1), field, "category", false, false, true);
+        pendingAutoSaves.put("category", request);
+        main.post(this::drainAutoSaves);
     }
 
     private void startAutoSave(AutoSaveRequest request, JSONObject retryPayload) {
@@ -549,7 +644,11 @@ public class SimClientActivity extends Activity {
         try {
             JSONObject optimistic = new JSONObject(selected.toString());
             JSONObject values = payload.getJSONObject("values");
-            for (String key : keys) if (values.has(key)) optimistic.put(key, values.get(key));
+            java.util.Iterator<String> valueKeys = values.keys();
+            while (valueKeys.hasNext()) {
+                String key = valueKeys.next();
+                optimistic.put(key, values.get(key));
+            }
             ProductCatalog localUpdated = catalog.updated(optimistic);
             persistCatalog(server, localUpdated);
             catalog = localUpdated;
@@ -634,7 +733,9 @@ public class SimClientActivity extends Activity {
                     if (request.field.getText().toString().trim().equals(submittedText)) {
                         settingValues = true;
                         try {
-                            request.field.setText(request.price
+                            request.field.setText(request.name
+                                    ? finalStoredProduct.optString(request.key, "")
+                                    : request.price
                                     ? (finalStoredProduct.isNull(request.key) ? "" : ProductCatalog.money(finalStoredProduct, request.key))
                                     : String.valueOf(finalStoredProduct.getInt(request.key)));
                         } catch (Exception ignored) {}
@@ -696,6 +797,7 @@ public class SimClientActivity extends Activity {
         if (movingPlan != null) movingPlan.setExternalBusy(value);
         product.setEnabled(!value);
         category.setEnabled(!value && !categories.isEmpty());
+        editCategory.setEnabled(!value && selected != null && !categories.isEmpty());
         connection.setEnabled(!value);
         refresh.setEnabled(!value);
         moving.setEnabled(!value || optimisticLocalPending);
@@ -710,7 +812,7 @@ public class SimClientActivity extends Activity {
             AutoSaveRequest request = iterator.next().getValue();
             iterator.remove();
             if (request.productId != selected.optInt("id", -1)) continue;
-            if (!ProductFieldChange.changed(selected, request.key, request.field.getText().toString(), request.price)) continue;
+            if (!ProductFieldChange.changed(selected, request.key, request.field.getText().toString(), request.price, request.name)) continue;
             startAutoSave(request);
             return;
         }
@@ -898,7 +1000,7 @@ public class SimClientActivity extends Activity {
             }, plan -> {
                 JSONObject result = request(server, "/AikaPos/stockingPlan", plan);
                 if (result.optInt("billId", -1) < 0) throw new IOException("POS did not return a stocking plan ID");
-            });
+            }, id -> showEditingPage(id));
             stockingPage = stockingPlan.view();
             pages.addView(stockingPage, new FrameLayout.LayoutParams(-1, -1));
         }
@@ -1247,9 +1349,12 @@ public class SimClientActivity extends Activity {
         field.addView(input, full()); return field;
     }
     private void autoSaveIfChanged(EditText field, String key, boolean price) {
+        autoSaveIfChanged(field, key, price, false);
+    }
+    private void autoSaveIfChanged(EditText field, String key, boolean price, boolean name) {
         if (settingValues || selected == null || !field.isEnabled()
-                || !ProductFieldChange.changed(selected, key, field.getText().toString(), price)) return;
-        AutoSaveRequest request = new AutoSaveRequest(selected.optInt("id", -1), field, key, price);
+                || !ProductFieldChange.changed(selected, key, field.getText().toString(), price, name)) return;
+        AutoSaveRequest request = new AutoSaveRequest(selected.optInt("id", -1), field, key, price, name);
         pendingAutoSaves.put(key, request);
         main.post(this::drainAutoSaves);
     }

@@ -16,6 +16,7 @@ import java.util.*;
 final class StockingPlanPage {
     interface CatalogProvider { JSONArray products() throws Exception; }
     interface SyncHandler { void sync(JSONObject plan) throws Exception; }
+    interface ProductClickHandler { void open(int productId); }
     private final Activity activity;
     private final CatalogProvider provider;
     private final SharedPreferences prefs;
@@ -34,9 +35,10 @@ final class StockingPlanPage {
     private JSONArray products = new JSONArray();
     private String selectedCategory;
     private int selectedWeeks = 3;
+    private final ProductClickHandler productClickHandler;
 
-    StockingPlanPage(Activity activity, String base, CatalogProvider provider, SyncHandler syncHandler) {
-        this.activity = activity; this.provider = provider; this.syncHandler = syncHandler;
+    StockingPlanPage(Activity activity, String base, CatalogProvider provider, SyncHandler syncHandler, ProductClickHandler productClickHandler) {
+        this.activity = activity; this.provider = provider; this.syncHandler = syncHandler; this.productClickHandler = productClickHandler;
         root = new LinearLayout(activity); listContent = new LinearLayout(activity); rows = new LinearLayout(activity); header = new LinearLayout(activity); category = new Spinner(activity); weeks = new Spinner(activity); total = new TextView(activity); status = new TextView(activity); note = new EditText(activity);
         prefs = activity.getSharedPreferences("stocking_plans", Activity.MODE_PRIVATE);
         root.setOrientation(LinearLayout.VERTICAL); root.setPadding(dp(18), dp(18), dp(18), dp(8));
@@ -78,6 +80,7 @@ final class StockingPlanPage {
             }
         });
         weeks.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, new String[]{"1 week","2 weeks","3 weeks","4 weeks","5 weeks"}));
+        weeks.setSelection(2);
         weeks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onNothingSelected(AdapterView<?> p) {}
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) { selectedWeeks = pos + 1; render(); }
@@ -132,6 +135,11 @@ final class StockingPlanPage {
             int rowTotal=saved != null && saved.has("total") ? saved.optInt("total",qty*unitPrice) : qty*unitPrice;
             EditText q=number(String.valueOf(qty)); EditText price=number(String.format(Locale.ROOT,"%.2f",unitPrice/100.0)); EditText lineTotal=number(String.format(Locale.ROOT,"%.2f",rowTotal/100.0));
             TextView name=text(p.optString("mnemonic",p.optString("subject",p.optString("code"))));
+            name.setTextColor(0xff1976d2);
+            name.setPaintFlags(name.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+            name.setClickable(true);
+            name.setContentDescription("Edit " + name.getText());
+            name.setOnClickListener(v -> productClickHandler.open(p.optInt("id", -1)));
             LinearLayout line=new LinearLayout(activity); line.setGravity(android.view.Gravity.CENTER_VERTICAL); line.addView(name,new LinearLayout.LayoutParams(0,dp(52),1)); line.addView(q,new LinearLayout.LayoutParams(dp(58),dp(48))); line.addView(price,new LinearLayout.LayoutParams(dp(78),dp(48))); line.addView(lineTotal,new LinearLayout.LayoutParams(dp(82),dp(48))); rows.addView(line); count++;
             final JSONObject product=p; final boolean[] syncing={false};
             TextWatcher link = new TextWatcher() {

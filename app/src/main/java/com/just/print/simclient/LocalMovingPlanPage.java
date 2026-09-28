@@ -34,7 +34,9 @@ final class LocalMovingPlanPage {
     private JSONObject activeRow;
     private boolean savingQuantity;
     private ListView list;
-    private int sortOrder;
+    // Product name is the most predictable default for the Stock Moving page.
+    // The user can still switch to quantity or category from the spinner.
+    private int sortOrder = 1;
     private JSONObject input, draft, pending;
     private boolean externalBusy, busy, fresh, closed;
     private boolean inventoryTouched;
@@ -52,12 +54,13 @@ final class LocalMovingPlanPage {
         LinearLayout sortBar = new LinearLayout(activity);
         sortBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
         TextView sortLabel = new TextView(activity); sortLabel.setText("Sort by"); sortLabel.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        sortBar.addView(sortLabel, new LinearLayout.LayoutParams(dp(80), dp(48)));
+        sortBar.addView(sortLabel, new LinearLayout.LayoutParams(dp(66), dp(48)));
         Spinner sort = new Spinner(activity);
         ArrayAdapter<String> sortOptions = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item,
                 new String[]{"Moving quantity", "Product name", "Category"});
         sortOptions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sort.setAdapter(sortOptions);
+        sort.setSelection(sortOrder);
         SimClientActivity.styleDropdown(activity, sort);
         sort.setContentDescription("Sort moving plan");
         sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -67,14 +70,14 @@ final class LocalMovingPlanPage {
                 if (list != null && retrySync != null) render();
             }
         });
-        sortBar.addView(sort, new LinearLayout.LayoutParams(0, dp(48), 1));
+        sortBar.addView(sort, new LinearLayout.LayoutParams(dp(150), dp(48)));
         summary = new TextView(activity); summary.setTextSize(16);
         list = new ListView(activity); list.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS); root.addView(list, new LinearLayout.LayoutParams(-1, 0, 1));
         // Keep controls and the total below the moving list so the list gets visual priority.
         LinearLayout bottomControls = new LinearLayout(activity);
         bottomControls.setGravity(android.view.Gravity.CENTER_VERTICAL);
         bottomControls.addView(sortBar, new LinearLayout.LayoutParams(-2, -2));
-        bottomControls.setGravity(android.view.Gravity.RIGHT | android.view.Gravity.CENTER_VERTICAL);
+        bottomControls.setGravity(android.view.Gravity.CENTER);
         root.addView(bottomControls);
         feedback = new TextView(activity); feedback.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE); root.addView(feedback);
         retrySync = new Button(activity); retrySync.setText("Retry sync");
@@ -117,9 +120,11 @@ final class LocalMovingPlanPage {
         if (pending != null) { submit(null); return; }
         if (!flushQuantity()) return;
         fresh = false;
-        setBusy(true); setFeedback("Refreshing inventory and calculating plan…");
+        setBusy(true); setFeedback("Reading refreshed inventory and calculating plan…");
         io.execute(() -> {
+            String stage = "starting";
             try {
+                stage = "reading saved moving state";
                 JSONObject saved = read("draft:"), request = read("pending:");
                 JSONObject savedInput = read("inputs:");
                 if (request != null) {
@@ -127,22 +132,35 @@ final class LocalMovingPlanPage {
                         setBusy(false); submit(null); } });
                     return;
                 }
-                saveCatalog(SimClientActivity.request(base, "/AikaPos/stockProducts", null));
+                stage = "reading local inventory cache";
                 SharedPreferences local = activity.getSharedPreferences("product_catalogs", Activity.MODE_PRIVATE);
-                JSONArray products = new JSONArray(local.getString(base, "[]"));
+                String catalog = local.getString(base, null);
+                if (catalog == null) {
+                    throw new IOException("No refreshed inventory is available on this phone. Tap Refresh products first.");
+                }
+                JSONArray products = new JSONArray(catalog);
+                stage = "calculating moving suggestions";
                 JSONObject latest = LocalMovingInputs.fromCatalog(products);
+                // The catalog was already refreshed and persisted by the main page.
+                // Switching to beerMoving is intentionally local-only; it must not
+                // perform another POS request just to calculate the suggestions.
                 boolean verified = true;
+                stage = "saving calculated moving draft locally";
                 JSONObject generated = MovingPlan.generate(latest, null);
                 if (!prefs.edit().putString("inputs:" + base, latest.toString()).putString("draft:" + base, generated.toString()).commit())
-                    throw new IOException("Cannot save draft on this phone");
+                    throw new IOException("Phone storage rejected the draft (SharedPreferences.commit returned false).");
                 JSONObject resultInput = latest;
                 String message = generated.getJSONArray("rows").length() == 0
-                        ? "No moves suggested by the saved Monque and Stock3 values."
-                        : "";
+                        ? "Calculation complete. No moves suggested by the saved Monque and Stock3 values."
+                        : "Calculation complete. Moving plan updated from the latest local inventory ("
+                                + generated.getJSONArray("rows").length() + " suggestion(s)).";
                 if (!verified) message = "Refresh inventory to verify the previous stock update before syncing.";
                 String note = message;
                 main.post(() -> { if (alive()) { input = resultInput; draft = generated; fresh = verified; setBusy(false); setFeedback(note); } });
-            } catch (Exception ex) { fail("Could not load/save the draft. " + ex.getMessage()); }
+            } catch (Exception ex) {
+                fail("Moving plan failed while " + stage + ": "
+                        + (ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage()));
+            }
         });
     }
 
@@ -285,8 +303,7 @@ final class LocalMovingPlanPage {
                 line.setContentDescription(row.optString("name") + ". Double-tap to edit product. Single-tap for actions.");
                 line.setEnabled(!isBusy() && pending == null);
                 line.setOnClickListener(v -> new AlertDialog.Builder(activity).setTitle(row.optString("name"))
-                        .setMessage("Category: " + category(row, categories) + "\n" + row.optLong("cases")
-                                + " case(s) × " + row.optLong("unitsPerCase") + " = " + row.optLong("units") + " units\n" + row.optString("code"))
+                        .setMessage(details(row, categories))
                         .setNegativeButton("Close", null)
                         .setNeutralButton("Edit product", (d, which) -> openProduct.accept(row.optInt("productId")))
                         .show());
@@ -306,6 +323,25 @@ final class LocalMovingPlanPage {
                 return line;
             }
         });
+    }
+    private String details(JSONObject row, java.util.Map<Integer, String> categories) {
+        StringBuilder text = new StringBuilder("Category: ").append(category(row, categories)).append('\n');
+        JSONArray breakdown = row.optJSONArray("shortageBreakdown");
+        if (breakdown != null && breakdown.length() > 0) {
+            text.append("Shortage breakdown:\n");
+            for (int i = 0; i < breakdown.length(); i++) {
+                JSONObject item = breakdown.optJSONObject(i);
+                if (item == null) continue;
+                text.append("• ").append(item.optString("name")).append(": ")
+                        .append(item.optLong("count")).append(" × ")
+                        .append(item.optLong("unitsPerItem")).append(" = ")
+                        .append(item.optLong("units")).append(" units\n");
+            }
+            text.append("Shortage total: ").append(row.optLong("shortage")).append(" units\n");
+        }
+        text.append(row.optLong("cases")).append(" case(s) × ").append(row.optLong("unitsPerCase"))
+                .append(" = ").append(row.optLong("units")).append(" units\n").append(row.optString("code"));
+        return text.toString();
     }
     boolean flushQuantity() {
         if (activeQuantity == null || savingQuantity) return true;

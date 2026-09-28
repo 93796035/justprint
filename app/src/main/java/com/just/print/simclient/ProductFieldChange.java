@@ -7,8 +7,13 @@ public final class ProductFieldChange {
     private ProductFieldChange() {}
 
     public static boolean changed(JSONObject product, String key, String text, boolean price) {
+        return changed(product, key, text, price, false);
+    }
+
+    public static boolean changed(JSONObject product, String key, String text, boolean price, boolean name) {
         if (product == null || !product.has(key)) return false;
         String value = text == null ? "" : text.trim();
+        if (name) return !value.equals(product.optString(key, "").trim());
         try {
             if (price) {
                 if (value.isEmpty()) return !product.isNull(key);
