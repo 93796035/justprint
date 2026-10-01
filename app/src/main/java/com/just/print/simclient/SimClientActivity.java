@@ -1006,7 +1006,8 @@ public class SimClientActivity extends Activity {
         int id = selected.optInt("id", -1);
         if (id <= 0) return;
         CartLine line = cart.get(id);
-        if (line == null) cart.put(id, new CartLine(selected.optString("mnemonic", "Product"), finalPriceCents(selected)));
+        if (line == null) cart.put(id, new CartLine(selected.optString("mnemonic", "Product"),
+                selected.optString("category", ""), finalPriceCents(selected)));
         else line.quantity++;
         cartButton.animate().cancel();
         cartButton.animate().scaleX(1.25f).scaleY(1.25f).setDuration(90)
@@ -1091,21 +1092,62 @@ public class SimClientActivity extends Activity {
             message("Cart submission failed: the cart is empty.", true);
             return;
         }
-        // There is currently no iCart/POS order endpoint in the SimClient
-        // protocol. Do not claim success or discard the local cart until a
-        // server acknowledgement has been received.
-        message("Not submitted to iCart: no POS order endpoint is configured. "
-                + quantity + " item(s), total "
-                + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents))
-                + " remain in the cart.", true);
+        if (server == null || server.trim().isEmpty()) {
+            message("Cart submission failed: configure the iK POS address first. Cart remains.", true);
+            return;
+        }
+        final int submittedQuantity = quantity;
+        final int submittedCents = (int) Math.min(Integer.MAX_VALUE, cents);
+        final JSONObject payload = new JSONObject();
+        try {
+            payload.put("lastModifiedTime", "0");
+            payload.put("totalPrice", submittedCents / 100.0);
+            payload.put("openTime", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.ROOT).format(new java.util.Date()));
+            payload.put("waiter", "SimClient");
+            payload.put("table", "SimClient");
+            payload.put("billIndex", "SIM-" + System.currentTimeMillis());
+            StringBuilder orderContent = new StringBuilder();
+            for (CartLine line : cart.values()) {
+                orderContent.append("DishStart:")
+                        .append(java.net.URLEncoder.encode(line.category, "UTF-8")).append('\n')
+                        .append(java.net.URLEncoder.encode(line.name, "UTF-8")).append('\n')
+                        .append(line.unitPriceCents / 100.0).append('\n')
+                        .append(line.quantity).append('\n')
+                        .append("MarkStart:\n");
+            }
+            payload.put("orderContent", orderContent.toString());
+        } catch (Exception ex) {
+            message("Cart submission failed: could not prepare the POS order. Cart remains.", true);
+            return;
+        }
+        if (cartDialog != null) cartDialog.dismiss();
+        message("Submitting cart to iK POS…", false);
+        io.execute(() -> {
+            try {
+                request(server, "/AikaPos/synchronizeFromServer", payload);
+                main.post(() -> {
+                    cart.clear();
+                    updateCatalogTotals();
+                    message("Cart submitted successfully to iK POS: " + submittedQuantity
+                            + " item(s), total " + formatMoneyCents(submittedCents) + ". Cart cleared.", false);
+                });
+            } catch (Exception ex) {
+                main.post(() -> message("Cart submission failed: " + detail(ex) + ". Cart remains.", true));
+            }
+        });
     }
 
     private static final class CartLine {
         final String name;
+        final String category;
         final int unitPriceCents;
         int quantity = 1;
         CartLine(String name, int unitPriceCents) {
+            this(name, "", unitPriceCents);
+        }
+        CartLine(String name, String category, int unitPriceCents) {
             this.name = name;
+            this.category = category == null ? "" : category;
             this.unitPriceCents = unitPriceCents;
         }
     }
