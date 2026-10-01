@@ -24,6 +24,9 @@ import java.util.concurrent.Executors;
 
 /** Small standalone launcher: no POS database, login, timers or printing are initialized. */
 public class SimClientActivity extends Activity {
+    private static final int PRODUCT_PHOTO_REQUEST = 2401;
+    private static final int PRODUCT_BACKUP_REQUEST = 2402;
+    private static final int PRODUCT_IMPORT_REQUEST = 2403;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private AutoCompleteTextView product;
@@ -38,6 +41,16 @@ public class SimClientActivity extends Activity {
     private final String[] keys = {"stock1", "stock2", "stock3", "monque"};
     private TextView status;
     private TextView weeklySales;
+    private TextView priceWithTax;
+    private TextView totalNumber;
+    private TextView totalPrice;
+    private TextView cartButton;
+    private TextView cartBadge;
+    private final java.util.LinkedHashMap<Integer, CartLine> cart = new java.util.LinkedHashMap<>();
+    private ImageView productPhoto;
+    private File pendingProductPhoto;
+    private String pendingProductBackup;
+    private AlertDialog localInventoryDialog;
     private final EditText[] prices = new EditText[2];
     private final String[] priceKeys = {"cost", "price"};
     private LinearLayout refreshProgress;
@@ -80,11 +93,22 @@ public class SimClientActivity extends Activity {
         super.onCreate(state);
         setTitle("SimClient");
         setFinishOnTouchOutside(false);
-        server = getPreferences(MODE_PRIVATE).getString("server", "");
-        getPreferences(MODE_PRIVATE).edit().remove("token").apply();
+        // Recovery mode: keep the known POS address, but never download over the
+        // phone's surviving catalog during startup.  The local catalog is the
+        // source of truth until the operator explicitly starts a recovery.
+        server = normalizeServerAddress(getPreferences(MODE_PRIVATE)
+                .getString("server", "192.168.2.111"));
+        // The activation code is the server-side personId/client namespace for
+        // website-backed synchronization. It is intentionally kept separate
+        // from the POS address and from any logged-in employee ID.
         LinearLayout root = column();
         int pad = dp(18);
         root.setPadding(pad, pad, pad, pad);
+        // The compact totals row intentionally reaches into the top padding.
+        // Allow its cart icon to remain fully visible instead of clipping its
+        // upper edge at the content boundary.
+        root.setClipChildren(false);
+        root.setClipToPadding(false);
         TextView title = new TextView(this);
         android.text.SpannableString brand = new android.text.SpannableString("SimClient");
         brand.setSpan(new android.text.style.ForegroundColorSpan(0xff64e5ce), 0, 3, 0);
@@ -147,6 +171,7 @@ public class SimClientActivity extends Activity {
         categoryBar.addView(category, new LinearLayout.LayoutParams(0, dp(48), 1));
         editCategory = new Button(this);
         editCategory.setText("✎"); editCategory.setTextSize(24); editCategory.setAllCaps(false);
+        editCategory.setScaleX(-1f);
         editCategory.setContentDescription("Edit category"); editCategory.setEnabled(false);
         editCategory.setOnClickListener(v -> { if (selected != null && !saving) { editingCategory = true; editCategory.setSelected(true); category.setEnabled(true); } });
         categoryBar.addView(editCategory, new LinearLayout.LayoutParams(dp(58), dp(48)));
@@ -213,8 +238,8 @@ public class SimClientActivity extends Activity {
         product.setMinHeight(dp(64));
         TextView productLabel = new TextView(this);
         productLabel.setText("Product name");
-        productLabel.setPadding(0, dp(20), 0, dp(8));
-        root.addView(productLabel, full());
+        productLabel.setIncludeFontPadding(false);
+        productLabel.setPadding(0, 0, 0, 0);
         LinearLayout productRow = new LinearLayout(this);
         productRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
         productRow.addView(product, new LinearLayout.LayoutParams(0, -2, 1));
@@ -222,6 +247,7 @@ public class SimClientActivity extends Activity {
         editProductName.setText("✎");
         editProductName.setTextSize(24);
         editProductName.setAllCaps(false);
+        editProductName.setScaleX(-1f);
         editProductName.setContentDescription("Edit product name");
         editProductName.setTooltipText("Edit product name");
         editProductName.setEnabled(false);
@@ -234,6 +260,58 @@ public class SimClientActivity extends Activity {
             product.selectAll();
         });
         productRow.addView(editProductName, new LinearLayout.LayoutParams(dp(58), dp(64)));
+
+        LinearLayout totals = new LinearLayout(this);
+        totals.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
+        totals.setPadding(0, 0, 0, 0);
+        cartButton = new TextView(this);
+        cartButton.setText("🛒");
+        cartButton.setTextSize(25);
+        cartButton.setGravity(android.view.Gravity.CENTER);
+        cartButton.setIncludeFontPadding(false);
+        cartButton.setPadding(0, 0, 0, 0);
+        cartButton.setContentDescription("Add selected product to cart");
+        cartButton.setClickable(true);
+        cartButton.setOnClickListener(v -> addSelectedProductToCart());
+        FrameLayout cartHolder = new FrameLayout(this);
+        cartHolder.setClipChildren(false);
+        cartHolder.addView(cartButton, new FrameLayout.LayoutParams(dp(36), dp(32)));
+        cartBadge = new TextView(this);
+        cartBadge.setTextSize(9);
+        cartBadge.setTextColor(0xffffffff);
+        cartBadge.setGravity(android.view.Gravity.CENTER);
+        cartBadge.setBackground(roundBackground(0xffe53935, 0xffe53935, 20));
+        FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20), android.view.Gravity.TOP | android.view.Gravity.RIGHT);
+        badgeParams.topMargin = -dp(4);
+        badgeParams.rightMargin = -dp(5);
+        cartHolder.addView(cartBadge, badgeParams);
+        totals.addView(cartHolder, new LinearLayout.LayoutParams(dp(36), dp(32)));
+        totalNumber = summaryText("QTY: 0", "Total number of products");
+        totalNumber.setTextSize(12);
+        totalNumber.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
+        totalNumber.setTypeface(null, android.graphics.Typeface.NORMAL);
+        totalNumber.setIncludeFontPadding(false);
+        totalNumber.setPadding(0, 0, dp(8), 0);
+        totalPrice = summaryText("Total: $0.00", "Total price of products");
+        totalPrice.setTextSize(12);
+        totalPrice.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
+        totalPrice.setTypeface(null, android.graphics.Typeface.NORMAL);
+        totalPrice.setIncludeFontPadding(false);
+        totalPrice.setOnClickListener(v -> showCartDialog());
+        totalPrice.setTextColor(0xff087f8c);
+        totalPrice.setPaintFlags(totalPrice.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        totalPrice.setPadding(0, 0, dp(8), 0);
+        LinearLayout.LayoutParams qtyParams = new LinearLayout.LayoutParams(-2, dp(32));
+        qtyParams.leftMargin = dp(20);
+        totals.addView(totalNumber, qtyParams);
+        LinearLayout.LayoutParams totalParams = new LinearLayout.LayoutParams(-2, dp(32));
+        totalParams.leftMargin = dp(12);
+        totals.addView(totalPrice, totalParams);
+        LinearLayout.LayoutParams totalsParams = full();
+        totalsParams.topMargin = -dp(14);
+        totalsParams.bottomMargin = -dp(4);
+        root.addView(totals, totalsParams);
+        root.addView(productLabel, full());
         root.addView(productRow, full());
         LinearLayout stocks = new LinearLayout(this);
         for (int i = 0; i < 3; i++) {
@@ -246,24 +324,52 @@ public class SimClientActivity extends Activity {
         details.addView(priceField(0, "Cost"), new LinearLayout.LayoutParams(0, -2, 1));
         details.addView(priceField(1, "Price"), new LinearLayout.LayoutParams(0, -2, 1));
         root.addView(details, full());
-        weeklySales = new TextView(this);
-        weeklySales.setText("Weekly sales: —");
-        weeklySales.setTextSize(16);
-        weeklySales.setTextColor(0xff48636d);
-        weeklySales.setPadding(0, dp(8), 0, dp(8));
-        weeklySales.setContentDescription("Weekly sales, read only");
-        root.addView(weeklySales, full());
+        LinearLayout salesAndTax = new LinearLayout(this);
+        salesAndTax.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        weeklySales = summaryText("Weekly sales: —", "Weekly sales, read only");
+        priceWithTax = summaryText("+ Tax: —", "Price with Tax, read only");
+        salesAndTax.addView(weeklySales, new LinearLayout.LayoutParams(0, -2, 1));
+        salesAndTax.addView(priceWithTax, new LinearLayout.LayoutParams(0, -2, 1));
+        root.addView(salesAndTax, full());
         // Category belongs below all editable inventory fields and above the status text.
         LinearLayout.LayoutParams categoryParams = full();
         categoryParams.topMargin = dp(12);
         root.addView(categoryBar, categoryParams);
+
+        // Reserve the large lower panel for the selected product photo.  Keep
+        // it in the product page layout even before a photo is available so
+        // the status message stays at the bottom instead of attaching itself
+        // to the category controls.
+        productPhoto = new ImageView(this);
+        productPhoto.setContentDescription("Product photo");
+        productPhoto.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        android.graphics.drawable.GradientDrawable photoBackground = new android.graphics.drawable.GradientDrawable();
+        photoBackground.setColor(0xffe8f2f4);
+        photoBackground.setStroke(dp(1), 0xffb7cdd2);
+        productPhoto.setBackground(photoBackground);
+        productPhoto.setClickable(true);
+        productPhoto.setFocusable(true);
+        productPhoto.setOnClickListener(v -> captureProductPhoto());
+        LinearLayout.LayoutParams photoParams = new LinearLayout.LayoutParams(dp(180), dp(120));
+        photoParams.topMargin = dp(16);
+        photoParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        root.addView(productPhoto, photoParams);
+
+        // Consume any remaining viewport height so the message sits below the
+        // photo area, with breathing room above the bottom divider.
+        root.addView(new Space(this), new LinearLayout.LayoutParams(-1, 0, 1));
         status = new TextView(this);
         status.setTextSize(14);
-        status.setPadding(0, dp(18), 0, dp(8));
+        status.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        status.setMinHeight(dp(48));
+        status.setPadding(0, dp(8), 0, dp(8));
+        LinearLayout.LayoutParams statusParams = full();
+        statusParams.bottomMargin = dp(20);
         status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        root.addView(status, full());
+        root.addView(status, statusParams);
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
+        scroll.setClipToPadding(false);
         scroll.setBackgroundColor(0xfff0f8fa);
         scroll.addView(root);
         editingPage = scroll;
@@ -340,7 +446,9 @@ public class SimClientActivity extends Activity {
         });
         message(server.isEmpty() ? "Open Settings to enter the POS address." : "Type a name, then select a product from the list.", false);
         product.requestFocus();
-        loadCatalog(true);
+        // Do not auto-refresh here.  Refreshing would replace the phone's
+        // surviving catalog with the damaged/empty server PRODUCT table.
+        loadCatalog(false);
         if (state != null && state.getBoolean("showingId")) showIdPage(state);
     }
 
@@ -349,6 +457,7 @@ public class SimClientActivity extends Activity {
         generation++;
         if (pendingSearch != null) main.removeCallbacks(pendingSearch);
         selected = null;
+        updateCatalogTotals();
         for (EditText field : prices) field.setText("");
         enableValues(false);
         for (EditText field : quantities) field.setText("");
@@ -421,7 +530,14 @@ public class SimClientActivity extends Activity {
         };
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         category.setAdapter(adapter);
-        if (selectedCategory != null) category.setSelection(categories.indexOf(selectedCategory));
+        if (!categories.isEmpty()) {
+            int position = selectedCategory == null ? 0 : categories.indexOf(selectedCategory);
+            if (position < 0) position = 0;
+            selectedCategory = categories.get(position);
+            category.setSelection(position);
+        } else {
+            selectedCategory = null;
+        }
         category.setEnabled(!saving && !categories.isEmpty());
     }
 
@@ -447,21 +563,25 @@ public class SimClientActivity extends Activity {
         busy(true);
         message("Loading local products…", false);
         String base = server;
+        String syncToken = getPreferences(MODE_PRIVATE).getString("token", "");
         io.execute(() -> {
             ProductCatalog loaded = null;
             String feedback;
             try {
-                if (getSharedPreferences("product_catalogs", MODE_PRIVATE).getBoolean("pending:" + base, false))
-                    throw new IOException("An interrupted update needs Refresh");
+                boolean pending = getSharedPreferences("product_catalogs", MODE_PRIVATE)
+                        .getBoolean("pending:" + base, false);
                 String data = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(base, "[]");
                 loaded = new ProductCatalog(new JSONArray(data));
-                feedback = loaded.size() + " products loaded locally. Tap Refresh to download the latest data.";
+                feedback = loaded.size() + " products loaded locally. "
+                        + (pending ? "A previous update was not confirmed; use Refresh or Force Upload to recover."
+                        : "Tap Refresh to download the latest data.");
             } catch (Exception ex) { feedback = "Local data needs verification. Tap Refresh before editing."; }
             ProductCatalog result = loaded;
             String text = feedback;
             main.post(() -> {
                 if (closed) return;
                 catalog = result;
+                updateCatalogTotals();
                 updateCategories(true);
                 busy(false);
                 message(text, false);
@@ -487,32 +607,68 @@ public class SimClientActivity extends Activity {
     private void refreshCatalog() {
         if (saving) return;
         if (server.isEmpty()) { message("Enter the POS address in Settings first.", false); return; }
+        // The phone's catalog is the protected source of truth until an
+        // explicit, verified upload has completed. Never let a refresh-only
+        // download replace precious local product data.
+        try {
+            String saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(server, "[]");
+            ProductCatalog protectedCatalog = new ProductCatalog(new JSONArray(saved));
+        } catch (Exception ex) {
+            message("Refresh is blocked because the saved product data could not be verified. Do not overwrite it.", true);
+            return;
+        }
         invalidateSelection();
         busy(true);
         refreshProgress.setVisibility(View.VISIBLE);
         showRefreshProgress("Connecting to POS…", -1);
         message("Refreshing products…", false);
         String base = server;
+        String saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(server, "[]");
+        ProductCatalog protectedCatalog;
+        try { protectedCatalog = new ProductCatalog(new JSONArray(saved)); }
+        catch (Exception ex) { message("Refresh is blocked because the saved product data could not be verified. Do not overwrite it.", true); return; }
+        String syncToken = getPreferences(MODE_PRIVATE).getString("token", "");
         io.execute(() -> {
             ProductCatalog downloaded = null;
             String feedback;
             try {
-                JSONObject response = request(base, "/AikaPos/stockProducts", null,
+                JSONObject response = requestSync(base, syncToken.isEmpty() ? "/AikaPos/stockProducts" : "/products/mobileSync/products", null,
                         (text, percent) -> main.post(() -> {
                             if (!closed) showRefreshProgress(text, percent);
                         }));
                 main.post(() -> { if (!closed) showRefreshProgress("Preparing product inventory…", -1); });
                 ProductCatalog candidate = new ProductCatalog(response.getJSONArray("products"));
+                JSONArray localRows = new JSONArray(saved);
+                java.util.List<ProductSyncDiff.Item> differences = ProductSyncDiff.compare(response.getJSONArray("products"), localRows);
+                if (!differences.isEmpty() && protectedCatalog.size() > 0) {
+                    boolean hideReport = getPreferences(MODE_PRIVATE).getBoolean("hideSyncReport", false);
+                    if (hideReport && canAutoResolve(differences)) {
+                        main.post(() -> autoResolveSync(base, response, differences));
+                    } else {
+                        main.post(() -> showSyncReport(base, response, differences));
+                    }
+                    feedback = "Comparison ready: " + differences.size() + " product difference(s).";
+                    ProductCatalog result = null;
+                    String text = feedback;
+                    main.post(() -> { if (!closed) { refreshProgress.setVisibility(View.GONE); busy(false); message(text, true); } });
+                    return;
+                }
                 main.post(() -> { if (!closed) showRefreshProgress("Saving " + candidate.size() + " products on this phone…", -1); });
                 persistCatalog(base, candidate);
                 downloaded = candidate;
                 feedback = candidate.size() + " products refreshed and saved locally.";
-            } catch (Exception ex) { feedback = "Refresh failed. Previous local data retained. " + ex.getMessage(); }
+            } catch (Exception ex) {
+                String error = "Refresh failed. Previous local data retained. " + ex.getMessage();
+                main.post(() -> {
+                    if (!closed) showRefreshRecovery(base, error);
+                });
+                feedback = error;
+            }
             ProductCatalog result = downloaded;
             String text = feedback;
             main.post(() -> {
                 if (closed) return;
-                if (result != null) { catalog = result; updateCategories(false); }
+                if (result != null) { catalog = result; updateCatalogTotals(); updateCategories(false); }
                 refreshProgress.setVisibility(View.GONE);
                 busy(false);
                 if (showingMoving && movingPlan != null) {
@@ -527,9 +683,12 @@ public class SimClientActivity extends Activity {
         settingValues = true;
         try {
             selected = row;
+            updateCatalogTotals();
+            showLocalProductPhoto(row.optInt("id", -1));
             editingCategory = false;
             if (editCategory != null) { editCategory.setSelected(false); editCategory.setEnabled(true); }
             weeklySales.setText("Weekly sales: " + weeklySales(row));
+            priceWithTax.setText("+ Tax: " + formatMoneyCents(finalPriceCents(row)));
             editingProductName = false;
             if (editProductName != null) { editProductName.setSelected(false); editProductName.setEnabled(true); }
             editedFromProductId = null;
@@ -606,6 +765,212 @@ public class SimClientActivity extends Activity {
         startAutoSave(request, null);
     }
 
+    private void showSyncReport(String base, JSONObject response, java.util.List<ProductSyncDiff.Item> differences) {
+        android.text.SpannableStringBuilder report = new android.text.SpannableStringBuilder("Products different on server and phone:\n\n");
+        int shown = 0;
+        for (ProductSyncDiff.Item item : differences) {
+            if (shown++ >= 80) { report.append("… and ").append(String.valueOf(differences.size() - 80)).append(" more\n"); break; }
+            JSONObject s = item.server, l = item.local;
+            String id = s != null ? s.optString("local_id", s.optString("id")) : l.optString("local_id", l.optString("id"));
+            report.append("ID ").append(id).append("\n");
+            int serverStart = report.length(); report.append("SERVER: ").append(summary(s)).append("\n");
+            int serverEnd = report.length();
+            int localStart = report.length(); report.append("LOCAL:  ").append(summary(l)).append("\n\n");
+            int localEnd = report.length();
+            if (item.serverNewer) report.setSpan(new android.text.style.ForegroundColorSpan(0xff16803c), serverStart, serverEnd, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (item.localNewer) report.setSpan(new android.text.style.ForegroundColorSpan(0xff16803c), localStart, localEnd, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        CheckBox skip = new CheckBox(this);
+        skip.setText("Do not show this comparison next time");
+        LinearLayout box = column();
+        box.setPadding(dp(24), 0, dp(24), 0);
+        TextView text = new TextView(this); text.setText(report); box.addView(text); box.addView(skip);
+        Button uploadAll = new Button(this);
+        uploadAll.setText("Upload all local products");
+        box.addView(uploadAll);
+        Button forceUploadAll = new Button(this);
+        forceUploadAll.setText("Force upload all local products");
+        box.addView(forceUploadAll);
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Product synchronization report").setView(box)
+                .setNegativeButton("Keep phone data", null)
+                .setPositiveButton("Upload phone data", (d, w) -> uploadLocalProducts(base, differences))
+                .setNeutralButton("Download server data", (d, w) -> {
+                    try {
+                        ProductCatalog downloaded = new ProductCatalog(response.getJSONArray("products"));
+                        persistCatalog(base, downloaded); catalog = downloaded; updateCatalogTotals(); updateCategories(false);
+                        message("Server product data downloaded to the phone.", true);
+                    } catch (Exception ex) { message("Download cancelled: " + ex.getMessage(), true); }
+                }).create();
+        uploadAll.setOnClickListener(v -> { dialog.dismiss(); uploadAllLocalProducts(base, response); });
+        forceUploadAll.setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle("Force upload all local products")
+                .setMessage("This will overwrite the server Product data for the current POS ID. Continue?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Force upload", (d, w) -> { dialog.dismiss(); forceUploadAllLocalProducts(base, response); })
+                .show());
+        dialog.setOnDismissListener(d -> getPreferences(MODE_PRIVATE).edit().putBoolean("hideSyncReport", skip.isChecked()).apply());
+        dialog.show();
+    }
+
+    /**
+     * Keep the local catalog available for upload testing when the read endpoint
+     * returns a non-JSON page or is otherwise unavailable. The normal comparison
+     * report still remains the preferred path when a server snapshot is present.
+     */
+    private void showRefreshRecovery(String base, String error) {
+        LinearLayout box = column();
+        box.setPadding(dp(24), 0, dp(24), 0);
+        TextView text = new TextView(this);
+        text.setText(error + "\n\nThe server snapshot was not available. You can still test uploading the phone's local catalog.");
+        box.addView(text);
+        Button uploadAll = new Button(this);
+        uploadAll.setText("Upload all local products");
+        box.addView(uploadAll);
+        Button forceUploadAll = new Button(this);
+        forceUploadAll.setText("Force upload all local products");
+        box.addView(forceUploadAll);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Product sync recovery")
+                .setView(box)
+                .setNegativeButton("Keep phone data", null)
+                .create();
+        JSONObject emptyServer = new JSONObject();
+        uploadAll.setOnClickListener(v -> {
+            dialog.dismiss();
+            uploadAllLocalProducts(base, emptyServer);
+        });
+        forceUploadAll.setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle("Force upload all local products")
+                .setMessage("The server snapshot could not be downloaded. This will send the entire local catalog and request overwrite on the server. Continue?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Force upload", (d, w) -> {
+                    dialog.dismiss();
+                    forceUploadAllLocalProducts(base, emptyServer);
+                })
+                .show());
+        dialog.show();
+    }
+
+    private boolean canAutoResolve(java.util.List<ProductSyncDiff.Item> differences) {
+        boolean upload = false, download = false;
+        for (ProductSyncDiff.Item item : differences) {
+            if (item.serverNewer == item.localNewer) return false;
+            upload |= item.localNewer; download |= item.serverNewer;
+        }
+        return upload ^ download;
+    }
+
+    private void autoResolveSync(String base, JSONObject response, java.util.List<ProductSyncDiff.Item> differences) {
+        boolean upload = differences.get(0).localNewer;
+        if (upload) {
+            uploadLocalProducts(base, differences);
+        } else {
+            try {
+                ProductCatalog downloaded = new ProductCatalog(response.getJSONArray("products"));
+                persistCatalog(base, downloaded); catalog = downloaded; updateCatalogTotals(); updateCategories(false);
+                message("Synchronization completed: server data downloaded.", true);
+            } catch (Exception ex) { message("Automatic download failed. Local product data was retained. " + ex.getMessage(), true); }
+        }
+    }
+
+    private void uploadLocalProducts(String base, java.util.List<ProductSyncDiff.Item> differences) {
+        String token = getPreferences(MODE_PRIVATE).getString("token", "");
+        io.execute(() -> {
+            try {
+                JSONArray rows = new JSONArray();
+                for (ProductSyncDiff.Item item : differences) if (item.local != null) {
+                    JSONObject row = new JSONObject();
+                    if (item.local.has("local_id") && !item.local.isNull("local_id") && item.local.optLong("local_id") > 0)
+                        row.put("local_id", item.local.optLong("local_id"));
+                    row.put("expected_last_modified", item.server == null ? "" : item.server.optString("last_modified", ""));
+                    row.put("data", item.local);
+                    rows.put(row);
+                }
+                JSONObject body = new JSONObject().put("products", rows);
+                JSONObject response = requestSync(base, "/products/mobileSync/products", body, null);
+                String personId = getPreferences(MODE_PRIVATE).getString("personId", "unknown");
+                int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
+                int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
+                int conflicts = response.optJSONArray("conflicts") == null ? 0 : response.optJSONArray("conflicts").length();
+                String result = "Phone Product data uploaded. POS ID: " + personId + ". Requested: " + rows.length() + ", uploaded: " + uploaded + ", failed: " + failed + ", conflicts: " + conflicts;
+                System.out.println("[ProductUpload] POS_ID=" + personId + " requested=" + rows.length() + " uploaded=" + uploaded + " failed=" + failed + " conflicts=" + conflicts);
+                main.post(() -> message(result, true));
+            } catch (Exception ex) {
+                main.post(() -> message("Upload failed. Local product data was retained. " + ex.getMessage(), true));
+            }
+        });
+    }
+
+    private void uploadAllLocalProducts(String base, JSONObject serverResponse) {
+        uploadAllLocalProducts(base, serverResponse, false);
+    }
+
+    private void forceUploadAllLocalProducts(String base, JSONObject serverResponse) {
+        uploadAllLocalProducts(base, serverResponse, true);
+    }
+
+    private void uploadAllLocalProducts(String base, JSONObject serverResponse, boolean force) {
+        String token = getPreferences(MODE_PRIVATE).getString("token", "");
+        io.execute(() -> {
+            try {
+                ProductCatalog localCatalog = catalog;
+                if (localCatalog == null) {
+                    String saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(base, "[]");
+                    localCatalog = new ProductCatalog(new JSONArray(saved));
+                }
+                if (localCatalog.size() == 0) throw new IOException("No local products are available to upload");
+                JSONArray localRows = new JSONArray(localCatalog.serialize());
+                java.util.Map<Long, String> expected = new java.util.HashMap<>();
+                JSONArray serverRows = serverResponse.optJSONArray("products");
+                if (serverRows != null) for (int i = 0; i < serverRows.length(); i++) {
+                    JSONObject row = serverRows.getJSONObject(i);
+                    expected.put(row.optLong("local_id", row.optLong("id")), row.optString("last_modified", ""));
+                }
+                JSONArray rows = new JSONArray();
+                for (int i = 0; i < localRows.length(); i++) {
+                    JSONObject local = localRows.getJSONObject(i);
+                    long id = local.optLong("local_id", 0);
+                    JSONObject upload = new JSONObject()
+                            .put("expected_last_modified", id > 0 && expected.containsKey(id) ? expected.get(id) : "")
+                            .put("data", local);
+                    if (id > 0) upload.put("local_id", id);
+                    rows.put(upload);
+                }
+                JSONObject response = requestSync(base, "/products/mobileSync/products", new JSONObject().put("products", rows).put("force", force), null);
+                int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
+                int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
+                int conflicts = response.optJSONArray("conflicts") == null ? 0 : response.optJSONArray("conflicts").length();
+                String personId = getPreferences(MODE_PRIVATE).getString("personId", "unknown");
+                String result = (force ? "FORCE upload" : "All local Products upload") + " finished. POS ID: " + personId + ". Requested: " + rows.length() + ", uploaded: " + uploaded + ", failed: " + failed + ", conflicts: " + conflicts;
+                System.out.println("[ProductUploadAll] force=" + force + " POS_ID=" + personId + " requested=" + rows.length() + " uploaded=" + uploaded + " failed=" + failed + " conflicts=" + conflicts);
+                main.post(() -> message(result, failed == 0 && conflicts == 0));
+            } catch (Exception ex) {
+                main.post(() -> message("All local Products upload failed. Local data was retained. " + ex.getMessage(), true));
+            }
+        });
+    }
+
+    private static String summary(JSONObject row) {
+        if (row == null) return "<missing>";
+        return row.optString("mnemonic", row.optString("subject", row.optString("code", "")))
+                + " | modified=" + row.optString("server_modified", row.optString("last_modified", ""));
+    }
+
+    private void showLocalProductPhoto(int productId) {
+        if (productPhoto == null) return;
+        productPhoto.setImageDrawable(null);
+        productPhoto.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        if (productId <= 0) return;
+        File file = new File(new File(getFilesDir(), "product-photos"), "product-" + productId + ".jpg");
+        if (file.isFile()) {
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+            if (bitmap != null) {
+                productPhoto.setImageBitmap(bitmap);
+                productPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
+        }
+    }
+
     private int weeklySales(JSONObject row) {
         int weekly = Math.max(row.optInt("weekly_sales_qty", row.optInt("weeklySalesQty", 0)),
                 row.optInt("lastSevenDaysQty", 0));
@@ -616,6 +981,83 @@ public class SimClientActivity extends Activity {
             weekly = Math.max(weekly, recent);
         }
         return weekly;
+    }
+
+    private void updateCatalogTotals() {
+        if (totalNumber == null || totalPrice == null) return;
+        int count = 0;
+        long cents = 0;
+        for (CartLine line : cart.values()) {
+            count += line.quantity;
+            cents += (long) line.unitPriceCents * line.quantity;
+        }
+        totalNumber.setText("QTY: " + count);
+        totalPrice.setText("Total: " + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)));
+        if (cartBadge != null) {
+            cartBadge.setText(String.valueOf(count));
+            cartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void addSelectedProductToCart() {
+        if (selected == null) {
+            message("Select a product before adding it to the cart.", false);
+            return;
+        }
+        int id = selected.optInt("id", -1);
+        if (id <= 0) return;
+        CartLine line = cart.get(id);
+        if (line == null) cart.put(id, new CartLine(selected.optString("mnemonic", "Product"), finalPriceCents(selected)));
+        else line.quantity++;
+        cartButton.animate().cancel();
+        cartButton.animate().scaleX(1.25f).scaleY(1.25f).setDuration(90)
+                .withEndAction(() -> cartButton.animate().scaleX(1f).scaleY(1f).setDuration(120).start()).start();
+        cartBadge.animate().cancel();
+        cartBadge.animate().scaleX(1.3f).scaleY(1.3f).setDuration(90)
+                .withEndAction(() -> cartBadge.animate().scaleX(1f).scaleY(1f).setDuration(120).start()).start();
+        updateCatalogTotals();
+        message("Added to cart.", false);
+    }
+
+    private void showCartDialog() {
+        LinearLayout content = column();
+        content.setPadding(dp(20), dp(8), dp(20), 0);
+        if (cart.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("Cart is empty");
+            content.addView(empty, full());
+        } else {
+            for (java.util.Map.Entry<Integer, CartLine> entry : cart.entrySet()) {
+                int id = entry.getKey(); CartLine line = entry.getValue();
+                LinearLayout row = new LinearLayout(this);
+                row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                TextView label = new TextView(this);
+                label.setText(line.name + "  x" + line.quantity + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
+                label.setTextSize(15);
+                row.addView(label, new LinearLayout.LayoutParams(0, dp(48), 1));
+                Button remove = new Button(this);
+                remove.setText("×"); remove.setTextSize(18); remove.setAllCaps(false);
+                remove.setOnClickListener(v -> { cart.remove(id); updateCatalogTotals(); showCartDialog(); });
+                row.addView(remove, new LinearLayout.LayoutParams(dp(52), dp(48)));
+                content.addView(row, full());
+            }
+        }
+        Button submit = new Button(this);
+        submit.setText("Submit");
+        submit.setOnClickListener(v -> { message("Cart submitted.", false); });
+        content.addView(submit, full());
+        new AlertDialog.Builder(this).setTitle("Selected Products").setView(content)
+                .setNegativeButton("Close", null).show();
+    }
+
+    private static final class CartLine {
+        final String name;
+        final int unitPriceCents;
+        int quantity = 1;
+        CartLine(String name, int unitPriceCents) {
+            this.name = name;
+            this.unitPriceCents = unitPriceCents;
+        }
     }
 
     private void saveCategory(String value) {
@@ -652,7 +1094,9 @@ public class SimClientActivity extends Activity {
             ProductCatalog localUpdated = catalog.updated(optimistic);
             persistCatalog(server, localUpdated);
             catalog = localUpdated;
+            updateCatalogTotals();
             selected = optimistic;
+            if (priceWithTax != null) priceWithTax.setText("+ Tax: " + formatMoneyCents(finalPriceCents(optimistic)));
             optimisticLocalPending = true;
             if (movingPlan != null) movingPlan.invalidateForInventoryChange();
             message("Local inventory updated. Calculating Stock Moving from the new values…", false);
@@ -669,8 +1113,12 @@ public class SimClientActivity extends Activity {
         String base = server;
         ProductCatalog snapshot = catalog;
         String submittedText = request.field.getText().toString().trim();
+        final boolean websiteMode = !getPreferences(MODE_PRIVATE).getString("token", "").trim().isEmpty();
+        final JSONObject websiteProduct;
+        try { websiteProduct = new JSONObject(selected.toString()); }
+        catch (Exception ex) { productSaveBusy(false); message("Could not prepare the product for upload: " + detail(ex), false); return; }
         io.execute(() -> {
-            String feedback;
+            String feedback = "Product sync did not complete. Tap Refresh to load the current stock.";
             ProductCatalog updated = null;
             JSONObject storedProduct = null;
             boolean verified = false;
@@ -681,38 +1129,64 @@ public class SimClientActivity extends Activity {
                 if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
                         .putBoolean("pending:" + base, true).commit())
                     throw new IOException("Unable to save recovery state. Nothing was submitted.");
-                JSONObject submitted = payload;
-                boolean stockOnlyCompatibility = false;
-                main.post(() -> { if (!closed) message("Saving changes to AikaPos…", false); });
-                try {
-                    request(base, "/AikaPos/stockProducts", payload);
-                } catch (RequestException failure) {
-                    if (!ProductSyncCompatibility.needsStockOnlyRetry(failure.code, failure.getMessage(), payload))
-                        throw failure;
-                    submitted = ProductSyncCompatibility.stockOnly(payload);
-                    request(base, "/AikaPos/stockProducts", submitted);
-                    stockOnlyCompatibility = true;
-                }
-                main.post(() -> { if (!closed) message("AikaPos saved the change. Verifying the saved product…", false); });
-                JSONObject stored = request(base, "/AikaPos/stockProducts?id="
-                        + payload.getInt("productId"), null).getJSONObject("product");
-                ProductSyncVerification.verify(submitted, stored);
-                verified = true;
-                storedProduct = stored;
-                try {
-                    main.post(() -> { if (!closed) message("AikaPos verified. Updating the local inventory cache…", false); });
-                    ProductCatalog saved = snapshot.updated(stored);
-                    updated = saved;
-                    persistCatalog(base, saved);
-                    main.post(() -> { if (!closed) message("Local inventory updated. Recalculating Stock Moving on next open…", false); });
-                    feedback = (stockOnlyCompatibility
-                            ? "Stock saved and verified. This AikaPos version did not save Cost/Price. "
-                            : "Saved and verified on AikaPos. ")
-                            + "Stock 1: " + stored.getInt("stock1") + ", Stock 2: "
-                            + stored.getInt("stock2") + ", Stock 3: " + stored.getInt("stock3");
-                } catch (Exception ex) {
-                    feedback = "POS updated and verified, but saving the local product cache failed: "
-                            + detail(ex) + ". Tap Refresh before continuing.";
+                if (websiteMode) {
+                    main.post(() -> { if (!closed) message("Saving changes to website…", false); });
+                    JSONObject row = new JSONObject();
+                    if (websiteProduct.has("local_id") && !websiteProduct.isNull("local_id")
+                            && websiteProduct.optLong("local_id") > 0)
+                        row.put("local_id", websiteProduct.optLong("local_id"));
+                    row.put("expected_last_modified", websiteProduct.optString("last_modified", ""));
+                    row.put("data", websiteProduct);
+                    JSONObject response = requestSync(base, "/products/mobileSync/products",
+                            new JSONObject().put("products", new JSONArray().put(row)), null);
+                    JSONArray failed = response.optJSONArray("failed");
+                    JSONArray conflicts = response.optJSONArray("conflicts");
+                    if (!response.optBoolean("ok", false) || (failed != null && failed.length() > 0)
+                            || (conflicts != null && conflicts.length() > 0))
+                        throw new IOException("Website rejected the product update");
+                    verified = true;
+                    storedProduct = websiteProduct;
+                    updated = snapshot;
+                    // The optimistic catalog was already saved before the request;
+                    // persist again here to remove the recovery marker only after
+                    // the website has acknowledged the upload.
+                    persistCatalog(base, snapshot);
+                    feedback = "Website saved and verified. Stock 1: " + websiteProduct.optInt("stock1", 0)
+                            + ", Stock 2: " + websiteProduct.optInt("stock2", 0)
+                            + ", Stock 3: " + websiteProduct.optInt("stock3", 0);
+                    JSONObject submitted = payload;
+                    boolean stockOnlyCompatibility = false;
+                    main.post(() -> { if (!closed) message("Saving changes to AikaPos…", false); });
+                    try {
+                        request(base, "/AikaPos/stockProducts", payload);
+                    } catch (RequestException failure) {
+                        if (!ProductSyncCompatibility.needsStockOnlyRetry(failure.code, failure.getMessage(), payload))
+                            throw failure;
+                        submitted = ProductSyncCompatibility.stockOnly(payload);
+                        request(base, "/AikaPos/stockProducts", submitted);
+                        stockOnlyCompatibility = true;
+                    }
+                    main.post(() -> { if (!closed) message("AikaPos saved the change. Verifying the saved product…", false); });
+                    JSONObject stored = request(base, "/AikaPos/stockProducts?id="
+                            + payload.getInt("productId"), null).getJSONObject("product");
+                    ProductSyncVerification.verify(submitted, stored);
+                    verified = true;
+                    storedProduct = stored;
+                    try {
+                        main.post(() -> { if (!closed) message("AikaPos verified. Updating the local inventory cache…", false); });
+                        ProductCatalog saved = snapshot.updated(stored);
+                        updated = saved;
+                        persistCatalog(base, saved);
+                        main.post(() -> { if (!closed) message("Local inventory updated. Recalculating Stock Moving on next open…", false); });
+                        feedback = (stockOnlyCompatibility
+                                ? "Stock saved and verified. This AikaPos version did not save Cost/Price. "
+                                : "Saved and verified on AikaPos. ")
+                                + "Stock 1: " + stored.getInt("stock1") + ", Stock 2: "
+                                + stored.getInt("stock2") + ", Stock 3: " + stored.getInt("stock3");
+                    } catch (Exception ex) {
+                        feedback = "POS updated and verified, but saving the local product cache failed: "
+                                + detail(ex) + ". Tap Refresh before continuing.";
+                    }
                 }
             } catch (Exception ex) {
                 feedback = "Product sync failed: " + detail(ex) + ". Tap Refresh to load the current stock.";
@@ -725,6 +1199,7 @@ public class SimClientActivity extends Activity {
                 if (closed) return;
                 if (finalUpdated != null && finalStoredProduct != null) {
                     catalog = finalUpdated;
+                    updateCatalogTotals();
                     selected = finalStoredProduct;
                     // Stock Moving keeps its own calculated input/draft while it
                     // is hidden.  Invalidate that snapshot after a verified edit
@@ -829,15 +1304,23 @@ public class SimClientActivity extends Activity {
     }
 
     static JSONObject request(String base, String path, JSONObject body) throws Exception {
-        return request(base, path, body, null);
+        return request(base, path, body, null, null);
     }
 
     private static JSONObject request(String base, String path, JSONObject body, DownloadProgress progress) throws Exception {
+        return request(base, path, body, progress, null);
+    }
+
+    private static JSONObject request(String base, String path, JSONObject body, DownloadProgress progress, String syncToken) throws Exception {
         HttpURLConnection c = (HttpURLConnection) new URL(base + path).openConnection();
         c.setConnectTimeout(5000);
-        c.setReadTimeout(10000);
+        // Full Product uploads can legitimately take longer than a normal
+        // catalog read. A timeout here means the server may have committed
+        // the update even though the response was not received.
+        c.setReadTimeout(body == null ? 15000 : 120000);
         c.setInstanceFollowRedirects(false);
         c.setUseCaches(false);
+        if (syncToken != null && !syncToken.trim().isEmpty()) c.setRequestProperty("X-Mobile-Sync-Token", syncToken);
 
         try {
             if (body != null) {
@@ -872,7 +1355,9 @@ public class SimClientActivity extends Activity {
             try { result = new JSONObject(new String(bytes.toByteArray(), StandardCharsets.UTF_8)); }
             catch (Exception ex) {
                 if (code >= 400) throw new RequestException(code, "HTTP " + code + ": " + httpError(code));
-                throw new IOException("HTTP " + code + ": Check that POS supports the inventory API");
+                String raw = new String(bytes.toByteArray(), StandardCharsets.UTF_8).trim();
+                if (raw.length() > 240) raw = raw.substring(0, 240);
+                throw new IOException("HTTP " + code + ": Server returned non-JSON response: " + raw);
             }
             if (code != 200) throw new RequestException(code, "HTTP " + code + ": "
                     + result.optString("error", httpError(code)));
@@ -880,6 +1365,52 @@ public class SimClientActivity extends Activity {
         } catch (java.net.SocketTimeoutException ex) {
             throw new IOException(body == null ? "Connection timed out" : "Response timed out. Update status is unconfirmed", ex);
         } finally { c.disconnect(); }
+    }
+
+    /** Product sync requests silently renew the short-lived server session once. */
+    private JSONObject requestSync(String base, String path, JSONObject body, DownloadProgress progress) throws Exception {
+        String token = getPreferences(MODE_PRIVATE).getString("token", "").trim();
+        try {
+            return request(base, path, body, progress, token);
+        } catch (RequestException ex) {
+            if (ex.code != HttpURLConnection.HTTP_UNAUTHORIZED) throw ex;
+            String licence = getPreferences(MODE_PRIVATE).getString("personId", "").trim();
+            if (licence.isEmpty()) throw ex;
+            validateWebsiteActivation(base, licence);
+            String renewed = getPreferences(MODE_PRIVATE).getString("token", "").trim();
+            return request(base, path, body, progress, renewed);
+        }
+    }
+
+    private EditText settingsDecimal(String label, double value) {
+        EditText input = new EditText(this);
+        input.setHint(label + " (%)"); input.setSingleLine(true);
+        input.setText(String.format(java.util.Locale.ROOT, "%.3f", value));
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        styleInput(input);
+        return input;
+    }
+
+    private EditText settingsMoney(String label, int cents) {
+        EditText input = new EditText(this);
+        input.setHint(label + " ($ per product)"); input.setSingleLine(true);
+        input.setText(String.format(java.util.Locale.ROOT, "%.2f", cents / 100.0));
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        styleInput(input);
+        return input;
+    }
+
+    private int parseRate(EditText input, int fallback) {
+        try {
+            double percent = Double.parseDouble(input.getText().toString().trim());
+            if (percent < 0 || percent > 100) throw new NumberFormatException();
+            return (int) Math.round(percent * 100.0);
+        } catch (Exception ex) { return fallback; }
+    }
+
+    private int parseMoneySetting(EditText input) {
+        try { return ProductCatalog.moneyCents(input.getText().toString().trim()); }
+        catch (Exception ex) { return 0; }
     }
 
     private void configure() {
@@ -894,26 +1425,97 @@ public class SimClientActivity extends Activity {
         selectAllOnFocus(address);
 
         box.addView(address);
+        EditText activationCode = new EditText(this);
+        styleInput(activationCode);
+        activationCode.setHint("Enter activation code");
+        activationCode.setSingleLine(true);
+        activationCode.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        activationCode.setText(getPreferences(MODE_PRIVATE).getString("personId", ""));
+        selectAllOnFocus(activationCode);
+        TextView activationLabel = new TextView(this);
+        activationLabel.setText("Activation code (website synchronization)");
+        box.addView(activationLabel);
+        box.addView(activationCode);
+
+        // Keep activation hidden while the address is being entered. It is
+        // shown only after Save identifies a website domain.
+        activationLabel.setVisibility(View.GONE);
+        activationCode.setVisibility(View.GONE);
+        TextView taxLabel = new TextView(this);
+        taxLabel.setText("Price calculation settings (%)");
+        box.addView(taxLabel);
+        EditText gstRate = settingsDecimal("GST", settingRate("tax_gst_basis_points", 500) / 100.0);
+        EditText qstRate = settingsDecimal("QST", settingRate("tax_qst_basis_points", 9975) / 100.0);
+        EditText ecoTax = settingsMoney("Eco Tax", getPreferences(MODE_PRIVATE).getInt("tax_eco_cents", 1));
+        EditText bottleFee = settingsMoney("Bottle Fee", getPreferences(MODE_PRIVATE).getInt("tax_bottle_cents", 10));
+        box.addView(gstRate); box.addView(qstRate); box.addView(ecoTax); box.addView(bottleFee);
         Button viewLocal = new Button(this);
         viewLocal.setText("View Local Inventory");
         viewLocal.setOnClickListener(v -> viewLocalInventory());
         box.addView(viewLocal);
+        Button backup = new Button(this);
+        backup.setText("Back Up Protected Products");
+        backup.setOnClickListener(v -> startProductBackup());
+        box.addView(backup);
+        Button forceUpload = new Button(this);
+        forceUpload.setText("Force Upload All Local Products");
+        forceUpload.setOnClickListener(v -> {
+            final String uploadTarget = server;
+            if (uploadTarget == null || uploadTarget.trim().isEmpty()) {
+                message("Save the server address before forcing an upload.", true);
+                return;
+            }
+            new AlertDialog.Builder(this)
+                    .setTitle("Force upload all local products")
+                    .setMessage("Send the complete local product catalog to the configured server and overwrite matching products. Continue?")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Force upload", (d, w) ->
+                            forceUploadAllLocalProducts(uploadTarget, new JSONObject()))
+                    .show();
+        });
+        box.addView(forceUpload);
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Connection Settings")
                 .setView(box).setNegativeButton("Cancel", null).setPositiveButton("Save", null).create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String url = address.getText().toString().trim().replaceAll("/+$", "");
-            boolean bareAddress = !url.contains("://");
-            if (bareAddress) url = "http://" + url;
+            String entered = address.getText().toString().trim();
+            boolean websiteMode = isWebsiteDomain(entered);
+            String url = normalizeServerAddress(entered);
             try {
                 URL parsed = new URL(url);
                 if (!(parsed.getProtocol().equals("http") || parsed.getProtocol().equals("https")) || parsed.getHost().isEmpty()
                         || !parsed.getPath().isEmpty() || parsed.getQuery() != null || parsed.getRef() != null || parsed.getUserInfo() != null)
                     throw new Exception();
-                if (bareAddress && parsed.getPort() == -1) url += ":8880";
             } catch (Exception ex) { address.setError("Enter a server address, e.g. http://192.168.1.20:8880"); return; }
 
-            String savedAddress = url;
             android.content.SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+            String previousServer = preferences.getString("server", "").trim();
+            boolean serverChanged = !previousServer.isEmpty() && !previousServer.equalsIgnoreCase(url);
+            if (serverChanged && websiteMode) {
+                // A website URL identifies the activation namespace. Changing it
+                // invalidates the old token/personId, but must not touch local products.
+                preferences.edit().remove("token").apply();
+                activationLabel.setVisibility(View.VISIBLE);
+                activationCode.setVisibility(View.VISIBLE);
+            }
+            String personId = activationCode.getText().toString().trim();
+            // A previously saved personId is not proof that this installation
+            // has a valid sync token. Allow reactivation whenever the token
+            // is missing, even if the old activation code is still stored.
+            boolean needsWebsiteActivation = websiteMode
+                    && getPreferences(MODE_PRIVATE).getString("token", "").trim().isEmpty();
+            if (needsWebsiteActivation && personId.isEmpty()) {
+                activationLabel.setVisibility(View.VISIBLE);
+                activationCode.setVisibility(View.VISIBLE);
+                activationCode.setError("Enter the activation code for this website");
+                activationCode.requestFocus();
+                return;
+            }
+            if (needsWebsiteActivation) {
+                activationLabel.setVisibility(View.VISIBLE);
+                activationCode.setVisibility(View.VISIBLE);
+            }
+
+            String savedAddress = url;
             address.setEnabled(false);
             viewLocal.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -922,18 +1524,40 @@ public class SimClientActivity extends Activity {
             dialog.setCancelable(false);
             busy(true);
             io.execute(() -> {
-                boolean saved = preferences.edit().putString("server", savedAddress).remove("token").commit();
+                boolean saved = false;
+                String failure = null;
+                try {
+                    // Welp uses the existing activeJustPrintAccount endpoint.
+                    // Its successful response is a positive number (remaining
+                    // activation time), so do not persist an unverified code.
+                    if (websiteMode) validateWebsiteActivation(savedAddress, personId);
+                    android.content.SharedPreferences.Editor settings = preferences.edit()
+                            .putString("server", savedAddress);
+                    settings.putInt("tax_gst_basis_points", parseRate(gstRate, 500));
+                    settings.putInt("tax_qst_basis_points", parseRate(qstRate, 9975));
+                    settings.putInt("tax_eco_cents", parseMoneySetting(ecoTax));
+                    settings.putInt("tax_bottle_cents", parseMoneySetting(bottleFee));
+                    if (websiteMode) settings.putString("personId", personId);
+                    if (!websiteMode) {
+                        settings.remove("personId");
+                    }
+                    saved = settings.commit();
+                } catch (Exception ex) { failure = ex.getMessage(); }
+                boolean savedResult = saved;
+                String failureResult = failure;
                 main.post(() -> {
                     if (closed) return;
                     busy(false);
-                    if (!saved) {
+                    if (!savedResult) {
                         address.setEnabled(true);
                         viewLocal.setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("Save");
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
                         dialog.setCancelable(true);
-                        address.setError("Could not save the address. Please try again.");
+                        activationCode.setError(failureResult == null
+                                ? "Could not save the connection. Please try again."
+                                : failureResult);
                         return;
                     }
                     server = savedAddress;
@@ -945,15 +1569,97 @@ public class SimClientActivity extends Activity {
                     if (idChecking != null) idChecking.deactivate();
                     editingPage.setVisibility(View.VISIBLE);
                     updateTabs();
-                    loadCatalog(true);
+                    // Address changes must also remain offline-first during
+                    // recovery; an explicit Refresh is required to download.
+                    loadCatalog(false);
                     dialog.dismiss();
-                    Toast.makeText(this, "Connection saved: " + server, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, websiteMode
+                            ? "Activation successful. synchronizing data with server"
+                            : "Connection saved: " + server, Toast.LENGTH_LONG).show();
                     product.requestFocus(); product.selectAll();
                 });
             });
         }));
         dialog.show();
     }
+
+    private static boolean isWebsiteDomain(String value) {
+        String normalized = value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT);
+        if (normalized.startsWith("http://")) normalized = normalized.substring(7);
+        else if (normalized.startsWith("https://")) normalized = normalized.substring(8);
+        normalized = normalized.replaceAll("/+$", "");
+        return normalized.endsWith(".com")
+                || normalized.contains(".com/");
+    }
+
+    /**
+     * Canonicalize the address used by the direct AikaPos desktop listener.
+     * The legacy POS listener is HTTP on port 8880; operators traditionally
+     * enter only the computer IP (for example, 192.168.1.20). Website URLs
+     * keep their explicit protocol and port.
+     */
+    private static String normalizeServerAddress(String value) {
+        String normalized = value == null ? "" : value.trim().replaceAll("/+$", "");
+        if (normalized.isEmpty()) return "";
+        if (normalized.contains("://")) return normalized;
+        String host = normalized;
+        int colon = normalized.lastIndexOf(':');
+        boolean hasPort = colon > 0 && normalized.indexOf(':') == colon
+                && normalized.substring(colon + 1).matches("\\d+");
+        // Only the direct desktop POS address gets the legacy 8880 default.
+        // A bare website hostname uses the normal HTTP port.
+        if (!hasPort && (host.matches("\\d{1,3}(\\.\\d{1,3}){3}") || "localhost".equalsIgnoreCase(host)))
+            host += ":8880";
+        return "http://" + host;
+    }
+
+    private void validateWebsiteActivation(String base, String activationCode) throws Exception {
+        String endpoint = base + (base.endsWith("/") ? "" : "/") + "products/mobileSync/activate";
+        HttpURLConnection connection = (HttpURLConnection) new URL(endpoint).openConnection();
+        connection.setConnectTimeout(10000);
+        connection.setReadTimeout(15000);
+        connection.setInstanceFollowRedirects(true);
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.setUseCaches(false);
+        connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        // This is the AikaPos/SanjiPos activation protocol. The activation
+        // code is the shared client personId used by the remote Product table.
+        JSONObject body = new JSONObject().put("licence", activationCode);
+        try (OutputStream out = connection.getOutputStream()) {
+            out.write(body.toString().getBytes(StandardCharsets.UTF_8));
+        }
+        int code = connection.getResponseCode();
+        InputStream stream = code >= 400 ? connection.getErrorStream() : connection.getInputStream();
+        String response = "";
+        if (stream != null) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (InputStream in = stream) {
+                byte[] buffer = new byte[1024]; int n;
+                while ((n = in.read(buffer)) != -1) bytes.write(buffer, 0, n);
+            }
+            response = new String(bytes.toByteArray(), StandardCharsets.UTF_8).trim();
+        }
+        connection.disconnect();
+        if (code != HttpURLConnection.HTTP_OK) throw new IOException("Activation failed (HTTP " + code + ")");
+        if (response.isEmpty() || response.startsWith("0_") || "0".equals(response)) {
+            String detail = response.isEmpty() ? "empty response" : response;
+            throw new IOException("Activation rejected by server: " + detail);
+        }
+        JSONObject activated;
+        try { activated = new JSONObject(response); }
+        catch (Exception ex) {
+            throw new IOException("Server returned non-JSON activation response: " + response, ex);
+        }
+        String token = activated.optString("token", "").trim();
+        if (token.isEmpty()) throw new IOException("Activation rejected by server: no sync token");
+        // The token authorizes Product reads/writes; personId remains the
+        // shared Product namespace and is only retained for diagnostics.
+        android.content.SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        prefs.edit().putString("token", token)
+                .putString("personId", activated.optString("personId", activationCode)).apply();
+    }
+
 
     private void openMovingPlans() {
         if ((saving && !optimisticLocalPending) || showingMoving || (idChecking != null && idChecking.isBusy())
@@ -1070,7 +1776,130 @@ public class SimClientActivity extends Activity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PRODUCT_BACKUP_REQUEST) {
+            if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+                message("Product backup cancelled. Local data was not changed.", false);
+                pendingProductBackup = null;
+                return;
+            }
+            try (OutputStream out = getContentResolver().openOutputStream(data.getData())) {
+                if (out == null) throw new IOException("Could not open the selected backup file");
+                out.write(pendingProductBackup.getBytes(StandardCharsets.UTF_8));
+                out.flush();
+                message("Protected product backup saved successfully. Local data was not changed.", false);
+            } catch (Exception ex) {
+                message("Product backup failed: " + ex.getMessage(), true);
+            } finally { pendingProductBackup = null; }
+            return;
+        }
+        if (requestCode == PRODUCT_IMPORT_REQUEST) {
+            importProductBackup(data, resultCode);
+            return;
+        }
+        if (requestCode == PRODUCT_PHOTO_REQUEST) {
+            if (resultCode == RESULT_OK && pendingProductPhoto != null && pendingProductPhoto.length() > 0) {
+                android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(pendingProductPhoto.getAbsolutePath());
+                if (bitmap != null) {
+                    productPhoto.setImageBitmap(bitmap);
+                    productPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    message("Product photo saved locally. Remote upload is pending POS image support.", false);
+                } else {
+                    message("The product photo could not be opened.", true);
+                }
+            } else {
+                message("No product photo captured.", false);
+            }
+            pendingProductPhoto = null;
+            return;
+        }
         if (idChecking != null) idChecking.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void captureProductPhoto() {
+        android.widget.Toast.makeText(this, "Opening camera…", android.widget.Toast.LENGTH_SHORT).show();
+        if (selected == null || saving) {
+            android.widget.Toast.makeText(this, "Select a product first.", android.widget.Toast.LENGTH_LONG).show();
+            message("Select a product before taking its photo.", false);
+            return;
+        }
+        try {
+            File directory = new File(getFilesDir(), "product-photos");
+            if (!directory.isDirectory() && !directory.mkdirs()) throw new IOException("Cannot create photo directory");
+            pendingProductPhoto = new File(directory, "product-" + selected.getInt("id") + ".jpg");
+            android.content.Intent intent = new android.content.Intent(this, CameraCaptureActivity.class);
+            intent.putExtra(CameraCaptureActivity.EXTRA_OUTPUT_PATH, pendingProductPhoto.getAbsolutePath());
+            startActivityForResult(intent, PRODUCT_PHOTO_REQUEST);
+        } catch (Exception ex) {
+            message("Unable to prepare product photo: " + ex.getMessage(), true);
+        }
+    }
+
+    private void startProductBackup() {
+        if (server == null || server.isEmpty()) {
+            message("Enter the server address before creating a product backup.", true);
+            return;
+        }
+        try {
+            android.content.SharedPreferences prefs = getSharedPreferences("product_catalogs", MODE_PRIVATE);
+            String raw = prefs.getString(server, null);
+            if (raw == null) throw new IOException("No saved product catalog was found");
+            ProductCatalog saved = new ProductCatalog(new JSONArray(raw));
+            if (saved.size() == 0) throw new IOException("The saved product catalog is empty");
+            JSONObject backup = new JSONObject();
+            backup.put("format", "JustPrint protected product backup");
+            backup.put("version", 1);
+            backup.put("server", server);
+            backup.put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""));
+            backup.put("createdAt", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", java.util.Locale.ROOT)
+                    .format(new java.util.Date()));
+            backup.put("products", new JSONArray(saved.serialize()));
+            pendingProductBackup = backup.toString(2);
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);
+            intent.setType("application/json");
+            intent.putExtra(android.content.Intent.EXTRA_TITLE, "justprint-products-" + System.currentTimeMillis() + ".json");
+            startActivityForResult(intent, PRODUCT_BACKUP_REQUEST);
+        } catch (Exception ex) {
+            message("Product backup was not created: " + ex.getMessage(), true);
+        }
+    }
+
+    private void importProductBackup(android.content.Intent data, int resultCode) {
+        if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+            message("Product import cancelled. Local data was not changed.", false);
+            return;
+        }
+        io.execute(() -> {
+            try (InputStream in = getContentResolver().openInputStream(data.getData())) {
+                if (in == null) throw new IOException("Could not open the selected backup file");
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                byte[] buffer = new byte[4096]; int n;
+                while ((n = in.read(buffer)) != -1) bytes.write(buffer, 0, n);
+                JSONObject backup = new JSONObject(new String(bytes.toByteArray(), StandardCharsets.UTF_8));
+                JSONArray products = backup.optJSONArray("products");
+                if (!"JustPrint protected product backup".equals(backup.optString("format")) || products == null)
+                    throw new IOException("This is not a valid JustPrint product backup");
+                ProductCatalog restored = new ProductCatalog(products);
+                if (restored.size() == 0) throw new IOException("The backup contains no products");
+                String key = server;
+                boolean saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
+                        .putString(key, restored.serialize()).remove("pending:" + key).commit();
+                if (!saved) throw new IOException("Could not save the restored product data");
+                main.post(() -> {
+                    catalog = restored;
+                    updateCatalogTotals();
+                    updateCategories(true);
+                    message(restored.size() + " products imported. Local data restored; server was not changed.", false);
+                    if (localInventoryDialog != null && localInventoryDialog.isShowing()) {
+                        localInventoryDialog.dismiss();
+                        localInventoryDialog = null;
+                    }
+                    viewLocalInventory();
+                });
+            } catch (Exception ex) {
+                main.post(() -> message("Product import failed: " + ex.getMessage(), true));
+            }
+        });
     }
 
     @Override protected void onSaveInstanceState(Bundle state) {
@@ -1186,6 +2015,13 @@ public class SimClientActivity extends Activity {
         styleInput(filter);
         filter.setEnabled(false);
         content.addView(filter, full());
+        Button importBackup = new Button(this);
+        importBackup.setText("Import Product Backup");
+        importBackup.setOnClickListener(v -> startActivityForResult(
+                new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
+                        .addCategory(android.content.Intent.CATEGORY_OPENABLE)
+                        .setType("application/json"), PRODUCT_IMPORT_REQUEST));
+        content.addView(importBackup, full());
         ListView list = new ListView(this);
         list.setDivider(new android.graphics.drawable.ColorDrawable(0xffd9ecef));
         list.setDividerHeight(dp(1));
@@ -1206,6 +2042,7 @@ public class SimClientActivity extends Activity {
         content.addView(tableScroll, tableLayout);
         AlertDialog viewer = new AlertDialog.Builder(this).setTitle("Local Inventory")
                 .setView(content).setPositiveButton("Close", null).create();
+        localInventoryDialog = viewer;
         viewer.show();
         viewer.getWindow().setLayout(-1, -1);
         viewer.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -1318,6 +2155,81 @@ public class SimClientActivity extends Activity {
     private void report(Exception ex, int current) {
         main.post(() -> { if (!closed && generation == current) message("Unable to load products: " + ex.getMessage(), false); });
     }
+    private TextView summaryText(String text, String description) {
+        TextView view = new TextView(this);
+        view.setText(text);
+        view.setTextSize(16);
+        view.setTextColor(0xff48636d);
+        view.setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD));
+        view.setPadding(0, dp(8), dp(8), dp(8));
+        view.setContentDescription(description);
+        return view;
+    }
+
+    private android.graphics.drawable.Drawable roundBackground(int fill, int stroke, int radius) {
+        android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
+        background.setColor(fill);
+        background.setStroke(dp(1), stroke);
+        background.setCornerRadius(dp(radius));
+        return background;
+    }
+
+    private int settingRate(String key, int defaultBasisPoints) {
+        return getPreferences(MODE_PRIVATE).getInt(key, defaultBasisPoints);
+    }
+
+    private int finalPriceCents(JSONObject row) {
+        long price = Math.max(0L, row.optLong("price", 0));
+        long total = price;
+        int gstRate = settingRate("tax_gst_basis_points", 500);
+        int qstRate = settingRate("tax_qst_basis_points", 9975);
+        if (row.optInt("folderid", 0) != 0) total += Math.round(price * gstRate / 10000.0);
+        if (row.optInt("qst", 0) != 0) total += Math.round(price * qstRate / 10000.0);
+        boolean bottleProduct = bottleCategory(row.optString("category", ""));
+        int ecoFee = feeCents(row, bottleProduct ? settingRate("tax_eco_cents", 1) : 0,
+                "eco_tax", "ecoTax", "ecotax", "clear_fee", "clearFee", "clear_fee_cents");
+        int bottleFee = feeCents(row, bottleProduct ? defaultBottleFeeCents(row) : 0,
+                "bottle_fee", "bottleFee", "bottlefee", "deposit", "bottle_fee_cents");
+        total += ecoFee + bottleFee;
+        // BO Panel applies GST/QST to the eco/clear fee when clear-fee taxation
+        // is enabled. Bottle Fee itself is added without another tax layer.
+        if (ecoFee != 0 && getPreferences(MODE_PRIVATE).getBoolean("tax_eco_taxable", true)) {
+            if (row.optInt("folderid", 0) != 0) total += Math.round(ecoFee * gstRate / 10000.0);
+            if (row.optInt("qst", 0) != 0) total += Math.round(ecoFee * qstRate / 10000.0);
+        }
+        return (int) Math.min(Integer.MAX_VALUE, total);
+    }
+
+    private boolean bottleCategory(String category) {
+        String value = category == null ? "" : category.trim().toUpperCase(java.util.Locale.ROOT);
+        return value.equals("BIERE") || value.equals("MOLSON") || value.equals("LABATT")
+                || value.equals("SLEEMAN") || value.equals("POPPERS");
+    }
+
+    private int defaultBottleFeeCents(JSONObject row) {
+        String name = (row.optString("mnemonic", "") + " " + row.optString("subject", ""))
+                .toUpperCase(java.util.Locale.ROOT);
+        int perBottle = name.matches(".*\\b[2-9](?:\\.\\d+)?\\s*L\\b.*") ? 25 : settingRate("tax_bottle_cents", 10);
+        java.util.regex.Matcher multiplier = java.util.regex.Pattern.compile("\\b(\\d+)\\s*[X×]").matcher(name);
+        int count = multiplier.find() ? Math.max(1, Integer.parseInt(multiplier.group(1))) : 1;
+        return perBottle * count;
+    }
+
+    private int feeCents(JSONObject row, int fallbackCents, String... keys) {
+        for (String key : keys) if (row.has(key) && !row.isNull(key)) {
+            Object value = row.opt(key);
+            if (value instanceof Number) return (int) Math.round(((Number) value).doubleValue() < 10
+                    ? ((Number) value).doubleValue() * 100 : ((Number) value).doubleValue());
+            try { return ProductCatalog.moneyCents(String.valueOf(value)); }
+            catch (Exception ignored) { return 0; }
+        }
+        return fallbackCents;
+    }
+
+    private String formatMoneyCents(int cents) {
+        return String.format(java.util.Locale.ROOT, "$%.2f", cents / 100.0);
+    }
+
     private LinearLayout numberField(int index, String name) {
         LinearLayout field = column();
         field.setPadding(dp(4), dp(16), dp(4), dp(8));
