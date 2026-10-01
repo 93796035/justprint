@@ -1091,11 +1091,13 @@ public class SimClientActivity extends Activity {
             message("Cart submission failed: the cart is empty.", true);
             return;
         }
-        cart.clear();
-        updateCatalogTotals();
-        if (cartDialog != null) cartDialog.dismiss();
-        message("Cart submitted successfully: " + quantity + " item(s), total "
-                + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)) + ". Cart cleared.", false);
+        // There is currently no iCart/POS order endpoint in the SimClient
+        // protocol. Do not claim success or discard the local cart until a
+        // server acknowledgement has been received.
+        message("Not submitted to iCart: no POS order endpoint is configured. "
+                + quantity + " item(s), total "
+                + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents))
+                + " remain in the cart.", true);
     }
 
     private static final class CartLine {
