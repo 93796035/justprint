@@ -1525,9 +1525,9 @@ public class SimClientActivity extends Activity {
         title.setTextColor(0xff16344b);
         title.setSingleLine(true);
         title.setPadding(0, 0, dp(6), 0);
-        field.addView(title, new LinearLayout.LayoutParams(-2, -2));
+        field.addView(title, new LinearLayout.LayoutParams(dp(58), -2));
         input.setMinHeight(dp(44));
-        field.addView(input, new LinearLayout.LayoutParams(dp(96), dp(44)));
+        field.addView(input, new LinearLayout.LayoutParams(dp(80), dp(44)));
         return field;
     }
 
