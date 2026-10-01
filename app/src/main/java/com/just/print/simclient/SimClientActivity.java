@@ -1109,7 +1109,12 @@ public class SimClientActivity extends Activity {
             cents += (long) line.unitPriceCents * line.quantity;
         }
         if (quantity == 0) {
-            message("Cart submission failed: the cart is empty.", true);
+            if (cartDialog != null) cartDialog.dismiss();
+            new AlertDialog.Builder(this)
+                    .setTitle("Cart submission failed")
+                    .setMessage("The cart is empty.")
+                    .setPositiveButton("OK", (dialog, which) -> showEditingPage(null))
+                    .show();
             return;
         }
         if (server == null || server.trim().isEmpty()) {
