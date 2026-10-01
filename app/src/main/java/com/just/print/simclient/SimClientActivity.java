@@ -1116,14 +1116,16 @@ public class SimClientActivity extends Activity {
             return;
         }
         if (cartDialog != null) cartDialog.dismiss();
-        message("Submitting cart to iK POS…", false);
+        final boolean websiteOrder = isWebsiteDomain(server);
+        message(websiteOrder ? "Submitting cart to website…" : "Submitting cart to iK POS…", false);
         io.execute(() -> {
             try {
-                request(server, "/AikaPos/sales", payload);
+                if (websiteOrder) requestSync(server, "/products/mobileSync/sales", payload, null);
+                else request(server, "/AikaPos/sales", payload);
                 main.post(() -> {
                     cart.clear();
                     updateCatalogTotals();
-                    message("Cart submitted successfully to iK POS: " + submittedQuantity
+                    message("Cart submitted successfully to " + (websiteOrder ? "website" : "iK POS") + ": " + submittedQuantity
                             + " item(s), total " + formatMoneyCents(submittedCents) + ". Cart cleared.", false);
                 });
             } catch (Exception ex) {
