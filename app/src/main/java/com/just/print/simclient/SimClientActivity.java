@@ -311,9 +311,8 @@ public class SimClientActivity extends Activity {
         totalPrice.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
         totalPrice.setTypeface(null, android.graphics.Typeface.NORMAL);
         totalPrice.setIncludeFontPadding(false);
-        totalPrice.setOnClickListener(v -> showCartDialog());
-        totalPrice.setTextColor(0xff087f8c);
-        totalPrice.setPaintFlags(totalPrice.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        totalPrice.setClickable(false);
+        totalPrice.setTextColor(0xff48636d);
         totalPrice.setPadding(0, 0, dp(8), 0);
         LinearLayout.LayoutParams totalParams = new LinearLayout.LayoutParams(-2, dp(32));
         totalParams.leftMargin = dp(12);
