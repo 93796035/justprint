@@ -1041,7 +1041,7 @@ public class SimClientActivity extends Activity {
         } else {
             content.removeAllViews();
         }
-        content.setPadding(dp(20), dp(8), dp(20), 0);
+        content.setPadding(dp(20), dp(8), dp(20), dp(16));
         content.setMinimumHeight(dp(220));
         if (cart.isEmpty()) {
             TextView empty = new TextView(this);
