@@ -61,7 +61,8 @@ public final class CameraCaptureActivity extends Activity implements LifecycleOw
         try {
             File directory = new File(getCacheDir(), "age-check").getCanonicalFile();
             File file = new File(path).getCanonicalFile();
-            return file.getParentFile().equals(directory) ? file : null;
+            File productDirectory = new File(getFilesDir(), "product-photos").getCanonicalFile();
+            return file.getParentFile().equals(directory) || file.getParentFile().equals(productDirectory) ? file : null;
         } catch (Exception ignored) { return null; }
     }
 

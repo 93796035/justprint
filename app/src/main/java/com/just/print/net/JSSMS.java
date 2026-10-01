@@ -3,6 +3,7 @@ import android.telephony.gsm.SmsManager;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 
 public class JSSMS extends Activity {
 
@@ -12,11 +13,12 @@ public class JSSMS extends Activity {
         String DELIVERED = "SMS_DELIVERED";
 
         try {
+            int pendingFlags = Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0;
             PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(
-                    SENT), 0);
+                    SENT), pendingFlags);
 
             PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0,
-                    new Intent(DELIVERED), 0);
+                    new Intent(DELIVERED), pendingFlags);
 
 
             SmsManager sms = SmsManager.getDefault();

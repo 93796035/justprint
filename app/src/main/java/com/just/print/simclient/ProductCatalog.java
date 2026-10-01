@@ -26,7 +26,12 @@ public final class ProductCatalog {
         public final String name, code, category;
         private final String json, searchName;
         private Product(JSONObject row) throws Exception {
-            id = row.getInt("id");
+            int storedLocalId = row.optInt("local_id", 0);
+            int storedId = row.optInt("id", 0);
+            id = storedLocalId > 0 ? storedLocalId : storedId > 0 ? storedId : stableId(row);
+            if (id <= 0) throw new IllegalArgumentException("Product has no usable local ID");
+            // Normalize the two historical names once at the cache boundary.
+            row.put("id", id);
             String mnemonic = row.optString("mnemonic", "").trim();
             String subject = row.optString("subject", "").trim();
             name = !mnemonic.isEmpty() ? mnemonic : !subject.isEmpty() ? subject : row.optString("code", "") ;
@@ -41,6 +46,13 @@ public final class ProductCatalog {
             }
             json = row.toString();
             searchName = name.toUpperCase(Locale.ROOT);
+        }
+        private static int stableId(JSONObject row) {
+            String identity = row.optString("code", "").trim();
+            if (identity.isEmpty()) identity = row.optString("subject", "").trim();
+            if (identity.isEmpty()) throw new IllegalArgumentException("Product has no code or subject for local ID");
+            int value = identity.hashCode() & 0x7fffffff;
+            return value == 0 ? 1 : value;
         }
         public JSONObject row() throws Exception { return new JSONObject(json); }
         @Override public String toString() { return name + "  [" + (code.isEmpty() ? id : code) + "]"; }

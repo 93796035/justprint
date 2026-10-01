@@ -123,12 +123,7 @@ final class StockingPlanPage {
         note.setText(prefs.getString(noteKey(), ""));
         for (int i=0;i<products.length();i++) try {
             JSONObject p=products.getJSONObject(i); if (!selectedCategory.equalsIgnoreCase(p.optString("category"))) continue;
-            int weekly=Math.max(p.optInt("weekly_sales_qty", p.optInt("weeklySalesQty", 0)), p.optInt("lastSevenDaysQty", 0));
-            JSONObject sales=p.optJSONObject("movingSales");
-            if (sales != null) { int recent=0; for (java.util.Iterator<String> it=sales.keys(); it.hasNext();) recent += Math.max(0, sales.optInt(it.next(), 0)); weekly=Math.max(weekly, recent); }
-            int stock=p.optInt("stock1",0)+p.optInt("stock2",0)+p.optInt("stock3",0);
-            int pack=Math.max(1,p.optInt("case_qty", p.optInt("caseQty",1)));
-            int qty=Math.max(0,(weekly*selectedWeeks-stock+pack-1)/pack); if(qty<=0) continue;
+            int qty=StockingPlanCalculator.quantity(p, selectedCategory, selectedWeeks); if(qty<=0) continue;
             JSONObject saved=readPlan(p.optInt("id")); if(saved!=null) qty=saved.optInt("quantity",qty);
             String defaultPrice=ProductCatalog.money(p,"cost");
             int unitPrice=saved != null && saved.has("price") ? saved.optInt("price",0) : parse(defaultPrice);

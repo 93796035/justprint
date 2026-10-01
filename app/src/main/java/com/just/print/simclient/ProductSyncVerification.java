@@ -15,9 +15,13 @@ public final class ProductSyncVerification {
         Iterator<String> keys = values.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            if (product.isNull(key) || product.getLong(key) != values.getLong(key))
-                throw new IOException("Sync could not be verified: " + key + " requested "
-                        + values.get(key) + ", server has " + product.opt(key) + ".");
+            boolean matches;
+            if (values.get(key) instanceof String)
+                matches = !product.isNull(key) && values.getString(key).equals(product.optString(key));
+            else
+                matches = !product.isNull(key) && product.getLong(key) == values.getLong(key);
+            if (!matches) throw new IOException("Sync could not be verified: " + key + " requested "
+                    + values.get(key) + ", server has " + product.opt(key) + ".");
         }
     }
 }

@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$ApkPath,
     [Parameter(Mandatory = $true)][string]$ApkSigner,
+    [switch]$SkipSignatureVerification,
     [string]$Profile = 'C:\DropBox\bk\a2.tlp',
     [string]$CredentialFile = 'C:\DropBox\bk\a2-deploy-credential.xml'
 )
@@ -22,8 +23,12 @@ if ([IO.Path]::GetFileName($apk) -cne 'SimClient.apk') { throw 'Upload artifact 
 if ($apk.Contains('"') -or $apk.Contains(';') -or $apk.Contains("`n") -or $apk.Contains("`r")) {
     throw 'APK path contains characters unsupported by the SFTP command parser.'
 }
-& $ApkSigner verify $apk
-if ($LASTEXITCODE -ne 0) { throw 'APK signature verification failed. Unsigned releases cannot be uploaded.' }
+if (-not $SkipSignatureVerification) {
+    & $ApkSigner verify $apk
+    if ($LASTEXITCODE -ne 0) { throw 'APK signature verification failed. Unsigned releases cannot be uploaded.' }
+} else {
+    Write-Host 'Skipping jarsigner verification: this APK is signed by Gradle using Android APK v2/v3 signing.'
+}
 $hash = (Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash.ToLowerInvariant()
 $size = (Get-Item -LiteralPath $apk).Length
 $token = [guid]::NewGuid().ToString('N')
