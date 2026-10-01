@@ -272,9 +272,9 @@ public class SimClientActivity extends Activity {
         cartButton.setGravity(android.view.Gravity.CENTER);
         cartButton.setIncludeFontPadding(false);
         cartButton.setPadding(0, 0, 0, 0);
-        cartButton.setContentDescription("Add selected product to cart");
+        cartButton.setContentDescription("Show cart");
         cartButton.setClickable(true);
-        cartButton.setOnClickListener(v -> addSelectedProductToCart());
+        cartButton.setOnClickListener(v -> showCartDialog());
         FrameLayout cartHolder = new FrameLayout(this);
         cartHolder.setClipChildren(false);
         cartHolder.addView(cartButton, new FrameLayout.LayoutParams(dp(36), dp(32)));
