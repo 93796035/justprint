@@ -1043,9 +1043,12 @@ public class SimClientActivity extends Activity {
             content.removeAllViews();
         }
         content.setPadding(dp(20), dp(8), dp(20), 0);
+        content.setMinimumHeight(dp(220));
         if (cart.isEmpty()) {
             TextView empty = new TextView(this);
             empty.setText("Cart is empty");
+            empty.setGravity(android.view.Gravity.CENTER);
+            empty.setMinHeight(dp(130));
             content.addView(empty, full());
         } else {
             for (java.util.Map.Entry<Integer, CartLine> entry : cart.entrySet()) {
@@ -1056,21 +1059,22 @@ public class SimClientActivity extends Activity {
                 label.setText(line.name + "  x" + line.quantity + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
                 label.setTextSize(15);
                 row.addView(label, new LinearLayout.LayoutParams(0, dp(48), 1));
+                LinearLayout quantityControls = new LinearLayout(this);
+                quantityControls.setGravity(android.view.Gravity.CENTER_VERTICAL);
                 Button minus = new Button(this);
                 minus.setText("−"); minus.setTextSize(18); minus.setAllCaps(false);
                 minus.setOnClickListener(v -> {
                     if (--line.quantity <= 0) cart.remove(id);
                     updateCatalogTotals(); showCartDialog();
                 });
-                row.addView(minus, new LinearLayout.LayoutParams(dp(44), dp(48)));
+                quantityControls.addView(minus, new LinearLayout.LayoutParams(dp(44), dp(48)));
                 Button plus = new Button(this);
                 plus.setText("+"); plus.setTextSize(18); plus.setAllCaps(false);
                 plus.setOnClickListener(v -> { line.quantity++; updateCatalogTotals(); showCartDialog(); });
-                row.addView(plus, new LinearLayout.LayoutParams(dp(44), dp(48)));
-                Button remove = new Button(this);
-                remove.setText("×"); remove.setTextSize(18); remove.setAllCaps(false);
-                remove.setOnClickListener(v -> { cart.remove(id); updateCatalogTotals(); showCartDialog(); });
-                row.addView(remove, new LinearLayout.LayoutParams(dp(52), dp(48)));
+                quantityControls.addView(plus, new LinearLayout.LayoutParams(dp(44), dp(48)));
+                LinearLayout.LayoutParams quantityParams = new LinearLayout.LayoutParams(dp(88), dp(48));
+                quantityParams.leftMargin = dp(12);
+                row.addView(quantityControls, quantityParams);
                 content.addView(row, full());
             }
         }
@@ -1078,12 +1082,10 @@ public class SimClientActivity extends Activity {
         actions.setGravity(android.view.Gravity.CENTER);
         Button submit = new Button(this);
         submit.setText("Submit");
+        stylePrimaryButton(this, submit);
+        submit.setTextColor(0xffffffff);
         submit.setOnClickListener(v -> submitCart());
-        actions.addView(submit, new LinearLayout.LayoutParams(0, dp(48), 1));
-        Button close = new Button(this);
-        close.setText("Close");
-        close.setOnClickListener(v -> { if (cartDialog != null) cartDialog.dismiss(); });
-        actions.addView(close, new LinearLayout.LayoutParams(0, dp(48), 1));
+        actions.addView(submit, new LinearLayout.LayoutParams(dp(150), dp(52)));
         content.addView(actions, full());
         if (cartDialog != null && cartDialog.isShowing()) {
             return;
@@ -1094,6 +1096,9 @@ public class SimClientActivity extends Activity {
         cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
+        if (cartDialog.getWindow() != null) {
+            cartDialog.getWindow().setLayout(Math.min(getResources().getDisplayMetrics().widthPixels - dp(32), dp(460)), -2);
+        }
     }
 
     private void submitCart() {
