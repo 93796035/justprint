@@ -1058,15 +1058,21 @@ public class SimClientActivity extends Activity {
                 content.addView(row, full());
             }
         }
+        LinearLayout actions = new LinearLayout(this);
+        actions.setGravity(android.view.Gravity.CENTER);
         Button submit = new Button(this);
         submit.setText("Submit");
         submit.setOnClickListener(v -> { message("Cart submitted.", false); });
-        content.addView(submit, full());
+        actions.addView(submit, new LinearLayout.LayoutParams(0, dp(48), 1));
+        Button close = new Button(this);
+        close.setText("Close");
+        close.setOnClickListener(v -> { if (cartDialog != null) cartDialog.dismiss(); });
+        actions.addView(close, new LinearLayout.LayoutParams(0, dp(48), 1));
+        content.addView(actions, full());
         if (cartDialog != null && cartDialog.isShowing()) {
             return;
         }
-        cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content)
-                .setNegativeButton("Close", null).create();
+        cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
     }
