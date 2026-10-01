@@ -287,6 +287,18 @@ public class SimClientActivity extends Activity {
         badgeParams.topMargin = dp(2);
         badgeParams.leftMargin = dp(3);
         cartHolder.addView(cartBadge, badgeParams);
+        TextView addToCart = new TextView(this);
+        addToCart.setText("Add to cart");
+        addToCart.setTextSize(12);
+        addToCart.setTextColor(0xff087f8c);
+        addToCart.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        addToCart.setIncludeFontPadding(false);
+        addToCart.setContentDescription("Add selected product to cart");
+        addToCart.setTooltipText("Add selected product to cart");
+        addToCart.setPaintFlags(addToCart.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        addToCart.setPadding(0, 0, dp(8), 0);
+        addToCart.setOnClickListener(v -> addSelectedProductToCart());
+        totals.addView(addToCart, new LinearLayout.LayoutParams(-2, dp(32)));
         totals.addView(cartHolder, new LinearLayout.LayoutParams(dp(36), dp(32)));
         totalNumber = summaryText("QTY: 0", "Total number of products");
         totalNumber.setTextSize(12);
@@ -346,6 +358,9 @@ public class SimClientActivity extends Activity {
         photoBackground.setColor(0xffe8f2f4);
         photoBackground.setStroke(dp(1), 0xffb7cdd2);
         productPhoto.setBackground(photoBackground);
+        // Keep the frame above the bitmap. An opaque product image can cover
+        // an ImageView background, so the outline belongs in the foreground.
+        productPhoto.setForeground(roundBackground(0x00000000, 0xff8faeb5, 0));
         productPhoto.setClickable(true);
         productPhoto.setFocusable(true);
         productPhoto.setOnClickListener(v -> captureProductPhoto());
@@ -1491,6 +1506,16 @@ public class SimClientActivity extends Activity {
         return input;
     }
 
+    private LinearLayout settingsField(String label, EditText input) {
+        LinearLayout field = column();
+        TextView title = new TextView(this);
+        title.setText(label);
+        title.setTextColor(0xff16344b);
+        field.addView(title, full());
+        field.addView(input, full());
+        return field;
+    }
+
     private int parseRate(EditText input, int fallback) {
         try {
             double percent = Double.parseDouble(input.getText().toString().trim());
@@ -1539,7 +1564,30 @@ public class SimClientActivity extends Activity {
         EditText qstRate = settingsDecimal("QST", settingRate("tax_qst_basis_points", 9975) / 100.0);
         EditText ecoTax = settingsMoney("Eco Tax", getPreferences(MODE_PRIVATE).getInt("tax_eco_cents", 1));
         EditText bottleFee = settingsMoney("Bottle Fee", getPreferences(MODE_PRIVATE).getInt("tax_bottle_cents", 10));
-        box.addView(gstRate); box.addView(qstRate); box.addView(ecoTax); box.addView(bottleFee);
+        LinearLayout taxRow1 = new LinearLayout(this);
+        taxRow1.addView(settingsField("GST (%)", gstRate), new LinearLayout.LayoutParams(0, -2, 1));
+        taxRow1.addView(settingsField("QST (%)", qstRate), new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout taxRow2 = new LinearLayout(this);
+        taxRow2.addView(settingsField("Eco Tax ($)", ecoTax), new LinearLayout.LayoutParams(0, -2, 1));
+        taxRow2.addView(settingsField("Bottle Fee ($)", bottleFee), new LinearLayout.LayoutParams(0, -2, 1));
+        box.addView(taxRow1, full());
+        box.addView(taxRow2, full());
+        TextView languageLabel = new TextView(this);
+        languageLabel.setText("Language");
+        box.addView(languageLabel, full());
+        RadioGroup languages = new RadioGroup(this);
+        languages.setOrientation(RadioGroup.HORIZONTAL);
+        RadioButton french = new RadioButton(this); french.setText("Français"); french.setTag("fr");
+        RadioButton english = new RadioButton(this); english.setText("English"); english.setTag("en");
+        RadioButton chinese = new RadioButton(this); chinese.setText("中文"); chinese.setTag("zh");
+        languages.addView(french, new RadioGroup.LayoutParams(0, -2, 1));
+        languages.addView(english, new RadioGroup.LayoutParams(0, -2, 1));
+        languages.addView(chinese, new RadioGroup.LayoutParams(0, -2, 1));
+        String language = getPreferences(MODE_PRIVATE).getString("language", "en");
+        if ("fr".equals(language)) french.setChecked(true);
+        else if ("zh".equals(language)) chinese.setChecked(true);
+        else english.setChecked(true);
+        box.addView(languages, full());
         Button viewLocal = new Button(this);
         viewLocal.setText("View Local Inventory");
         viewLocal.setOnClickListener(v -> viewLocalInventory());
@@ -1628,6 +1676,8 @@ public class SimClientActivity extends Activity {
                     settings.putInt("tax_qst_basis_points", parseRate(qstRate, 9975));
                     settings.putInt("tax_eco_cents", parseMoneySetting(ecoTax));
                     settings.putInt("tax_bottle_cents", parseMoneySetting(bottleFee));
+                    View checkedLanguage = languages.findViewById(languages.getCheckedRadioButtonId());
+                    settings.putString("language", checkedLanguage == null ? "en" : String.valueOf(checkedLanguage.getTag()));
                     if (websiteMode) settings.putString("personId", personId);
                     if (!websiteMode) {
                         settings.remove("personId");
@@ -2027,13 +2077,22 @@ public class SimClientActivity extends Activity {
 
     static void styleDropdown(Activity activity, Spinner spinner) {
         float density = activity.getResources().getDisplayMetrics().density;
-        android.graphics.drawable.GradientDrawable border = new android.graphics.drawable.GradientDrawable();
-        border.setColor(0xffffffff); border.setCornerRadius(12 * density);
-        border.setStroke(Math.max(1, Math.round(density)), 0xffb6d5df);
-        // Keep the platform dropdown arrow above the new outline.
+        // The platform Spinner background can cover the left side of a custom
+        // outline. Keep the arrow as the background, then draw the complete
+        // rounded frame in the foreground so the content area stays framed.
         android.graphics.drawable.Drawable arrow = spinner.getBackground();
-        spinner.setBackground(new android.graphics.drawable.LayerDrawable(
-                new android.graphics.drawable.Drawable[]{border, arrow}));
+        spinner.setBackground(arrow);
+        android.graphics.drawable.GradientDrawable foreground = new android.graphics.drawable.GradientDrawable();
+        foreground.setColor(0x00000000);
+        foreground.setCornerRadius(12 * density);
+        foreground.setStroke(Math.max(1, Math.round(density)), 0xffb6d5df);
+        spinner.setForeground(foreground);
+        spinner.setClipToOutline(true);
+        spinner.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override public void getOutline(View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 12 * density);
+            }
+        });
     }
 
     private void updateTabs() {
