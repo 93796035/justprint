@@ -1644,6 +1644,7 @@ public class SimClientActivity extends Activity {
             android.widget.LinearLayout buttonBar = (android.widget.LinearLayout) dialog.getButton(AlertDialog.BUTTON_POSITIVE).getParent();
             buttonBar.removeAllViews();
             buttonBar.setGravity(android.view.Gravity.CENTER);
+            buttonBar.setPadding(0, dp(20), 0, 0);
             buttonBar.addView(dialog.getButton(AlertDialog.BUTTON_POSITIVE),
                     new android.view.ViewGroup.LayoutParams(dp(110), dp(52)));
             Space buttonGap = new Space(this);
