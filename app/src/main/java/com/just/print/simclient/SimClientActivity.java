@@ -1518,12 +1518,15 @@ public class SimClientActivity extends Activity {
     }
 
     private LinearLayout settingsField(String label, EditText input) {
-        LinearLayout field = column();
+        LinearLayout field = new LinearLayout(this);
+        field.setGravity(android.view.Gravity.CENTER_VERTICAL);
         TextView title = new TextView(this);
         title.setText(label);
         title.setTextColor(0xff16344b);
-        field.addView(title, full());
-        field.addView(input, full());
+        title.setSingleLine(true);
+        title.setPadding(0, 0, dp(6), 0);
+        field.addView(title, new LinearLayout.LayoutParams(-2, -2));
+        field.addView(input, new LinearLayout.LayoutParams(0, -2, 1));
         return field;
     }
 
@@ -1579,8 +1582,8 @@ public class SimClientActivity extends Activity {
         taxRow1.addView(settingsField("GST (%)", gstRate), new LinearLayout.LayoutParams(0, -2, 1));
         taxRow1.addView(settingsField("QST (%)", qstRate), new LinearLayout.LayoutParams(0, -2, 1));
         LinearLayout taxRow2 = new LinearLayout(this);
-        taxRow2.addView(settingsField("Eco Tax ($)", ecoTax), new LinearLayout.LayoutParams(0, -2, 1));
-        taxRow2.addView(settingsField("Bottle Fee ($)", bottleFee), new LinearLayout.LayoutParams(0, -2, 1));
+        taxRow2.addView(settingsField("Eco ($)", ecoTax), new LinearLayout.LayoutParams(0, -2, 1));
+        taxRow2.addView(settingsField("Bottle ($)", bottleFee), new LinearLayout.LayoutParams(0, -2, 1));
         box.addView(taxRow1, full());
         box.addView(taxRow2, full());
         TextView languageLabel = new TextView(this);
