@@ -284,7 +284,7 @@ public class SimClientActivity extends Activity {
         cartBadge.setBackground(roundBackground(0xffe53935, 0xffe53935, 20));
         FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20), android.view.Gravity.TOP | android.view.Gravity.LEFT);
         badgeParams.topMargin = dp(2);
-        badgeParams.leftMargin = dp(8);
+        badgeParams.leftMargin = dp(3);
         cartHolder.addView(cartBadge, badgeParams);
         totals.addView(cartHolder, new LinearLayout.LayoutParams(dp(36), dp(32)));
         totalNumber = summaryText("QTY: 0", "Total number of products");
@@ -302,9 +302,6 @@ public class SimClientActivity extends Activity {
         totalPrice.setTextColor(0xff087f8c);
         totalPrice.setPaintFlags(totalPrice.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
         totalPrice.setPadding(0, 0, dp(8), 0);
-        LinearLayout.LayoutParams qtyParams = new LinearLayout.LayoutParams(-2, dp(32));
-        qtyParams.leftMargin = dp(20);
-        totals.addView(totalNumber, qtyParams);
         LinearLayout.LayoutParams totalParams = new LinearLayout.LayoutParams(-2, dp(32));
         totalParams.leftMargin = dp(12);
         totals.addView(totalPrice, totalParams);
