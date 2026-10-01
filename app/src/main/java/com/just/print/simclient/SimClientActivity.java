@@ -1526,7 +1526,8 @@ public class SimClientActivity extends Activity {
         title.setSingleLine(true);
         title.setPadding(0, 0, dp(6), 0);
         field.addView(title, new LinearLayout.LayoutParams(-2, -2));
-        field.addView(input, new LinearLayout.LayoutParams(0, -2, 1));
+        input.setMinHeight(dp(44));
+        field.addView(input, new LinearLayout.LayoutParams(dp(96), dp(44)));
         return field;
     }
 
@@ -1573,7 +1574,9 @@ public class SimClientActivity extends Activity {
         activationCode.setVisibility(View.GONE);
         TextView taxLabel = new TextView(this);
         taxLabel.setText("Price calculation settings (%)");
-        box.addView(taxLabel);
+        LinearLayout.LayoutParams taxLabelParams = full();
+        taxLabelParams.topMargin = dp(20);
+        box.addView(taxLabel, taxLabelParams);
         EditText gstRate = settingsDecimal("GST", settingRate("tax_gst_basis_points", 500) / 100.0);
         EditText qstRate = settingsDecimal("QST", settingRate("tax_qst_basis_points", 9975) / 100.0);
         EditText ecoTax = settingsMoney("Eco Tax", getPreferences(MODE_PRIVATE).getInt("tax_eco_cents", 1));
@@ -1585,10 +1588,14 @@ public class SimClientActivity extends Activity {
         taxRow2.addView(settingsField("Eco ($)", ecoTax), new LinearLayout.LayoutParams(0, -2, 1));
         taxRow2.addView(settingsField("Bottle ($)", bottleFee), new LinearLayout.LayoutParams(0, -2, 1));
         box.addView(taxRow1, full());
-        box.addView(taxRow2, full());
+        LinearLayout.LayoutParams taxRow2Params = full();
+        taxRow2Params.topMargin = dp(10);
+        box.addView(taxRow2, taxRow2Params);
         TextView languageLabel = new TextView(this);
         languageLabel.setText("Language");
-        box.addView(languageLabel, full());
+        LinearLayout.LayoutParams languageLabelParams = full();
+        languageLabelParams.topMargin = dp(20);
+        box.addView(languageLabel, languageLabelParams);
         RadioGroup languages = new RadioGroup(this);
         languages.setOrientation(RadioGroup.HORIZONTAL);
         RadioButton french = new RadioButton(this); french.setText("Français"); french.setTag("fr");
