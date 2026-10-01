@@ -1641,7 +1641,7 @@ public class SimClientActivity extends Activity {
             stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_POSITIVE));
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xffffffff);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xffffffff);
-            android.view.ViewGroup buttonBar = (android.view.ViewGroup) dialog.getButton(AlertDialog.BUTTON_POSITIVE).getParent();
+            android.widget.LinearLayout buttonBar = (android.widget.LinearLayout) dialog.getButton(AlertDialog.BUTTON_POSITIVE).getParent();
             buttonBar.removeAllViews();
             buttonBar.setGravity(android.view.Gravity.CENTER);
             buttonBar.addView(dialog.getButton(AlertDialog.BUTTON_POSITIVE),
