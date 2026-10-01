@@ -1062,7 +1062,7 @@ public class SimClientActivity extends Activity {
         actions.setGravity(android.view.Gravity.CENTER);
         Button submit = new Button(this);
         submit.setText("Submit");
-        submit.setOnClickListener(v -> { message("Cart submitted.", false); });
+        submit.setOnClickListener(v -> submitCart());
         actions.addView(submit, new LinearLayout.LayoutParams(0, dp(48), 1));
         Button close = new Button(this);
         close.setText("Close");
@@ -1075,6 +1075,24 @@ public class SimClientActivity extends Activity {
         cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
+    }
+
+    private void submitCart() {
+        int quantity = 0;
+        long cents = 0;
+        for (CartLine line : cart.values()) {
+            quantity += line.quantity;
+            cents += (long) line.unitPriceCents * line.quantity;
+        }
+        if (quantity == 0) {
+            message("Cart submission failed: the cart is empty.", true);
+            return;
+        }
+        cart.clear();
+        updateCatalogTotals();
+        if (cartDialog != null) cartDialog.dismiss();
+        message("Cart submitted successfully: " + quantity + " item(s), total "
+                + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)) + ". Cart cleared.", false);
     }
 
     private static final class CartLine {
