@@ -1641,6 +1641,15 @@ public class SimClientActivity extends Activity {
             stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_POSITIVE));
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xffffffff);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xffffffff);
+            android.view.ViewGroup buttonBar = (android.view.ViewGroup) dialog.getButton(AlertDialog.BUTTON_POSITIVE).getParent();
+            buttonBar.removeAllViews();
+            buttonBar.setGravity(android.view.Gravity.CENTER);
+            buttonBar.addView(dialog.getButton(AlertDialog.BUTTON_POSITIVE),
+                    new android.view.ViewGroup.LayoutParams(dp(110), dp(52)));
+            Space buttonGap = new Space(this);
+            buttonBar.addView(buttonGap, new android.view.ViewGroup.LayoutParams(dp(20), dp(1)));
+            buttonBar.addView(dialog.getButton(AlertDialog.BUTTON_NEGATIVE),
+                    new android.view.ViewGroup.LayoutParams(dp(110), dp(52)));
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String entered = address.getText().toString().trim();
             boolean websiteMode = isWebsiteDomain(entered);
