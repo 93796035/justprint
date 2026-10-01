@@ -1006,7 +1006,7 @@ public class SimClientActivity extends Activity {
         int id = selected.optInt("id", -1);
         if (id <= 0) return;
         CartLine line = cart.get(id);
-        if (line == null) cart.put(id, new CartLine(selected.optString("mnemonic", "Product"),
+        if (line == null) cart.put(id, new CartLine(id, selected.optString("mnemonic", "Product"),
                 selected.optString("category", ""), finalPriceCents(selected)));
         else line.quantity++;
         cartButton.animate().cancel();
@@ -1100,22 +1100,17 @@ public class SimClientActivity extends Activity {
         final int submittedCents = (int) Math.min(Integer.MAX_VALUE, cents);
         final JSONObject payload = new JSONObject();
         try {
-            payload.put("lastModifiedTime", "0");
-            payload.put("totalPrice", submittedCents / 100.0);
-            payload.put("openTime", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.ROOT).format(new java.util.Date()));
-            payload.put("waiter", "SimClient");
-            payload.put("table", "SimClient");
-            payload.put("billIndex", "SIM-" + System.currentTimeMillis());
-            StringBuilder orderContent = new StringBuilder();
+            payload.put("saleId", "SIM-" + System.currentTimeMillis());
+            payload.put("totalCents", submittedCents);
+            JSONArray items = new JSONArray();
             for (CartLine line : cart.values()) {
-                orderContent.append("DishStart:")
-                        .append(java.net.URLEncoder.encode(line.category, "UTF-8")).append('\n')
-                        .append(java.net.URLEncoder.encode(line.name, "UTF-8")).append('\n')
-                        .append(line.unitPriceCents / 100.0).append('\n')
-                        .append(line.quantity).append('\n')
-                        .append("MarkStart:\n");
+                items.put(new JSONObject().put("productId", line.productId)
+                        .put("name", line.name).put("category", line.category)
+                        .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents)
+                        .put("totalCents", line.unitPriceCents * line.quantity)
+                        .put("stockField", "stock1"));
             }
-            payload.put("orderContent", orderContent.toString());
+            payload.put("items", items);
         } catch (Exception ex) {
             message("Cart submission failed: could not prepare the POS order. Cart remains.", true);
             return;
@@ -1124,7 +1119,7 @@ public class SimClientActivity extends Activity {
         message("Submitting cart to iK POS…", false);
         io.execute(() -> {
             try {
-                request(server, "/AikaPos/synchronizeFromServer", payload);
+                request(server, "/AikaPos/sales", payload);
                 main.post(() -> {
                     cart.clear();
                     updateCatalogTotals();
@@ -1138,14 +1133,16 @@ public class SimClientActivity extends Activity {
     }
 
     private static final class CartLine {
+        final int productId;
         final String name;
         final String category;
         final int unitPriceCents;
         int quantity = 1;
-        CartLine(String name, int unitPriceCents) {
-            this(name, "", unitPriceCents);
+        CartLine(int productId, String name, int unitPriceCents) {
+            this(productId, name, "", unitPriceCents);
         }
-        CartLine(String name, String category, int unitPriceCents) {
+        CartLine(int productId, String name, String category, int unitPriceCents) {
+            this.productId = productId;
             this.name = name;
             this.category = category == null ? "" : category;
             this.unitPriceCents = unitPriceCents;
