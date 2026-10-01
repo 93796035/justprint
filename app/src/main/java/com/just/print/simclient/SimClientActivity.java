@@ -281,9 +281,9 @@ public class SimClientActivity extends Activity {
         cartBadge.setTextColor(0xffffffff);
         cartBadge.setGravity(android.view.Gravity.CENTER);
         cartBadge.setBackground(roundBackground(0xffe53935, 0xffe53935, 20));
-        FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20), android.view.Gravity.TOP | android.view.Gravity.RIGHT);
-        badgeParams.topMargin = -dp(4);
-        badgeParams.rightMargin = -dp(5);
+        FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20), android.view.Gravity.TOP | android.view.Gravity.LEFT);
+        badgeParams.topMargin = dp(2);
+        badgeParams.leftMargin = dp(8);
         cartHolder.addView(cartBadge, badgeParams);
         totals.addView(cartHolder, new LinearLayout.LayoutParams(dp(36), dp(32)));
         totalNumber = summaryText("QTY: 0", "Total number of products");
@@ -1035,6 +1035,17 @@ public class SimClientActivity extends Activity {
                 label.setText(line.name + "  x" + line.quantity + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
                 label.setTextSize(15);
                 row.addView(label, new LinearLayout.LayoutParams(0, dp(48), 1));
+                Button minus = new Button(this);
+                minus.setText("−"); minus.setTextSize(18); minus.setAllCaps(false);
+                minus.setOnClickListener(v -> {
+                    if (--line.quantity <= 0) cart.remove(id);
+                    updateCatalogTotals(); showCartDialog();
+                });
+                row.addView(minus, new LinearLayout.LayoutParams(dp(44), dp(48)));
+                Button plus = new Button(this);
+                plus.setText("+"); plus.setTextSize(18); plus.setAllCaps(false);
+                plus.setOnClickListener(v -> { line.quantity++; updateCatalogTotals(); showCartDialog(); });
+                row.addView(plus, new LinearLayout.LayoutParams(dp(44), dp(48)));
                 Button remove = new Button(this);
                 remove.setText("×"); remove.setTextSize(18); remove.setAllCaps(false);
                 remove.setOnClickListener(v -> { cart.remove(id); updateCatalogTotals(); showCartDialog(); });
