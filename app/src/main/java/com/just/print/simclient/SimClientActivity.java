@@ -1636,7 +1636,12 @@ public class SimClientActivity extends Activity {
         box.addView(forceUpload);
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Connection Settings")
                 .setView(box).setNegativeButton("Cancel", null).setPositiveButton("Save", null).create();
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+        dialog.setOnShowListener(d -> {
+            stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_NEGATIVE));
+            stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_POSITIVE));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xffffffff);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xffffffff);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String entered = address.getText().toString().trim();
             boolean websiteMode = isWebsiteDomain(entered);
             String url = normalizeServerAddress(entered);
@@ -1741,7 +1746,8 @@ public class SimClientActivity extends Activity {
                     product.requestFocus(); product.selectAll();
                 });
             });
-        }));
+            });
+        });
         dialog.show();
     }
 
