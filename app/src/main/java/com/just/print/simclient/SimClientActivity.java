@@ -1072,6 +1072,9 @@ public class SimClientActivity extends Activity {
         if (cartDialog != null && cartDialog.isShowing()) {
             return;
         }
+        if (content.getParent() instanceof android.view.ViewGroup) {
+            ((android.view.ViewGroup) content.getParent()).removeView(content);
+        }
         cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
