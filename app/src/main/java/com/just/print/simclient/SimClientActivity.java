@@ -312,7 +312,7 @@ public class SimClientActivity extends Activity {
         totalPrice.setTypeface(null, android.graphics.Typeface.NORMAL);
         totalPrice.setIncludeFontPadding(false);
         totalPrice.setClickable(false);
-        totalPrice.setTextColor(0xff48636d);
+        totalPrice.setTextColor(0xff000000);
         totalPrice.setPadding(0, 0, dp(8), 0);
         LinearLayout.LayoutParams totalParams = new LinearLayout.LayoutParams(-2, dp(32));
         totalParams.leftMargin = dp(12);
@@ -1077,6 +1077,7 @@ public class SimClientActivity extends Activity {
                 content.addView(row, full());
             }
         }
+        content.addView(new Space(this), new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout actions = new LinearLayout(this);
         actions.setGravity(android.view.Gravity.CENTER);
         Button submit = new Button(this);
@@ -1123,6 +1124,7 @@ public class SimClientActivity extends Activity {
             payload.put("totalCents", submittedCents);
             JSONArray items = new JSONArray();
             for (CartLine line : cart.values()) {
+                if (line.quantity <= 0) continue;
                 items.put(new JSONObject().put("productId", line.productId)
                         .put("name", line.name).put("category", line.category)
                         .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents)
