@@ -47,6 +47,7 @@ public class SimClientActivity extends Activity {
     private TextView cartButton;
     private TextView cartBadge;
     private AlertDialog cartDialog;
+    private LinearLayout cartContent;
     private final java.util.LinkedHashMap<Integer, CartLine> cart = new java.util.LinkedHashMap<>();
     private ImageView productPhoto;
     private File pendingProductPhoto;
@@ -1018,8 +1019,13 @@ public class SimClientActivity extends Activity {
     }
 
     private void showCartDialog() {
-        if (cartDialog != null && cartDialog.isShowing()) cartDialog.dismiss();
-        LinearLayout content = column();
+        LinearLayout content = cartContent;
+        if (content == null) {
+            content = column();
+            cartContent = content;
+        } else {
+            content.removeAllViews();
+        }
         content.setPadding(dp(20), dp(8), dp(20), 0);
         if (cart.isEmpty()) {
             TextView empty = new TextView(this);
@@ -1056,6 +1062,9 @@ public class SimClientActivity extends Activity {
         submit.setText("Submit");
         submit.setOnClickListener(v -> { message("Cart submitted.", false); });
         content.addView(submit, full());
+        if (cartDialog != null && cartDialog.isShowing()) {
+            return;
+        }
         cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content)
                 .setNegativeButton("Close", null).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
