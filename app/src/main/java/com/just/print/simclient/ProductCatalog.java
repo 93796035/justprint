@@ -9,6 +9,9 @@ import java.util.Locale;
 
 /** Validated, immutable snapshots shared by local search and durable storage. */
 public final class ProductCatalog {
+    interface Progress {
+        void update(int completed, int total);
+    }
     public static int moneyCents(String text) {
         if (!text.matches("[0-9]+(?:[.,][0-9]{1,2})?"))
             throw new IllegalArgumentException("Enter a non-negative amount with up to 2 decimal places");
@@ -59,11 +62,20 @@ public final class ProductCatalog {
     }
     private final List<Product> products = new ArrayList<>();
     public ProductCatalog(JSONArray rows) throws Exception {
+        this(rows, null);
+    }
+
+    public ProductCatalog(JSONArray rows, Progress progress) throws Exception {
         HashSet<Integer> ids = new HashSet<>();
         for (int i = 0; i < rows.length(); i++) {
-            Product product = new Product(rows.getJSONObject(i));
-            if (!ids.add(product.id)) throw new IllegalArgumentException("Duplicate product ID in response");
+            Product product;
+            try { product = new Product(rows.getJSONObject(i)); }
+            catch (Exception ex) {
+                throw new IllegalArgumentException("Invalid product at row " + (i + 1) + "/" + rows.length() + ": " + ex.getMessage(), ex);
+            }
+            if (!ids.add(product.id)) throw new IllegalArgumentException("Duplicate product ID at row " + (i + 1) + "/" + rows.length() + ": " + product.id);
             products.add(product);
+            if (progress != null) progress.update(i + 1, rows.length());
         }
     }
     public int size() { return products.size(); }

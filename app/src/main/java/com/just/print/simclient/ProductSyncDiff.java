@@ -13,6 +13,9 @@ import java.util.TimeZone;
 
 /** Read-only comparison of phone and server product snapshots. */
 final class ProductSyncDiff {
+    interface Progress {
+        void update(int completed, int total);
+    }
     static final class Item {
         final JSONObject server;
         final JSONObject local;
@@ -32,29 +35,46 @@ final class ProductSyncDiff {
     private ProductSyncDiff() {}
 
     static List<Item> compare(JSONArray server, JSONArray local) throws Exception {
-        Map<String, JSONObject> servers = index(server);
-        Map<String, JSONObject> locals = index(local);
+        return compare(server, local, null);
+    }
+
+    static List<Item> compare(JSONArray server, JSONArray local, Progress progress) throws Exception {
+        Map<String, JSONObject> servers = index(server, "server");
+        Map<String, JSONObject> locals = index(local, "local");
         Map<String, Boolean> seen = new HashMap<>();
         List<Item> result = new ArrayList<>();
+        int completed = 0;
+        int total = servers.size() + locals.size();
         for (String id : servers.keySet()) {
             JSONObject s = servers.get(id), l = locals.get(id);
             if (l == null || different(s, l)) {
                 result.add(new Item(s, l, time(s) > time(l), time(l) > time(s)));
             }
             seen.put(id, true);
+            if (progress != null) progress.update(++completed, total);
         }
         for (String id : locals.keySet()) if (!seen.containsKey(id))
-            result.add(new Item(null, locals.get(id), false, true));
+            { result.add(new Item(null, locals.get(id), false, true)); if (progress != null) progress.update(++completed, total); }
         return result;
     }
 
-    private static Map<String, JSONObject> index(JSONArray rows) throws Exception {
+    private static Map<String, JSONObject> index(JSONArray rows, String source) throws Exception {
         Map<String, JSONObject> result = new HashMap<>();
         for (int i = 0; i < rows.length(); i++) {
             JSONObject row = rows.getJSONObject(i);
             long localId = row.optLong("local_id", 0);
-            String key = localId > 0 ? "id:" + localId : "code:" + row.optString("code", "");
-            if (key.length() <= 5) throw new IllegalArgumentException("Product has neither local_id nor code");
+            // Server snapshots from older POS/web versions may expose the
+            // stable product identifier as `id` instead of `local_id`.
+            // Prefer local_id, then id, and only use code as the legacy key.
+            if (localId <= 0) localId = row.optLong("id", 0);
+            String code = row.optString("code", "").trim();
+            String key = localId > 0 ? "id:" + localId : "code:" + code;
+            if (localId <= 0 && code.isEmpty()) {
+                String raw = row.toString();
+                if (raw.length() > 500) raw = raw.substring(0, 500) + "…";
+                throw new IllegalArgumentException("Product has no local_id, id, or code in "
+                        + source + " row " + (i + 1) + "/" + rows.length() + ": " + raw);
+            }
             result.put(key, row);
         }
         return result;

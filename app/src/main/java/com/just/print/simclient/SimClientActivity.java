@@ -99,7 +99,7 @@ public class SimClientActivity extends Activity {
         // phone's surviving catalog during startup.  The local catalog is the
         // source of truth until the operator explicitly starts a recovery.
         server = normalizeServerAddress(getPreferences(MODE_PRIVATE)
-                .getString("server", "192.168.2.111"));
+                .getString("server", "https://www.sharethegoodones.com"));
         // The activation code is the server-side personId/client namespace for
         // website-backed synchronization. It is intentionally kept separate
         // from the POS address and from any logged-in employee ID.
@@ -269,6 +269,8 @@ public class SimClientActivity extends Activity {
         cartButton = new TextView(this);
         cartButton.setText("🛒");
         cartButton.setTextSize(25);
+        cartButton.setTextColor(0xff087f8c);
+        cartButton.setAlpha(1f);
         cartButton.setGravity(android.view.Gravity.CENTER);
         cartButton.setIncludeFontPadding(false);
         cartButton.setPadding(0, 0, 0, 0);
@@ -421,6 +423,12 @@ public class SimClientActivity extends Activity {
         }
         shell.addView(tabs, full());
         setContentView(shell);
+        // Download the shared product library without delaying the first screen.
+        if (!ProductImageStore.hasAnyImage(this)) {
+            ProductImageStore.downloadInBackground(this, server, () -> {
+                if (!closed && selected != null) showLocalProductPhoto(selected.optInt("id", -1));
+            });
+        }
         updateTabs();
         getWindow().setLayout(-1, -1);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -454,7 +462,7 @@ public class SimClientActivity extends Activity {
             Product item = (Product) parent.getItemAtPosition(position);
             generation++;
             if (pendingSearch != null) main.removeCallbacks(pendingSearch);
-            try { fillProduct(item.row()); }
+            try { fillProduct(item.row()); clearProductSearchFocus(); }
             catch (Exception ex) { message("Invalid cached product. Tap Refresh.", false); }
         });
         message(server.isEmpty() ? "Open Settings to enter the POS address." : "Type a name, then select a product from the list.", false);
@@ -463,6 +471,9 @@ public class SimClientActivity extends Activity {
         // surviving catalog with the damaged/empty server PRODUCT table.
         loadCatalog(false);
         if (state != null && state.getBoolean("showingId")) showIdPage(state);
+        if (getPreferences(MODE_PRIVATE).getString("personId", "").trim().isEmpty()) {
+            main.post(this::configure);
+        }
     }
 
     private void invalidateSelection() {
@@ -489,6 +500,7 @@ public class SimClientActivity extends Activity {
             try {
                 fillProduct(match.row());
                 product.dismissDropDown();
+                clearProductSearchFocus();
                 message("Product selected automatically: " + match.name, false);
             } catch (Exception ex) { message("Invalid cached product. Tap Refresh.", false); }
             return;
@@ -649,10 +661,24 @@ public class SimClientActivity extends Activity {
                         (text, percent) -> main.post(() -> {
                             if (!closed) showRefreshProgress(text, percent);
                         }));
-                main.post(() -> { if (!closed) showRefreshProgress("Preparing product inventory…", -1); });
-                ProductCatalog candidate = new ProductCatalog(response.getJSONArray("products"));
+                JSONArray serverRows = response.getJSONArray("products");
+                main.post(() -> { if (!closed) showRefreshProgress("Received " + serverRows.length() + " products. Validating…", 0); });
+                ProductCatalog candidate = new ProductCatalog(serverRows, (completed, total) -> {
+                    if (completed == total || completed % 5 == 0) {
+                        int percent = total == 0 ? 100 : completed * 100 / total;
+                        main.post(() -> { if (!closed) showRefreshProgress(
+                                "Validating products… " + completed + "/" + total, percent); });
+                    }
+                });
                 JSONArray localRows = new JSONArray(saved);
-                java.util.List<ProductSyncDiff.Item> differences = ProductSyncDiff.compare(response.getJSONArray("products"), localRows);
+                main.post(() -> { if (!closed) showRefreshProgress("Comparing " + serverRows.length() + " server products with " + localRows.length() + " local products…", 0); });
+                java.util.List<ProductSyncDiff.Item> differences = ProductSyncDiff.compare(serverRows, localRows,
+                        (completed, total) -> {
+                            if (completed == total || completed % 25 == 0) {
+                                int percent = total == 0 ? 100 : completed * 100 / total;
+                                main.post(() -> { if (!closed) showRefreshProgress("Comparing products… " + completed + "/" + total, percent); });
+                            }
+                        });
                 if (!differences.isEmpty() && protectedCatalog.size() > 0) {
                     boolean hideReport = getPreferences(MODE_PRIVATE).getBoolean("hideSyncReport", false);
                     if (hideReport && canAutoResolve(differences)) {
@@ -666,7 +692,7 @@ public class SimClientActivity extends Activity {
                     main.post(() -> { if (!closed) { refreshProgress.setVisibility(View.GONE); busy(false); message(text, true); } });
                     return;
                 }
-                main.post(() -> { if (!closed) showRefreshProgress("Saving " + candidate.size() + " products on this phone…", -1); });
+                main.post(() -> { if (!closed) showRefreshProgress("Comparison complete. Saving " + candidate.size() + " products on this phone…", 100); });
                 persistCatalog(base, candidate);
                 downloaded = candidate;
                 feedback = candidate.size() + " products refreshed and saved locally.";
@@ -974,6 +1000,14 @@ public class SimClientActivity extends Activity {
         productPhoto.setImageDrawable(null);
         productPhoto.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         if (productId <= 0) return;
+        if (selected != null) {
+            android.graphics.Bitmap shared = ProductImageStore.decode(this, selected.optString("code", ""));
+            if (shared != null) {
+                productPhoto.setImageBitmap(shared);
+                productPhoto.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                return;
+            }
+        }
         File file = new File(new File(getFilesDir(), "product-photos"), "product-" + productId + ".jpg");
         if (file.isFile()) {
             android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -1578,7 +1612,9 @@ public class SimClientActivity extends Activity {
         taxLabelParams.topMargin = dp(20);
         box.addView(taxLabel, taxLabelParams);
         EditText gstRate = settingsDecimal("GST", settingRate("tax_gst_basis_points", 500) / 100.0);
-        EditText qstRate = settingsDecimal("QST", settingRate("tax_qst_basis_points", 9975) / 100.0);
+        // QST is 9.975%; the stored rate is hundredths of a percent, so
+        // 998 is the nearest representable default (9.98%).
+        EditText qstRate = settingsDecimal("QST", settingRate("tax_qst_basis_points", 998) / 100.0);
         EditText ecoTax = settingsMoney("Eco Tax", getPreferences(MODE_PRIVATE).getInt("tax_eco_cents", 1));
         EditText bottleFee = settingsMoney("Bottle Fee", getPreferences(MODE_PRIVATE).getInt("tax_bottle_cents", 10));
         LinearLayout taxRow1 = new LinearLayout(this);
@@ -1613,6 +1649,9 @@ public class SimClientActivity extends Activity {
         viewLocal.setText("View Local Inventory");
         viewLocal.setOnClickListener(v -> viewLocalInventory());
         box.addView(viewLocal);
+        Button downloadImages = new Button(this);
+        downloadImages.setText("Download Product Images");
+        box.addView(downloadImages);
         Button backup = new Button(this);
         backup.setText("Back Up Protected Products");
         backup.setOnClickListener(v -> startProductBackup());
@@ -1636,6 +1675,19 @@ public class SimClientActivity extends Activity {
         box.addView(forceUpload);
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Connection Settings")
                 .setView(box).setNegativeButton("Cancel", null).setPositiveButton("Save", null).create();
+        downloadImages.setOnClickListener(v -> {
+            dialog.dismiss();
+            message("Downloading product images…", false);
+            ProductImageStore.downloadInBackground(this, server, error -> {
+                if (error == null) {
+                    if (!closed && selected != null) showLocalProductPhoto(selected.optInt("id", -1));
+                    message("Product image download finished successfully.", true);
+                } else {
+                    message("Product image download failed.\nReason: " + error.getMessage(), true);
+                }
+            }, (batch, count, total) -> main.post(() -> message(
+                    "Product images saved: batch " + (batch + 1) + " (" + count + " images, shared total " + total + ")", false)));
+        });
         dialog.setOnShowListener(d -> {
             stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_NEGATIVE));
             stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_POSITIVE));
@@ -1709,7 +1761,7 @@ public class SimClientActivity extends Activity {
                     android.content.SharedPreferences.Editor settings = preferences.edit()
                             .putString("server", savedAddress);
                     settings.putInt("tax_gst_basis_points", parseRate(gstRate, 500));
-                    settings.putInt("tax_qst_basis_points", parseRate(qstRate, 9975));
+                    settings.putInt("tax_qst_basis_points", parseRate(qstRate, 998));
                     settings.putInt("tax_eco_cents", parseMoneySetting(ecoTax));
                     settings.putInt("tax_bottle_cents", parseMoneySetting(bottleFee));
                     View checkedLanguage = languages.findViewById(languages.getCheckedRadioButtonId());
@@ -1746,14 +1798,18 @@ public class SimClientActivity extends Activity {
                     if (idChecking != null) idChecking.deactivate();
                     editingPage.setVisibility(View.VISIBLE);
                     updateTabs();
-                    // Address changes must also remain offline-first during
-                    // recovery; an explicit Refresh is required to download.
-                    loadCatalog(false);
+                    // Load the local cache first, then automatically refresh
+                    // from the newly activated website after loading finishes.
+                    // Calling refreshCatalog() immediately here races with
+                    // loadCatalog() setting busy=true and gets ignored.
+                    loadCatalog(websiteMode);
                     dialog.dismiss();
                     Toast.makeText(this, websiteMode
                             ? "Activation successful. synchronizing data with server"
                             : "Connection saved: " + server, Toast.LENGTH_LONG).show();
-                    product.requestFocus(); product.selectAll();
+                    if (!websiteMode) {
+                        product.requestFocus(); product.selectAll();
+                    }
                 });
             });
             });
@@ -1788,7 +1844,9 @@ public class SimClientActivity extends Activity {
         // A bare website hostname uses the normal HTTP port.
         if (!hasPort && (host.matches("\\d{1,3}(\\.\\d{1,3}){3}") || "localhost".equalsIgnoreCase(host)))
             host += ":8880";
-        return "http://" + host;
+        // Public website hosts are HTTPS. Only the local POS listener uses HTTP.
+        boolean local = host.matches("\\d{1,3}(\\.\\d{1,3}){3}") || "localhost".equalsIgnoreCase(host);
+        return (local ? "http://" : "https://") + host;
     }
 
     private void validateWebsiteActivation(String base, String activationCode) throws Exception {
@@ -1978,19 +2036,45 @@ public class SimClientActivity extends Activity {
             if (resultCode == RESULT_OK && pendingProductPhoto != null && pendingProductPhoto.length() > 0) {
                 android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(pendingProductPhoto.getAbsolutePath());
                 if (bitmap != null) {
+                    if (selected != null) {
+                        try {
+                            File target = ProductImageStore.primaryFile(this, selected.optString("code", ""));
+                            if (target != null && !pendingProductPhoto.getCanonicalFile().equals(target.getCanonicalFile())) {
+                                File parent = target.getParentFile(); if (parent != null) parent.mkdirs();
+                                java.nio.file.Files.copy(pendingProductPhoto.toPath(), target.toPath(),
+                                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            }
+                            uploadProductImage(target, selected.optString("code", ""));
+                        } catch (Exception ignored) { }
+                    }
                     productPhoto.setImageBitmap(bitmap);
                     productPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    message("Product photo saved locally. Remote upload is pending POS image support.", false);
+                    message("Product photo saved and replaced locally.", false);
                 } else {
                     message("The product photo could not be opened.", true);
                 }
             } else {
                 message("No product photo captured.", false);
             }
-            pendingProductPhoto = null;
             return;
         }
         if (idChecking != null) idChecking.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void uploadProductImage(File imageFile, String code) {
+        if (imageFile == null || !imageFile.isFile() || code == null || code.trim().isEmpty()) return;
+        final String targetServer = server;
+        io.execute(() -> {
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(imageFile.toPath());
+                String encoded = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+                JSONObject body = new JSONObject().put("code", code.trim()).put("imageBase64", encoded);
+                requestSync(targetServer, "/products/mobileSync/productImage", body, null);
+                main.post(() -> message("Product photo uploaded to server.", false));
+            } catch (Exception ex) {
+                main.post(() -> message("Product photo saved locally, but upload failed: " + ex.getMessage(), true));
+            }
+        });
     }
 
     private void captureProductPhoto() {
@@ -2003,7 +2087,9 @@ public class SimClientActivity extends Activity {
         try {
             File directory = new File(getFilesDir(), "product-photos");
             if (!directory.isDirectory() && !directory.mkdirs()) throw new IOException("Cannot create photo directory");
-            pendingProductPhoto = new File(directory, "product-" + selected.getInt("id") + ".jpg");
+            File standard = ProductImageStore.primaryFile(this, selected.optString("code", ""));
+            pendingProductPhoto = standard != null ? standard
+                    : new File(directory, "product-" + selected.getInt("id") + ".jpg");
             android.content.Intent intent = new android.content.Intent(this, CameraCaptureActivity.class);
             intent.putExtra(CameraCaptureActivity.EXTRA_OUTPUT_PATH, pendingProductPhoto.getAbsolutePath());
             startActivityForResult(intent, PRODUCT_PHOTO_REQUEST);
@@ -2011,6 +2097,7 @@ public class SimClientActivity extends Activity {
             message("Unable to prepare product photo: " + ex.getMessage(), true);
         }
     }
+
 
     private void startProductBackup() {
         if (server == null || server.isEmpty()) {
@@ -2098,7 +2185,7 @@ public class SimClientActivity extends Activity {
             selectedCategory = item.category;
             int position = categories.indexOf(item.category);
             if (position >= 0) category.setSelection(position);
-            try { fillProduct(item.row()); }
+            try { fillProduct(item.row()); clearProductSearchFocus(); }
             catch (Exception ex) { message("Unable to open product. Tap Refresh.", true); }
             ((ScrollView) editingPage).smoothScrollTo(0, 0);
             return;
@@ -2110,6 +2197,12 @@ public class SimClientActivity extends Activity {
     private void hideKeyboard() {
         ((android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(pages.getWindowToken(), 0);
+    }
+
+    private void clearProductSearchFocus() {
+        product.dismissDropDown();
+        hideKeyboard();
+        product.clearFocus();
     }
 
     static void styleDropdown(Activity activity, Spinner spinner) {
@@ -2362,14 +2455,20 @@ public class SimClientActivity extends Activity {
     }
 
     private int settingRate(String key, int defaultBasisPoints) {
-        return getPreferences(MODE_PRIVATE).getInt(key, defaultBasisPoints);
+        int value = getPreferences(MODE_PRIVATE).getInt(key, defaultBasisPoints);
+        // Migrate the previously shipped QST typo (99.75%) to 9.98%.
+        if ("tax_qst_basis_points".equals(key) && value == 9975) {
+            value = 998;
+            getPreferences(MODE_PRIVATE).edit().putInt(key, value).apply();
+        }
+        return value;
     }
 
     private int finalPriceCents(JSONObject row) {
         long price = Math.max(0L, row.optLong("price", 0));
         long total = price;
         int gstRate = settingRate("tax_gst_basis_points", 500);
-        int qstRate = settingRate("tax_qst_basis_points", 9975);
+        int qstRate = settingRate("tax_qst_basis_points", 998);
         if (row.optInt("folderid", 0) != 0) total += Math.round(price * gstRate / 10000.0);
         if (row.optInt("qst", 0) != 0) total += Math.round(price * qstRate / 10000.0);
         boolean bottleProduct = bottleCategory(row.optString("category", ""));
