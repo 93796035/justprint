@@ -150,15 +150,8 @@ public final class ProductImageStore {
         HttpURLConnection connection = (HttpURLConnection) new URL(source).openConnection();
         connection.setConnectTimeout(20000); connection.setReadTimeout(30000);
         connection.setInstanceFollowRedirects(true);
-        // Activity.getPreferences() stores this activity's values under its
-        // local class name. Keep the image request on that exact store so it
-        // sees the token saved by SimClientActivity after activation.
-        String token = context.getSharedPreferences("SimClientActivity", Context.MODE_PRIVATE)
-                .getString("token", "").trim();
-        android.util.Log.i("ProductImages", "authorizationTokenPresent=" + !token.isEmpty());
-        // Toastdale's mobileSession() reads this exact header. Do not use
-        // Authorization: Bearer here; that header is not used by this API.
-        if (!token.isEmpty()) connection.setRequestProperty("X-Mobile-Sync-Token", token);
+        // Product images are public for the selected server/person. The
+        // mobile client intentionally does not send a session token.
         try {
             int responseCode = connection.getResponseCode();
             android.util.Log.i("ProductImages", "HTTP=" + responseCode
@@ -195,12 +188,15 @@ public final class ProductImageStore {
                         if (imageEntries <= 10) android.util.Log.i("ProductImages", "zipEntry=" + name);
                     }
                     File target = new File(dir, name).getCanonicalFile();
-                    if (!target.getPath().startsWith(dir.getCanonicalPath() + File.separator) || target.exists()) continue;
+                    if (!target.getPath().startsWith(dir.getCanonicalPath() + File.separator)) continue;
+                    long remoteModified = entry.getTime();
+                    if (target.exists() && (remoteModified <= 0L || target.lastModified() >= remoteModified)) continue;
                     File parent = target.getParentFile(); if (parent != null) parent.mkdirs();
                     try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(target))) {
                         byte[] buffer = new byte[8192]; int n;
                         while ((n = zip.read(buffer)) >= 0) { if (n > 0) out.write(buffer, 0, n); }
                     }
+                    if (remoteModified > 0L) target.setLastModified(remoteModified);
                 }
             }
             android.util.Log.i("ProductImages", "zipEntries=" + allEntries

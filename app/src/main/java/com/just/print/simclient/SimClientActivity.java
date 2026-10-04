@@ -588,7 +588,6 @@ public class SimClientActivity extends Activity {
         busy(true);
         message("Loading local products…", false);
         String base = server;
-        String syncToken = getPreferences(MODE_PRIVATE).getString("token", "");
         io.execute(() -> {
             ProductCatalog loaded = null;
             String feedback;
@@ -629,6 +628,30 @@ public class SimClientActivity extends Activity {
             throw new IOException("Local storage could not be updated");
     }
 
+    private static String productKey(JSONObject row) {
+        String code = row.optString("code", "").trim();
+        if (!code.isEmpty()) return "code:" + code.toUpperCase(java.util.Locale.ROOT);
+        long id = row.optLong("local_id", row.optLong("id", 0));
+        return id > 0 ? "id:" + id : "empty:" + row.toString();
+    }
+
+    private static JSONArray mergeProductDelta(JSONArray localRows, JSONArray deltaRows) throws Exception {
+        java.util.LinkedHashMap<String, JSONObject> merged = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < localRows.length(); i++) {
+            JSONObject row = localRows.getJSONObject(i);
+            merged.put(productKey(row), row);
+        }
+        for (int i = 0; i < deltaRows.length(); i++) {
+            JSONObject row = deltaRows.getJSONObject(i);
+            String key = productKey(row);
+            if (row.optInt("deleted", 0) != 0) merged.remove(key);
+            else merged.put(key, row);
+        }
+        JSONArray result = new JSONArray();
+        for (JSONObject row : merged.values()) result.put(row);
+        return result;
+    }
+
     private void refreshCatalog() {
         if (saving) return;
         if (server.isEmpty()) { message("Enter the POS address in Settings first.", false); return; }
@@ -652,16 +675,25 @@ public class SimClientActivity extends Activity {
         ProductCatalog protectedCatalog;
         try { protectedCatalog = new ProductCatalog(new JSONArray(saved)); }
         catch (Exception ex) { message("Refresh is blocked because the saved product data could not be verified. Do not overwrite it.", true); return; }
-        String syncToken = getPreferences(MODE_PRIVATE).getString("token", "");
+        String cursor = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
         io.execute(() -> {
             ProductCatalog downloaded = null;
             String feedback;
             try {
-                JSONObject response = requestSync(base, syncToken.isEmpty() ? "/AikaPos/stockProducts" : "/products/mobileSync/products", null,
+                String path = isWebsiteDomain(base) ? "/products/mobileSync/products" : "/AikaPos/stockProducts";
+                String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
+                path += "?personId=" + java.net.URLEncoder.encode(personId, "UTF-8");
+                if (!cursor.isEmpty()) path += "&since=" + java.net.URLEncoder.encode(cursor, "UTF-8");
+                JSONObject response = requestSync(base, path, null,
                         (text, percent) -> main.post(() -> {
                             if (!closed) showRefreshProgress(text, percent);
                         }));
-                JSONArray serverRows = response.getJSONArray("products");
+                JSONArray downloadedRows = response.getJSONArray("products");
+                JSONArray localRows = new JSONArray(saved);
+                if (response.optBoolean("incremental", false)) {
+                    downloadedRows = mergeProductDelta(localRows, downloadedRows);
+                }
+                final JSONArray serverRows = downloadedRows;
                 main.post(() -> { if (!closed) showRefreshProgress("Received " + serverRows.length() + " products. Validating…", 0); });
                 ProductCatalog candidate = new ProductCatalog(serverRows, (completed, total) -> {
                     if (completed == total || completed % 5 == 0) {
@@ -670,7 +702,6 @@ public class SimClientActivity extends Activity {
                                 "Validating products… " + completed + "/" + total, percent); });
                     }
                 });
-                JSONArray localRows = new JSONArray(saved);
                 main.post(() -> { if (!closed) showRefreshProgress("Comparing " + serverRows.length() + " server products with " + localRows.length() + " local products…", 0); });
                 java.util.List<ProductSyncDiff.Item> differences = ProductSyncDiff.compare(serverRows, localRows,
                         (completed, total) -> {
@@ -694,6 +725,8 @@ public class SimClientActivity extends Activity {
                 }
                 main.post(() -> { if (!closed) showRefreshProgress("Comparison complete. Saving " + candidate.size() + " products on this phone…", 100); });
                 persistCatalog(base, candidate);
+                String nextCursor = response.optString("nextCursor", "");
+                if (!nextCursor.isEmpty()) getPreferences(MODE_PRIVATE).edit().putString("product_cursor:" + base, nextCursor).apply();
                 downloaded = candidate;
                 feedback = candidate.size() + " products refreshed and saved locally.";
             } catch (Exception ex) {
@@ -913,7 +946,6 @@ public class SimClientActivity extends Activity {
     }
 
     private void uploadLocalProducts(String base, java.util.List<ProductSyncDiff.Item> differences) {
-        String token = getPreferences(MODE_PRIVATE).getString("token", "");
         io.execute(() -> {
             try {
                 JSONArray rows = new JSONArray();
@@ -925,8 +957,20 @@ public class SimClientActivity extends Activity {
                     row.put("data", item.local);
                     rows.put(row);
                 }
-                JSONObject body = new JSONObject().put("products", rows);
+                String syncTime = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
+                String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
+                JSONObject body = new JSONObject().put("personId", personId).put("products", rows).put("syncTime", syncTime);
                 JSONObject response = requestSync(base, "/products/mobileSync/products", body, null);
+                JSONArray finalProducts = response.optJSONArray("products");
+                if (finalProducts != null) {
+                    String saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).getString(base, "[]");
+                    JSONArray merged = mergeProductDelta(new JSONArray(saved), finalProducts);
+                    ProductCatalog finalCatalog = new ProductCatalog(merged);
+                    persistCatalog(base, finalCatalog);
+                    String nextCursor = response.optString("nextCursor", "");
+                    if (!nextCursor.isEmpty()) getPreferences(MODE_PRIVATE).edit().putString("product_cursor:" + base, nextCursor).apply();
+                    catalog = finalCatalog;
+                }
                 String personId = getPreferences(MODE_PRIVATE).getString("personId", "unknown");
                 int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
                 int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
@@ -949,7 +993,6 @@ public class SimClientActivity extends Activity {
     }
 
     private void uploadAllLocalProducts(String base, JSONObject serverResponse, boolean force) {
-        String token = getPreferences(MODE_PRIVATE).getString("token", "");
         io.execute(() -> {
             try {
                 ProductCatalog localCatalog = catalog;
@@ -975,7 +1018,10 @@ public class SimClientActivity extends Activity {
                     if (id > 0) upload.put("local_id", id);
                     rows.put(upload);
                 }
-                JSONObject response = requestSync(base, "/products/mobileSync/products", new JSONObject().put("products", rows).put("force", force), null);
+                JSONObject response = requestSync(base, "/products/mobileSync/products",
+                        new JSONObject().put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""))
+                                .put("syncTime", getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, ""))
+                                .put("products", rows).put("force", force), null);
                 int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
                 int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
                 int conflicts = response.optJSONArray("conflicts") == null ? 0 : response.optJSONArray("conflicts").length();
@@ -1180,7 +1226,10 @@ public class SimClientActivity extends Activity {
         message(websiteOrder ? "Submitting cart to website…" : "Submitting cart to iK POS…", false);
         io.execute(() -> {
             try {
-                if (websiteOrder) requestSync(server, "/products/mobileSync/sales", payload, null);
+                if (websiteOrder) {
+                    payload.put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""));
+                    requestSync(server, "/products/mobileSync/sales", payload, null);
+                }
                 else request(server, "/AikaPos/sales", payload);
                 main.post(() -> {
                     cart.clear();
@@ -1264,7 +1313,7 @@ public class SimClientActivity extends Activity {
         String base = server;
         ProductCatalog snapshot = catalog;
         String submittedText = request.field.getText().toString().trim();
-        final boolean websiteMode = !getPreferences(MODE_PRIVATE).getString("token", "").trim().isEmpty();
+        final boolean websiteMode = isWebsiteDomain(base);
         final JSONObject websiteProduct;
         try { websiteProduct = new JSONObject(selected.toString()); }
         catch (Exception ex) { productSaveBusy(false); message("Could not prepare the product for upload: " + detail(ex), false); return; }
@@ -1288,16 +1337,29 @@ public class SimClientActivity extends Activity {
                         row.put("local_id", websiteProduct.optLong("local_id"));
                     row.put("expected_last_modified", websiteProduct.optString("last_modified", ""));
                     row.put("data", websiteProduct);
+                    String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
+                    String syncTime = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
                     JSONObject response = requestSync(base, "/products/mobileSync/products",
-                            new JSONObject().put("products", new JSONArray().put(row)), null);
+                            new JSONObject().put("personId", personId).put("syncTime", syncTime)
+                                    .put("products", new JSONArray().put(row)), null);
                     JSONArray failed = response.optJSONArray("failed");
-                    JSONArray conflicts = response.optJSONArray("conflicts");
-                    if (!response.optBoolean("ok", false) || (failed != null && failed.length() > 0)
-                            || (conflicts != null && conflicts.length() > 0))
+                    if (!response.optBoolean("ok", false) || (failed != null && failed.length() > 0))
                         throw new IOException("Website rejected the product update");
+                    JSONArray returned = response.optJSONArray("products");
+                    if (returned != null) {
+                        JSONArray merged = mergeProductDelta(new JSONArray(snapshot.serialize()), returned);
+                        updated = new ProductCatalog(merged);
+                        persistCatalog(base, updated);
+                        catalog = updated;
+                        String nextCursor = response.optString("nextCursor", "");
+                        if (!nextCursor.isEmpty()) getPreferences(MODE_PRIVATE).edit().putString("product_cursor:" + base, nextCursor).apply();
+                        storedProduct = websiteProduct;
+                    } else {
+                        verified = true;
+                        storedProduct = websiteProduct;
+                        updated = snapshot;
+                    }
                     verified = true;
-                    storedProduct = websiteProduct;
-                    updated = snapshot;
                     // The optimistic catalog was already saved before the request;
                     // persist again here to remove the recovery marker only after
                     // the website has acknowledged the upload.
@@ -1455,14 +1517,10 @@ public class SimClientActivity extends Activity {
     }
 
     static JSONObject request(String base, String path, JSONObject body) throws Exception {
-        return request(base, path, body, null, null);
+        return request(base, path, body, null);
     }
 
     private static JSONObject request(String base, String path, JSONObject body, DownloadProgress progress) throws Exception {
-        return request(base, path, body, progress, null);
-    }
-
-    private static JSONObject request(String base, String path, JSONObject body, DownloadProgress progress, String syncToken) throws Exception {
         HttpURLConnection c = (HttpURLConnection) new URL(base + path).openConnection();
         c.setConnectTimeout(5000);
         // Full Product uploads can legitimately take longer than a normal
@@ -1471,8 +1529,6 @@ public class SimClientActivity extends Activity {
         c.setReadTimeout(body == null ? 15000 : 120000);
         c.setInstanceFollowRedirects(false);
         c.setUseCaches(false);
-        if (syncToken != null && !syncToken.trim().isEmpty()) c.setRequestProperty("X-Mobile-Sync-Token", syncToken);
-
         try {
             if (body != null) {
                 c.setRequestMethod("POST");
@@ -1518,19 +1574,9 @@ public class SimClientActivity extends Activity {
         } finally { c.disconnect(); }
     }
 
-    /** Product sync requests silently renew the short-lived server session once. */
+    /** Product sync requests use the validated personId; no session token is required. */
     private JSONObject requestSync(String base, String path, JSONObject body, DownloadProgress progress) throws Exception {
-        String token = getPreferences(MODE_PRIVATE).getString("token", "").trim();
-        try {
-            return request(base, path, body, progress, token);
-        } catch (RequestException ex) {
-            if (ex.code != HttpURLConnection.HTTP_UNAUTHORIZED) throw ex;
-            String licence = getPreferences(MODE_PRIVATE).getString("personId", "").trim();
-            if (licence.isEmpty()) throw ex;
-            validateWebsiteActivation(base, licence);
-            String renewed = getPreferences(MODE_PRIVATE).getString("token", "").trim();
-            return request(base, path, body, progress, renewed);
-        }
+        return request(base, path, body, progress);
     }
 
     private EditText settingsDecimal(String label, double value) {
@@ -1719,17 +1765,13 @@ public class SimClientActivity extends Activity {
             boolean serverChanged = !previousServer.isEmpty() && !previousServer.equalsIgnoreCase(url);
             if (serverChanged && websiteMode) {
                 // A website URL identifies the activation namespace. Changing it
-                // invalidates the old token/personId, but must not touch local products.
-                preferences.edit().remove("token").apply();
+                // requires selecting the person again, but must not touch local products.
+                preferences.edit().remove("personId").apply();
                 activationLabel.setVisibility(View.VISIBLE);
                 activationCode.setVisibility(View.VISIBLE);
             }
             String personId = activationCode.getText().toString().trim();
-            // A previously saved personId is not proof that this installation
-            // has a valid sync token. Allow reactivation whenever the token
-            // is missing, even if the old activation code is still stored.
-            boolean needsWebsiteActivation = websiteMode
-                    && getPreferences(MODE_PRIVATE).getString("token", "").trim().isEmpty();
+            boolean needsWebsiteActivation = websiteMode && personId.isEmpty();
             if (needsWebsiteActivation && personId.isEmpty()) {
                 activationLabel.setVisibility(View.VISIBLE);
                 activationCode.setVisibility(View.VISIBLE);
@@ -1887,12 +1929,10 @@ public class SimClientActivity extends Activity {
         catch (Exception ex) {
             throw new IOException("Server returned non-JSON activation response: " + response, ex);
         }
-        String token = activated.optString("token", "").trim();
-        if (token.isEmpty()) throw new IOException("Activation rejected by server: no sync token");
-        // The token authorizes Product reads/writes; personId remains the
-        // shared Product namespace and is only retained for diagnostics.
+        // The activation response is used only to validate and store personId.
+        // Product/sales/image requests do not use the returned token.
         android.content.SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        prefs.edit().putString("token", token)
+        prefs.edit().remove("token")
                 .putString("personId", activated.optString("personId", activationCode)).apply();
     }
 
@@ -2068,9 +2108,21 @@ public class SimClientActivity extends Activity {
             try {
                 byte[] bytes = java.nio.file.Files.readAllBytes(imageFile.toPath());
                 String encoded = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
-                JSONObject body = new JSONObject().put("code", code.trim()).put("imageBase64", encoded);
-                requestSync(targetServer, "/products/mobileSync/productImage", body, null);
-                main.post(() -> message("Product photo uploaded to server.", false));
+                JSONObject body = new JSONObject().put("code", code.trim()).put("imageBase64", encoded)
+                        .put("lastModified", imageFile.lastModified());
+                body.put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""));
+                JSONObject imageResponse = requestSync(targetServer, "/products/mobileSync/productImage", body, null);
+                if (imageResponse.optBoolean("serverWins", false)) {
+                    String serverImage = imageResponse.optString("imageBase64", "");
+                    if (!serverImage.isEmpty()) {
+                        java.nio.file.Files.write(imageFile.toPath(), android.util.Base64.decode(serverImage, android.util.Base64.DEFAULT));
+                        long serverModified = imageResponse.optLong("lastModified", 0L);
+                        if (serverModified > 0L) imageFile.setLastModified(serverModified);
+                    }
+                    main.post(() -> message("Server kept the newer product photo; local photo was replaced.", false));
+                } else {
+                    main.post(() -> message("Product photo uploaded to server.", false));
+                }
             } catch (Exception ex) {
                 main.post(() -> message("Product photo saved locally, but upload failed: " + ex.getMessage(), true));
             }
