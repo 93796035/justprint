@@ -2566,18 +2566,13 @@ public class SimClientActivity extends Activity {
         filter.setEnabled(false);
         content.addView(filter, full());
         Button importBackup = new Button(this);
-        importBackup.setText("Import Product Backup");
+        importBackup.setText("Import Backup");
         importBackup.setOnClickListener(v -> startActivityForResult(
                 new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
                         .addCategory(android.content.Intent.CATEGORY_OPENABLE)
                         .setType("application/json"), PRODUCT_IMPORT_REQUEST));
         Button backup = new Button(this);
-        backup.setText("Backup Filtered Products");
-        LinearLayout actions = new LinearLayout(this);
-        actions.setOrientation(LinearLayout.HORIZONTAL);
-        actions.addView(importBackup, new LinearLayout.LayoutParams(0, -2, 1));
-        actions.addView(backup, new LinearLayout.LayoutParams(0, -2, 1));
-        content.addView(actions, full());
+        backup.setText("Backup");
         TextView footerInfo = new TextView(this);
         footerInfo.setPadding(0, dp(8), dp(8), 0);
         footerInfo.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -2587,7 +2582,9 @@ public class SimClientActivity extends Activity {
         HorizontalScrollView tableScroll = new HorizontalScrollView(this);
         tableScroll.setFillViewport(true);
         LinearLayout table = column();
-        table.addView(localInventoryRow(new String[]{"Product", "Category", "Stock\n1", "Stock\n2", "Stock\n3", "Cost", "Price"}, true), full());
+        String[] headings = {"Product", "Category", "Stock\n1", "Stock\n2", "Stock\n3", "Cost", "Price"};
+        LinearLayout header = localInventoryRow(headings, true);
+        table.addView(header, full());
         table.addView(list, new LinearLayout.LayoutParams(-1, 0, 1));
         TextView empty = new TextView(this);
         empty.setText("No matching products.");
@@ -2601,10 +2598,12 @@ public class SimClientActivity extends Activity {
         content.addView(tableScroll, tableLayout);
         LinearLayout footer = new LinearLayout(this);
         footer.setOrientation(LinearLayout.HORIZONTAL);
-        footer.addView(footerInfo, new LinearLayout.LayoutParams(0, dp(52), 1));
+        content.addView(footerInfo, full());
+        footer.addView(importBackup, new LinearLayout.LayoutParams(0, dp(52), 1));
+        footer.addView(backup, new LinearLayout.LayoutParams(0, dp(52), 1));
         Button close = new Button(this);
         close.setText("Close");
-        footer.addView(close, new LinearLayout.LayoutParams(dp(110), dp(52)));
+        footer.addView(close, new LinearLayout.LayoutParams(0, dp(52), 1));
         content.addView(footer, full());
         AlertDialog viewer = new AlertDialog.Builder(this).setTitle("Local Inventory")
                 .setView(content).create();
@@ -2624,16 +2623,26 @@ public class SimClientActivity extends Activity {
                     if (closed || !viewer.isShowing()) return;
                     filter.setEnabled(true);
                     java.util.List<ProductCatalog.Product> filteredRows = new ArrayList<>(saved.all());
+                    final int[] sortColumn = {-1};
+                    final boolean[] sortAscending = {true};
                     footerInfo.setText("Total: " + saved.size() + " · Filtered: " + filteredRows.size());
-                    showLocalRows(list, filteredRows);
+                    showLocalRows(list, filteredRows, sortColumn[0], sortAscending[0]);
                     backup.setOnClickListener(v -> startProductBackup(filteredRows));
+                    for (int i = 0; i < header.getChildCount(); i++) {
+                        final int column = i;
+                        header.getChildAt(i).setOnClickListener(v -> {
+                            if (sortColumn[0] == column) sortAscending[0] = !sortAscending[0];
+                            else { sortColumn[0] = column; sortAscending[0] = true; }
+                            showLocalRows(list, filteredRows, sortColumn[0], sortAscending[0]);
+                        });
+                    }
                     filter.addTextChangedListener(new TextWatcher() {
                         public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                         public void onTextChanged(CharSequence s, int start, int before, int count) {}
                         public void afterTextChanged(Editable text) {
                             filteredRows.clear();
                             filteredRows.addAll(text.toString().trim().isEmpty() ? saved.all() : saved.search(text.toString()));
-                            showLocalRows(list, filteredRows);
+                            showLocalRows(list, filteredRows, sortColumn[0], sortAscending[0]);
                             footerInfo.setText("Total: " + saved.size() + " · Filtered: " + filteredRows.size());
                         }
                     });
@@ -2644,9 +2653,24 @@ public class SimClientActivity extends Activity {
         });
     }
 
-    private void showLocalRows(ListView list, java.util.List<Product> rows) {
+    private void showLocalRows(ListView list, java.util.List<Product> rows, int sortColumn, boolean ascending) {
+        java.util.List<Product> sortedRows = new ArrayList<>(rows);
+        if (sortColumn >= 0) {
+            java.util.Collections.sort(sortedRows, (left, right) -> {
+                try {
+                    JSONObject a = left.row(), b = right.row();
+                    int result;
+                    if (sortColumn == 0) result = left.name.compareToIgnoreCase(right.name);
+                    else if (sortColumn == 1) result = left.category.compareToIgnoreCase(right.category);
+                    else if (sortColumn <= 4) result = Integer.compare(a.optInt("stock" + (sortColumn - 1), 0), b.optInt("stock" + (sortColumn - 1), 0));
+                    else if (sortColumn == 5) result = Integer.compare(a.optInt("cost", 0), b.optInt("cost", 0));
+                    else result = Integer.compare(a.optInt("price", 0), b.optInt("price", 0));
+                    return ascending ? result : -result;
+                } catch (Exception ex) { return 0; }
+            });
+        }
         java.util.List<String[]> items = new ArrayList<>();
-        for (Product item : rows) {
+        for (Product item : sortedRows) {
             String[] entry = {item.name, item.category, "—", "—", "—", "—", "—"};
             try {
                 JSONObject row = item.row();
