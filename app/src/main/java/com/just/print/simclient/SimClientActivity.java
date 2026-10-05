@@ -1604,7 +1604,6 @@ public class SimClientActivity extends Activity {
                                 + detail(ex) + ". Tap Refresh before continuing.";
                     }
                     }
-                }
             } catch (Exception ex) {
                 feedback = "Product sync failed: " + detail(ex) + ". Tap Refresh to load the current stock.";
             }
