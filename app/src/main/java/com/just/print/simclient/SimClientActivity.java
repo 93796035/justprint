@@ -1908,10 +1908,6 @@ public class SimClientActivity extends Activity {
         Button downloadImages = new Button(this);
         downloadImages.setText("Download Product Images");
         box.addView(downloadImages);
-        Button backup = new Button(this);
-        backup.setText("Back Up Protected Products");
-        backup.setOnClickListener(v -> startProductBackup());
-        box.addView(backup);
         Button forceUpload = new Button(this);
         forceUpload.setText("Force Upload All Local Products");
         forceUpload.setOnClickListener(v -> {
@@ -2378,17 +2374,16 @@ public class SimClientActivity extends Activity {
     }
 
 
-    private void startProductBackup() {
+    private void startProductBackup(java.util.List<ProductCatalog.Product> selectedProducts) {
         if (server == null || server.isEmpty()) {
             message("Enter the server address before creating a product backup.", true);
             return;
         }
         try {
-            android.content.SharedPreferences prefs = getSharedPreferences("product_catalogs", MODE_PRIVATE);
-            String raw = prefs.getString(server, null);
-            if (raw == null) throw new IOException("No saved product catalog was found");
-            ProductCatalog saved = new ProductCatalog(new JSONArray(raw));
-            if (saved.size() == 0) throw new IOException("The saved product catalog is empty");
+            if (selectedProducts == null || selectedProducts.isEmpty())
+                throw new IOException("The filtered inventory contains no products");
+            JSONArray selectedRows = new JSONArray();
+            for (ProductCatalog.Product product : selectedProducts) selectedRows.put(product.row());
             JSONObject backup = new JSONObject();
             backup.put("format", "JustPrint protected product backup");
             backup.put("version", 1);
@@ -2396,7 +2391,7 @@ public class SimClientActivity extends Activity {
             backup.put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""));
             backup.put("createdAt", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", java.util.Locale.ROOT)
                     .format(new java.util.Date()));
-            backup.put("products", new JSONArray(saved.serialize()));
+            backup.put("products", selectedRows);
             pendingProductBackup = backup.toString(2);
             android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT);
             intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);
@@ -2563,10 +2558,6 @@ public class SimClientActivity extends Activity {
         // Read persisted data, not the editable fields or in-memory snapshot.
         LinearLayout content = column();
         content.setPadding(dp(16), dp(12), dp(16), dp(12));
-        TextView summary = new TextView(this);
-        summary.setText("Loading saved inventory…");
-        summary.setPadding(0, 0, 0, dp(12));
-        content.addView(summary, full());
         EditText filter = new EditText(this);
         filter.setHint("Filter saved products");
         filter.setSingleLine(true);
@@ -2580,7 +2571,16 @@ public class SimClientActivity extends Activity {
                 new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
                         .addCategory(android.content.Intent.CATEGORY_OPENABLE)
                         .setType("application/json"), PRODUCT_IMPORT_REQUEST));
-        content.addView(importBackup, full());
+        Button backup = new Button(this);
+        backup.setText("Backup Filtered Products");
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        actions.addView(importBackup, new LinearLayout.LayoutParams(0, -2, 1));
+        actions.addView(backup, new LinearLayout.LayoutParams(0, -2, 1));
+        content.addView(actions, full());
+        TextView footerInfo = new TextView(this);
+        footerInfo.setPadding(0, dp(8), dp(8), 0);
+        footerInfo.setGravity(android.view.Gravity.CENTER_VERTICAL);
         ListView list = new ListView(this);
         list.setDivider(new android.graphics.drawable.ColorDrawable(0xffd9ecef));
         list.setDividerHeight(dp(1));
@@ -2599,8 +2599,16 @@ public class SimClientActivity extends Activity {
         LinearLayout.LayoutParams tableLayout = new LinearLayout.LayoutParams(-1, 0, 1);
         tableLayout.topMargin = dp(12);
         content.addView(tableScroll, tableLayout);
+        LinearLayout footer = new LinearLayout(this);
+        footer.setOrientation(LinearLayout.HORIZONTAL);
+        footer.addView(footerInfo, new LinearLayout.LayoutParams(0, dp(52), 1));
+        Button close = new Button(this);
+        close.setText("Close");
+        footer.addView(close, new LinearLayout.LayoutParams(dp(110), dp(52)));
+        content.addView(footer, full());
         AlertDialog viewer = new AlertDialog.Builder(this).setTitle("Local Inventory")
-                .setView(content).setPositiveButton("Close", null).create();
+                .setView(content).create();
+        close.setOnClickListener(v -> viewer.dismiss());
         localInventoryDialog = viewer;
         viewer.show();
         viewer.getWindow().setLayout(-1, -1);
@@ -2614,21 +2622,24 @@ public class SimClientActivity extends Activity {
                 boolean pending = prefs.getBoolean("pending:" + base, false);
                 main.post(() -> {
                     if (closed || !viewer.isShowing()) return;
-                    summary.setText(saved.size() + " saved products · Swipe table for more columns"
-                            + (pending ? "\nAn update was interrupted. Tap Refresh to verify these saved values."
-                            : saved.size() == 0 ? "\nTap Refresh on the main screen to download products." : ""));
                     filter.setEnabled(true);
-                    showLocalRows(list, saved.all());
+                    java.util.List<ProductCatalog.Product> filteredRows = new ArrayList<>(saved.all());
+                    footerInfo.setText("Total: " + saved.size() + " · Filtered: " + filteredRows.size());
+                    showLocalRows(list, filteredRows);
+                    backup.setOnClickListener(v -> startProductBackup(filteredRows));
                     filter.addTextChangedListener(new TextWatcher() {
                         public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                         public void onTextChanged(CharSequence s, int start, int before, int count) {}
                         public void afterTextChanged(Editable text) {
-                            showLocalRows(list, text.toString().trim().isEmpty() ? saved.all() : saved.search(text.toString()));
+                            filteredRows.clear();
+                            filteredRows.addAll(text.toString().trim().isEmpty() ? saved.all() : saved.search(text.toString()));
+                            showLocalRows(list, filteredRows);
+                            footerInfo.setText("Total: " + saved.size() + " · Filtered: " + filteredRows.size());
                         }
                     });
                 });
             } catch (Exception ex) {
-                main.post(() -> { if (!closed && viewer.isShowing()) summary.setText("Unable to read saved inventory. Tap Refresh to rebuild it."); });
+                main.post(() -> { if (!closed && viewer.isShowing()) footerInfo.setText("Unable to read saved inventory."); });
             }
         });
     }
