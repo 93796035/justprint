@@ -1467,6 +1467,12 @@ public class SimClientActivity extends Activity {
             message(ex.getMessage(), false);
             return;
         }
+        // Keep the server version from before the optimistic local edit. This
+        // is the value TaoStyle must compare for conflict detection; the
+        // edited product itself receives a new last_modified value locally.
+        final String expectedServerLastModified = retryPayload != null
+                ? retryPayload.optString("expected_server_last_modified", selected.optString("last_modified", "")).trim()
+                : selected.optString("last_modified", "").trim();
         autoSaveInFlight = request;
         // Apply the user's edit locally before the network call. Stock Moving must
         // calculate from what the user entered, even while POS sync is in flight.
@@ -1524,7 +1530,8 @@ public class SimClientActivity extends Activity {
                     if (websiteProduct.has("local_id") && !websiteProduct.isNull("local_id")
                             && websiteProduct.optLong("local_id") > 0)
                         row.put("local_id", websiteProduct.optLong("local_id"));
-                    row.put("expected_last_modified", websiteProduct.optString("last_modified", ""));
+                    row.put("code", websiteProduct.optString("code", ""));
+                    row.put("expected_last_modified", expectedServerLastModified);
                     row.put("data", websiteProduct);
                     String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
                     String syncCursor = readSyncCursor(base);
