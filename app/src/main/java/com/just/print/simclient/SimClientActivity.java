@@ -630,9 +630,17 @@ public class SimClientActivity extends Activity {
 
     private static String productKey(JSONObject row) {
         long id = row.optLong("local_id", row.optLong("id", 0));
-        if (id > 0) return "id:" + id;
         String code = row.optString("code", "").trim();
-        if (!code.isEmpty()) return "code:" + code.toUpperCase(java.util.Locale.ROOT);
+        if (id > 0) {
+            // ID identifies the server row. Include the barcode as a guard so
+            // corrupt data with the same ID but different products cannot
+            // silently overwrite one another.
+            return "id:" + id + "|code:" + code.toUpperCase(java.util.Locale.ROOT);
+        }
+        if (!code.isEmpty()) {
+            String subject = row.optString("subject", "").trim().toUpperCase(java.util.Locale.ROOT);
+            return "code:" + code.toUpperCase(java.util.Locale.ROOT) + "|subject:" + subject;
+        }
         return "empty:" + row.toString();
     }
 
