@@ -41,6 +41,10 @@ public final class ProductCatalog {
             category = row.optString("category", "").trim();
             code = row.optString("code");
             for (String key : new String[]{"stock1", "stock2", "stock3", "monque"}) {
+                // Older/server-side product rows may omit an unused stock
+                // column. Treat a missing stock value as zero so one sparse
+                // row cannot invalidate the entire downloaded catalog.
+                if (!row.has(key) || row.isNull(key)) row.put(key, 0);
                 Object value = row.get(key);
                 if (!(value instanceof Number) || !value.toString().matches("-?[0-9]+")
                         || ((Number) value).longValue() < Integer.MIN_VALUE

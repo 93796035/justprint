@@ -30,7 +30,7 @@ final class ProductSyncDiff {
     private static final List<String> FIELDS = Arrays.asList(
             "subject", "mnemonic", "code", "category", "unit", "cost", "price",
             "stock", "stock1", "stock2", "stock3", "monque", "weekly_sales_qty",
-            "monthly_sales_qty", "case_qty", "deleted", "last_modified", "server_modified");
+            "monthly_sales_qty", "case_qty", "deleted", "last_modified");
 
     private ProductSyncDiff() {}
 
@@ -62,14 +62,9 @@ final class ProductSyncDiff {
         Map<String, JSONObject> result = new HashMap<>();
         for (int i = 0; i < rows.length(); i++) {
             JSONObject row = rows.getJSONObject(i);
-            long localId = row.optLong("local_id", 0);
-            // Server snapshots from older POS/web versions may expose the
-            // stable product identifier as `id` instead of `local_id`.
-            // Prefer local_id, then id, and only use code as the legacy key.
-            if (localId <= 0) localId = row.optLong("id", 0);
             String code = row.optString("code", "").trim();
-            String key = localId > 0 ? "id:" + localId : "code:" + code;
-            if (localId <= 0 && code.isEmpty()) {
+            String key = matchKey(row);
+            if (code.isEmpty() && row.optLong("local_id", row.optLong("id", 0)) <= 0) {
                 String raw = row.toString();
                 if (raw.length() > 500) raw = raw.substring(0, 500) + "…";
                 throw new IllegalArgumentException("Product has no local_id, id, or code in "
@@ -78,6 +73,16 @@ final class ProductSyncDiff {
             result.put(key, row);
         }
         return result;
+    }
+
+    static String matchKey(JSONObject row) {
+        if (row == null) return "<missing>";
+        String code = row.optString("code", "").trim();
+        if (!code.isEmpty()) return "code:" + code.toUpperCase(java.util.Locale.ROOT);
+        long localId = row.optLong("local_id", 0);
+        if (localId <= 0) localId = row.optLong("id", 0);
+        if (localId > 0) return "id:" + localId;
+        return "<no barcode/id>";
     }
 
     private static boolean different(JSONObject a, JSONObject b) {
@@ -92,14 +97,33 @@ final class ProductSyncDiff {
 
     private static long time(JSONObject row) {
         if (row == null) return Long.MIN_VALUE;
-        String value = row.optString("server_modified", row.optString("last_modified", ""));
+        String value = row.optString("last_modified", "");
         try { return Long.parseLong(value); } catch (Exception ignored) { }
-        String[] formats = {"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ssX"};
+        String[] formats = {"yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ssX", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss"};
         for (String format : formats) try {
             SimpleDateFormat parser = new SimpleDateFormat(format, java.util.Locale.ROOT);
             parser.setTimeZone(TimeZone.getTimeZone("UTC"));
             return parser.parse(value).getTime();
         } catch (Exception ignored) { }
         return Long.MIN_VALUE;
+    }
+
+    static boolean serverChangedAfter(Item item, String syncTime) {
+        if (item == null || item.server == null || item.local == null) return false;
+        long serverTime = time(item.server);
+        if (serverTime == Long.MIN_VALUE || syncTime == null || syncTime.trim().isEmpty()) return false;
+        long cursorTime;
+        try { cursorTime = Long.parseLong(syncTime.trim()); }
+        catch (Exception ignored) {
+            cursorTime = Long.MIN_VALUE;
+            String[] formats = {"yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ssX", "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss"};
+            for (String format : formats) try {
+                SimpleDateFormat parser = new SimpleDateFormat(format, java.util.Locale.ROOT);
+                parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+                cursorTime = parser.parse(syncTime).getTime();
+                break;
+            } catch (Exception ignoredFormat) { }
+        }
+        return cursorTime != Long.MIN_VALUE && serverTime > cursorTime;
     }
 }

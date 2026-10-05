@@ -25,8 +25,11 @@ public final class ProductImageStore {
     private static final long NUMERIC_OFFSET = 10754L;
     private static final String[] EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"};
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static volatile boolean downloadActive;
 
     private ProductImageStore() {}
+
+    public static boolean isDownloadActive() { return downloadActive; }
 
     public static File directory(Context context) {
         // Keep the same shared Windows location as Security when available.
@@ -94,6 +97,7 @@ public final class ProductImageStore {
 
     public interface DownloadListener { void finished(Exception error); }
     public interface BatchListener { void batchFinished(int batch, int imageCount, int totalImages); }
+    public interface ProgressListener { void update(int batch, long downloadedBytes, long totalBytes); }
     private static final class BatchResult {
         final int images, total;
         BatchResult(int images, int total) { this.images = images; this.total = total; }
@@ -105,10 +109,19 @@ public final class ProductImageStore {
 
     public static void downloadInBackground(Context context, String configuredServer,
                                              DownloadListener listener, BatchListener batchListener) {
+        downloadInBackground(context, configuredServer, listener, batchListener, null);
+    }
+
+    public static void downloadInBackground(Context context, String configuredServer,
+                                             DownloadListener listener, BatchListener batchListener,
+                                             ProgressListener progressListener) {
         final Context app = context.getApplicationContext();
+        if (downloadActive) return;
+        downloadActive = true;
         EXECUTOR.execute(() -> {
             Exception error = null;
-            try { downloadAndMerge(app, configuredServer, batchListener); } catch (Exception ex) { error = ex; }
+            try { downloadAndMerge(app, configuredServer, batchListener, progressListener); } catch (Exception ex) { error = ex; }
+            downloadActive = false;
             final Exception result = error;
             if (listener != null) {
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> listener.finished(result));
@@ -116,7 +129,9 @@ public final class ProductImageStore {
         });
     }
 
-    private static void downloadAndMerge(Context context, String configuredServer, BatchListener batchListener) throws Exception {
+    private static void downloadAndMerge(Context context, String configuredServer,
+                                         BatchListener batchListener,
+                                         ProgressListener progressListener) throws Exception {
         final String progressKey = "product_image_next_batch";
         int batch = context.getSharedPreferences("ProductImageStore", Context.MODE_PRIVATE)
                 .getInt(progressKey, 0);
@@ -124,7 +139,7 @@ public final class ProductImageStore {
             BatchResult result = null;
             Exception last = null;
             for (int attempt = 1; attempt <= 3; attempt++) {
-                try { result = downloadBatch(context, configuredServer, batch, 20); break; }
+                try { result = downloadBatch(context, configuredServer, batch, 20, progressListener); break; }
                 catch (Exception ex) { last = ex; android.util.Log.w("ProductImages", "batch=" + batch + " attempt=" + attempt + " failed", ex); if (attempt < 3) try { Thread.sleep(attempt * 1000L); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); } }
             }
             if (result == null) throw last;
@@ -141,10 +156,14 @@ public final class ProductImageStore {
         }
     }
 
-    private static BatchResult downloadBatch(Context context, String configuredServer, int batch, int batchSize) throws Exception {
+    private static BatchResult downloadBatch(Context context, String configuredServer, int batch, int batchSize,
+                                             ProgressListener progressListener) throws Exception {
         File dir = directory(context);
         File temp = File.createTempFile("menu_images_" + batch + "_", ".jar", context.getCacheDir());
         String source = downloadUrl(configuredServer) + "?batch=" + batch + "&size=" + batchSize;
+        // Report before opening the connection: the server may spend time
+        // assembling the ZIP package before it sends HTTP headers.
+        if (progressListener != null) progressListener.update(batch, 0, -1);
         android.util.Log.i("ProductImages", "configuredServer=" + configuredServer
                 + ", isLan=" + isLanAddress(configuredServer) + ", source=" + source);
         HttpURLConnection connection = (HttpURLConnection) new URL(source).openConnection();
@@ -162,11 +181,26 @@ public final class ProductImageStore {
                 throw new IOException("HTTP " + responseCode + " from " + connection.getURL());
             }
             int totalImages = connection.getHeaderFieldInt("X-Image-Shared-Total", -1);
+            long totalBytes = connection.getContentLengthLong();
+            long downloadedBytes = 0;
+            if (progressListener != null) progressListener.update(batch, 0, totalBytes);
+            long lastProgress = android.os.SystemClock.elapsedRealtime();
             try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
                  BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(temp))) {
                 byte[] buffer = new byte[8192]; int n;
-                while ((n = in.read(buffer)) >= 0) { if (n > 0) out.write(buffer, 0, n); }
+                while ((n = in.read(buffer)) >= 0) {
+                    if (n > 0) {
+                        out.write(buffer, 0, n);
+                        downloadedBytes += n;
+                        long now = android.os.SystemClock.elapsedRealtime();
+                        if (progressListener != null && now - lastProgress >= 200) {
+                            progressListener.update(batch, downloadedBytes, totalBytes);
+                            lastProgress = now;
+                        }
+                    }
+                }
             }
+            if (progressListener != null) progressListener.update(batch, downloadedBytes, totalBytes);
             android.util.Log.i("ProductImages", "downloadedBytes=" + temp.length());
             int imageEntries = 0;
             int allEntries = 0;

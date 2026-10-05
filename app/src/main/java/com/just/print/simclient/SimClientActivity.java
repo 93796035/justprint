@@ -21,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 /** Small standalone launcher: no POS database, login, timers or printing are initialized. */
 public class SimClientActivity extends Activity {
@@ -423,12 +426,9 @@ public class SimClientActivity extends Activity {
         }
         shell.addView(tabs, full());
         setContentView(shell);
-        // Download the shared product library without delaying the first screen.
-        if (!ProductImageStore.hasAnyImage(this)) {
-            ProductImageStore.downloadInBackground(this, server, () -> {
-                if (!closed && selected != null) showLocalProductPhoto(selected.optInt("id", -1));
-            });
-        }
+        // Product activation/refresh downloads product data only.
+        // Product images are intentionally downloaded only from the explicit
+        // Settings -> Download Product Images action below.
         updateTabs();
         getWindow().setLayout(-1, -1);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -629,10 +629,11 @@ public class SimClientActivity extends Activity {
     }
 
     private static String productKey(JSONObject row) {
+        long id = row.optLong("local_id", row.optLong("id", 0));
+        if (id > 0) return "id:" + id;
         String code = row.optString("code", "").trim();
         if (!code.isEmpty()) return "code:" + code.toUpperCase(java.util.Locale.ROOT);
-        long id = row.optLong("local_id", row.optLong("id", 0));
-        return id > 0 ? "id:" + id : "empty:" + row.toString();
+        return "empty:" + row.toString();
     }
 
     private static JSONArray mergeProductDelta(JSONArray localRows, JSONArray deltaRows) throws Exception {
@@ -675,60 +676,105 @@ public class SimClientActivity extends Activity {
         ProductCatalog protectedCatalog;
         try { protectedCatalog = new ProductCatalog(new JSONArray(saved)); }
         catch (Exception ex) { message("Refresh is blocked because the saved product data could not be verified. Do not overwrite it.", true); return; }
-        String cursor = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
+        String cursor = readSyncCursor(base);
         io.execute(() -> {
             ProductCatalog downloaded = null;
             String feedback;
             try {
-                String path = isWebsiteDomain(base) ? "/products/mobileSync/products" : "/AikaPos/stockProducts";
                 String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
-                path += "?personId=" + java.net.URLEncoder.encode(personId, "UTF-8");
-                if (!cursor.isEmpty()) path += "&since=" + java.net.URLEncoder.encode(cursor, "UTF-8");
-                JSONObject response = requestSync(base, path, null,
-                        (text, percent) -> main.post(() -> {
-                            if (!closed) showRefreshProgress(text, percent);
-                        }));
-                JSONArray downloadedRows = response.getJSONArray("products");
                 JSONArray localRows = new JSONArray(saved);
-                if (response.optBoolean("incremental", false)) {
-                    downloadedRows = mergeProductDelta(localRows, downloadedRows);
+                JSONArray uploadedRows = new JSONArray();
+                int localMarkedCount = 0;
+                String earliestLocalModified = "";
+                String latestLocalModified = "";
+                for (int i = 0; i < localRows.length(); i++) {
+                    JSONObject local = localRows.getJSONObject(i);
+                    String localModified = local.optString("last_modified", "").trim();
+                    // An empty cursor means this catalog was never synchronized by
+                    // this client. Do not upload the initial downloaded snapshot.
+                    // After the first sync, only rows newer than the cursor are local
+                    // edits and become upload candidates.
+                    if (cursor.isEmpty() || localModified.isEmpty() || localModified.compareTo(cursor) <= 0) continue;
+                    localMarkedCount++;
+                    if (earliestLocalModified.isEmpty() || localModified.compareTo(earliestLocalModified) < 0)
+                        earliestLocalModified = localModified;
+                    if (latestLocalModified.isEmpty() || localModified.compareTo(latestLocalModified) > 0)
+                        latestLocalModified = localModified;
+                    JSONObject upload = new JSONObject();
+                    if (local.has("local_id") && !local.isNull("local_id"))
+                        upload.put("local_id", local.getLong("local_id"));
+                    else if (local.has("id") && !local.isNull("id"))
+                        upload.put("local_id", local.getLong("id"));
+                    upload.put("code", local.optString("code", ""));
+                    upload.put("expected_last_modified", local.optString("last_modified", ""));
+                    upload.put("data", local);
+                    uploadedRows.put(upload);
                 }
-                final JSONArray serverRows = downloadedRows;
-                main.post(() -> { if (!closed) showRefreshProgress("Received " + serverRows.length() + " products. Validating…", 0); });
-                ProductCatalog candidate = new ProductCatalog(serverRows, (completed, total) -> {
+                final int markedCount = localMarkedCount;
+                final String firstLocalModified = earliestLocalModified;
+                final String lastLocalModified = latestLocalModified;
+                main.post(() -> { if (!closed) message(
+                        "Refresh timestamp diagnosis\n"
+                                + "Server sync cursor: " + (cursor.isEmpty() ? "<empty>" : cursor) + "\n"
+                                + "Local catalog records: " + localRows.length() + "\n"
+                                + "Local records newer than cursor: " + markedCount + "\n"
+                                + "Local records at/before cursor: " + (localRows.length() - markedCount) + "\n"
+                                + "Earliest local last_modified newer than cursor: " + (firstLocalModified.isEmpty() ? "<none>" : firstLocalModified) + "\n"
+                                + "Latest local last_modified newer than cursor: " + (lastLocalModified.isEmpty() ? "<none>" : lastLocalModified), false); });
+                JSONObject uploadPayload = new JSONObject()
+                        .put("personId", personId)
+                        .put("syncTime", cursor)
+                        .put("products", uploadedRows);
+                main.post(() -> { if (!closed) showRefreshProgress(
+                        "Uploading " + uploadedRows.length() + " local products…", 0); });
+                JSONObject uploadResponse = requestSync(base, "/products/mobileSync/products",
+                        uploadPayload, null);
+                if (!uploadResponse.optBoolean("ok", false))
+                    throw new IOException("Server rejected the local product upload");
+                JSONArray returnedRows = uploadResponse.optJSONArray("products");
+                int uploadedCount = uploadResponse.optJSONArray("uploaded") == null
+                        ? 0 : uploadResponse.optJSONArray("uploaded").length();
+                int failedCount = uploadResponse.optJSONArray("failed") == null
+                        ? 0 : uploadResponse.optJSONArray("failed").length();
+                int conflictCount = uploadResponse.optJSONArray("conflicts") == null
+                        ? 0 : uploadResponse.optJSONArray("conflicts").length();
+                int returnedCount = returnedRows == null ? 0 : returnedRows.length();
+                main.post(() -> { if (!closed) showRefreshProgress(
+                        "Server resolved upload: accepted " + uploadedCount
+                                + ", conflicts " + conflictCount + ", failed " + failedCount
+                                + ", returned " + returnedCount, 65); });
+                // The POST response is the authoritative server result. Merge the
+                // returned delta into the local snapshot and absorb it directly;
+                // Refresh must not perform a second GET.
+                JSONArray serverRows = returnedRows == null ? new JSONArray() : returnedRows;
+                JSONArray mergedRows = mergeProductDelta(localRows, serverRows);
+                final JSONArray finalServerRows = mergedRows;
+                main.post(() -> { if (!closed) showRefreshProgress("Received " + finalServerRows.length() + " products. Validating…", 0); });
+                ProductCatalog candidate = new ProductCatalog(finalServerRows, (completed, total) -> {
                     if (completed == total || completed % 5 == 0) {
                         int percent = total == 0 ? 100 : completed * 100 / total;
                         main.post(() -> { if (!closed) showRefreshProgress(
                                 "Validating products… " + completed + "/" + total, percent); });
                     }
                 });
-                main.post(() -> { if (!closed) showRefreshProgress("Comparing " + serverRows.length() + " server products with " + localRows.length() + " local products…", 0); });
-                java.util.List<ProductSyncDiff.Item> differences = ProductSyncDiff.compare(serverRows, localRows,
-                        (completed, total) -> {
-                            if (completed == total || completed % 25 == 0) {
-                                int percent = total == 0 ? 100 : completed * 100 / total;
-                                main.post(() -> { if (!closed) showRefreshProgress("Comparing products… " + completed + "/" + total, percent); });
-                            }
-                        });
-                if (!differences.isEmpty() && protectedCatalog.size() > 0) {
-                    boolean hideReport = getPreferences(MODE_PRIVATE).getBoolean("hideSyncReport", false);
-                    if (hideReport && canAutoResolve(differences)) {
-                        main.post(() -> autoResolveSync(base, response, differences));
-                    } else {
-                        main.post(() -> showSyncReport(base, response, differences));
-                    }
-                    feedback = "Comparison ready: " + differences.size() + " product difference(s).";
-                    ProductCatalog result = null;
-                    String text = feedback;
-                    main.post(() -> { if (!closed) { refreshProgress.setVisibility(View.GONE); busy(false); message(text, true); } });
-                    return;
-                }
                 main.post(() -> { if (!closed) showRefreshProgress("Comparison complete. Saving " + candidate.size() + " products on this phone…", 100); });
                 persistCatalog(base, candidate);
-                String nextCursor = response.optString("nextCursor", "");
+                String nextCursor = uploadResponse.optString("nextCursor", "");
                 if (!nextCursor.isEmpty()) getPreferences(MODE_PRIVATE).edit().putString("product_cursor:" + base, nextCursor).apply();
                 downloaded = candidate;
-                feedback = candidate.size() + " products refreshed and saved locally.";
+                String finalCursor = uploadResponse.optString("nextCursor", "");
+                feedback = "Refresh synchronized successfully.\n"
+                        + "Server sync cursor before refresh: " + (cursor.isEmpty() ? "<empty>" : cursor) + "\n"
+                        + "Local modified range: " + (firstLocalModified.isEmpty() ? "<none>" : firstLocalModified)
+                        + " → " + (lastLocalModified.isEmpty() ? "<none>" : lastLocalModified) + "\n"
+                        + "Local records sent: " + uploadedRows.length() + "\n"
+                        + "Server accepted: " + uploadedCount + "\n"
+                        + "Server conflicts (server won): " + conflictCount + "\n"
+                        + "Server upload failures: " + failedCount + "\n"
+                        + "Records returned in upload response: " + returnedCount + "\n"
+                        + "Records returned by sync POST: " + returnedCount + "\n"
+                        + "Local catalog now contains: " + candidate.size() + "\n"
+                        + "Sync cursor: " + (finalCursor.isEmpty() ? "<empty>" : finalCursor);
             } catch (Exception ex) {
                 String error = "Refresh failed. Previous local data retained. " + ex.getMessage();
                 main.post(() -> {
@@ -837,15 +883,65 @@ public class SimClientActivity extends Activity {
         startAutoSave(request, null);
     }
 
-    private void showSyncReport(String base, JSONObject response, java.util.List<ProductSyncDiff.Item> differences) {
-        android.text.SpannableStringBuilder report = new android.text.SpannableStringBuilder("Products different on server and phone:\n\n");
-        int shown = 0;
+    private static String localModifiedNow() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.ROOT);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(new Date());
+    }
+
+    /** Only UTC ISO cursors are safe to send to the server. Legacy cursors are discarded. */
+    private String readSyncCursor(String base) {
+        String value = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
+        if (value == null) return "";
+        value = value.trim();
+        return value.matches("\\d{4}-\\d{2}-\\d{2}T.*Z") ? value : "";
+    }
+
+    private static ProductCatalog clearLocalModified(ProductCatalog source) throws Exception {
+        JSONArray rows = new JSONArray(source.serialize());
+        for (int i = 0; i < rows.length(); i++) rows.getJSONObject(i).remove("local_modified");
+        return new ProductCatalog(rows);
+    }
+
+    private void showSyncReport(String base, JSONObject response, JSONArray comparisonRows,
+                                JSONArray localRows, java.util.List<ProductSyncDiff.Item> differences,
+                                String syncTime) {
+        JSONArray serverRows = response.optJSONArray("products");
+        int rawServerCount = serverRows == null ? 0 : serverRows.length();
+        int comparisonCount = comparisonRows == null ? 0 : comparisonRows.length();
+        int localCount = localRows == null ? 0 : localRows.length();
+        int onlyServer = 0, onlyLocal = 0, changed = 0, conflicts = 0;
         for (ProductSyncDiff.Item item : differences) {
-            if (shown++ >= 80) { report.append("… and ").append(String.valueOf(differences.size() - 80)).append(" more\n"); break; }
+            if (item.server == null) onlyLocal++;
+            else if (item.local == null) onlyServer++;
+            else {
+                changed++;
+                if (ProductSyncDiff.serverChangedAfter(item, syncTime)) conflicts++;
+            }
+        }
+        String shownSyncTime = syncTime == null || syncTime.isEmpty() ? "<none / first synchronization>" : syncTime;
+        android.text.SpannableStringBuilder report = new android.text.SpannableStringBuilder();
+        report.append("Synchronization status\n")
+                .append("Sync time (cursor): ").append(shownSyncTime).append("\n")
+                .append("Refresh protocol: upload local records, then absorb server response\n")
+                .append("Raw records returned by server: ").append(String.valueOf(rawServerCount)).append("\n")
+                .append("Records used for comparison after merge: ").append(String.valueOf(comparisonCount)).append("\n")
+                .append("Records currently on phone: ").append(String.valueOf(localCount)).append("\n")
+                .append("Present on both sides: ").append(String.valueOf(comparisonCount - onlyServer)).append("\n")
+                .append("Only on server: ").append(String.valueOf(onlyServer)).append("\n")
+                .append("Only on phone: ").append(String.valueOf(onlyLocal)).append("\n")
+                .append("Different records: ").append(String.valueOf(changed + onlyServer + onlyLocal)).append("\n")
+                .append("Conflicts: ").append(String.valueOf(conflicts)).append("\n\n")
+                .append("Details (server modified after sync time = conflict):\n\n");
+        for (ProductSyncDiff.Item item : differences) {
             JSONObject s = item.server, l = item.local;
             String id = s != null ? s.optString("local_id", s.optString("id")) : l.optString("local_id", l.optString("id"));
             report.append("ID ").append(id).append("\n");
-            int serverStart = report.length(); report.append("SERVER: ").append(summary(s)).append("\n");
+            report.append("MATCH KEY: ").append(ProductSyncDiff.matchKey(l != null ? l : s)).append("\n");
+            boolean conflict = ProductSyncDiff.serverChangedAfter(item, syncTime);
+            int serverStart = report.length(); report.append("SERVER: ").append(summary(s));
+            if (conflict) report.append("  [CONFLICT: changed after sync time]");
+            report.append("\n");
             int serverEnd = report.length();
             int localStart = report.length(); report.append("LOCAL:  ").append(summary(l)).append("\n\n");
             int localEnd = report.length();
@@ -856,7 +952,13 @@ public class SimClientActivity extends Activity {
         skip.setText("Do not show this comparison next time");
         LinearLayout box = column();
         box.setPadding(dp(24), 0, dp(24), 0);
-        TextView text = new TextView(this); text.setText(report); box.addView(text); box.addView(skip);
+        ScrollView scroll = new ScrollView(this);
+        TextView text = new TextView(this); text.setText(report); text.setTextIsSelectable(true);
+        text.setPadding(0, dp(8), 0, dp(8));
+        scroll.addView(text, new ScrollView.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
+        box.addView(scroll, scrollParams);
+        box.addView(skip);
         Button uploadAll = new Button(this);
         uploadAll.setText("Upload all local products");
         box.addView(uploadAll);
@@ -957,9 +1059,9 @@ public class SimClientActivity extends Activity {
                     row.put("data", item.local);
                     rows.put(row);
                 }
-                String syncTime = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
+                String syncCursor = readSyncCursor(base);
                 String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
-                JSONObject body = new JSONObject().put("personId", personId).put("products", rows).put("syncTime", syncTime);
+                JSONObject body = new JSONObject().put("personId", personId).put("products", rows).put("syncTime", syncCursor);
                 JSONObject response = requestSync(base, "/products/mobileSync/products", body, null);
                 JSONArray finalProducts = response.optJSONArray("products");
                 if (finalProducts != null) {
@@ -971,7 +1073,6 @@ public class SimClientActivity extends Activity {
                     if (!nextCursor.isEmpty()) getPreferences(MODE_PRIVATE).edit().putString("product_cursor:" + base, nextCursor).apply();
                     catalog = finalCatalog;
                 }
-                String personId = getPreferences(MODE_PRIVATE).getString("personId", "unknown");
                 int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
                 int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
                 int conflicts = response.optJSONArray("conflicts") == null ? 0 : response.optJSONArray("conflicts").length();
@@ -1020,7 +1121,7 @@ public class SimClientActivity extends Activity {
                 }
                 JSONObject response = requestSync(base, "/products/mobileSync/products",
                         new JSONObject().put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""))
-                                .put("syncTime", getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, ""))
+                                .put("syncTime", readSyncCursor(base))
                                 .put("products", rows).put("force", force), null);
                 int uploaded = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
                 int failed = response.optJSONArray("failed") == null ? 0 : response.optJSONArray("failed").length();
@@ -1038,7 +1139,7 @@ public class SimClientActivity extends Activity {
     private static String summary(JSONObject row) {
         if (row == null) return "<missing>";
         return row.optString("mnemonic", row.optString("subject", row.optString("code", "")))
-                + " | modified=" + row.optString("server_modified", row.optString("last_modified", ""));
+                + " | modified=" + row.optString("last_modified", "");
     }
 
     private void showLocalProductPhoto(int productId) {
@@ -1160,6 +1261,19 @@ public class SimClientActivity extends Activity {
         content.addView(new Space(this), new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout actions = new LinearLayout(this);
         actions.setGravity(android.view.Gravity.CENTER);
+        Button clearCart = new Button(this);
+        clearCart.setText("Clear Cart");
+        clearCart.setAllCaps(false);
+        stylePrimaryButton(this, clearCart);
+        clearCart.setTextColor(0xffffffff);
+        clearCart.setOnClickListener(v -> {
+            cart.clear();
+            updateCatalogTotals();
+            if (cartDialog != null) cartDialog.dismiss();
+            showEditingPage(null);
+            message("Cart cleared.", false);
+        });
+        actions.addView(clearCart, new LinearLayout.LayoutParams(dp(150), dp(52)));
         Button submit = new Button(this);
         submit.setText("Submit");
         stylePrimaryButton(this, submit);
@@ -1173,7 +1287,26 @@ public class SimClientActivity extends Activity {
         if (content.getParent() instanceof android.view.ViewGroup) {
             ((android.view.ViewGroup) content.getParent()).removeView(content);
         }
-        cartDialog = new AlertDialog.Builder(this).setTitle("Selected Products").setView(content).create();
+        LinearLayout cartTitle = new LinearLayout(this);
+        cartTitle.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        cartTitle.setPadding(dp(20), dp(8), dp(8), dp(4));
+        TextView cartTitleText = new TextView(this);
+        cartTitleText.setText("Selected Products");
+        cartTitleText.setTextSize(20);
+        cartTitleText.setTextColor(0xff16344b);
+        cartTitle.addView(cartTitleText, new LinearLayout.LayoutParams(0, dp(48), 1));
+        ImageButton closeCart = new ImageButton(this);
+        closeCart.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        closeCart.setContentDescription("Close selected products");
+        closeCart.setTooltipText("Close");
+        closeCart.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        closeCart.setColorFilter(0xff16344b);
+        closeCart.setOnClickListener(v -> {
+            if (cartDialog != null) cartDialog.dismiss();
+            showEditingPage(null);
+        });
+        cartTitle.addView(closeCart, new LinearLayout.LayoutParams(dp(52), dp(48)));
+        cartDialog = new AlertDialog.Builder(this).setCustomTitle(cartTitle).setView(content).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
         if (cartDialog.getWindow() != null) {
@@ -1291,6 +1424,8 @@ public class SimClientActivity extends Activity {
                 String key = valueKeys.next();
                 optimistic.put(key, values.get(key));
             }
+            // The single last_modified field is the common sync version marker.
+            optimistic.put("last_modified", localModifiedNow());
             ProductCatalog localUpdated = catalog.updated(optimistic);
             persistCatalog(server, localUpdated);
             catalog = localUpdated;
@@ -1338,9 +1473,9 @@ public class SimClientActivity extends Activity {
                     row.put("expected_last_modified", websiteProduct.optString("last_modified", ""));
                     row.put("data", websiteProduct);
                     String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
-                    String syncTime = getPreferences(MODE_PRIVATE).getString("product_cursor:" + base, "");
+                    String syncCursor = readSyncCursor(base);
                     JSONObject response = requestSync(base, "/products/mobileSync/products",
-                            new JSONObject().put("personId", personId).put("syncTime", syncTime)
+                            new JSONObject().put("personId", personId).put("syncTime", syncCursor)
                                     .put("products", new JSONArray().put(row)), null);
                     JSONArray failed = response.optJSONArray("failed");
                     if (!response.optBoolean("ok", false) || (failed != null && failed.length() > 0))
@@ -1363,10 +1498,15 @@ public class SimClientActivity extends Activity {
                     // The optimistic catalog was already saved before the request;
                     // persist again here to remove the recovery marker only after
                     // the website has acknowledged the upload.
-                    persistCatalog(base, snapshot);
+                    persistCatalog(base, clearLocalModified(snapshot));
                     feedback = "Website saved and verified. Stock 1: " + websiteProduct.optInt("stock1", 0)
                             + ", Stock 2: " + websiteProduct.optInt("stock2", 0)
                             + ", Stock 3: " + websiteProduct.optInt("stock3", 0);
+                    // The website POST above is the complete sync protocol for
+                    // website mode. Do not send the website URL a second
+                    // /AikaPos request; that route belongs only to a local POS
+                    // listener and may return the website HTML page.
+                    if (!websiteMode) {
                     JSONObject submitted = payload;
                     boolean stockOnlyCompatibility = false;
                     main.post(() -> { if (!closed) message("Saving changes to AikaPos…", false); });
@@ -1399,6 +1539,7 @@ public class SimClientActivity extends Activity {
                     } catch (Exception ex) {
                         feedback = "POS updated and verified, but saving the local product cache failed: "
                                 + detail(ex) + ". Tap Refresh before continuing.";
+                    }
                     }
                 }
             } catch (Exception ex) {
@@ -1648,10 +1789,25 @@ public class SimClientActivity extends Activity {
         box.addView(activationLabel);
         box.addView(activationCode);
 
-        // Keep activation hidden while the address is being entered. It is
-        // shown only after Save identifies a website domain.
-        activationLabel.setVisibility(View.GONE);
-        activationCode.setVisibility(View.GONE);
+        String savedPersonId = getPreferences(MODE_PRIVATE).getString("personId", "").trim();
+        boolean currentWebsite = isWebsiteDomain(server);
+        // Show the activation field when this website has not been activated.
+        // Once activated, keep it hidden until the user enters a different URL.
+        int activationVisibility = currentWebsite && savedPersonId.isEmpty() ? View.VISIBLE : View.GONE;
+        activationLabel.setVisibility(activationVisibility);
+        activationCode.setVisibility(activationVisibility);
+        address.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String entered = s == null ? "" : s.toString().trim();
+                boolean newWebsite = isWebsiteDomain(entered)
+                        && (server == null || !entered.equalsIgnoreCase(server.trim()));
+                boolean show = newWebsite || (isWebsiteDomain(entered) && savedPersonId.isEmpty());
+                activationLabel.setVisibility(show ? View.VISIBLE : View.GONE);
+                activationCode.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+            public void afterTextChanged(Editable s) { }
+        });
         TextView taxLabel = new TextView(this);
         taxLabel.setText("Price calculation settings (%)");
         LinearLayout.LayoutParams taxLabelParams = full();
@@ -1723,6 +1879,10 @@ public class SimClientActivity extends Activity {
                 .setView(box).setNegativeButton("Cancel", null).setPositiveButton("Save", null).create();
         downloadImages.setOnClickListener(v -> {
             dialog.dismiss();
+            if (ProductImageStore.isDownloadActive()) {
+                message("Product image download is already in progress. Please wait for it to finish.", false);
+                return;
+            }
             message("Downloading product images…", false);
             ProductImageStore.downloadInBackground(this, server, error -> {
                 if (error == null) {
@@ -1732,7 +1892,20 @@ public class SimClientActivity extends Activity {
                     message("Product image download failed.\nReason: " + error.getMessage(), true);
                 }
             }, (batch, count, total) -> main.post(() -> message(
-                    "Product images saved: batch " + (batch + 1) + " (" + count + " images, shared total " + total + ")", false)));
+                    "Product images saved: batch " + (batch + 1) + " (" + count + " images, shared total " + total + ")", false)),
+                    (batch, downloaded, totalBytes) -> main.post(() -> {
+                        if (totalBytes > 0) {
+                            int percent = (int) Math.min(100, downloaded * 100L / totalBytes);
+                            message("Downloading product images: batch " + (batch + 1)
+                                    + " — " + percent + "% (" + formatBytes(downloaded)
+                                    + " / " + formatBytes(totalBytes) + ")", false);
+                        } else {
+                            message(downloaded == 0
+                                    ? "Preparing product images: batch " + (batch + 1) + "…"
+                                    : "Downloading product images: batch " + (batch + 1)
+                                    + " — " + formatBytes(downloaded) + " received", false);
+                        }
+                    }));
         });
         dialog.setOnShowListener(d -> {
             stylePrimaryButton(this, dialog.getButton(AlertDialog.BUTTON_NEGATIVE));
@@ -2639,6 +2812,11 @@ public class SimClientActivity extends Activity {
             case 500: return "POS reached the moving-plan service, but the service failed internally. Check the POS server log; the phone did submit the request.";
             default: return "Server request failed. Check POS and reload stock before retrying.";
         }
+    }
+    private static String formatBytes(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format(java.util.Locale.ROOT, "%.1f KB", bytes / 1024.0);
+        return String.format(java.util.Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0));
     }
     private void message(String text, boolean toast) {
         status.setText(text);
