@@ -2564,7 +2564,7 @@ public class SimClientActivity extends Activity {
         LinearLayout content = column();
         content.setPadding(dp(16), dp(12), dp(16), dp(12));
         EditText filter = new EditText(this);
-        filter.setHint("Filter saved products");
+        filter.setHint("Filter Local Inventory");
         filter.setSingleLine(true);
         selectAllOnFocus(filter);
         styleInput(filter);
@@ -2610,8 +2610,7 @@ public class SimClientActivity extends Activity {
         close.setText("Close");
         footer.addView(close, new LinearLayout.LayoutParams(0, dp(52), 1));
         content.addView(footer, full());
-        AlertDialog viewer = new AlertDialog.Builder(this).setTitle("Local Inventory")
-                .setView(content).create();
+        AlertDialog viewer = new AlertDialog.Builder(this).setView(content).create();
         close.setOnClickListener(v -> viewer.dismiss());
         localInventoryDialog = viewer;
         viewer.show();
