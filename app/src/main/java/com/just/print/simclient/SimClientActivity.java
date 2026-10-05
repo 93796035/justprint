@@ -1552,15 +1552,24 @@ public class SimClientActivity extends Activity {
                     // The optimistic catalog was already saved before the request;
                     // persist again here to remove the recovery marker only after
                     // the website has acknowledged the upload.
-                    persistCatalog(base, clearLocalModified(snapshot));
-                    feedback = "Website saved and verified. Stock 1: " + websiteProduct.optInt("stock1", 0)
+                    ProductCatalog websiteCommitted = updated == null ? snapshot : updated;
+                    persistCatalog(base, clearLocalModified(websiteCommitted));
+                    int accepted = response.optJSONArray("uploaded") == null ? 0 : response.optJSONArray("uploaded").length();
+                    int conflicts = response.optJSONArray("conflicts") == null ? 0 : response.optJSONArray("conflicts").length();
+                    int failures = failed == null ? 0 : failed.length();
+                    int returnedCount = returned == null ? 0 : returned.length();
+                    feedback = "Website POST completed. Accepted: " + accepted
+                            + ", conflicts: " + conflicts + ", failed: " + failures
+                            + ", returned: " + returnedCount + ". "
+                            + "Stock 1: " + websiteProduct.optInt("stock1", 0)
                             + ", Stock 2: " + websiteProduct.optInt("stock2", 0)
                             + ", Stock 3: " + websiteProduct.optInt("stock3", 0);
                     // The website POST above is the complete sync protocol for
                     // website mode. Do not send the website URL a second
                     // /AikaPos request; that route belongs only to a local POS
                     // listener and may return the website HTML page.
-                    if (!websiteMode) {
+                }
+                if (!websiteMode) {
                     JSONObject submitted = payload;
                     boolean stockOnlyCompatibility = false;
                     main.post(() -> { if (!closed) message("Saving changes to AikaPos…", false); });
