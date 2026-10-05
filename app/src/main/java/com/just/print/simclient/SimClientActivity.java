@@ -670,6 +670,22 @@ public class SimClientActivity extends Activity {
         }
     }
 
+    private static String syncConflictSummary(JSONObject response) {
+        JSONArray conflicts = response.optJSONArray("conflicts");
+        if (conflicts == null || conflicts.length() == 0) return "Time conflicts: 0";
+        StringBuilder text = new StringBuilder("Time conflicts: ").append(conflicts.length()).append(" (first 10):\n");
+        for (int i = 0; i < conflicts.length() && i < 10; i++) {
+            JSONObject conflict = conflicts.optJSONObject(i);
+            if (conflict == null) continue;
+            text.append("- ").append(conflict.optString("comparison", "unknown"))
+                    .append("; client=").append(conflict.optString("client_last_modified", "<empty>"))
+                    .append("; server=").append(conflict.optString("server_last_modified", "<empty>"))
+                    .append("; barcode=").append(conflict.optString("code", "<empty>"))
+                    .append("\n");
+        }
+        return text.toString().trim();
+    }
+
     private static String productDiagnostic(String key, JSONObject existing, JSONObject incoming) {
         return "key=" + key
                 + "; old{barcode=" + existing.optString("code", "")
@@ -826,6 +842,7 @@ public class SimClientActivity extends Activity {
                         + "Server upload failures: " + failedCount + "\n"
                         + "Records returned in upload response: " + returnedCount + "\n"
                         + "Records returned by sync POST: " + returnedCount + "\n"
+                        + syncConflictSummary(uploadResponse) + "\n"
                         + mergeOverwriteSummary() + "\n"
                         + "Local catalog now contains: " + candidate.size() + "\n"
                         + "Sync cursor: " + (finalCursor.isEmpty() ? "<empty>" : finalCursor);
