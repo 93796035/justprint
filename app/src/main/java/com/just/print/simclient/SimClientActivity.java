@@ -27,6 +27,8 @@ import java.util.TimeZone;
 
 /** Small standalone launcher: no POS database, login, timers or printing are initialized. */
 public class SimClientActivity extends Activity {
+    private static final java.util.List<String> mergeOverwriteDetails =
+            new java.util.ArrayList<>();
     private static final int PRODUCT_PHOTO_REQUEST = 2401;
     private static final int PRODUCT_BACKUP_REQUEST = 2402;
     private static final int PRODUCT_IMPORT_REQUEST = 2403;
@@ -638,6 +640,9 @@ public class SimClientActivity extends Activity {
 
     private static JSONArray mergeProductDelta(JSONArray localRows, JSONArray deltaRows) throws Exception {
         java.util.LinkedHashMap<String, JSONObject> merged = new java.util.LinkedHashMap<>();
+        synchronized (mergeOverwriteDetails) {
+            mergeOverwriteDetails.clear();
+        }
         for (int i = 0; i < localRows.length(); i++) {
             JSONObject row = localRows.getJSONObject(i);
             putProductWithoutCollision(merged, productKey(row), row);
@@ -651,6 +656,28 @@ public class SimClientActivity extends Activity {
         JSONArray result = new JSONArray();
         for (JSONObject row : merged.values()) result.put(row);
         return result;
+    }
+
+    private static String mergeOverwriteSummary() {
+        synchronized (mergeOverwriteDetails) {
+            if (mergeOverwriteDetails.isEmpty()) return "Merge overwrites: 0";
+            StringBuilder text = new StringBuilder("Merge overwrites: ")
+                    .append(mergeOverwriteDetails.size()).append(" (first 10):\n");
+            for (String detail : mergeOverwriteDetails) text.append("- ").append(detail).append("\n");
+            return text.toString().trim();
+        }
+    }
+
+    private static String productDiagnostic(String key, JSONObject existing, JSONObject incoming) {
+        return "key=" + key
+                + "; old{barcode=" + existing.optString("code", "")
+                + ", local_id=" + existing.optString("local_id", existing.optString("id", ""))
+                + ", subject=" + existing.optString("subject", existing.optString("mnemonic", ""))
+                + ", last_modified=" + existing.optString("last_modified", "") + "}"
+                + " -> new{barcode=" + incoming.optString("code", "")
+                + ", local_id=" + incoming.optString("local_id", incoming.optString("id", ""))
+                + ", subject=" + incoming.optString("subject", incoming.optString("mnemonic", ""))
+                + ", last_modified=" + incoming.optString("last_modified", "") + "}";
     }
 
     private static void putProductWithoutCollision(java.util.LinkedHashMap<String, JSONObject> merged,
@@ -670,6 +697,10 @@ public class SimClientActivity extends Activity {
         // Numeric barcode match: the server row is authoritative and replaces
         // the local row with the same barcode. local_id is intentionally
         // ignored because it is not the product identity for this client.
+        synchronized (mergeOverwriteDetails) {
+            if (mergeOverwriteDetails.size() < 10)
+                mergeOverwriteDetails.add(productDiagnostic(key, merged.get(key), row));
+        }
         merged.put(key, row);
     }
 
@@ -793,6 +824,7 @@ public class SimClientActivity extends Activity {
                         + "Server upload failures: " + failedCount + "\n"
                         + "Records returned in upload response: " + returnedCount + "\n"
                         + "Records returned by sync POST: " + returnedCount + "\n"
+                        + mergeOverwriteSummary() + "\n"
                         + "Local catalog now contains: " + candidate.size() + "\n"
                         + "Sync cursor: " + (finalCursor.isEmpty() ? "<empty>" : finalCursor);
             } catch (Exception ex) {
