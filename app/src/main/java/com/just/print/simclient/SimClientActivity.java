@@ -1495,6 +1495,15 @@ public class SimClientActivity extends Activity {
             optimisticLocalPending = true;
             if (movingPlan != null) movingPlan.invalidateForInventoryChange();
             message("Local inventory updated. Calculating Stock Moving from the new values…", false);
+            // Website product edits use the same upload/absorb protocol as
+            // Refresh. This keeps one synchronization path for single edits
+            // and full refreshes.
+            if (isWebsiteDomain(server)) {
+                productSaveBusy(false);
+                autoSaveInFlight = null;
+                refreshCatalog();
+                return;
+            }
         } catch (Exception ex) {
             autoSaveInFlight = null;
             message("Could not update the local inventory before syncing: " + detail(ex), false);
