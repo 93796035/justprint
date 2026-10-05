@@ -2418,17 +2418,22 @@ public class SimClientActivity extends Activity {
                 JSONArray products = backup.optJSONArray("products");
                 if (!"JustPrint protected product backup".equals(backup.optString("format")) || products == null)
                     throw new IOException("This is not a valid JustPrint product backup");
-                ProductCatalog restored = new ProductCatalog(products);
-                if (restored.size() == 0) throw new IOException("The backup contains no products");
                 String key = server;
-                boolean saved = getSharedPreferences("product_catalogs", MODE_PRIVATE).edit()
+                ProductCatalog incoming = new ProductCatalog(products);
+                if (incoming.size() == 0) throw new IOException("The backup contains no products");
+                android.content.SharedPreferences prefs = getSharedPreferences("product_catalogs", MODE_PRIVATE);
+                ProductCatalog current = new ProductCatalog(new JSONArray(prefs.getString(key, "[]")));
+                ProductCatalog restored = new ProductCatalog(
+                        mergeProductDelta(new JSONArray(current.serialize()), products));
+                boolean saved = prefs.edit()
                         .putString(key, restored.serialize()).remove("pending:" + key).commit();
                 if (!saved) throw new IOException("Could not save the restored product data");
                 main.post(() -> {
                     catalog = restored;
                     updateCatalogTotals();
                     updateCategories(true);
-                    message(restored.size() + " products imported. Local data restored; server was not changed.", false);
+                    message(restored.size() + " products imported and merged by numeric barcode. "
+                            + "Local records not in the backup were preserved; server was not changed.", false);
                     if (localInventoryDialog != null && localInventoryDialog.isShowing()) {
                         localInventoryDialog.dismiss();
                         localInventoryDialog = null;
