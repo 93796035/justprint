@@ -629,32 +629,24 @@ public class SimClientActivity extends Activity {
     }
 
     private static String productKey(JSONObject row) {
-        long id = row.optLong("local_id", row.optLong("id", 0));
         String code = row.optString("code", "").trim();
-        if (id > 0) {
-            // ID identifies the server row. Include the barcode as a guard so
-            // corrupt data with the same ID but different products cannot
-            // silently overwrite one another.
-            return "id:" + id + "|code:" + code.toUpperCase(java.util.Locale.ROOT);
-        }
-        if (!code.isEmpty()) {
-            String subject = row.optString("subject", "").trim().toUpperCase(java.util.Locale.ROOT);
-            return "code:" + code.toUpperCase(java.util.Locale.ROOT) + "|subject:" + subject;
-        }
-        return "empty:" + row.toString();
+        // Barcode is the only merge identity. Only a numeric barcode is safe
+        // to use as an overwrite key; malformed, textual, or missing barcodes
+        // must remain separate records and must never overwrite one another.
+        return code.matches("[0-9]+") ? "barcode:" + code : "";
     }
 
     private static JSONArray mergeProductDelta(JSONArray localRows, JSONArray deltaRows) throws Exception {
         java.util.LinkedHashMap<String, JSONObject> merged = new java.util.LinkedHashMap<>();
         for (int i = 0; i < localRows.length(); i++) {
             JSONObject row = localRows.getJSONObject(i);
-            putProductWithoutCollision(merged, productKey(row), row, false);
+            putProductWithoutCollision(merged, productKey(row), row);
         }
         for (int i = 0; i < deltaRows.length(); i++) {
             JSONObject row = deltaRows.getJSONObject(i);
             String key = productKey(row);
-            if (row.optInt("deleted", 0) != 0) merged.remove(key);
-            else putProductWithoutCollision(merged, key, row, true);
+            if (row.optInt("deleted", 0) != 0 && !key.isEmpty()) merged.remove(key);
+            else putProductWithoutCollision(merged, key, row);
         }
         JSONArray result = new JSONArray();
         for (JSONObject row : merged.values()) result.put(row);
@@ -662,27 +654,23 @@ public class SimClientActivity extends Activity {
     }
 
     private static void putProductWithoutCollision(java.util.LinkedHashMap<String, JSONObject> merged,
-                                                    String key, JSONObject row, boolean delta) {
+                                                    String key, JSONObject row) {
+        // Empty key means missing/non-numeric barcode. Always append such a
+        // server record instead of matching or replacing a local record.
+        if (key.isEmpty()) {
+            String unique = "row:" + merged.size();
+            while (merged.containsKey(unique)) unique = unique + "#";
+            merged.put(unique, row);
+            return;
+        }
         if (!merged.containsKey(key)) {
             merged.put(key, row);
             return;
         }
-        JSONObject existing = merged.get(key);
-        String existingCode = existing.optString("code", "").trim();
-        String incomingCode = row.optString("code", "").trim();
-        long existingId = existing.optLong("local_id", existing.optLong("id", 0));
-        long incomingId = row.optLong("local_id", row.optLong("id", 0));
-        // Same server row: the delta is the authoritative replacement.
-        if (existingId > 0 && incomingId == existingId
-                && existingCode.equalsIgnoreCase(incomingCode)) {
-            merged.put(key, row);
-            return;
-        }
-        // Different rows with a colliding/weak identity must both survive.
-        String unique = key;
-        int suffix = 2;
-        while (merged.containsKey(unique)) unique = key + "#" + suffix++;
-        merged.put(unique, row);
+        // Numeric barcode match: the server row is authoritative and replaces
+        // the local row with the same barcode. local_id is intentionally
+        // ignored because it is not the product identity for this client.
+        merged.put(key, row);
     }
 
     private void refreshCatalog() {
