@@ -2637,6 +2637,7 @@ public class SimClientActivity extends Activity {
                         header.getChildAt(i).setOnClickListener(v -> {
                             if (sortColumn[0] == column) sortAscending[0] = !sortAscending[0];
                             else { sortColumn[0] = column; sortAscending[0] = true; }
+                            updateInventorySortIndicators(header, headings, sortColumn[0], sortAscending[0]);
                             showLocalRows(list, filteredRows, sortColumn[0], sortAscending[0]);
                         });
                     }
@@ -2655,6 +2656,14 @@ public class SimClientActivity extends Activity {
                 main.post(() -> { if (!closed && viewer.isShowing()) footerInfo.setText("Unable to read saved inventory."); });
             }
         });
+    }
+
+    private void updateInventorySortIndicators(LinearLayout header, String[] headings,
+                                                int sortColumn, boolean ascending) {
+        for (int i = 0; i < header.getChildCount() && i < headings.length; i++) {
+            String arrow = i == sortColumn ? (ascending ? " ↑" : " ↓") : "";
+            ((TextView) header.getChildAt(i)).setText(headings[i] + arrow);
+        }
     }
 
     private void showLocalRows(ListView list, java.util.List<Product> rows, int sortColumn, boolean ascending) {
