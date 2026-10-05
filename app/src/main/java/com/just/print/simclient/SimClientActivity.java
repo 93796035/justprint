@@ -648,17 +648,41 @@ public class SimClientActivity extends Activity {
         java.util.LinkedHashMap<String, JSONObject> merged = new java.util.LinkedHashMap<>();
         for (int i = 0; i < localRows.length(); i++) {
             JSONObject row = localRows.getJSONObject(i);
-            merged.put(productKey(row), row);
+            putProductWithoutCollision(merged, productKey(row), row, false);
         }
         for (int i = 0; i < deltaRows.length(); i++) {
             JSONObject row = deltaRows.getJSONObject(i);
             String key = productKey(row);
             if (row.optInt("deleted", 0) != 0) merged.remove(key);
-            else merged.put(key, row);
+            else putProductWithoutCollision(merged, key, row, true);
         }
         JSONArray result = new JSONArray();
         for (JSONObject row : merged.values()) result.put(row);
         return result;
+    }
+
+    private static void putProductWithoutCollision(java.util.LinkedHashMap<String, JSONObject> merged,
+                                                    String key, JSONObject row, boolean delta) {
+        if (!merged.containsKey(key)) {
+            merged.put(key, row);
+            return;
+        }
+        JSONObject existing = merged.get(key);
+        String existingCode = existing.optString("code", "").trim();
+        String incomingCode = row.optString("code", "").trim();
+        long existingId = existing.optLong("local_id", existing.optLong("id", 0));
+        long incomingId = row.optLong("local_id", row.optLong("id", 0));
+        // Same server row: the delta is the authoritative replacement.
+        if (existingId > 0 && incomingId == existingId
+                && existingCode.equalsIgnoreCase(incomingCode)) {
+            merged.put(key, row);
+            return;
+        }
+        // Different rows with a colliding/weak identity must both survive.
+        String unique = key;
+        int suffix = 2;
+        while (merged.containsKey(unique)) unique = key + "#" + suffix++;
+        merged.put(unique, row);
     }
 
     private void refreshCatalog() {
