@@ -650,8 +650,10 @@ public class SimClientActivity extends Activity {
         for (int i = 0; i < deltaRows.length(); i++) {
             JSONObject row = deltaRows.getJSONObject(i);
             String key = productKey(row);
-            if (row.optInt("deleted", 0) != 0 && !key.isEmpty()) merged.remove(key);
-            else putProductWithoutCollision(merged, key, row);
+            // Keep rows flagged as deleted for now. The server's deleted value
+            // is currently polluted by legacy POS status values, so removing
+            // these rows would make the phone silently lose products.
+            putProductWithoutCollision(merged, key, row);
         }
         JSONArray result = new JSONArray();
         for (JSONObject row : merged.values()) result.put(row);
