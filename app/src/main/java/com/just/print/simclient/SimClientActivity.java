@@ -2571,7 +2571,7 @@ public class SimClientActivity extends Activity {
         filter.setEnabled(false);
         content.addView(filter, full());
         Button importBackup = new Button(this);
-        importBackup.setText("Import Backup");
+        importBackup.setText("Import");
         importBackup.setOnClickListener(v -> startActivityForResult(
                 new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
                         .addCategory(android.content.Intent.CATEGORY_OPENABLE)
