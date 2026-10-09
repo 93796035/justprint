@@ -1,15 +1,45 @@
 <resources>
     <string name="app_name">AikaPos</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-
-    <string-array name="style_array">
-        <item>Separate</item>
-        <item>All</item>
-    </string-array>
+    <string name="ui_settings">Settings</string>
+    <string name="ui_refresh">Refresh</string>
+    <string name="ui_stock_moving">Stock Moving</string>
+    <string name="ui_product">Product</string>
+    <string name="ui_stocking">Stocking</string>
+    <string name="ui_category">Category</string>
+    <string name="ui_product_name">Product name</string>
+    <string name="ui_enter_product_name">Enter product name</string>
+    <string name="ui_for_sale">For Sale</string>
+    <string name="ui_buffer">Buffer</string>
+    <string name="ui_warehouse">Warehouse</string>
+    <string name="ui_shortage">Shortage</string>
+    <string name="ui_cost">Cost</string>
+    <string name="ui_price">Price</string>
+    <string name="ui_add_to_cart">Add to cart</string>
+    <string name="ui_show_cart">Show cart</string>
+    <string name="ui_language">Language</string>
+    <string name="ui_connection_settings">Connection Settings</string>
+    <string name="ui_save">Save</string>
+    <string name="ui_cancel">Cancel</string>
+    <string name="ui_view_local_inventory">View Local Inventory</string>
+    <string name="ui_download_product_images">Download Product Images</string>
+    <string name="ui_force_upload">Force Upload All Local Products</string>
+    <string name="ui_display_case_header">For Sale</string>
+    <string name="ui_no_matching_products">No matching products.</string>
+    <string name="ui_selected_products">Selected Products</string>
+    <string name="ui_clear_cart">Clear Cart</string>
+    <string name="ui_submit">Submit</string>
+    <string name="ui_cart_empty">Cart is empty</string>
+    <string name="ui_total">Total</string>
+    <string name="ui_weekly_sales">Weekly sales</string>
+    <string name="ui_add_tax">+ Tax</string>
+    <string name="ui_pos_computer_ip">AikaPos computer IP (default port: 8880)</string>
+    <string name="ui_enter_pos_ip">Enter POS computer IP</string>
+    <string name="ui_activation_code">Activation code (website synchronization)</string>
+    <string name="ui_enter_activation_code">Enter activation code</string>
+    <string name="ui_price_calculation_settings">Price calculation settings (%)</string>
+    <string name="ui_create_stocking_plan">Create stocking plan</string>
+    <string name="ui_submit_as_stocking_plan">Submit as stocking plan</string>
     <string-array name="language_array">
-        <item>Fr</item>
-        <item>En</item>
-        <item>Zh</item>
+        <item>Français</item><item>English</item><item>中文</item>
     </string-array>
 </resources>

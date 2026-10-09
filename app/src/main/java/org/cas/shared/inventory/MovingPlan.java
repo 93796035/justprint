@@ -29,7 +29,7 @@ public final class MovingPlan {
             JSONArray shortageBreakdown = new JSONArray();
             for (JSONObject p : entry.getValue()) {
                 JSONObject facts = p.getJSONObject("moving");
-                long shortageCount = Math.max(0L, p.getLong("monque"));
+                long shortageCount = Math.abs(p.getLong("monque"));
                 long shortageUnits = Math.multiplyExact(shortageCount, facts.getLong("shortageBottles"));
                 shortage = Math.addExact(shortage, shortageUnits);
                 if (shortageCount > 0) shortageBreakdown.put(new JSONObject()

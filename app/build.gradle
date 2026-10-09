@@ -7,6 +7,9 @@ def prepareSimClientResources = tasks.register('prepareSimClientResources', Sync
     from('src/main/res') {
         include 'values/styles.xml'
         include 'values-v27/styles.xml'
+        include 'values/strings.xml'
+        include 'values-zh/strings.xml'
+        include 'values-fr/strings.xml'
         include 'drawable/aikapos_logo.png', 'drawable/ic_sim_settings.xml', 'drawable/ic_sim_refresh.xml'
         include 'drawable/ic_sim_camera.xml'
         include 'xml/network_security_config.xml', 'xml/age_check_paths.xml'

@@ -18,6 +18,22 @@ public final class ProductCatalog {
         try { return new java.math.BigDecimal(text.replace(',', '.')).movePointRight(2).intValueExact(); }
         catch (ArithmeticException ex) { throw new IllegalArgumentException("Amount is out of range"); }
     }
+    /** Evaluates the small arithmetic expressions accepted by the product editor. */
+    public static int expressionCents(String text) {
+        final String source = text.replace(',', '.').replaceAll("\\s+", "");
+        if (!source.matches("[0-9.+*/()\\-]+")) throw new IllegalArgumentException("Enter a valid amount or calculation");
+        class Parser {
+            int p;
+            java.math.BigDecimal expr() { java.math.BigDecimal v = term(); while (p < source.length() && (source.charAt(p) == '+' || source.charAt(p) == '-')) { char op=source.charAt(p++); java.math.BigDecimal n=term(); v=op=='+'?v.add(n):v.subtract(n); } return v; }
+            java.math.BigDecimal term() { java.math.BigDecimal v = factor(); while (p < source.length() && (source.charAt(p) == '*' || source.charAt(p) == '/')) { char op=source.charAt(p++); java.math.BigDecimal n=factor(); if (op=='/') { if (n.signum()==0) throw new IllegalArgumentException("Cannot divide by zero"); v=v.divide(n, 8, java.math.RoundingMode.HALF_UP); } else v=v.multiply(n); } return v; }
+            java.math.BigDecimal factor() { if (p<source.length() && source.charAt(p)=='(') { p++; java.math.BigDecimal v=expr(); if (p>=source.length() || source.charAt(p++)!=')') throw new IllegalArgumentException("Unclosed calculation"); return v; } int s=p; if (p<source.length() && (source.charAt(p)=='+'||source.charAt(p)=='-')) p++; while(p<source.length() && (Character.isDigit(source.charAt(p))||source.charAt(p)=='.')) p++; if(s==p) throw new IllegalArgumentException("Enter a valid amount or calculation"); try { return new java.math.BigDecimal(source.substring(s,p)); } catch(Exception e) { throw new IllegalArgumentException("Enter a valid amount or calculation"); } }
+        }
+        Parser parser = new Parser();
+        java.math.BigDecimal value = parser.expr().movePointRight(2);
+        if (parser.p != source.length() || value.signum() < 0) throw new IllegalArgumentException("Amount must be non-negative");
+        try { return value.setScale(0, java.math.RoundingMode.HALF_UP).intValueExact(); }
+        catch (ArithmeticException ex) { throw new IllegalArgumentException("Amount is out of range"); }
+    }
     /** POS stores prices as integer cents; missing old-cache values are not zero prices. */
     public static String money(JSONObject row, String key) {
         Object value = row.opt(key);
@@ -40,6 +56,12 @@ public final class ProductCatalog {
             name = !mnemonic.isEmpty() ? mnemonic : !subject.isEmpty() ? subject : row.optString("code", "") ;
             category = row.optString("category", "").trim();
             code = row.optString("code");
+            // The website's product POST response names this SQL column rather
+            // than "monque". Preserve its signed value instead of defaulting
+            // a successful response to zero.
+            if ((!row.has("monque") || row.isNull("monque"))
+                    && row.has("stock1_shortage") && !row.isNull("stock1_shortage"))
+                row.put("monque", row.get("stock1_shortage"));
             for (String key : new String[]{"stock1", "stock2", "stock3", "monque"}) {
                 // Older/server-side product rows may omit an unused stock
                 // column. Treat a missing stock value as zero so one sparse

@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
@@ -37,6 +38,7 @@ public class SimClientActivity extends Activity {
     private AutoCompleteTextView product;
     private Button editProductName;
     private boolean editingProductName;
+    private boolean imeVisible;
     private Spinner category;
     private Button editCategory;
     private boolean editingCategory;
@@ -54,11 +56,15 @@ public class SimClientActivity extends Activity {
     private AlertDialog cartDialog;
     private LinearLayout cartContent;
     private final java.util.LinkedHashMap<Integer, CartLine> cart = new java.util.LinkedHashMap<>();
+    private boolean cartAsStockingPlan;
     private ImageView productPhoto;
     private File pendingProductPhoto;
     private String pendingProductBackup;
     private AlertDialog localInventoryDialog;
     private final EditText[] prices = new EditText[2];
+    private final TextView[] priceLabels = new TextView[2];
+    // First blur of an expression only materializes the result; the next blur saves it.
+    private final boolean[] calculatedPricePendingSave = new boolean[2];
     private final String[] priceKeys = {"cost", "price"};
     private LinearLayout refreshProgress;
     private ProgressBar refreshProgressBar;
@@ -72,6 +78,7 @@ public class SimClientActivity extends Activity {
     private View editingPage, movingPage, idPage;
     private View stockingPage;
     private StockingPlanPage stockingPlan;
+    private JSONArray pendingStockingCart;
     private IdCheckingPage idChecking;
     private LocalMovingPlanPage movingPlan;
     private boolean showingMoving;
@@ -94,10 +101,28 @@ public class SimClientActivity extends Activity {
     private Runnable pendingSearch;
     private final CompletionEchoGuard completionEcho = new CompletionEchoGuard();
 
+    private String ui(int resourceId) {
+        return getResources().getString(resourceId);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void applyUiLocale() {
+        String language = getPreferences(MODE_PRIVATE).getString("language", "en");
+        java.util.Locale locale = "zh".equalsIgnoreCase(language)
+                ? java.util.Locale.SIMPLIFIED_CHINESE
+                : "fr".equalsIgnoreCase(language) ? java.util.Locale.FRENCH : java.util.Locale.ENGLISH;
+        java.util.Locale.setDefault(locale);
+        android.content.res.Configuration configuration = new android.content.res.Configuration(
+                getResources().getConfiguration());
+        configuration.setLocale(locale);
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+    }
+
     // This Activity deliberately uses the platform Material theme, not AppCompat.
     @android.annotation.SuppressLint("AppCompatCustomView")
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        applyUiLocale();
         setTitle("SimClient");
         setFinishOnTouchOutside(false);
         // Recovery mode: keep the known POS address, but never download over the
@@ -116,6 +141,32 @@ public class SimClientActivity extends Activity {
         // upper edge at the content boundary.
         root.setClipChildren(false);
         root.setClipToPadding(false);
+        // Tapping an unused area of the Product page should finish editing the
+        // current TextField just like moving to another field.  This lets the
+        // existing focus-loss auto-save run and hides the keyboard without
+        // forcing the user to enter a different field.
+        root.setFocusableInTouchMode(true);
+        root.setOnClickListener(v -> finishProductFieldEditing());
+        root.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN)
+                finishProductFieldEditing();
+            return false;
+        });
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            root.setOnApplyWindowInsetsListener((view, insets) -> {
+                boolean visible = insets.isVisible(android.view.WindowInsets.Type.ime());
+                boolean wasVisible = imeVisible;
+                imeVisible = visible;
+                if (wasVisible && !visible) {
+                    View focused = getCurrentFocus();
+                    if (focused instanceof EditText) {
+                        focused.clearFocus();
+                        focused.post(() -> finishProductFieldEditing());
+                    }
+                }
+                return insets;
+            });
+        }
         TextView title = new TextView(this);
         android.text.SpannableString brand = new android.text.SpannableString("SimClient");
         brand.setSpan(new android.text.style.ForegroundColorSpan(0xff64e5ce), 0, 3, 0);
@@ -139,9 +190,9 @@ public class SimClientActivity extends Activity {
         tagline.setSingleLine(true);
         tagline.setEllipsize(android.text.TextUtils.TruncateAt.END);
         brandBlock.addView(tagline, full());
-        connection = toolbarIcon(com.just.print.R.drawable.ic_sim_settings, "Settings");
+        connection = toolbarIcon(com.just.print.R.drawable.ic_sim_settings, ui(com.just.print.R.string.ui_settings));
         connection.setOnClickListener(v -> configure());
-        refresh = toolbarIcon(com.just.print.R.drawable.ic_sim_refresh, "Refresh");
+        refresh = toolbarIcon(com.just.print.R.drawable.ic_sim_refresh, ui(com.just.print.R.string.ui_refresh));
         refresh.setOnClickListener(v -> refreshCatalog());
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -155,7 +206,7 @@ public class SimClientActivity extends Activity {
                 new int[]{0xff112d46, 0xff17465a}));
         toolbar.setElevation(dp(4));
         moving = new Button(this);
-        moving.setText("Stock Moving");
+        moving.setText(ui(com.just.print.R.string.ui_stock_moving));
         moving.setAllCaps(false);
         moving.setOnClickListener(v -> openMovingPlans());
         refreshProgress = column();
@@ -168,7 +219,7 @@ public class SimClientActivity extends Activity {
         refreshProgress.setVisibility(View.GONE);
 
         TextView categoryLabel = new TextView(this);
-        categoryLabel.setText("Category");
+        categoryLabel.setText(ui(com.just.print.R.string.ui_category));
         LinearLayout categoryBar = new LinearLayout(this);
         categoryBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
         categoryBar.addView(categoryLabel, new LinearLayout.LayoutParams(dp(80), dp(48)));
@@ -214,7 +265,7 @@ public class SimClientActivity extends Activity {
                 try { super.replaceText(text); } finally { settingText = false; }
             }
         };
-        product.setHint("Enter product name");
+        product.setHint(ui(com.just.print.R.string.ui_enter_product_name));
         product.setSingleLine(true);
         product.setSelectAllOnFocus(true);
         product.setThreshold(1);
@@ -235,7 +286,6 @@ public class SimClientActivity extends Activity {
                 if (editingProductName) {
                     editingProductName = false;
                     editProductName.setSelected(false);
-                    product.setEnabled(false);
                     autoSaveIfChanged(product, "mnemonic", false, true);
                 }
             }
@@ -244,7 +294,7 @@ public class SimClientActivity extends Activity {
         product.setTextSize(20);
         product.setMinHeight(dp(64));
         TextView productLabel = new TextView(this);
-        productLabel.setText("Product name");
+        productLabel.setText(ui(com.just.print.R.string.ui_product_name));
         productLabel.setIncludeFontPadding(false);
         productLabel.setPadding(0, 0, 0, 0);
         LinearLayout productRow = new LinearLayout(this);
@@ -260,6 +310,14 @@ public class SimClientActivity extends Activity {
         editProductName.setEnabled(false);
         editProductName.setOnClickListener(v -> {
             if (selected == null || saving) return;
+            if (editingProductName) {
+                editingProductName = false;
+                editProductName.setSelected(false);
+                autoSaveIfChanged(product, "mnemonic", false, true);
+                product.clearFocus();
+                hideKeyboard(product);
+                return;
+            }
             editingProductName = true;
             editProductName.setSelected(true);
             product.setEnabled(true);
@@ -295,7 +353,7 @@ public class SimClientActivity extends Activity {
         badgeParams.leftMargin = dp(3);
         cartHolder.addView(cartBadge, badgeParams);
         TextView addToCart = new TextView(this);
-        addToCart.setText("Add to cart");
+        addToCart.setText(ui(com.just.print.R.string.ui_add_to_cart));
         addToCart.setTextSize(12);
         addToCart.setTextColor(0xff087f8c);
         addToCart.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -313,7 +371,7 @@ public class SimClientActivity extends Activity {
         totalNumber.setTypeface(null, android.graphics.Typeface.NORMAL);
         totalNumber.setIncludeFontPadding(false);
         totalNumber.setPadding(0, 0, dp(8), 0);
-        totalPrice = summaryText("Total: $0.00", "Total price of products");
+        totalPrice = summaryText(ui(com.just.print.R.string.ui_total) + ": $0.00", "Total price of products");
         totalPrice.setTextSize(12);
         totalPrice.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
         totalPrice.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -332,19 +390,20 @@ public class SimClientActivity extends Activity {
         root.addView(productRow, full());
         LinearLayout stocks = new LinearLayout(this);
         for (int i = 0; i < 3; i++) {
-            LinearLayout field = numberField(i, "Stock" + (i + 1));
+            String[] stockLabels = {ui(com.just.print.R.string.ui_for_sale), ui(com.just.print.R.string.ui_buffer), ui(com.just.print.R.string.ui_warehouse)};
+            LinearLayout field = numberField(i, stockLabels[i]);
             stocks.addView(field, new LinearLayout.LayoutParams(0, -2, 1));
         }
         root.addView(stocks, full());
         LinearLayout details = new LinearLayout(this);
-        details.addView(numberField(3, "Monque"), new LinearLayout.LayoutParams(0, -2, 1));
-        details.addView(priceField(0, "Cost"), new LinearLayout.LayoutParams(0, -2, 1));
-        details.addView(priceField(1, "Price"), new LinearLayout.LayoutParams(0, -2, 1));
+        details.addView(numberField(3, ui(com.just.print.R.string.ui_shortage)), new LinearLayout.LayoutParams(0, -2, 1));
+        details.addView(priceField(0, ui(com.just.print.R.string.ui_cost)), new LinearLayout.LayoutParams(0, -2, 1));
+        details.addView(priceField(1, ui(com.just.print.R.string.ui_price)), new LinearLayout.LayoutParams(0, -2, 1));
         root.addView(details, full());
         LinearLayout salesAndTax = new LinearLayout(this);
         salesAndTax.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        weeklySales = summaryText("Weekly sales: —", "Weekly sales, read only");
-        priceWithTax = summaryText("+ Tax: —", "Price with Tax, read only");
+        weeklySales = summaryText(ui(com.just.print.R.string.ui_weekly_sales) + ": —", "Weekly sales, read only");
+        priceWithTax = summaryText(ui(com.just.print.R.string.ui_add_tax) + ": —", "Price with Tax, read only");
         salesAndTax.addView(weeklySales, new LinearLayout.LayoutParams(0, -2, 1));
         salesAndTax.addView(priceWithTax, new LinearLayout.LayoutParams(0, -2, 1));
         root.addView(salesAndTax, full());
@@ -405,10 +464,26 @@ public class SimClientActivity extends Activity {
         tabs.setPadding(0, 0, 0, dp(8));
         tabs.setBackgroundColor(0xffffffff);
         tabs.setElevation(dp(8));
-        editingTab = new Button(this); editingTab.setText("Product");
+        editingTab = new Button(this); editingTab.setText(ui(com.just.print.R.string.ui_product));
         editingTab.setAllCaps(false); editingTab.setOnClickListener(v -> showEditingPage(null));
-        stocking = new Button(this); stocking.setText("Stocking"); stocking.setAllCaps(false);
-        stocking.setOnClickListener(v -> showStockingPage());
+        stocking = new Button(this); stocking.setText(ui(com.just.print.R.string.ui_stocking)); stocking.setAllCaps(false);
+        stocking.setOnClickListener(v -> {
+            if (!cart.isEmpty()) {
+                try {
+                    JSONArray cartRows = new JSONArray();
+                    for (CartLine line : cart.values()) {
+                        cartRows.put(new JSONObject().put("productId", line.productId)
+                                .put("name", line.name).put("category", line.category)
+                                .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents));
+                    }
+                    if (stockingPlan != null) stockingPlan.importCart(cartRows);
+                    else pendingStockingCart = cartRows;
+                    cart.clear();
+                    updateCatalogTotals();
+                } catch (Exception ex) { message("Could not create stocking plan: " + ex.getMessage(), true); return; }
+            }
+            showStockingPage();
+        });
         idTab = new ImageButton(this);
         idTab.setImageResource(com.just.print.R.drawable.ic_sim_camera);
         idTab.setScaleType(ImageView.ScaleType.CENTER);
@@ -469,9 +544,13 @@ public class SimClientActivity extends Activity {
         });
         message(server.isEmpty() ? "Open Settings to enter the POS address." : "Type a name, then select a product from the list.", false);
         product.requestFocus();
-        // Do not auto-refresh here.  Refreshing would replace the phone's
-        // surviving catalog with the damaged/empty server PRODUCT table.
-        loadCatalog(false);
+        // Load the local cache first so the product page remains usable offline,
+        // then automatically synchronize when a usable server configuration is
+        // already present. Website servers additionally require activation.
+        String configuredPersonId = getPreferences(MODE_PRIVATE).getString("personId", "").trim();
+        boolean autoSyncOnStartup = !server.isEmpty()
+                && (!isWebsiteDomain(server) || !configuredPersonId.isEmpty());
+        loadCatalog(autoSyncOnStartup);
         if (state != null && state.getBoolean("showingId")) showIdPage(state);
         if (getPreferences(MODE_PRIVATE).getString("personId", "").trim().isEmpty()) {
             main.post(this::configure);
@@ -625,9 +704,22 @@ public class SimClientActivity extends Activity {
     }
 
     private void persistCatalog(String base, ProductCatalog snapshot) throws Exception {
-        if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit().putString(base, snapshot.serialize())
+        JSONArray rows = new JSONArray(snapshot.serialize());
+        for (int i = 0; i < rows.length(); i++) {
+            JSONObject row = rows.getJSONObject(i);
+            String modified = row.optString("last_modified", "").trim();
+            if (!modified.isEmpty()) row.put("last_modified", canonicalSyncTimestamp(modified));
+        }
+        if (!getSharedPreferences("product_catalogs", MODE_PRIVATE).edit().putString(base, rows.toString())
                 .remove("pending:" + base).commit())
             throw new IOException("Local storage could not be updated");
+    }
+
+    private static String canonicalSyncTimestamp(String value) {
+        if (value == null) return "";
+        String text = value.trim();
+        return text.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z")
+                ? text.substring(0, 19) + "Z" : text;
     }
 
     private static String productKey(JSONObject row) {
@@ -656,7 +748,18 @@ public class SimClientActivity extends Activity {
             putProductWithoutCollision(merged, key, row);
         }
         JSONArray result = new JSONArray();
-        for (JSONObject row : merged.values()) result.put(row);
+        // A few POS/database snapshots contain the same product ID under
+        // different barcode rows. ProductCatalog correctly rejects that
+        // corruption, but one bad duplicate must not make the whole refresh
+        // fail. Keep the last server-authoritative row for each numeric ID.
+        java.util.LinkedHashMap<String, JSONObject> uniqueById = new java.util.LinkedHashMap<>();
+        for (JSONObject row : merged.values()) {
+            String identity = row.optString("local_id", "").trim();
+            if (identity.isEmpty()) identity = row.optString("id", "").trim();
+            String key = identity.matches("-?[0-9]+") ? "id:" + identity : "row:" + uniqueById.size();
+            uniqueById.put(key, row);
+        }
+        for (JSONObject row : uniqueById.values()) result.put(row);
         return result;
     }
 
@@ -735,6 +838,8 @@ public class SimClientActivity extends Activity {
             message("Refresh is blocked because the saved product data could not be verified. Do not overwrite it.", true);
             return;
         }
+        final int selectedIdBeforeRefresh = selected == null ? -1 : selected.optInt("id", -1);
+        final String selectedCodeBeforeRefresh = selected == null ? "" : selected.optString("code", "").trim();
         invalidateSelection();
         busy(true);
         refreshProgress.setVisibility(View.VISIBLE);
@@ -776,7 +881,7 @@ public class SimClientActivity extends Activity {
                         upload.put("local_id", local.getLong("id"));
                     upload.put("code", local.optString("code", ""));
                     upload.put("expected_last_modified", local.optString("last_modified", ""));
-                    upload.put("data", local);
+                    upload.put("data", ShortageSync.forWebsite(local));
                     uploadedRows.put(upload);
                 }
                 final int markedCount = localMarkedCount;
@@ -837,6 +942,7 @@ public class SimClientActivity extends Activity {
                         + "Local modified range: " + (firstLocalModified.isEmpty() ? "<none>" : firstLocalModified)
                         + " → " + (lastLocalModified.isEmpty() ? "<none>" : lastLocalModified) + "\n"
                         + "Local records sent: " + uploadedRows.length() + "\n"
+                        + "Products sent:\n" + summarizeUploadedProducts(uploadedRows)
                         + "Server accepted: " + uploadedCount + "\n"
                         + "Server conflicts (server won): " + conflictCount + "\n"
                         + "Server upload failures: " + failedCount + "\n"
@@ -857,7 +963,11 @@ public class SimClientActivity extends Activity {
             String text = feedback;
             main.post(() -> {
                 if (closed) return;
-                if (result != null) { catalog = result; updateCatalogTotals(); updateCategories(false); }
+                if (result != null) {
+                    catalog = result; updateCatalogTotals(); updateCategories(false);
+                    JSONObject refreshed = findCatalogRow(result, selectedIdBeforeRefresh, selectedCodeBeforeRefresh);
+                    if (refreshed != null) fillProduct(refreshed);
+                }
                 refreshProgress.setVisibility(View.GONE);
                 busy(false);
                 if (showingMoving && movingPlan != null) {
@@ -876,8 +986,8 @@ public class SimClientActivity extends Activity {
             showLocalProductPhoto(row.optInt("id", -1));
             editingCategory = false;
             if (editCategory != null) { editCategory.setSelected(false); editCategory.setEnabled(true); }
-            weeklySales.setText("Weekly sales: " + weeklySales(row));
-            priceWithTax.setText("+ Tax: " + formatMoneyCents(finalPriceCents(row)));
+            weeklySales.setText(ui(com.just.print.R.string.ui_weekly_sales) + ": " + weeklySales(row));
+            priceWithTax.setText(ui(com.just.print.R.string.ui_add_tax) + ": " + formatMoneyCents(finalPriceCents(row)));
             editingProductName = false;
             if (editProductName != null) { editProductName.setSelected(false); editProductName.setEnabled(true); }
             editedFromProductId = null;
@@ -893,6 +1003,7 @@ public class SimClientActivity extends Activity {
                 prices[i].setText(amount.equals("—") ? "" : amount);
                 prices[i].setHint(row.has(priceKeys[i]) ? "Not set" : "Refresh");
             }
+            updatePriceLabel();
             enableValues(true);
             message("Changes save automatically when you leave a field.", false);
         } catch (Exception ex) { settingText = false; invalidateSelection(); message(ex.getMessage(), false); }
@@ -955,9 +1066,20 @@ public class SimClientActivity extends Activity {
     }
 
     private static String localModifiedNow() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.ROOT);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.ROOT);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.format(new Date());
+    }
+
+    private String saleModifiedAfter(String base, String previous) {
+        java.time.Instant now = java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+        for (String candidate : new String[]{previous, readSyncCursor(base)}) {
+            try {
+                java.time.Instant old = java.time.Instant.parse(candidate);
+                if (!now.isAfter(old)) now = old.plusSeconds(1);
+            } catch (Exception ignored) { }
+        }
+        return now.toString();
     }
 
     /** Only UTC ISO cursors are safe to send to the server. Legacy cursors are discarded. */
@@ -1057,6 +1179,28 @@ public class SimClientActivity extends Activity {
         dialog.show();
     }
 
+    private static String summarizeUploadedProducts(JSONArray rows) {
+        if (rows == null || rows.length() == 0) return "  <none>\n";
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < rows.length(); i++) {
+            JSONObject upload = rows.optJSONObject(i);
+            JSONObject data = upload == null ? null : upload.optJSONObject("data");
+            if (upload == null) continue;
+            String code = upload.optString("code", data == null ? "" : data.optString("code", ""));
+            String localId = upload.has("local_id") ? upload.optString("local_id", "")
+                    : data == null ? "" : data.optString("local_id", data.optString("id", ""));
+            String name = data == null ? "" : data.optString("mnemonic", data.optString("subject", ""));
+            String modified = data == null ? "" : data.optString("last_modified", "");
+            out.append("  ").append(i + 1).append(": barcode=").append(code.isEmpty() ? "<empty>" : code)
+                    .append(", local_id=").append(localId.isEmpty() ? "<none>" : localId)
+                    .append(", name=").append(name.isEmpty() ? "<empty>" : name)
+                    .append(", last_modified=").append(modified.isEmpty() ? "<empty>" : modified)
+                    .append("\n");
+        }
+        return out.toString();
+    }
+
+
     /**
      * Keep the local catalog available for upload testing when the read endpoint
      * returns a non-JSON page or is otherwise unavailable. The normal comparison
@@ -1127,7 +1271,7 @@ public class SimClientActivity extends Activity {
                     if (item.local.has("local_id") && !item.local.isNull("local_id") && item.local.optLong("local_id") > 0)
                         row.put("local_id", item.local.optLong("local_id"));
                     row.put("expected_last_modified", item.server == null ? "" : item.server.optString("last_modified", ""));
-                    row.put("data", item.local);
+                    row.put("data", ShortageSync.forWebsite(item.local));
                     rows.put(row);
                 }
                 String syncCursor = readSyncCursor(base);
@@ -1154,6 +1298,18 @@ public class SimClientActivity extends Activity {
                 main.post(() -> message("Upload failed. Local product data was retained. " + ex.getMessage(), true));
             }
         });
+    }
+
+    private static JSONObject findCatalogRow(ProductCatalog source, int id, String code) {
+        if (source == null) return null;
+        try {
+            for (ProductCatalog.Product item : source.all()) {
+                JSONObject row = item.row();
+                if (id > 0 && row.optInt("id", row.optInt("local_id", -1)) == id) return row;
+                if (!code.isEmpty() && code.equals(row.optString("code", "").trim())) return row;
+            }
+        } catch (Exception ignored) { }
+        return null;
     }
 
     private void uploadAllLocalProducts(String base, JSONObject serverResponse) {
@@ -1186,7 +1342,7 @@ public class SimClientActivity extends Activity {
                     long id = local.optLong("local_id", 0);
                     JSONObject upload = new JSONObject()
                             .put("expected_last_modified", id > 0 && expected.containsKey(id) ? expected.get(id) : "")
-                            .put("data", local);
+                            .put("data", ShortageSync.forWebsite(local));
                     if (id > 0) upload.put("local_id", id);
                     rows.put(upload);
                 }
@@ -1257,7 +1413,7 @@ public class SimClientActivity extends Activity {
             cents += (long) line.unitPriceCents * line.quantity;
         }
         totalNumber.setText("QTY: " + count);
-        totalPrice.setText("Total: " + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)));
+        totalPrice.setText(ui(com.just.print.R.string.ui_total) + ": " + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)));
         if (cartBadge != null) {
             cartBadge.setText(String.valueOf(count));
             cartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
@@ -1272,9 +1428,13 @@ public class SimClientActivity extends Activity {
         int id = selected.optInt("id", -1);
         if (id <= 0) return;
         CartLine line = cart.get(id);
-        if (line == null) cart.put(id, new CartLine(id, selected.optString("mnemonic", "Product"),
-                selected.optString("category", ""), finalPriceCents(selected)));
-        else line.quantity++;
+        boolean wasInCart = line != null;
+        if (line == null) cart.put(id, new CartLine(id, selected.optString("code", selected.optString("barcode", "")),
+                selected.optString("mnemonic", "Product"), selected.optString("category", ""),
+                finalPriceCents(selected), selected.has("cost") ? selected.optInt("cost", 0) : finalPriceCents(selected)));
+        line = cart.get(id);
+        if (cartAsStockingPlan) line.unitPriceCents = line.purchasePriceCents;
+        else if (wasInCart) line.quantity++;
         cartButton.animate().cancel();
         cartButton.animate().scaleX(1.25f).scaleY(1.25f).setDuration(90)
                 .withEndAction(() -> cartButton.animate().scaleX(1f).scaleY(1f).setDuration(120).start()).start();
@@ -1287,6 +1447,7 @@ public class SimClientActivity extends Activity {
 
     private void showCartDialog() {
         LinearLayout content = cartContent;
+        ArrayList<TextView> cartLineLabels = new ArrayList<>();
         if (content == null) {
             content = column();
             cartContent = content;
@@ -1297,7 +1458,7 @@ public class SimClientActivity extends Activity {
         content.setMinimumHeight(dp(220));
         if (cart.isEmpty()) {
             TextView empty = new TextView(this);
-            empty.setText("Cart is empty");
+            empty.setText(ui(com.just.print.R.string.ui_cart_empty));
             empty.setGravity(android.view.Gravity.CENTER);
             empty.setMinHeight(dp(130));
             content.addView(empty, full());
@@ -1305,35 +1466,71 @@ public class SimClientActivity extends Activity {
             for (java.util.Map.Entry<Integer, CartLine> entry : cart.entrySet()) {
                 int id = entry.getKey(); CartLine line = entry.getValue();
                 LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.VERTICAL);
                 row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                row.setPadding(0, 0, 0, dp(18));
                 TextView label = new TextView(this);
-                label.setText(line.name + "  x" + line.quantity + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
+                label.setText(line.name + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
                 label.setTextSize(15);
-                row.addView(label, new LinearLayout.LayoutParams(0, dp(48), 1));
+                label.setMaxLines(2);
+                cartLineLabels.add(label);
+                row.addView(label, new LinearLayout.LayoutParams(-1, -2));
                 LinearLayout quantityControls = new LinearLayout(this);
                 quantityControls.setGravity(android.view.Gravity.CENTER_VERTICAL);
                 Button minus = new Button(this);
-                minus.setText("−"); minus.setTextSize(18); minus.setAllCaps(false);
+                minus.setText("−"); minus.setTextSize(14); minus.setAllCaps(false);
+                minus.setMinWidth(0); minus.setMinHeight(0);
+                minus.setPadding(0, 0, 0, 0);
+                minus.setTextColor(0xff087f8c);
+                minus.setBackground(roundBackground(0xffdff4f2, 0xff087f8c, 18));
                 minus.setOnClickListener(v -> {
-                    if (--line.quantity <= 0) cart.remove(id);
+                    line.quantity = Math.max(0, line.quantity - 1);
                     updateCatalogTotals(); showCartDialog();
                 });
-                quantityControls.addView(minus, new LinearLayout.LayoutParams(dp(44), dp(48)));
+                LinearLayout.LayoutParams minusParams = new LinearLayout.LayoutParams(dp(22), dp(24));
+                minusParams.rightMargin = dp(14);
+                quantityControls.addView(minus, minusParams);
+                EditText quantityInput = new EditText(this);
+                quantityInput.setSingleLine(true);
+                quantityInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL
+                        | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                quantityInput.setKeyListener(DigitsKeyListener.getInstance("0123456789.,+-*/()"));
+                quantityInput.setText(String.valueOf(line.quantity));
+                quantityInput.setSelectAllOnFocus(true);
+                quantityInput.setGravity(android.view.Gravity.CENTER);
+                quantityInput.setOnClickListener(v -> quantityInput.post(() -> {
+                    if (quantityInput.hasFocus()) quantityInput.selectAll();
+                }));
+                quantityInput.setOnFocusChangeListener((v, focused) -> {
+                    if (!focused) {
+                        try { line.quantity = quantityExpression(quantityInput.getText().toString().trim()); }
+                        catch (Exception ignored) { quantityInput.setText(String.valueOf(line.quantity)); }
+                        quantityInput.setText(String.valueOf(line.quantity));
+                        label.setText(line.name + "  " + formatMoneyCents(line.unitPriceCents * line.quantity));
+                        updateCatalogTotals();
+                    }
+                });
+                quantityControls.addView(quantityInput, new LinearLayout.LayoutParams(dp(52), dp(48)));
                 Button plus = new Button(this);
-                plus.setText("+"); plus.setTextSize(18); plus.setAllCaps(false);
+                plus.setText("+"); plus.setTextSize(14); plus.setAllCaps(false);
+                plus.setMinWidth(0); plus.setMinHeight(0);
+                plus.setPadding(0, 0, 0, 0);
+                plus.setTextColor(0xff087f8c);
+                plus.setBackground(roundBackground(0xffdff4f2, 0xff087f8c, 18));
                 plus.setOnClickListener(v -> { line.quantity++; updateCatalogTotals(); showCartDialog(); });
-                quantityControls.addView(plus, new LinearLayout.LayoutParams(dp(44), dp(48)));
-                LinearLayout.LayoutParams quantityParams = new LinearLayout.LayoutParams(dp(88), dp(48));
+                LinearLayout.LayoutParams plusParams = new LinearLayout.LayoutParams(dp(22), dp(24));
+                plusParams.leftMargin = dp(14);
+                quantityControls.addView(plus, plusParams);
+                LinearLayout.LayoutParams quantityParams = new LinearLayout.LayoutParams(dp(152), dp(48));
                 quantityParams.leftMargin = dp(12);
                 row.addView(quantityControls, quantityParams);
                 content.addView(row, full());
             }
         }
-        content.addView(new Space(this), new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout actions = new LinearLayout(this);
         actions.setGravity(android.view.Gravity.CENTER);
         Button clearCart = new Button(this);
-        clearCart.setText("Clear Cart");
+        clearCart.setText(ui(com.just.print.R.string.ui_clear_cart));
         clearCart.setAllCaps(false);
         stylePrimaryButton(this, clearCart);
         clearCart.setTextColor(0xffffffff);
@@ -1344,14 +1541,44 @@ public class SimClientActivity extends Activity {
             showEditingPage(null);
             message("Cart cleared.", false);
         });
-        actions.addView(clearCart, new LinearLayout.LayoutParams(dp(150), dp(52)));
+        LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(dp(120), dp(52));
+        clearParams.rightMargin = dp(5);
+        actions.addView(clearCart, clearParams);
         Button submit = new Button(this);
-        submit.setText("Submit");
+        submit.setText(ui(com.just.print.R.string.ui_submit));
         stylePrimaryButton(this, submit);
         submit.setTextColor(0xffffffff);
-        submit.setOnClickListener(v -> submitCart());
-        actions.addView(submit, new LinearLayout.LayoutParams(dp(150), dp(52)));
-        content.addView(actions, full());
+        submit.setOnClickListener(v -> { if (cartAsStockingPlan) createStockingPlanFromCart(); else submitCart(); });
+        LinearLayout.LayoutParams submitParams = new LinearLayout.LayoutParams(dp(120), dp(52));
+        submitParams.leftMargin = dp(5);
+        actions.addView(submit, submitParams);
+        CheckBox stockingOrder = new CheckBox(this);
+        stockingOrder.setText(ui(com.just.print.R.string.ui_submit_as_stocking_plan));
+        stockingOrder.setChecked(cartAsStockingPlan);
+        stockingOrder.setOnCheckedChangeListener((button, checked) -> {
+            cartAsStockingPlan = checked;
+            int labelIndex = 0;
+            for (CartLine item : cart.values()) {
+                item.unitPriceCents = checked ? item.purchasePriceCents : item.salePriceCents;
+                if (labelIndex < cartLineLabels.size())
+                    cartLineLabels.get(labelIndex).setText(item.name + "  " + formatMoneyCents(item.unitPriceCents * item.quantity));
+                labelIndex++;
+            }
+            updateCatalogTotals();
+        });
+        LinearLayout footer = column();
+        footer.setPadding(dp(20), dp(8), dp(20), dp(12));
+        footer.addView(stockingOrder, full());
+        footer.addView(actions, full());
+        /* The submit button performs the selected action. */
+        Button createStocking = null;
+        /*
+        createStocking.setText(ui(com.just.print.R.string.ui_create_stocking_plan));
+        createStocking.setAllCaps(false);
+        stylePrimaryButton(this, createStocking);
+        createStocking.setTextColor(0xffffffff);
+        createStocking.setOnClickListener(v -> createStockingPlanFromCart());
+        content.addView(createStocking, full()); */
         if (cartDialog != null && cartDialog.isShowing()) {
             return;
         }
@@ -1362,7 +1589,7 @@ public class SimClientActivity extends Activity {
         cartTitle.setGravity(android.view.Gravity.CENTER_VERTICAL);
         cartTitle.setPadding(dp(20), dp(8), dp(8), dp(4));
         TextView cartTitleText = new TextView(this);
-        cartTitleText.setText("Selected Products");
+        cartTitleText.setText(ui(com.just.print.R.string.ui_selected_products));
         cartTitleText.setTextSize(20);
         cartTitleText.setTextColor(0xff16344b);
         cartTitle.addView(cartTitleText, new LinearLayout.LayoutParams(0, dp(48), 1));
@@ -1377,12 +1604,40 @@ public class SimClientActivity extends Activity {
             showEditingPage(null);
         });
         cartTitle.addView(closeCart, new LinearLayout.LayoutParams(dp(52), dp(48)));
-        cartDialog = new AlertDialog.Builder(this).setCustomTitle(cartTitle).setView(content).create();
+        LinearLayout dialogBody = column();
+        ScrollView cartScroll = new ScrollView(this);
+        cartScroll.setVerticalScrollBarEnabled(true);
+        cartScroll.setScrollbarFadingEnabled(false);
+        cartScroll.setFillViewport(false);
+        cartScroll.addView(content, new ScrollView.LayoutParams(-1, -2));
+        dialogBody.addView(cartScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        dialogBody.addView(footer, new LinearLayout.LayoutParams(-1, -2));
+        cartDialog = new AlertDialog.Builder(this).setCustomTitle(cartTitle).setView(dialogBody).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
         if (cartDialog.getWindow() != null) {
-            cartDialog.getWindow().setLayout(Math.min(getResources().getDisplayMetrics().widthPixels - dp(32), dp(460)), -2);
+            int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels * 0.82f);
+            cartDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            cartDialog.getWindow().setLayout(Math.min(getResources().getDisplayMetrics().widthPixels - dp(32), dp(460)), maxHeight);
         }
+    }
+    private void createStockingPlanFromCart() {
+        if (cart.isEmpty()) return;
+        try {
+            JSONArray cartRows = new JSONArray();
+            for (CartLine line : cart.values()) cartRows.put(new JSONObject().put("productId", line.productId)
+                    .put("name", line.name).put("category", line.category)
+                    .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents));
+            pendingStockingCart = cartRows;
+            cart.clear(); updateCatalogTotals();
+            if (cartDialog != null) cartDialog.dismiss();
+            showStockingPage();
+        } catch (Exception ex) { message("Could not create stocking plan: " + ex.getMessage(), true); }
+    }
+    private int quantityExpression(String raw) {
+        int cents = ProductCatalog.expressionCents(raw);
+        if (cents % 100 != 0) throw new IllegalArgumentException("Quantity must be a whole number");
+        return cents / 100;
     }
 
     private void submitCart() {
@@ -1414,7 +1669,8 @@ public class SimClientActivity extends Activity {
             JSONArray items = new JSONArray();
             for (CartLine line : cart.values()) {
                 if (line.quantity <= 0) continue;
-                items.put(new JSONObject().put("productId", line.productId)
+                if (line.productCode.isEmpty()) throw new IllegalArgumentException("Selected product has no barcode/productCode");
+                items.put(new JSONObject().put("productCode", line.productCode)
                         .put("name", line.name).put("category", line.category)
                         .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents)
                         .put("totalCents", line.unitPriceCents * line.quantity)
@@ -1426,20 +1682,39 @@ public class SimClientActivity extends Activity {
             return;
         }
         if (cartDialog != null) cartDialog.dismiss();
-        final boolean websiteOrder = isWebsiteDomain(server);
+        final String saleBase = server;
+        final boolean websiteOrder = isWebsiteDomain(saleBase);
         message(websiteOrder ? "Submitting cart to website…" : "Submitting cart to iK POS…", false);
         io.execute(() -> {
             try {
                 if (websiteOrder) {
                     payload.put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""));
-                    requestSync(server, "/products/mobileSync/sales", payload, null);
+                    JSONObject saleResponse = requestSync(saleBase, "/products/mobileSync/sales", payload, null);
+                    if (!saleResponse.optBoolean("ok", false)) throw new IOException("Website did not acknowledge the sale");
                 }
-                else request(server, "/AikaPos/sales", payload);
+                else request(saleBase, "/AikaPos/sales", payload);
                 main.post(() -> {
                     cart.clear();
                     updateCatalogTotals();
-                    message("Cart submitted successfully to " + (websiteOrder ? "website" : "iK POS") + ": " + submittedQuantity
-                            + " item(s), total " + formatMoneyCents(submittedCents) + ". Cart cleared.", false);
+                    if (!saleBase.equals(server)) {
+                        message("Sale saved and cart cleared, but the server setting changed before shortage could be updated. Reconcile the sale on "
+                                + saleBase + ".", true);
+                        return;
+                    }
+                    try {
+                        JSONArray shortageUploads = recordSubmittedSale(saleBase, payload.getJSONArray("items"));
+                        String saleMessage = "Cart submitted successfully to " + (websiteOrder ? "website" : "iK POS")
+                                + ": " + submittedQuantity + " item(s), total " + formatMoneyCents(submittedCents)
+                                + ". Cart cleared; local shortage updated.";
+                        message(saleMessage, false);
+                        if (websiteOrder && shortageUploads.length() > 0)
+                            uploadSaleShortages(saleBase, shortageUploads, saleMessage);
+                        else if (shortageUploads.length() > 0)
+                            uploadPosSaleShortages(saleBase, shortageUploads, payload.getJSONArray("items"), saleMessage);
+                    } catch (Exception ex) {
+                        message("Sale saved and cart cleared, but local shortage could not be updated: "
+                                + detail(ex) + ". Refresh/reconcile the affected products before another sale.", true);
+                    }
                 });
             } catch (Exception ex) {
                 main.post(() -> message("Cart submission failed: " + detail(ex) + ". Cart remains.", true));
@@ -1447,20 +1722,134 @@ public class SimClientActivity extends Activity {
         });
     }
 
+    /** Apply only an acknowledged sale, preserving each phone row's sign. */
+    private JSONArray recordSubmittedSale(String base, JSONArray items) throws Exception {
+        if (catalog == null) throw new IOException("Local product catalog is unavailable");
+        ProductCatalog changed = catalog;
+        JSONArray uploads = new JSONArray();
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject item = items.getJSONObject(i);
+            String code = item.getString("productCode").trim();
+            JSONObject previous = findCatalogRow(changed, -1, code);
+            if (previous == null) throw new IOException("Product not found in phone catalog: " + code);
+            JSONObject row = new JSONObject(previous.toString());
+            row.put("monque", ShortageSync.afterSale(row.getInt("monque"), item.getInt("quantity"),
+                    isWebsiteDomain(base)));
+            if (row.has("stock1_shortage")) row.put("stock1_shortage", row.getInt("monque"));
+            row.put("last_modified", saleModifiedAfter(base, previous.optString("last_modified", "")));
+            changed = changed.updated(row);
+            JSONObject upload = new JSONObject().put("code", code)
+                    .put("expected_last_modified", previous.optString("last_modified", ""))
+                    .put("data", ShortageSync.forWebsite(row));
+            if (row.optLong("local_id", 0) > 0) upload.put("local_id", row.getLong("local_id"));
+            uploads.put(upload);
+        }
+        persistCatalog(base, changed);
+        catalog = changed;
+        updateCatalogTotals();
+        if (selected != null) {
+            JSONObject current = findCatalogRow(changed, selected.optInt("id", -1), selected.optString("code", ""));
+            if (current != null) fillProduct(current);
+        }
+        if (movingPlan != null) movingPlan.invalidateForInventoryChange();
+        return uploads;
+    }
+
+    private void uploadSaleShortages(String base, JSONArray uploads, String saleMessage) {
+        io.execute(() -> {
+            try {
+                JSONObject response = requestSync(base, "/products/mobileSync/products",
+                        new JSONObject().put("personId", getPreferences(MODE_PRIVATE).getString("personId", ""))
+                                .put("syncTime", readSyncCursor(base)).put("products", uploads), null);
+                JSONArray accepted = response.optJSONArray("uploaded");
+                JSONArray failed = response.optJSONArray("failed");
+                JSONArray conflicts = response.optJSONArray("conflicts");
+                if (!response.optBoolean("ok", false) || accepted == null || accepted.length() != uploads.length()
+                        || (failed != null && failed.length() > 0) || (conflicts != null && conflicts.length() > 0))
+                    throw new IOException("Website rejected or conflicted with the shortage update");
+                main.post(() -> message(saleMessage + " Website shortage updated.", false));
+            } catch (Exception ex) {
+                main.post(() -> message("Sale saved and local shortage updated, but website product shortage is NOT confirmed: "
+                        + detail(ex) + ". Keep the phone data and reconcile before refreshing.", true));
+            }
+        });
+    }
+
+    private void uploadPosSaleShortages(String base, JSONArray uploads, JSONArray items, String saleMessage) {
+        io.execute(() -> {
+            try {
+                JSONArray verifiedRows = new JSONArray();
+                for (int i = 0; i < uploads.length(); i++) {
+                    int productId = uploads.getJSONObject(i).getJSONObject("data").getInt("id");
+                    int quantity = items.getJSONObject(i).getInt("quantity");
+                    JSONObject before = request(base, "/AikaPos/stockProducts?id=" + productId, null)
+                            .getJSONObject("product");
+                    JSONObject expected = new JSONObject(), values = new JSONObject();
+                    for (String key : keys) {
+                        expected.put(key, before.getInt(key));
+                        values.put(key, key.equals("monque")
+                                ? ShortageSync.afterSale(before.getInt(key), quantity, false) : before.getInt(key));
+                    }
+                    request(base, "/AikaPos/stockProducts", new JSONObject()
+                            .put("productId", productId).put("expected", expected).put("values", values));
+                    JSONObject verified = request(base, "/AikaPos/stockProducts?id=" + productId, null)
+                            .getJSONObject("product");
+                    if (verified.getInt("monque") != values.getInt("monque"))
+                        throw new IOException("POS shortage verification failed for product " + productId);
+                    verifiedRows.put(verified);
+                }
+                main.post(() -> {
+                    if (!base.equals(server)) {
+                        message("POS shortage was updated, but the server setting changed. Reopen the original POS catalog to refresh.", true);
+                        return;
+                    }
+                    try {
+                        ProductCatalog confirmed = catalog;
+                        for (int i = 0; i < verifiedRows.length(); i++)
+                            confirmed = confirmed.updated(verifiedRows.getJSONObject(i));
+                        persistCatalog(base, confirmed);
+                        catalog = confirmed;
+                        updateCatalogTotals();
+                        if (selected != null) {
+                            JSONObject current = findCatalogRow(confirmed, selected.optInt("id", -1), selected.optString("code", ""));
+                            if (current != null) fillProduct(current);
+                        }
+                        message(saleMessage + " POS shortage saved and verified.", false);
+                    } catch (Exception ex) {
+                        message("Sale and POS shortage were saved, but the phone cache could not be verified: "
+                                + detail(ex) + ". Refresh from POS.", true);
+                    }
+                });
+            } catch (Exception ex) {
+                main.post(() -> message("Sale saved and local shortage updated, but POS shortage is NOT confirmed: "
+                        + detail(ex) + ". Reconcile the affected products before refreshing.", true));
+            }
+        });
+    }
+
     private static final class CartLine {
         final int productId;
+        final String productCode;
         final String name;
         final String category;
-        final int unitPriceCents;
+        final int salePriceCents;
+        final int purchasePriceCents;
+        int unitPriceCents;
         int quantity = 1;
         CartLine(int productId, String name, int unitPriceCents) {
-            this(productId, name, "", unitPriceCents);
+            this(productId, "", name, "", unitPriceCents, unitPriceCents);
         }
         CartLine(int productId, String name, String category, int unitPriceCents) {
+            this(productId, "", name, category, unitPriceCents, unitPriceCents);
+        }
+        CartLine(int productId, String productCode, String name, String category, int salePriceCents, int purchasePriceCents) {
             this.productId = productId;
+            this.productCode = productCode == null ? "" : productCode.trim();
             this.name = name;
             this.category = category == null ? "" : category;
-            this.unitPriceCents = unitPriceCents;
+            this.salePriceCents = salePriceCents;
+            this.purchasePriceCents = purchasePriceCents;
+            this.unitPriceCents = salePriceCents;
         }
     }
 
@@ -1508,19 +1897,14 @@ public class SimClientActivity extends Activity {
             catalog = localUpdated;
             updateCatalogTotals();
             selected = optimistic;
-            if (priceWithTax != null) priceWithTax.setText("+ Tax: " + formatMoneyCents(finalPriceCents(optimistic)));
+            if (priceWithTax != null) priceWithTax.setText(ui(com.just.print.R.string.ui_add_tax) + ": " + formatMoneyCents(finalPriceCents(optimistic)));
             optimisticLocalPending = true;
             if (movingPlan != null) movingPlan.invalidateForInventoryChange();
             message("Local inventory updated. Calculating Stock Moving from the new values…", false);
-            // Website product edits use the same upload/absorb protocol as
-            // Refresh. This keeps one synchronization path for single edits
-            // and full refreshes.
-            if (isWebsiteDomain(server)) {
-                productSaveBusy(false);
-                autoSaveInFlight = null;
-                refreshCatalog();
-                return;
-            }
+            // Website edits continue through the upload/acknowledgement path
+            // below.  Do not refresh-and-return here: that used to bypass the
+            // response merge and the final fillProduct() call, leaving the
+            // other Stock fields blank after a successful website POST.
         } catch (Exception ex) {
             autoSaveInFlight = null;
             message("Could not update the local inventory before syncing: " + detail(ex), false);
@@ -1558,7 +1942,7 @@ public class SimClientActivity extends Activity {
                         row.put("local_id", websiteProduct.optLong("local_id"));
                     row.put("code", websiteProduct.optString("code", ""));
                     row.put("expected_last_modified", expectedServerLastModified);
-                    row.put("data", websiteProduct);
+                    row.put("data", ShortageSync.forWebsite(websiteProduct));
                     String personId = getPreferences(MODE_PRIVATE).getString("personId", "");
                     String syncCursor = readSyncCursor(base);
                     JSONObject response = requestSync(base, "/products/mobileSync/products",
@@ -1649,22 +2033,15 @@ public class SimClientActivity extends Activity {
                 if (finalUpdated != null && finalStoredProduct != null) {
                     catalog = finalUpdated;
                     updateCatalogTotals();
-                    selected = finalStoredProduct;
+                    // A product save may return a complete row (POS) or a row
+                    // merged from the website response.  Rebind every product
+                    // field from that row; updating only request.field leaves
+                    // the other EditTexts stale/blank after a successful POST.
+                    fillProduct(finalStoredProduct);
                     // Stock Moving keeps its own calculated input/draft while it
                     // is hidden.  Invalidate that snapshot after a verified edit
                     // so the next tab switch cannot calculate from old Manque.
                     if (movingPlan != null) movingPlan.invalidateForInventoryChange();
-                    if (request.field.getText().toString().trim().equals(submittedText)) {
-                        settingValues = true;
-                        try {
-                            request.field.setText(request.name
-                                    ? finalStoredProduct.optString(request.key, "")
-                                    : request.price
-                                    ? (finalStoredProduct.isNull(request.key) ? "" : ProductCatalog.money(finalStoredProduct, request.key))
-                                    : String.valueOf(finalStoredProduct.getInt(request.key)));
-                        } catch (Exception ignored) {}
-                        finally { settingValues = false; }
-                    }
                 }
                 productSaveBusy(false);
                 autoSaveInFlight = null;
@@ -1866,21 +2243,21 @@ public class SimClientActivity extends Activity {
         EditText address = new EditText(this);
         styleInput(address);
         TextView ipLabel = new TextView(this);
-        ipLabel.setText("AikaPos computer IP (default port: 8880)");
+        ipLabel.setText(ui(com.just.print.R.string.ui_pos_computer_ip));
         box.addView(ipLabel);
-        address.setHint("Enter POS computer IP"); address.setSingleLine(); address.setText(server);
+        address.setHint(ui(com.just.print.R.string.ui_enter_pos_ip)); address.setSingleLine(); address.setText(server);
         selectAllOnFocus(address);
 
         box.addView(address);
         EditText activationCode = new EditText(this);
         styleInput(activationCode);
-        activationCode.setHint("Enter activation code");
+        activationCode.setHint(ui(com.just.print.R.string.ui_enter_activation_code));
         activationCode.setSingleLine(true);
         activationCode.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
         activationCode.setText(getPreferences(MODE_PRIVATE).getString("personId", ""));
         selectAllOnFocus(activationCode);
         TextView activationLabel = new TextView(this);
-        activationLabel.setText("Activation code (website synchronization)");
+        activationLabel.setText(ui(com.just.print.R.string.ui_activation_code));
         box.addView(activationLabel);
         box.addView(activationCode);
 
@@ -1904,7 +2281,7 @@ public class SimClientActivity extends Activity {
             public void afterTextChanged(Editable s) { }
         });
         TextView taxLabel = new TextView(this);
-        taxLabel.setText("Price calculation settings (%)");
+        taxLabel.setText(ui(com.just.print.R.string.ui_price_calculation_settings));
         LinearLayout.LayoutParams taxLabelParams = full();
         taxLabelParams.topMargin = dp(20);
         box.addView(taxLabel, taxLabelParams);
@@ -1925,7 +2302,7 @@ public class SimClientActivity extends Activity {
         taxRow2Params.topMargin = dp(10);
         box.addView(taxRow2, taxRow2Params);
         TextView languageLabel = new TextView(this);
-        languageLabel.setText("Language");
+        languageLabel.setText(ui(com.just.print.R.string.ui_language));
         LinearLayout.LayoutParams languageLabelParams = full();
         languageLabelParams.topMargin = dp(20);
         box.addView(languageLabel, languageLabelParams);
@@ -1938,19 +2315,23 @@ public class SimClientActivity extends Activity {
         languages.addView(english, new RadioGroup.LayoutParams(0, -2, 1));
         languages.addView(chinese, new RadioGroup.LayoutParams(0, -2, 1));
         String language = getPreferences(MODE_PRIVATE).getString("language", "en");
+        final String languageBefore = language;
         if ("fr".equals(language)) french.setChecked(true);
         else if ("zh".equals(language)) chinese.setChecked(true);
         else english.setChecked(true);
         box.addView(languages, full());
         Button viewLocal = new Button(this);
-        viewLocal.setText("View Local Inventory");
+        viewLocal.setText(ui(com.just.print.R.string.ui_view_local_inventory));
+        styleAccentButton(this, viewLocal);
         viewLocal.setOnClickListener(v -> viewLocalInventory());
-        box.addView(viewLocal);
+        box.addView(viewLocal, secondaryButtonParams());
         Button downloadImages = new Button(this);
-        downloadImages.setText("Download Product Images");
-        box.addView(downloadImages);
+        downloadImages.setText(ui(com.just.print.R.string.ui_download_product_images));
+        styleAccentButton(this, downloadImages);
+        box.addView(downloadImages, secondaryButtonParams());
         Button forceUpload = new Button(this);
-        forceUpload.setText("Force Upload All Local Products");
+        forceUpload.setText(ui(com.just.print.R.string.ui_force_upload));
+        styleAccentButton(this, forceUpload);
         forceUpload.setOnClickListener(v -> {
             final String uploadTarget = server;
             if (uploadTarget == null || uploadTarget.trim().isEmpty()) {
@@ -1965,9 +2346,10 @@ public class SimClientActivity extends Activity {
                             forceUploadAllLocalProducts(uploadTarget, new JSONObject()))
                     .show();
         });
-        box.addView(forceUpload);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Connection Settings")
-                .setView(box).setNegativeButton("Cancel", null).setPositiveButton("Save", null).create();
+        box.addView(forceUpload, secondaryButtonParams());
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(ui(com.just.print.R.string.ui_connection_settings))
+                .setView(box).setNegativeButton(ui(com.just.print.R.string.ui_cancel), null)
+                .setPositiveButton(ui(com.just.print.R.string.ui_save), null).create();
         downloadImages.setOnClickListener(v -> {
             dialog.dismiss();
             if (ProductImageStore.isDownloadActive()) {
@@ -2071,7 +2453,7 @@ public class SimClientActivity extends Activity {
                     settings.putInt("tax_eco_cents", parseMoneySetting(ecoTax));
                     settings.putInt("tax_bottle_cents", parseMoneySetting(bottleFee));
                     View checkedLanguage = languages.findViewById(languages.getCheckedRadioButtonId());
-                    settings.putString("language", checkedLanguage == null ? "en" : String.valueOf(checkedLanguage.getTag()));
+                        settings.putString("language", checkedLanguage == null ? "en" : String.valueOf(checkedLanguage.getTag()));
                     if (websiteMode) settings.putString("personId", personId);
                     if (!websiteMode) {
                         settings.remove("personId");
@@ -2087,7 +2469,7 @@ public class SimClientActivity extends Activity {
                         address.setEnabled(true);
                         viewLocal.setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("Save");
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText(ui(com.just.print.R.string.ui_save));
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
                         dialog.setCancelable(true);
                         activationCode.setError(failureResult == null
@@ -2096,6 +2478,12 @@ public class SimClientActivity extends Activity {
                         return;
                     }
                     server = savedAddress;
+                    String selectedLanguage = preferences.getString("language", "en");
+                    if (!languageBefore.equalsIgnoreCase(selectedLanguage)) {
+                        dialog.dismiss();
+                        recreate();
+                        return;
+                    }
                     if (movingPlan != null) { movingPlan.dispose(); movingPlan = null; }
                     if (movingPage != null) { pages.removeView(movingPage); movingPage = null; }
                     showingMoving = false;
@@ -2249,6 +2637,10 @@ public class SimClientActivity extends Activity {
             }, id -> showEditingPage(id));
             stockingPage = stockingPlan.view();
             pages.addView(stockingPage, new FrameLayout.LayoutParams(-1, -1));
+        }
+        if (pendingStockingCart != null) {
+            stockingPlan.importCart(pendingStockingCart);
+            pendingStockingCart = null;
         }
         showingMoving = false; showingStocking = true; showingId = false;
         if (movingPage != null) movingPage.setVisibility(View.GONE);
@@ -2519,6 +2911,39 @@ public class SimClientActivity extends Activity {
                 .hideSoftInputFromWindow(pages.getWindowToken(), 0);
     }
 
+    private void finishProductFieldEditing() {
+        View focused = getCurrentFocus();
+        if (focused instanceof EditText) focused.clearFocus();
+        hideKeyboard(focused);
+        if (focused != null) {
+            // Android may restore the IME during the same touch dispatch that
+            // caused the EditText to lose focus. Repeat the hide request after
+            // focus processing has completed, using the EditText token.
+            focused.post(() -> {
+                focused.clearFocus();
+                hideKeyboard(focused);
+                focused.postDelayed(() -> hideKeyboard(focused), 120L);
+            });
+        }
+    }
+
+    private void hideKeyboard(View source) {
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        android.os.IBinder token = source == null ? null : source.getWindowToken();
+        if (token == null && pages != null) token = pages.getWindowToken();
+        if (token != null) imm.hideSoftInputFromWindow(token, 0);
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            View decor = getWindow().getDecorView();
+            android.view.WindowInsetsController controller = decor.getWindowInsetsController();
+            if (controller != null) {
+                controller.hide(android.view.WindowInsets.Type.ime());
+                controller.setSystemBarsBehavior(
+                        android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        }
+    }
+
     private void clearProductSearchFocus() {
         product.dismissDropDown();
         hideKeyboard();
@@ -2532,6 +2957,7 @@ public class SimClientActivity extends Activity {
         // rounded frame in the foreground so the content area stays framed.
         android.graphics.drawable.Drawable arrow = spinner.getBackground();
         spinner.setBackground(arrow);
+        spinner.setAlpha(1f);
         android.graphics.drawable.GradientDrawable foreground = new android.graphics.drawable.GradientDrawable();
         foreground.setColor(0x00000000);
         foreground.setCornerRadius(12 * density);
@@ -2613,12 +3039,14 @@ public class SimClientActivity extends Activity {
         content.addView(filter, full());
         Button importBackup = new Button(this);
         importBackup.setText("Import");
+        styleAccentButton(this, importBackup);
         importBackup.setOnClickListener(v -> startActivityForResult(
                 new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
                         .addCategory(android.content.Intent.CATEGORY_OPENABLE)
                         .setType("application/json"), PRODUCT_IMPORT_REQUEST));
         Button backup = new Button(this);
         backup.setText("Backup");
+        styleAccentButton(this, backup);
         TextView footerInfo = new TextView(this);
         footerInfo.setPadding(0, dp(8), dp(8), 0);
         footerInfo.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -2645,11 +3073,18 @@ public class SimClientActivity extends Activity {
         LinearLayout footer = new LinearLayout(this);
         footer.setOrientation(LinearLayout.HORIZONTAL);
         content.addView(footerInfo, full());
-        footer.addView(importBackup, new LinearLayout.LayoutParams(0, dp(52), 1));
-        footer.addView(backup, new LinearLayout.LayoutParams(0, dp(52), 1));
+        LinearLayout.LayoutParams importParams = new LinearLayout.LayoutParams(0, dp(52), 1);
+        importParams.rightMargin = dp(4);
+        footer.addView(importBackup, importParams);
+        LinearLayout.LayoutParams backupParams = new LinearLayout.LayoutParams(0, dp(52), 1);
+        backupParams.leftMargin = dp(4); backupParams.rightMargin = dp(4);
+        footer.addView(backup, backupParams);
         Button close = new Button(this);
         close.setText("Close");
-        footer.addView(close, new LinearLayout.LayoutParams(0, dp(52), 1));
+        styleAccentButton(this, close);
+        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams(0, dp(52), 1);
+        closeParams.leftMargin = dp(4);
+        footer.addView(close, closeParams);
         content.addView(footer, full());
         AlertDialog viewer = new AlertDialog.Builder(this).setView(content).create();
         close.setOnClickListener(v -> viewer.dismiss());
@@ -2904,15 +3339,106 @@ public class SimClientActivity extends Activity {
         LinearLayout field = column();
         field.setPadding(dp(4), dp(16), dp(4), dp(8));
         TextView label = new TextView(this); label.setText(name); field.addView(label);
+        priceLabels[index] = label;
         EditText input = new EditText(this); input.setSingleLine(); styleInput(input);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        // Keep the numeric IME, while allowing only amount and calculator characters.
+        // Operators not offered by the numeric IME still work from hardware input/paste.
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL
+                | InputType.TYPE_NUMBER_FLAG_SIGNED);
+        input.setKeyListener(DigitsKeyListener.getInstance("0123456789.,+-*/()%"));
         input.setSelectAllOnFocus(true); input.setContentDescription(name);
         prices[index] = input;
+        if (index == 0 || index == 1) {
+            input.addTextChangedListener(new TextWatcher() {
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String raw = s == null ? "" : s.toString();
+                    if (index == 1) updatePriceLabel(raw);
+                    else updateCostLabel(raw);
+                }
+                public void afterTextChanged(Editable s) { }
+            });
+        }
         input.setOnFocusChangeListener((view, focused) -> {
             if (focused) input.post(() -> { if (input.hasFocus()) input.selectAll(); });
-            else autoSaveIfChanged(input, priceKeys[index], true);
+            else {
+                try {
+                    String raw = input.getText().toString().trim();
+                    if (!raw.isEmpty()) {
+                        boolean calculation = isCalculationInput(raw);
+                        int cents = calculatePriceInput(index, raw);
+                        input.setText(String.format(java.util.Locale.ROOT, "%.2f", cents / 100.0));
+                        if (calculation && !calculatedPricePendingSave[index]) {
+                            calculatedPricePendingSave[index] = true;
+                            if (index == 1) updatePriceLabel(); else showOriginalCostLabel();
+                            return;
+                        }
+                        calculatedPricePendingSave[index] = false;
+                    }
+                    updatePriceLabel();
+                } catch (IllegalArgumentException ex) { message(ex.getMessage(), false); }
+                autoSaveIfChanged(input, priceKeys[index], true);
+            }
         });
         field.addView(input, full()); return field;
+    }
+    private int percentagePriceCents(String raw) {
+        if (selected == null || !selected.has("cost")) throw new IllegalArgumentException("Enter Cost first");
+        try {
+            java.math.BigDecimal rate = new java.math.BigDecimal(raw.substring(0, raw.length()-1).trim());
+            if (rate.signum() < 0) throw new Exception();
+            return rate.movePointLeft(2).add(java.math.BigDecimal.ONE).multiply(java.math.BigDecimal.valueOf(selected.getInt("cost"))).setScale(0, java.math.RoundingMode.HALF_UP).intValueExact();
+        } catch (Exception ex) { throw new IllegalArgumentException("Enter a valid profit percentage"); }
+    }
+    private boolean isCalculationInput(String raw) {
+        return raw.endsWith("%") || raw.indexOf('+') >= 0 || raw.indexOf('-') >= 0
+                || raw.indexOf('/') >= 0 || raw.indexOf('*') >= 0 || raw.indexOf('(') >= 0;
+    }
+    private int calculatePriceInput(int index, String raw) {
+        if (index == 1 && raw.endsWith("%")) return percentagePriceCents(raw);
+        // A leading + or - means an adjustment to the existing value, e.g. +1.55.
+        if (raw.length() > 1 && (raw.charAt(0) == '+' || raw.charAt(0) == '-') && selected != null
+                && selected.has(priceKeys[index])) {
+            int adjustment = ProductCatalog.expressionCents(raw.substring(1));
+            return raw.charAt(0) == '+' ? selected.optInt(priceKeys[index]) + adjustment
+                    : selected.optInt(priceKeys[index]) - adjustment;
+        }
+        return ProductCatalog.expressionCents(raw);
+    }
+    private void updatePriceLabel() {
+        updatePriceLabel(prices[1] == null ? "" : prices[1].getText().toString());
+    }
+    private void updatePriceLabel(String raw) {
+        if (priceLabels[1] == null) return;
+        String label = ui(com.just.print.R.string.ui_price);
+        if (raw.indexOf('+') >= 0 || raw.indexOf('-') >= 0 || raw.indexOf('/') >= 0 || raw.indexOf('*') >= 0) {
+            try {
+                if (selected != null && selected.has("price")) {
+                    String old = ProductCatalog.money(selected, "price");
+                    if (!old.equals("—")) { priceLabels[1].setText(label + " (old: $" + old + ")"); return; }
+                }
+            } catch (Exception ignored) { }
+        }
+        try { if (selected != null && selected.has("cost") && selected.getInt("cost") > 0) { int p=ProductCatalog.expressionCents(prices[1].getText().toString().trim()); double margin=(p/(double)selected.getInt("cost")-1)*100; label += String.format(java.util.Locale.ROOT, " %.0f%%", margin); } } catch (Exception ignored) { }
+        priceLabels[1].setText(label);
+    }
+    private void updateCostLabel(String raw) {
+        if (priceLabels[0] == null) return;
+        if (isCalculationInput(raw) && selected != null && selected.has("cost")) {
+            showOriginalCostLabel();
+        } else {
+            priceLabels[0].setText(ui(com.just.print.R.string.ui_cost));
+        }
+    }
+    private void showOriginalCostLabel() {
+        if (selected == null || !selected.has("cost")) return;
+        String old = ProductCatalog.money(selected, "cost");
+        android.text.SpannableString text = new android.text.SpannableString(
+                ui(com.just.print.R.string.ui_cost) + " " + old);
+        int start = ui(com.just.print.R.string.ui_cost).length() + 1;
+        text.setSpan(new android.text.style.StrikethroughSpan(), start, text.length(),
+                android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        priceLabels[0].setText(text);
     }
     private void autoSaveIfChanged(EditText field, String key, boolean price) {
         autoSaveIfChanged(field, key, price, false);
@@ -2992,18 +3518,38 @@ public class SimClientActivity extends Activity {
         android.graphics.drawable.GradientDrawable enabled = new android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, new int[]{0xff087f8c, 0xff146783});
         enabled.setCornerRadius(12 * density);
-        android.graphics.drawable.GradientDrawable disabled = new android.graphics.drawable.GradientDrawable();
-        disabled.setColor(0xffcce5ea); disabled.setCornerRadius(12 * density);
+        android.graphics.drawable.GradientDrawable disabled = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, new int[]{0xffffc857, 0xfff29d38});
+        disabled.setCornerRadius(12 * density);
         android.graphics.drawable.StateListDrawable backgrounds = new android.graphics.drawable.StateListDrawable();
         backgrounds.addState(new int[]{-android.R.attr.state_enabled}, disabled);
         backgrounds.addState(new int[]{}, enabled);
         button.setBackground(new android.graphics.drawable.RippleDrawable(
                 android.content.res.ColorStateList.valueOf(0x3370dccc), backgrounds, null));
         button.setTextColor(new android.content.res.ColorStateList(
-                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[]{}}, new int[]{0xff4b7180, 0xffffffff}));
+                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[]{}}, new int[]{0xff67420b, 0xffffffff}));
         button.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         button.setAllCaps(false);
         button.setMinHeight(Math.round(52 * density));
+    }
+    static void styleAccentButton(Activity activity, Button button) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setColor(0xffe9f3fa);
+        bg.setCornerRadius(12 * density);
+        bg.setStroke(Math.max(1, Math.round(density)), 0xff9abbd0);
+        button.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(0x223c7295), bg, null));
+        button.setTextColor(0xff28536f);
+        button.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        button.setAllCaps(false);
+        button.setMinHeight(Math.round(48 * density));
+    }
+    private LinearLayout.LayoutParams secondaryButtonParams() {
+        LinearLayout.LayoutParams params = full();
+        params.topMargin = dp(6);
+        params.bottomMargin = dp(6);
+        return params;
     }
     private LinearLayout column() { LinearLayout view = new LinearLayout(this); view.setOrientation(LinearLayout.VERTICAL); return view; }
     private LinearLayout.LayoutParams full() { return new LinearLayout.LayoutParams(-1, -2); }

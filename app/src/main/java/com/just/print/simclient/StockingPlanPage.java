@@ -36,6 +36,8 @@ final class StockingPlanPage {
     private String selectedCategory;
     private int selectedWeeks = 3;
     private final ProductClickHandler productClickHandler;
+    private JSONArray pendingCart;
+    private JSONArray importedCart;
 
     StockingPlanPage(Activity activity, String base, CatalogProvider provider, SyncHandler syncHandler, ProductClickHandler productClickHandler) {
         this.activity = activity; this.provider = provider; this.syncHandler = syncHandler; this.productClickHandler = productClickHandler;
@@ -54,11 +56,15 @@ final class StockingPlanPage {
         listContent.addView(total);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout controls = new LinearLayout(activity);
-        controls.setPadding(0, dp(2), 0, 0);
-        category.setBackgroundResource(android.R.drawable.btn_dropdown);
-        weeks.setBackgroundResource(android.R.drawable.btn_dropdown);
-        controls.addView(category, new LinearLayout.LayoutParams(0, dp(52), 1));
-        controls.addView(weeks, new LinearLayout.LayoutParams(0, dp(52), 1));
+        controls.setPadding(0, dp(8), 0, dp(8));
+        SimClientActivity.styleDropdown(activity, category);
+        SimClientActivity.styleDropdown(activity, weeks);
+        LinearLayout.LayoutParams categoryParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        categoryParams.rightMargin = dp(6);
+        controls.addView(category, categoryParams);
+        LinearLayout.LayoutParams weeksParams = new LinearLayout.LayoutParams(0, dp(44), 1);
+        weeksParams.leftMargin = dp(6);
+        controls.addView(weeks, weeksParams);
         note.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s,int st,int c,int a) {}
             public void onTextChanged(CharSequence s,int st,int b,int c) { saveNote(s.toString()); }
@@ -66,7 +72,12 @@ final class StockingPlanPage {
         });
         status.setTextSize(14); status.setTextColor(0xff176b78); root.addView(status);
         root.addView(controls);
-        syncButton = new Button(activity); syncButton.setText("Sync to POS"); syncButton.setOnClickListener(v -> sync()); root.addView(syncButton);
+        syncButton = new Button(activity); syncButton.setText("Sync to POS");
+        SimClientActivity.stylePrimaryButton(activity, syncButton);
+        syncButton.setOnClickListener(v -> sync());
+        LinearLayout.LayoutParams syncParams = new LinearLayout.LayoutParams(-1, -2);
+        syncParams.topMargin = dp(6);
+        root.addView(syncButton, syncParams);
         category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onNothingSelected(AdapterView<?> p) {}
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
@@ -88,8 +99,26 @@ final class StockingPlanPage {
     }
     View view() { return root; }
     void activate() {
-        try { products = provider.products(); loadCategories(); render(); }
+        try { products = provider.products(); loadCategories(); importPendingCart(); render(); }
         catch (Exception ex) { rows.removeAllViews(); rows.addView(text("Could not load local inventory: " + ex.getMessage())); }
+    }
+    void importCart(JSONArray cart) { pendingCart = cart; }
+    private void importPendingCart() throws Exception {
+        if (pendingCart == null || pendingCart.length() == 0) return;
+        importedCart = pendingCart;
+        category.setEnabled(false); weeks.setEnabled(false);
+        category.setAlpha(1f); weeks.setAlpha(1f);
+        String categoryForCart = pendingCart.optJSONObject(0).optString("category", "");
+        if (!categoryForCart.isEmpty()) selectedCategory = categoryForCart;
+        for (int i = 0; i < pendingCart.length(); i++) {
+            JSONObject item = pendingCart.getJSONObject(i);
+            int id = item.getInt("productId");
+            int qty = Math.max(0, item.optInt("quantity", 1));
+            int price = Math.max(0, item.optInt("unitPrice", 0));
+            prefs.edit().putString(key(id), new JSONObject().put("quantity", qty).put("price", price)
+                    .put("total", qty * price).put("note", note.getText().toString()).toString()).commit();
+        }
+        pendingCart = null;
     }
     private void loadCategories() throws Exception {
         // The catalog is already ordered like the POS Menu Panel. Preserve that
@@ -106,7 +135,9 @@ final class StockingPlanPage {
                 "COSTCO", "LAIT", "QUECAN", "MONDOUX"};
         for (String name : names) for (String wanted : allowed)
             if (name.equalsIgnoreCase(wanted)) { options.add(name); break; }
-        if (selectedCategory == null || !options.contains(selectedCategory) || ProductCatalog.categoryColor(selectedCategory) != 0) {
+        if (importedCart != null) {
+            selectedCategory = "Cart";
+        } else if (selectedCategory == null || !options.contains(selectedCategory) || ProductCatalog.categoryColor(selectedCategory) != 0) {
             selectedCategory = options.contains("BENSON") ? "BENSON" : "";
             if (selectedCategory.isEmpty()) for (String option : options) if (ProductCatalog.categoryColor(option) == 0) { selectedCategory = option; break; }
         }
@@ -122,9 +153,12 @@ final class StockingPlanPage {
         rows.removeAllViews(); long grand=0; int count=0;
         note.setText(prefs.getString(noteKey(), ""));
         for (int i=0;i<products.length();i++) try {
-            JSONObject p=products.getJSONObject(i); if (!selectedCategory.equalsIgnoreCase(p.optString("category"))) continue;
-            int qty=StockingPlanCalculator.quantity(p, selectedCategory, selectedWeeks); if(qty<=0) continue;
-            JSONObject saved=readPlan(p.optInt("id")); if(saved!=null) qty=saved.optInt("quantity",qty);
+            JSONObject p=products.getJSONObject(i);
+            if (importedCart != null ? !cartContains(p.optInt("id")) : !selectedCategory.equalsIgnoreCase(p.optString("category"))) continue;
+            JSONObject saved=readPlan(p.optInt("id"));
+            int qty;
+            if (importedCart != null) qty = saved == null ? 0 : saved.optInt("quantity", 0);
+            else { qty=StockingPlanCalculator.quantity(p, selectedCategory, selectedWeeks); if(qty<=0) continue; if(saved!=null) qty=saved.optInt("quantity",qty); }
             String defaultPrice=ProductCatalog.money(p,"cost");
             int unitPrice=saved != null && saved.has("price") ? saved.optInt("price",0) : parse(defaultPrice);
             int rowTotal=saved != null && saved.has("total") ? saved.optInt("total",qty*unitPrice) : qty*unitPrice;
@@ -162,13 +196,14 @@ final class StockingPlanPage {
         total.setText("Total: " + String.format(Locale.ROOT,"%.2f",grand/100.0) + "  ("+count+" item(s))");
     }
     private JSONObject readPlan(int id) throws Exception { String s=prefs.getString(key(id),null); return s==null?null:new JSONObject(s); }
+    private boolean cartContains(int id) { for (int i=0; i<importedCart.length(); i++) if (importedCart.optJSONObject(i).optInt("productId") == id) return true; return false; }
     private void saveRow(JSONObject p, EditText q, EditText price, EditText lineTotal) { try { prefs.edit().putString(key(p.getInt("id")),new JSONObject().put("quantity",Math.max(0,Integer.parseInt(q.getText().toString()))).put("price",parse(price.getText().toString())).put("total",parse(lineTotal.getText().toString())).put("note",note.getText().toString()).toString()).commit(); } catch(Exception ignored) {} }
-    private String key(int id){return (selectedCategory==null?"":selectedCategory)+":"+selectedWeeks+":"+id;}
+    private String key(int id){return (importedCart != null ? "Cart" : selectedCategory==null?"":selectedCategory)+":"+selectedWeeks+":"+id;}
     private String noteKey(){return (selectedCategory==null?"":selectedCategory)+":"+selectedWeeks+":note";}
     private void saveNote(String value){prefs.edit().putString(noteKey(), value).commit();}
     private void sync() {
         try { JSONArray out=new JSONArray(); int totalCents=0;
-            for(int i=0;i<products.length();i++){ JSONObject p=products.getJSONObject(i); if(!selectedCategory.equalsIgnoreCase(p.optString("category"))) continue; JSONObject s=readPlan(p.optInt("id")); if(s==null||s.optInt("quantity",0)<=0) continue; int qty=s.optInt("quantity"), price=s.optInt("price",0); out.put(new JSONObject().put("productId",p.getInt("id")).put("name",p.optString("mnemonic",p.optString("subject",p.optString("code")))).put("category",selectedCategory).put("quantity",qty).put("totalCents",qty*price)); totalCents += qty*price; }
+            for(int i=0;i<products.length();i++){ JSONObject p=products.getJSONObject(i); if(importedCart != null ? !cartContains(p.optInt("id")) : !selectedCategory.equalsIgnoreCase(p.optString("category"))) continue; JSONObject s=readPlan(p.optInt("id")); if(s==null||s.optInt("quantity",0)<=0) continue; int qty=s.optInt("quantity"), price=s.optInt("price",0); out.put(new JSONObject().put("productId",p.getInt("id")).put("name",p.optString("mnemonic",p.optString("subject",p.optString("code")))).put("category",p.optString("category",selectedCategory)).put("quantity",qty).put("totalCents",qty*price)); totalCents += qty*price; }
             if(out.length()==0) throw new IllegalArgumentException("There are no stocking quantities to sync.");
             JSONObject plan=failedPlan == null ? new JSONObject().put("draftId",UUID.randomUUID().toString()).put("category",selectedCategory).put("weeks",selectedWeeks).put("note",note.getText().toString()).put("totalCents",totalCents).put("rows",out) : failedPlan;
             status.setText("Saving stocking plan to POS…"); syncButton.setEnabled(false);
@@ -178,7 +213,7 @@ final class StockingPlanPage {
             Toast.makeText(activity,"Stocking plan synced to POS.",Toast.LENGTH_LONG).show();
         } catch(Exception ex) { syncButton.setText("Retry sync"); syncButton.setEnabled(true); status.setText("POS sync failed: " + (ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage()) + "\nDraft retained locally. Tap Retry sync."); Toast.makeText(activity,"Stocking sync failed. Draft retained; tap Retry sync.",Toast.LENGTH_LONG).show(); }
     }
-    private EditText number(String value){EditText e=new EditText(activity);e.setText(value.equals("—")?"":value);e.setInputType(2|8192);e.setSelectAllOnFocus(true);return e;}
+    private EditText number(String value){EditText e=new EditText(activity);e.setText(value.equals("—")?"":value);e.setTextSize(15);e.setInputType(2|8192);e.setSelectAllOnFocus(true);return e;}
     private TextView text(String value){TextView t=new TextView(activity);t.setText(value);t.setTextSize(15);t.setTextColor(0xff16344b);return t;}
     private void addHeader(String value, float weight) { TextView t=text(value); t.setTextSize(12); t.setTypeface(null, android.graphics.Typeface.BOLD); int width = value.equals("QTY") ? 58 : value.equals("Price") ? 78 : value.equals("Total") ? 82 : 0; header.addView(t, width == 0 ? new LinearLayout.LayoutParams(0,dp(38),1) : new LinearLayout.LayoutParams(dp(width),dp(38))); }
     private GradientDrawable panelBorder(int color, int radius) { GradientDrawable d = new GradientDrawable(); d.setColor(0x00ffffff); d.setCornerRadius(dp(radius)); d.setStroke(dp(1), color); return d; }
