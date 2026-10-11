@@ -3,4 +3,5 @@
     <string name="ui_selected_products">已选产品</string><string name="ui_clear_cart">清空购物车</string><string name="ui_submit">提交</string><string name="ui_cart_empty">购物车为空</string><string name="ui_total">总计</string><string name="ui_weekly_sales">每周销量</string><string name="ui_add_tax">税后</string><string name="ui_pos_computer_ip">AikaPos电脑IP（默认端口：8880）</string><string name="ui_enter_pos_ip">输入POS电脑IP</string><string name="ui_activation_code">激活码（网站同步）</string><string name="ui_enter_activation_code">输入激活码</string><string name="ui_price_calculation_settings">价格计算设置（%）</string>
     <string name="ui_create_stocking_plan">生成进货单</string><string-array name="language_array"><item>Français</item><item>English</item><item>中文</item></string-array>
     <string name="ui_submit_as_stocking_plan">提交为进货单</string>
+    <string name="ui_cart_items">PROD</string><string name="ui_cart_qty">QTY</string>
 </resources>

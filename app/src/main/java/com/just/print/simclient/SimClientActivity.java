@@ -53,6 +53,7 @@ public class SimClientActivity extends Activity {
     private TextView totalPrice;
     private TextView cartButton;
     private TextView cartBadge;
+    private TextView cartSummaryView;
     private AlertDialog cartDialog;
     private LinearLayout cartContent;
     private final java.util.LinkedHashMap<Integer, CartLine> cart = new java.util.LinkedHashMap<>();
@@ -78,7 +79,6 @@ public class SimClientActivity extends Activity {
     private View editingPage, movingPage, idPage;
     private View stockingPage;
     private StockingPlanPage stockingPlan;
-    private JSONArray pendingStockingCart;
     private IdCheckingPage idChecking;
     private LocalMovingPlanPage movingPlan;
     private boolean showingMoving;
@@ -467,23 +467,7 @@ public class SimClientActivity extends Activity {
         editingTab = new Button(this); editingTab.setText(ui(com.just.print.R.string.ui_product));
         editingTab.setAllCaps(false); editingTab.setOnClickListener(v -> showEditingPage(null));
         stocking = new Button(this); stocking.setText(ui(com.just.print.R.string.ui_stocking)); stocking.setAllCaps(false);
-        stocking.setOnClickListener(v -> {
-            if (!cart.isEmpty()) {
-                try {
-                    JSONArray cartRows = new JSONArray();
-                    for (CartLine line : cart.values()) {
-                        cartRows.put(new JSONObject().put("productId", line.productId)
-                                .put("name", line.name).put("category", line.category)
-                                .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents));
-                    }
-                    if (stockingPlan != null) stockingPlan.importCart(cartRows);
-                    else pendingStockingCart = cartRows;
-                    cart.clear();
-                    updateCatalogTotals();
-                } catch (Exception ex) { message("Could not create stocking plan: " + ex.getMessage(), true); return; }
-            }
-            showStockingPage();
-        });
+        stocking.setOnClickListener(v -> showStockingPage());
         idTab = new ImageButton(this);
         idTab.setImageResource(com.just.print.R.drawable.ic_sim_camera);
         idTab.setScaleType(ImageView.ScaleType.CENTER);
@@ -1407,6 +1391,7 @@ public class SimClientActivity extends Activity {
     private void updateCatalogTotals() {
         if (totalNumber == null || totalPrice == null) return;
         int count = 0;
+        int productsCount = cart.size();
         long cents = 0;
         for (CartLine line : cart.values()) {
             count += line.quantity;
@@ -1414,10 +1399,28 @@ public class SimClientActivity extends Activity {
         }
         totalNumber.setText("QTY: " + count);
         totalPrice.setText(ui(com.just.print.R.string.ui_total) + ": " + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)));
+        if (cartSummaryView != null) cartSummaryView.setText(formatCartSummary(productsCount, count, cents));
         if (cartBadge != null) {
             cartBadge.setText(String.valueOf(count));
             cartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         }
+    }
+
+    private int cartQuantity() {
+        int quantity = 0;
+        for (CartLine line : cart.values()) quantity += line.quantity;
+        return quantity;
+    }
+
+    private long cartTotalCents() {
+        long cents = 0;
+        for (CartLine line : cart.values()) cents += (long) line.unitPriceCents * line.quantity;
+        return cents;
+    }
+
+    private String formatCartSummary(int productCount, int quantity, long cents) {
+        return "(" + productCount + " / " + quantity + " / "
+                + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, cents)) + ")";
     }
 
     private void addSelectedProductToCart() {
@@ -1487,7 +1490,7 @@ public class SimClientActivity extends Activity {
                     line.quantity = Math.max(0, line.quantity - 1);
                     updateCatalogTotals(); showCartDialog();
                 });
-                LinearLayout.LayoutParams minusParams = new LinearLayout.LayoutParams(dp(22), dp(24));
+                LinearLayout.LayoutParams minusParams = new LinearLayout.LayoutParams(dp(44), dp(28));
                 minusParams.rightMargin = dp(14);
                 quantityControls.addView(minus, minusParams);
                 EditText quantityInput = new EditText(this);
@@ -1518,10 +1521,10 @@ public class SimClientActivity extends Activity {
                 plus.setTextColor(0xff087f8c);
                 plus.setBackground(roundBackground(0xffdff4f2, 0xff087f8c, 18));
                 plus.setOnClickListener(v -> { line.quantity++; updateCatalogTotals(); showCartDialog(); });
-                LinearLayout.LayoutParams plusParams = new LinearLayout.LayoutParams(dp(22), dp(24));
+                LinearLayout.LayoutParams plusParams = new LinearLayout.LayoutParams(dp(44), dp(28));
                 plusParams.leftMargin = dp(14);
                 quantityControls.addView(plus, plusParams);
-                LinearLayout.LayoutParams quantityParams = new LinearLayout.LayoutParams(dp(152), dp(48));
+                LinearLayout.LayoutParams quantityParams = new LinearLayout.LayoutParams(dp(196), dp(48));
                 quantityParams.leftMargin = dp(12);
                 row.addView(quantityControls, quantityParams);
                 content.addView(row, full());
@@ -1532,10 +1535,10 @@ public class SimClientActivity extends Activity {
         Button clearCart = new Button(this);
         clearCart.setText(ui(com.just.print.R.string.ui_clear_cart));
         clearCart.setAllCaps(false);
-        stylePrimaryButton(this, clearCart);
-        clearCart.setTextColor(0xffffffff);
+        styleWarningButton(this, clearCart);
         clearCart.setOnClickListener(v -> {
             cart.clear();
+            cartAsStockingPlan = false;
             updateCatalogTotals();
             if (cartDialog != null) cartDialog.dismiss();
             showEditingPage(null);
@@ -1548,7 +1551,6 @@ public class SimClientActivity extends Activity {
         submit.setText(ui(com.just.print.R.string.ui_submit));
         stylePrimaryButton(this, submit);
         submit.setTextColor(0xffffffff);
-        submit.setOnClickListener(v -> { if (cartAsStockingPlan) createStockingPlanFromCart(); else submitCart(); });
         LinearLayout.LayoutParams submitParams = new LinearLayout.LayoutParams(dp(120), dp(52));
         submitParams.leftMargin = dp(5);
         actions.addView(submit, submitParams);
@@ -1557,42 +1559,38 @@ public class SimClientActivity extends Activity {
         stockingOrder.setChecked(cartAsStockingPlan);
         stockingOrder.setOnCheckedChangeListener((button, checked) -> {
             cartAsStockingPlan = checked;
-            int labelIndex = 0;
-            for (CartLine item : cart.values()) {
+            for (int labelIndex = 0; labelIndex < cart.size(); labelIndex++) {
+                CartLine item = new ArrayList<>(cart.values()).get(labelIndex);
                 item.unitPriceCents = checked ? item.purchasePriceCents : item.salePriceCents;
-                if (labelIndex < cartLineLabels.size())
-                    cartLineLabels.get(labelIndex).setText(item.name + "  " + formatMoneyCents(item.unitPriceCents * item.quantity));
-                labelIndex++;
+                cartLineLabels.get(labelIndex).setText(item.name + "  "
+                        + formatMoneyCents((int) Math.min(Integer.MAX_VALUE, (long) item.unitPriceCents * item.quantity)));
             }
             updateCatalogTotals();
         });
+        submit.setOnClickListener(v -> {
+            if (cartAsStockingPlan) createStockingPlanFromCart(stockingOrder, submit, clearCart);
+            else submitCart();
+        });
         LinearLayout footer = column();
-        footer.setPadding(dp(20), dp(8), dp(20), dp(12));
+        footer.setPadding(dp(20), dp(8), dp(20), dp(20));
         footer.addView(stockingOrder, full());
         footer.addView(actions, full());
-        /* The submit button performs the selected action. */
-        Button createStocking = null;
-        /*
-        createStocking.setText(ui(com.just.print.R.string.ui_create_stocking_plan));
-        createStocking.setAllCaps(false);
-        stylePrimaryButton(this, createStocking);
-        createStocking.setTextColor(0xffffffff);
-        createStocking.setOnClickListener(v -> createStockingPlanFromCart());
-        content.addView(createStocking, full()); */
         if (cartDialog != null && cartDialog.isShowing()) {
             return;
         }
         if (content.getParent() instanceof android.view.ViewGroup) {
             ((android.view.ViewGroup) content.getParent()).removeView(content);
         }
-        LinearLayout cartTitle = new LinearLayout(this);
-        cartTitle.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        cartTitle.setPadding(dp(20), dp(8), dp(8), dp(4));
+        LinearLayout cartTitle = column();
+        cartTitle.setPadding(dp(20), 0, dp(8), 0);
+        LinearLayout cartTitleRow = new LinearLayout(this);
+        cartTitleRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
         TextView cartTitleText = new TextView(this);
         cartTitleText.setText(ui(com.just.print.R.string.ui_selected_products));
         cartTitleText.setTextSize(20);
         cartTitleText.setTextColor(0xff16344b);
-        cartTitle.addView(cartTitleText, new LinearLayout.LayoutParams(0, dp(48), 1));
+        cartTitleText.setIncludeFontPadding(false);
+        cartTitleRow.addView(cartTitleText, new LinearLayout.LayoutParams(0, dp(32), 1));
         ImageButton closeCart = new ImageButton(this);
         closeCart.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
         closeCart.setContentDescription("Close selected products");
@@ -1603,7 +1601,20 @@ public class SimClientActivity extends Activity {
             if (cartDialog != null) cartDialog.dismiss();
             showEditingPage(null);
         });
-        cartTitle.addView(closeCart, new LinearLayout.LayoutParams(dp(52), dp(48)));
+        cartTitleRow.addView(closeCart, new LinearLayout.LayoutParams(dp(52), dp(32)));
+        cartTitle.addView(cartTitleRow, full());
+        cartSummaryView = new TextView(this);
+        cartSummaryView.setTextSize(11);
+        cartSummaryView.setTextColor(0xff48636d);
+        cartSummaryView.setSingleLine(true);
+        cartSummaryView.setGravity(android.view.Gravity.LEFT | android.view.Gravity.CENTER_VERTICAL);
+        cartSummaryView.setIncludeFontPadding(false);
+        cartSummaryView.setLineSpacing(0, 0.85f);
+        cartSummaryView.setPadding(dp(50), 0, 0, 0);
+        cartSummaryView.setText(formatCartSummary(cart.size(), cartQuantity(), cartTotalCents()));
+        LinearLayout.LayoutParams summaryParams = new LinearLayout.LayoutParams(-1, dp(16));
+        summaryParams.topMargin = -dp(8);
+        cartTitle.addView(cartSummaryView, summaryParams);
         LinearLayout dialogBody = column();
         ScrollView cartScroll = new ScrollView(this);
         cartScroll.setVerticalScrollBarEnabled(true);
@@ -1612,26 +1623,75 @@ public class SimClientActivity extends Activity {
         cartScroll.addView(content, new ScrollView.LayoutParams(-1, -2));
         dialogBody.addView(cartScroll, new LinearLayout.LayoutParams(-1, 0, 1));
         dialogBody.addView(footer, new LinearLayout.LayoutParams(-1, -2));
+        int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels * 0.82f);
+        // The dialog has a custom title outside its content view. Give the body
+        // a concrete minimum height so its weighted list expands and the footer
+        // stays anchored at the bottom even when the cart contains few items.
+        dialogBody.setMinimumHeight(Math.max(dp(240), maxHeight - dp(72)));
         cartDialog = new AlertDialog.Builder(this).setCustomTitle(cartTitle).setView(dialogBody).create();
         cartDialog.setOnDismissListener(dialog -> cartDialog = null);
         cartDialog.show();
         if (cartDialog.getWindow() != null) {
-            int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels * 0.82f);
             cartDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
             cartDialog.getWindow().setLayout(Math.min(getResources().getDisplayMetrics().widthPixels - dp(32), dp(460)), maxHeight);
         }
     }
-    private void createStockingPlanFromCart() {
-        if (cart.isEmpty()) return;
+    private void createStockingPlanFromCart(CheckBox stockingOrder, Button submit, Button clearCart) {
+        if (cart.isEmpty() || saving) return;
         try {
             JSONArray cartRows = new JSONArray();
-            for (CartLine line : cart.values()) cartRows.put(new JSONObject().put("productId", line.productId)
-                    .put("name", line.name).put("category", line.category)
-                    .put("quantity", line.quantity).put("unitPrice", line.unitPriceCents));
-            pendingStockingCart = cartRows;
-            cart.clear(); updateCatalogTotals();
-            if (cartDialog != null) cartDialog.dismiss();
-            showStockingPage();
+            long totalCents = 0;
+            int totalQuantity = 0;
+            for (CartLine line : cart.values()) {
+                if (line.quantity <= 0) continue;
+                int lineCents = (int) Math.min(Integer.MAX_VALUE, (long) line.unitPriceCents * line.quantity);
+                cartRows.put(new JSONObject().put("productId", line.productId).put("name", line.name)
+                        .put("category", line.category).put("quantity", line.quantity).put("totalCents", lineCents));
+                totalCents = Math.min(Integer.MAX_VALUE, totalCents + lineCents);
+                totalQuantity += line.quantity;
+            }
+            if (cartRows.length() == 0) {
+                message("Enter a quantity greater than zero to create a stocking plan.", true);
+                return;
+            }
+            if (server == null || server.trim().isEmpty()) {
+                message("Enter the POS address in Settings first.", true);
+                return;
+            }
+            final int submittedQuantity = totalQuantity;
+            final long submittedCents = totalCents;
+            JSONObject plan = new JSONObject().put("draftId", java.util.UUID.randomUUID().toString())
+                    .put("category", "Cart").put("weeks", 0).put("note", "")
+                    .put("totalCents", submittedCents).put("rows", cartRows);
+            saving = true;
+            submit.setEnabled(false); clearCart.setEnabled(false); stockingOrder.setEnabled(false);
+            updateTabs();
+            io.execute(() -> {
+                String failure = null;
+                int billId = -1;
+                try {
+                    JSONObject result = request(server, "/AikaPos/stockingPlan", plan);
+                    billId = result.optInt("billId", -1);
+                    if (billId < 0) throw new IOException("POS did not return a stocking plan ID");
+                } catch (Exception ex) { failure = detail(ex); }
+                final String resultFailure = failure;
+                final int resultBillId = billId;
+                main.post(() -> {
+                    saving = false;
+                    submit.setEnabled(true); clearCart.setEnabled(true); stockingOrder.setEnabled(true);
+                    if (resultFailure != null) {
+                        message("Stocking plan submission failed: " + resultFailure + ". Cart remains.", true);
+                        updateTabs();
+                        return;
+                    }
+                    cart.clear(); cartAsStockingPlan = false;
+                    updateCatalogTotals();
+                    if (cartDialog != null) cartDialog.dismiss();
+                    message("Stocking plan " + resultBillId + " submitted: " + submittedQuantity
+                            + " item(s), total " + formatMoneyCents((int) submittedCents) + ". Cart cleared.", false);
+                    updateTabs();
+                });
+            });
         } catch (Exception ex) { message("Could not create stocking plan: " + ex.getMessage(), true); }
     }
     private int quantityExpression(String raw) {
@@ -2638,10 +2698,6 @@ public class SimClientActivity extends Activity {
             stockingPage = stockingPlan.view();
             pages.addView(stockingPage, new FrameLayout.LayoutParams(-1, -1));
         }
-        if (pendingStockingCart != null) {
-            stockingPlan.importCart(pendingStockingCart);
-            pendingStockingCart = null;
-        }
         showingMoving = false; showingStocking = true; showingId = false;
         if (movingPage != null) movingPage.setVisibility(View.GONE);
         if (idPage != null) idPage.setVisibility(View.GONE);
@@ -3544,6 +3600,20 @@ public class SimClientActivity extends Activity {
         button.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         button.setAllCaps(false);
         button.setMinHeight(Math.round(48 * density));
+    }
+    private void styleWarningButton(Activity activity, Button button) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{0xffffe2b8, 0xffffcf91});
+        bg.setCornerRadius(12 * density);
+        bg.setStroke(Math.max(1, Math.round(density)), 0xffd68a32);
+        button.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(0x33a85f12), bg, null));
+        button.setTextColor(0xff6f3e0d);
+        button.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        button.setAllCaps(false);
+        button.setMinHeight(Math.round(52 * density));
     }
     private LinearLayout.LayoutParams secondaryButtonParams() {
         LinearLayout.LayoutParams params = full();

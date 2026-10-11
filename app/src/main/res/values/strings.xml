@@ -39,6 +39,8 @@
     <string name="ui_price_calculation_settings">Price calculation settings (%)</string>
     <string name="ui_create_stocking_plan">Create stocking plan</string>
     <string name="ui_submit_as_stocking_plan">Submit as stocking plan</string>
+    <string name="ui_cart_items">PROD</string>
+    <string name="ui_cart_qty">QTY</string>
     <string-array name="language_array">
         <item>Français</item><item>English</item><item>中文</item>
     </string-array>
